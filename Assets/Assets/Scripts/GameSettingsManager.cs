@@ -5,19 +5,14 @@ using UnityEngine.UI;
 
 public class GameSettingsManager : MonoBehaviour
 {
-    public Text TextCompanyName;
-    public Text TextNickname;
+    public InputField TextCompanyName;
+    public InputField TextNickname;
 
     /*Keys values for accessing settings from
     PlayerPrefs class*/
     private const string DEFAULT_KEY_VALUE = "";
     private const string COMPANY_NAME_KEY = "1";
     private const string NICKNAME_KEY = "2";
-
-    public void Start()
-    {
-        LoadSettings();
-    }
 
     public void ApplySettings()
     {
