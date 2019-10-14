@@ -1,15 +1,29 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-
+﻿using System.Collections.Generic;
+/// <summary>
+/// This class represents company in a game's world
+/// </summary>
 public class Company
 {
+    /*Private consts fields*/
+
+    /*Private fields*/
+
+    /*Public consts fields*/
+
+    /*Public fields*/
+
     public string Name { get; set; }
-    public List<Worker> Workers { get; set; }
     /// <summary>
     /// Money balance of company
     /// </summary>
     public float Balance { get; set; }
 
-    private const int MAX_WORKERS_PER_COMPANY = 10;
+    /*Private methods*/
+
+    /*Public methods*/
+
+    public Company(string name)
+    {
+        this.Name = Name;
+    }
 }

@@ -3,6 +3,10 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
+/// <summary>
+/// This class handles main game aspects like loading scenes and
+/// handling multiplayer connection
+/// </summary>
 public class MainGameManager : Photon.PunBehaviour
 {
     public const string GAME_VERSION = "1.0";

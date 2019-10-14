@@ -5,8 +5,7 @@ using UnityEngine.UI;
 
 public class GameSettingsManager : MonoBehaviour
 {
-    public InputField TextCompanyName;
-    public InputField TextNickname;
+    /*Private consts fields*/
 
     /*Keys values for accessing settings from
     PlayerPrefs class*/
@@ -14,16 +13,36 @@ public class GameSettingsManager : MonoBehaviour
     private const string COMPANY_NAME_KEY = "1";
     private const string NICKNAME_KEY = "2";
 
-    public void ApplySettings()
+    /*Private fields*/
+
+    /*Public consts fields*/
+
+    /*Public fields*/
+
+    public string CompanyName { get; private set; }
+    public string Nickname { get; private set; }
+    public bool SettingsLoaded { get; private set; }
+
+    /*Private methods*/
+
+    /*Public methods*/
+
+    public void ApplySettings(string companyName, string nickname)
     {
-        PlayerPrefs.SetString(COMPANY_NAME_KEY, TextCompanyName.text);
-        PlayerPrefs.SetString(NICKNAME_KEY, TextNickname.text);
+        CompanyName = companyName;
+        Nickname = nickname;
+
+        PlayerPrefs.SetString(COMPANY_NAME_KEY, companyName);
+        PlayerPrefs.SetString(NICKNAME_KEY, nickname);
         PlayerPrefs.Save();
+
+        SettingsLoaded = true;
     }
 
     public void LoadSettings()
     {
-        TextCompanyName.text = PlayerPrefs.GetString(COMPANY_NAME_KEY, DEFAULT_KEY_VALUE);
-        TextNickname.text = PlayerPrefs.GetString(NICKNAME_KEY, DEFAULT_KEY_VALUE);
+        CompanyName = PlayerPrefs.GetString(COMPANY_NAME_KEY, DEFAULT_KEY_VALUE);
+        Nickname = PlayerPrefs.GetString(NICKNAME_KEY, DEFAULT_KEY_VALUE);
+        SettingsLoaded = true;
     }
 }
