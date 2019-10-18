@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Worker:IUpdatable
+public class Worker
 {
     /*Private consts fields*/
 

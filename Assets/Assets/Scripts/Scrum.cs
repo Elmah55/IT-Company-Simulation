@@ -1,5 +1,4 @@
 ﻿using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
@@ -7,24 +6,28 @@ using UnityEngine;
 /// It takes care of updating the binded project as the simulation is ongoing
 /// as well as keeping track of scrum statistics
 /// </summary>
-public class Scrum : IUpdatable
+public class Scrum : MonoBehaviour
 {
-    #region Fields
+    /*Private consts fields*/
+
+    /// <summary>
+    /// How often binded project should be updated.
+    /// This time is seconds in game time (scaled time)
+    /// </summary>
+    private const float PROJECT_UPDATE_FREQUENCY = 10.0f;
+
+    /*Private fields*/
+
+    /*Public consts fields*/
 
     /// <summary>
     /// Project binded to this instance of scrum
     /// </summary>
     public Project BindedProject { get; set; }
-    #endregion
 
-    #region Methods
-    public void UpdateState()
-    {
-        float projectProgressValue = 1.0f;
-        BindedProject.Progress += projectProgressValue;
+    /*Public fields*/
 
-        Debug.Log("Project progress: " + BindedProject.Progress);
-    }
+    /*Private methods*/
 
     /// <summary>
     /// Calculates value (in %) of project advancment
@@ -41,5 +44,40 @@ public class Scrum : IUpdatable
 
         return projectProgressValue;
     }
-    #endregion
+
+    private IEnumerator UpdateProject()
+    {
+        while (true)
+        {
+            BindedProject.Progress += CalculateProjectProgress();
+            Debug.Log("Project progress: " + BindedProject.Progress);
+
+            yield return new WaitForSeconds(PROJECT_UPDATE_FREQUENCY);
+        }
+    }
+
+    private void OnProjectFinished(Project finishedProject)
+    {
+        StopProject();
+        Debug.Log("Project finished");
+    }
+
+    /*Public methods*/
+
+    public void StartProject()
+    {
+        foreach (Worker companyWorker in BindedProject.Workers)
+        {
+            Debug.LogFormat("Worker {0} {1}",
+                new object[] { companyWorker.Name, companyWorker.Surename });
+        }
+
+        BindedProject.OnProjectCompleted += OnProjectFinished;
+        StartCoroutine(UpdateProject());
+    }
+
+    public void StopProject()
+    {
+        StopCoroutine(UpdateProject());
+    }
 }

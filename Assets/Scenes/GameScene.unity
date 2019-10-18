@@ -1840,8 +1840,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 746701997}
-  - component: {fileID: 746701996}
   - component: {fileID: 746701998}
+  - component: {fileID: 746701996}
   m_Layer: 0
   m_Name: Scripts
   m_TagString: Untagged
@@ -1858,7 +1858,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 746701995}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d2fb645f04967ea45bfd4c8344cd24c2, type: 3}
+  m_Script: {fileID: 11500000, guid: 10d2a2c726f724a42995fda0c95bcef0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!4 &746701997
@@ -2004,11 +2004,6 @@ PrefabInstance:
       propertyPath: m_Pivot.y
       value: 0.5
       objectReference: {fileID: 0}
-    - target: {fileID: 6853629631323117799, guid: c63ca5ebc1ff9c7418212e09c1369fd0,
-        type: 3}
-      propertyPath: m_Text
-      value: Back
-      objectReference: {fileID: 0}
     - target: {fileID: 6748209082760490779, guid: c63ca5ebc1ff9c7418212e09c1369fd0,
         type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.size
@@ -2068,6 +2063,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[1].m_Arguments.m_BoolArgument
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6853629631323117799, guid: c63ca5ebc1ff9c7418212e09c1369fd0,
+        type: 3}
+      propertyPath: m_Text
+      value: Back
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: c63ca5ebc1ff9c7418212e09c1369fd0, type: 3}

@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 /// <summary>
 /// This is core class for all aspects of gameplay that will
@@ -13,7 +11,6 @@ public class MainSimulationManager : MonoBehaviour
 
     /*Private fields*/
 
-    private GameSimulationEngine SimulationEngine;
     private GameSettingsManager SettingsManager;
 
     /*Public consts fields*/
@@ -24,7 +21,17 @@ public class MainSimulationManager : MonoBehaviour
 
     private void CreateCompany()
     {
+        //Testing scrum only for now
+        PlayerCompany testCompany = new PlayerCompany("TEST COMPANY");
+        Worker workerA = new Worker(1, "Jan", "Kowalski");
+        Worker workerB = new Worker(2, "Adam", "Nowak");
+        Project testProject = new Project("TEST");
+        testProject.Workers.Add(workerA);
+        testProject.Workers.Add(workerB);
+        Scrum testScrum = gameObject.AddComponent(typeof(Scrum)) as Scrum;
+        testScrum.BindedProject = testProject;
 
+        testScrum.StartProject();
     }
 
     /*Public methods*/
@@ -34,7 +41,9 @@ public class MainSimulationManager : MonoBehaviour
         /*Obtain refence to game manager object wich was created in
         menu scene*/
         GameObject gameManagerObject = GameObject.Find("GameManager");
-        SimulationEngine = gameManagerObject.GetComponent<GameSimulationEngine>();
         SettingsManager = GetComponent<GameSettingsManager>();
+
+        //TEST
+        CreateCompany();
     }
 }
