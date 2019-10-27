@@ -12,19 +12,13 @@ public class Project
 {
     /*Private consts fields*/
 
-    /// <summary>
-    /// Update frequency of this instance of project
-    /// (seconds in game time)
-    /// </summary>
-    private const float UPDATE_FREQUENCY = 10.0f;
-
     /*Private fields*/
 
     private float m_Progress;
 
     /*Public consts fields*/
 
-    public const int MAX_WORKERS_PER_PROJECT = PlayerCompany.MAX_WORKERS_PER_COMPANY;
+    public const int MAX_WORKERS_PER_PROJECT = 5;
 
     /*Public fields*/
 
@@ -64,6 +58,9 @@ public class Project
     /// Workers that are working on this project
     /// </summary>
     public List<Worker> Workers { get; private set; }
+    public List<ProjectTechnology> UsedTechnologies { get; private set; }
+    public DateTime TimeOfStart { get; set; }
+    public int DaysSinceStart { get; set; }
 
     /*Private methods*/
 
@@ -74,5 +71,6 @@ public class Project
         this.Name = projectName;
 
         Workers = new List<Worker>();
+        UsedTechnologies = new List<ProjectTechnology>();
     }
 }

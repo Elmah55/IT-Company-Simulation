@@ -12,8 +12,6 @@ public class PlayerCompany : Company
 
     /*Private fields*/
 
-    private float TimeFromLastUpdate;
-
     /*Public consts fields*/
 
     public const int MAX_WORKERS_PER_COMPANY = 10;
