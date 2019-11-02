@@ -41,3 +41,6 @@ public class EnumToString
         { ProjectTechnology.Java,"Java" }
     };
 }
+
+/*Delegates*/
+public delegate void ProjectAction(Project proj);

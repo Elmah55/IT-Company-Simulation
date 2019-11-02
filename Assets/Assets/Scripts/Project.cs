@@ -3,8 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public delegate void ProjectFinished(Project finishedProject);
-
 /// <summary>
 /// This class represents IT project that company can work on
 /// </summary>
@@ -22,7 +20,7 @@ public class Project
 
     /*Public fields*/
 
-    public event ProjectFinished OnProjectCompleted;
+    public event ProjectAction OnProjectCompleted;
     public string Name { get; set; }
     /// <summary>
     /// Progress of project completed (in %)

@@ -27,22 +27,22 @@ public class MainSimulationManager : MonoBehaviour
         testCompany = new PlayerCompany("TEST COMPANY");
         Worker workerA = new Worker("Jan", "Kowalski");
         Worker workerB = new Worker("Adam", "Nowak");
+        testCompany.Workers.Add(workerA);
+        testCompany.Workers.Add(workerB);
         Project testProject = new Project("TEST");
         testProject.Workers.Add(workerA);
         testProject.Workers.Add(workerB);
         Scrum testScrum = gameObject.AddComponent(typeof(Scrum)) as Scrum;
         testCompany.ScrumProcesses.Add(testScrum);
         testScrum.BindedProject = testProject;
-
-        testScrum.StartProject();
     }
 
     /*Public methods*/
 
     public void Start()
     {
-        /*Obtain refence to game manager object wich was created in
-        menu scene*/
+        //Obtain refence to game manager object wich was created in
+        //menu scene
         GameObject gameManagerObject = GameObject.Find("GameManager");
         SettingsManager = GetComponent<GameSettingsManager>();
 

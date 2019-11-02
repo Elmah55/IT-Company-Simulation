@@ -94,7 +94,7 @@ public class Scrum : MonoBehaviour
 
     /*Public methods*/
 
-    public void Start()
+    public void OnEnable()
     {
         GameTimeComponent = GetComponent<GameTime>();
         ProjectLastUpdateDaysSinceStart = GameTimeComponent.DaysSinceStart;

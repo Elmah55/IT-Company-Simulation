@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
+
 
 public class UIProjects : MonoBehaviour
 {
@@ -10,16 +12,40 @@ public class UIProjects : MonoBehaviour
 
     /*Private fields*/
 
+    private Project SelectedProject;
+    /// <summary>
+    /// List of workers buttons with each button mapped to its worker
+    /// </summary>
+    private Dictionary<GameObject, Worker> WorkersButtons;
+    /// <summary>
+    /// Keep track of which button is currently selected for both list
+    /// views (available workers and assinged workers)
+    /// </summary>
+    private GameObject AssignedWorkerSelectedButton;
+    private GameObject AvailableWorkerSelectedButton;
+    /// <summary>
+    /// Stored to restore button's colors to default value
+    /// </summary>
+    private ColorBlock AvailableWorkerSelectedButtonColors;
+    private ColorBlock AssignedWorkerSelectedButtonColors;
+    private Worker SelectedAvailableWorker;
+    private Worker SelectedAssignedWorker;
+
     /*Public consts fields*/
 
     /*Public fields*/
 
-    public MainSimulationManager SimulationManagerScript;
+    public MainSimulationManager SimulationManagerComponent;
     /// <summary>
     /// List of all projects in company will be placed here
     /// </summary>
     public Dropdown ProjectsListDropdown;
     public Text ProjectInfoText;
+    public UIControlListView AvailableWorkersControlList;
+    public UIControlListView AssignedWorkersControlList;
+    public Button AssignWorkerButton;
+    public Button UnassignWorkerButton;
+    public GameObject ListViewButtonPrefab;
 
     /*Private methods*/
 
@@ -27,7 +53,7 @@ public class UIProjects : MonoBehaviour
     {
         string projectsInfo = string.Empty;
 
-        foreach (Scrum scrumProcess in SimulationManagerScript.testCompany.ScrumProcesses)
+        foreach (Scrum scrumProcess in SimulationManagerComponent.testCompany.ScrumProcesses)
         {
             Project companyProject = scrumProcess.BindedProject;
 
@@ -38,33 +64,195 @@ public class UIProjects : MonoBehaviour
         ProjectInfoText.text = projectsInfo;
     }
 
-    private void OnProjectsListDropdownValueChanged(int index)
+    /// <summary>
+    /// Creates button that will be added to list view
+    /// with workers
+    /// </summary>
+    private GameObject CreateWorkerButton(Worker workerData, UnityAction listener)
     {
-        DisplayProjectInfo(SimulationManagerScript.testCompany.ScrumProcesses[index].BindedProject);
+        GameObject createdButton = GameObject.Instantiate(ListViewButtonPrefab);
+        Button buttonComponent = createdButton.GetComponent<Button>();
+
+        Text buttonTextComponent = createdButton.GetComponentInChildren<Text>();
+        buttonTextComponent.text = string.Format("{0} {1}", workerData.Name, workerData.Surename);
+
+        buttonComponent.onClick.AddListener(OnAvailableWorkersListButtonClicked);
+
+        return createdButton;
     }
 
-    /*Public methods*/
-
-    // Start is called before the first frame update
-    public void Start()
+    private void AddAvailableWorkersListViewButtons()
     {
-        SimulationManagerScript = GetComponent<MainSimulationManager>();
-        ProjectsListDropdown.onValueChanged.AddListener(OnProjectsListDropdownValueChanged);
+        foreach (Worker companyWorker in SimulationManagerComponent.testCompany.Workers)
+        {
+            //Add only workers that dont have assigned any project
+            if (null == companyWorker.AssignedProject)
+            {
+                GameObject createdButton = CreateWorkerButton(companyWorker, OnAvailableWorkersListButtonClicked);
+
+                AvailableWorkersControlList.AddControl(createdButton);
+                WorkersButtons.Add(createdButton, companyWorker);
+            }
+        }
     }
 
-    public void OnEnable()
+    private void AddAssignedWorkersListViewButtons()
+    {
+        //Clear controls in case there were some added
+        //for other project
+        AssignedWorkersControlList.RemoveAllControls();
+
+        foreach (Worker projectWorker in SelectedProject.Workers)
+        {
+            GameObject createdButton = CreateWorkerButton(projectWorker, OnAssignedWorkersListButtonClicked);
+
+            AssignedWorkersControlList.AddControl(createdButton);
+            WorkersButtons.Add(createdButton, projectWorker);
+        }
+    }
+
+    /// <summary>
+    /// Adds project in company to dropdown control
+    /// </summary>
+    private void AddProjects()
     {
         ProjectsListDropdown.options.Clear();
 
-        foreach (Scrum scrumProcess in SimulationManagerScript.testCompany.ScrumProcesses)
+        foreach (Scrum scrumProcess in SimulationManagerComponent.testCompany.ScrumProcesses)
         {
             Project companyProject = scrumProcess.BindedProject;
             Dropdown.OptionData projectOption = new Dropdown.OptionData(companyProject.Name);
             ProjectsListDropdown.options.Add(projectOption);
         }
+    }
 
-        /* Display info when dropdown value has not been changed yet */
-        int projectListDropdownSelectedIndex = ProjectsListDropdown.value;
-        DisplayProjectInfo(SimulationManagerScript.testCompany.ScrumProcesses[projectListDropdownSelectedIndex].BindedProject);
+    private void SelectWorkerListButton(ref ColorBlock savedColors, ref GameObject savedSelectedButton)
+    {
+        //We know its worker list button because its clicked event has been just called
+        GameObject selectedButton = EventSystem.current.currentSelectedGameObject;
+
+        if (savedSelectedButton != selectedButton)
+        {
+            if (null != savedSelectedButton)
+            {
+                Button previouslySelectedButtonComponent = savedSelectedButton.GetComponent<Button>();
+                //Restore default values for button that was previously selected
+                previouslySelectedButtonComponent.colors = savedColors;
+            }
+
+            Button buttonComponent = selectedButton.GetComponent<Button>();
+            ColorBlock buttonColors = buttonComponent.colors;
+            savedColors = buttonColors;
+            //We remember button as selected long as any other worker button
+            //won't be selected. That's why color will always stay even when
+            //button is not reckognized as selected anymore
+            buttonColors.normalColor = Color.gray;
+            buttonColors.selectedColor = Color.gray;
+            buttonComponent.colors = buttonColors;
+
+            savedSelectedButton = selectedButton;
+        }
+    }
+
+    private void DeselectWorkerListButton(GameObject selectedButton, ref ColorBlock savedColors)
+    {
+        Button buttonComponent = selectedButton.GetComponent<Button>();
+        buttonComponent.colors = savedColors;
+    }
+
+    private void OnAvailableWorkersListButtonClicked()
+    {
+        SelectWorkerListButton(
+            ref AvailableWorkerSelectedButtonColors, ref AvailableWorkerSelectedButton);
+        SelectedAvailableWorker = WorkersButtons[AvailableWorkerSelectedButton];
+
+        if (null != SelectedProject)
+        {
+            AssignWorkerButton.interactable = true;
+        }
+    }
+
+    private void OnAssignedWorkersListButtonClicked()
+    {
+        SelectWorkerListButton(
+            ref AssignedWorkerSelectedButtonColors, ref AssignedWorkerSelectedButton);
+        SelectedAssignedWorker = WorkersButtons[AssignedWorkerSelectedButton];
+
+        if (null != SelectedProject)
+        {
+            UnassignWorkerButton.interactable = true;
+        }
+    }
+
+    private void Initialize()
+    {
+        WorkersButtons = new Dictionary<GameObject, Worker>();
+        WorkersButtons = new Dictionary<GameObject, Worker>();
+        AddProjects();
+        AddAvailableWorkersListViewButtons();
+        AssignWorkerButton.interactable = false;
+        UnassignWorkerButton.interactable = false;
+        SelectedProject = SimulationManagerComponent.testCompany.ScrumProcesses[ProjectsListDropdown.value].BindedProject;
+    }
+
+    /// <summary>
+    /// Moves worker between assigned and unassigned workers list
+    /// </summary>
+    private void MoveWorker(UIControlListView listFrom, UIControlListView listTo,
+        ref GameObject selectedButton, ref ColorBlock selectedButtonSavedColors,
+        ref Worker selectedWorker, UnityAction newButtonListener, Button moveWorkerButton)
+    {
+        listFrom.RemoveControl(selectedButton, false);
+        listTo.AddControl(selectedButton);
+
+        DeselectWorkerListButton(selectedButton, ref selectedButtonSavedColors);
+        Button buttonComponent = selectedButton.GetComponent<Button>();
+        buttonComponent.onClick.RemoveAllListeners();
+        buttonComponent.onClick.AddListener(newButtonListener);
+
+        selectedButton = null;
+        selectedWorker = null;
+        moveWorkerButton.interactable = false;
+    }
+
+    /*Public methods*/
+
+    public void Start()
+    {
+        Initialize();
+    }
+
+    public void AssignWorker()
+    {
+        SelectedAvailableWorker.AssignedProject = SelectedProject;
+        MoveWorker(AvailableWorkersControlList, AssignedWorkersControlList, ref AvailableWorkerSelectedButton,
+            ref AvailableWorkerSelectedButtonColors, ref SelectedAvailableWorker, OnAssignedWorkersListButtonClicked, AssignWorkerButton);
+
+    }
+
+    public void UnassignWorker()
+    {
+        SelectedAssignedWorker.AssignedProject = null;
+        MoveWorker(AssignedWorkersControlList, AvailableWorkersControlList, ref AssignedWorkerSelectedButton,
+            ref AssignedWorkerSelectedButtonColors, ref SelectedAssignedWorker, OnAvailableWorkersListButtonClicked, UnassignWorkerButton);
+    }
+
+    public void OnProjectsListDropdownValueChanged(int index)
+    {
+        //DisplayProjectInfo(SimulationManagerComponent.testCompany.ScrumProcesses[index].BindedProject);
+        SelectedProject = SimulationManagerComponent.testCompany.ScrumProcesses[ProjectsListDropdown.value].BindedProject;
+        AddAssignedWorkersListViewButtons();
+
+        if (null != AvailableWorkerSelectedButton)
+        {
+            Button buttonComponent = AvailableWorkerSelectedButton.GetComponent<Button>();
+            buttonComponent.interactable = true;
+        }
+
+        if (null != AssignedWorkerSelectedButton)
+        {
+            Button buttonComponent = AssignedWorkerSelectedButton.GetComponent<Button>();
+            buttonComponent.interactable = true;
+        }
     }
 }
