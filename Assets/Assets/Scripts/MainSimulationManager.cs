@@ -30,8 +30,6 @@ public class MainSimulationManager : MonoBehaviour
         testCompany.Workers.Add(workerA);
         testCompany.Workers.Add(workerB);
         Project testProject = new Project("TEST");
-        testProject.Workers.Add(workerA);
-        testProject.Workers.Add(workerB);
         Scrum testScrum = gameObject.AddComponent(typeof(Scrum)) as Scrum;
         testCompany.ScrumProcesses.Add(testScrum);
         testScrum.BindedProject = testProject;

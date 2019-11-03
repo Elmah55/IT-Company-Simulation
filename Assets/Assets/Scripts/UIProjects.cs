@@ -10,9 +10,11 @@ public class UIProjects : MonoBehaviour
 {
     /*Private consts fields*/
 
+    private readonly Color SELECTED_WORKER_BUTTON_COLOR = Color.gray;
+
     /*Private fields*/
 
-    private Project SelectedProject;
+    private Scrum SelectedProjectScrum;
     /// <summary>
     /// List of workers buttons with each button mapped to its worker
     /// </summary>
@@ -45,7 +47,10 @@ public class UIProjects : MonoBehaviour
     public UIControlListView AssignedWorkersControlList;
     public Button AssignWorkerButton;
     public Button UnassignWorkerButton;
+    public Button StartProjectButton;
+    public Button StopProjectButton;
     public GameObject ListViewButtonPrefab;
+    public Slider ProjectProgressBar;
 
     /*Private methods*/
 
@@ -102,7 +107,7 @@ public class UIProjects : MonoBehaviour
         //for other project
         AssignedWorkersControlList.RemoveAllControls();
 
-        foreach (Worker projectWorker in SelectedProject.Workers)
+        foreach (Worker projectWorker in SelectedProjectScrum.BindedProject.Workers)
         {
             GameObject createdButton = CreateWorkerButton(projectWorker, OnAssignedWorkersListButtonClicked);
 
@@ -123,6 +128,11 @@ public class UIProjects : MonoBehaviour
             Project companyProject = scrumProcess.BindedProject;
             Dropdown.OptionData projectOption = new Dropdown.OptionData(companyProject.Name);
             ProjectsListDropdown.options.Add(projectOption);
+        }
+
+        if (SimulationManagerComponent.testCompany.ScrumProcesses.Count > 0)
+        {
+            SelectedProjectScrum = SimulationManagerComponent.testCompany.ScrumProcesses[ProjectsListDropdown.value];
         }
     }
 
@@ -145,9 +155,9 @@ public class UIProjects : MonoBehaviour
             savedColors = buttonColors;
             //We remember button as selected long as any other worker button
             //won't be selected. That's why color will always stay even when
-            //button is not reckognized as selected anymore
-            buttonColors.normalColor = Color.gray;
-            buttonColors.selectedColor = Color.gray;
+            //button is not reckognized as selected anymore by unity UI engine
+            buttonColors.normalColor = SELECTED_WORKER_BUTTON_COLOR;
+            buttonColors.selectedColor = SELECTED_WORKER_BUTTON_COLOR;
             buttonComponent.colors = buttonColors;
 
             savedSelectedButton = selectedButton;
@@ -166,7 +176,7 @@ public class UIProjects : MonoBehaviour
             ref AvailableWorkerSelectedButtonColors, ref AvailableWorkerSelectedButton);
         SelectedAvailableWorker = WorkersButtons[AvailableWorkerSelectedButton];
 
-        if (null != SelectedProject)
+        if (null != SelectedProjectScrum)
         {
             AssignWorkerButton.interactable = true;
         }
@@ -178,9 +188,27 @@ public class UIProjects : MonoBehaviour
             ref AssignedWorkerSelectedButtonColors, ref AssignedWorkerSelectedButton);
         SelectedAssignedWorker = WorkersButtons[AssignedWorkerSelectedButton];
 
-        if (null != SelectedProject)
+        if (null != SelectedProjectScrum)
         {
             UnassignWorkerButton.interactable = true;
+        }
+    }
+
+    private void InitializeProjectButtons()
+    {
+        if (SelectedProjectScrum != null)
+        {
+            StartProjectButton.interactable = (false == SelectedProjectScrum.BindedProject.Active);
+            StopProjectButton.interactable = SelectedProjectScrum.BindedProject.Active;
+        }
+    }
+
+    private void SetProjectProgressBar()
+    {
+        if (null != SelectedProjectScrum)
+        {
+            ProjectProgressBar.value = SelectedProjectScrum.BindedProject.Progress;
+            SelectedProjectScrum.BindedProject.ProjectProgressUpdated += OnProjectProgressChanged;
         }
     }
 
@@ -188,11 +216,11 @@ public class UIProjects : MonoBehaviour
     {
         WorkersButtons = new Dictionary<GameObject, Worker>();
         WorkersButtons = new Dictionary<GameObject, Worker>();
+
         AddProjects();
+        InitializeProjectButtons();
         AddAvailableWorkersListViewButtons();
-        AssignWorkerButton.interactable = false;
-        UnassignWorkerButton.interactable = false;
-        SelectedProject = SimulationManagerComponent.testCompany.ScrumProcesses[ProjectsListDropdown.value].BindedProject;
+        SetProjectProgressBar();
     }
 
     /// <summary>
@@ -224,7 +252,8 @@ public class UIProjects : MonoBehaviour
 
     public void AssignWorker()
     {
-        SelectedAvailableWorker.AssignedProject = SelectedProject;
+        SelectedAvailableWorker.AssignedProject = SelectedProjectScrum.BindedProject;
+        SelectedProjectScrum.BindedProject.Workers.Add(SelectedAvailableWorker);
         MoveWorker(AvailableWorkersControlList, AssignedWorkersControlList, ref AvailableWorkerSelectedButton,
             ref AvailableWorkerSelectedButtonColors, ref SelectedAvailableWorker, OnAssignedWorkersListButtonClicked, AssignWorkerButton);
 
@@ -232,6 +261,7 @@ public class UIProjects : MonoBehaviour
 
     public void UnassignWorker()
     {
+        SelectedProjectScrum.BindedProject.Workers.Remove(SelectedAssignedWorker);
         SelectedAssignedWorker.AssignedProject = null;
         MoveWorker(AssignedWorkersControlList, AvailableWorkersControlList, ref AssignedWorkerSelectedButton,
             ref AssignedWorkerSelectedButtonColors, ref SelectedAssignedWorker, OnAvailableWorkersListButtonClicked, UnassignWorkerButton);
@@ -239,9 +269,16 @@ public class UIProjects : MonoBehaviour
 
     public void OnProjectsListDropdownValueChanged(int index)
     {
+        if (null != SelectedProjectScrum)
+        {
+            //Unsubscribe progress bar event from previously selected project
+            SelectedProjectScrum.BindedProject.ProjectProgressUpdated -= OnProjectProgressChanged;
+        }
+
         //DisplayProjectInfo(SimulationManagerComponent.testCompany.ScrumProcesses[index].BindedProject);
-        SelectedProject = SimulationManagerComponent.testCompany.ScrumProcesses[ProjectsListDropdown.value].BindedProject;
+        SelectedProjectScrum = SimulationManagerComponent.testCompany.ScrumProcesses[ProjectsListDropdown.value];
         AddAssignedWorkersListViewButtons();
+        SetProjectProgressBar();
 
         if (null != AvailableWorkerSelectedButton)
         {
@@ -254,5 +291,24 @@ public class UIProjects : MonoBehaviour
             Button buttonComponent = AssignedWorkerSelectedButton.GetComponent<Button>();
             buttonComponent.interactable = true;
         }
+    }
+
+    public void StartSelectedProject()
+    {
+        SelectedProjectScrum.StartProject();
+        StartProjectButton.interactable = false;
+        StopProjectButton.interactable =true;
+    }
+
+    public void StopSelectedProject()
+    {
+        SelectedProjectScrum.StopProject();
+        StopProjectButton.interactable = false;
+        StartProjectButton.interactable = true;
+    }
+
+    public void OnProjectProgressChanged(Project proj)
+    {
+        ProjectProgressBar.value = proj.Progress;
     }
 }

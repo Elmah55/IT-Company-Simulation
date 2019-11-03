@@ -20,7 +20,8 @@ public class Project
 
     /*Public fields*/
 
-    public event ProjectAction OnProjectCompleted;
+    public event ProjectAction ProjectCompleted;
+    public event ProjectAction ProjectProgressUpdated;
     public string Name { get; set; }
     /// <summary>
     /// Progress of project completed (in %)
@@ -34,13 +35,17 @@ public class Project
 
         set
         {
-            m_Progress = value;
-
-            if (m_Progress > 100.0f)
+            if (m_Progress != value)
             {
-                m_Progress = Mathf.Clamp(m_Progress, 0.0f, 100.0f);
-                Completed = true;
-                OnProjectCompleted?.Invoke(this);
+                m_Progress = value;
+                ProjectProgressUpdated?.Invoke(this);
+
+                if (m_Progress > 100.0f)
+                {
+                    m_Progress = Mathf.Clamp(m_Progress, 0.0f, 100.0f);
+                    Completed = true;
+                    ProjectCompleted?.Invoke(this);
+                }
             }
         }
     }

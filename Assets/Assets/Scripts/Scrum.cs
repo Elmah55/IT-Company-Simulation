@@ -30,6 +30,7 @@ public class Scrum : MonoBehaviour
     /// of game when project was last updated
     /// </summary>
     private int ProjectLastUpdateDaysSinceStart;
+    private Coroutine ProjectUpdateCoroutine;
 
     /*Public consts fields*/
 
@@ -79,10 +80,10 @@ public class Scrum : MonoBehaviour
     {
         while (true)
         {
+            yield return new WaitForSeconds(PROJECT_UPDATE_FREQUENCY);
+
             BindedProject.Progress += CalculateProjectProgress();
             Debug.Log("Project progress: " + BindedProject.Progress);
-
-            yield return new WaitForSeconds(PROJECT_UPDATE_FREQUENCY);
         }
     }
 
@@ -108,13 +109,13 @@ public class Scrum : MonoBehaviour
                 new object[] { companyWorker.Name, companyWorker.Surename });
         }
 
-        BindedProject.OnProjectCompleted += OnProjectFinished;
+        BindedProject.ProjectCompleted += OnProjectFinished;
         BindedProject.TimeOfStart = GameTimeComponent.CurrentTime;
-        StartCoroutine(UpdateProject());
+        ProjectUpdateCoroutine = StartCoroutine(UpdateProject());
     }
 
     public void StopProject()
     {
-        StopCoroutine(UpdateProject());
+        StopCoroutine(ProjectUpdateCoroutine);
     }
 }
