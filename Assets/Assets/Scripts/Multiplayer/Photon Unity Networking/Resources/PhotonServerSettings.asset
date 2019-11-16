@@ -44,4 +44,5 @@ MonoBehaviour:
   - RequestForPickupTimes
   - TaggedPlayer
   - StartTime
+  - SetWorkers
   DisableAutoOpenWizard: 1

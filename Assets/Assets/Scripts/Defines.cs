@@ -42,5 +42,31 @@ public class EnumToString
     };
 }
 
+/// <summary>
+/// Class that holds data that is used when creating new worker
+/// </summary>
+public class WorkerData
+{
+    public static List<string> Names = new List<string>()
+    {
+        "John",
+        "Adam",
+        "David",
+        "Kenny",
+        "Michael",
+        "Kathie",
+        "Anna",
+        "Alice"
+    };
+
+    public static List<string> Surenames = new List<string>()
+    {
+        "Smith",
+        "Crew",
+        "Kendrick",
+        "Sanny"
+    };
+}
+
 /*Delegates*/
 public delegate void ProjectAction(Project proj);

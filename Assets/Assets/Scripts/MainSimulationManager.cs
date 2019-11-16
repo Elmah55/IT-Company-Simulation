@@ -15,23 +15,27 @@ public class MainSimulationManager : MonoBehaviour
 
     /*Public consts fields*/
 
-    public PlayerCompany testCompany;
-
     /*Public fields*/
+
+    public PlayerCompany ControlledCompany { get; private set; }
 
     /*Private methods*/
 
     private void CreateCompany()
     {
         //Testing scrum only for now
-        testCompany = new PlayerCompany("TEST COMPANY");
+        ControlledCompany = new PlayerCompany("TEST COMPANY");
         Worker workerA = new Worker("Jan", "Kowalski");
         Worker workerB = new Worker("Adam", "Nowak");
-        testCompany.Workers.Add(workerA);
-        testCompany.Workers.Add(workerB);
+        ControlledCompany.Workers.Add(workerA);
+        ControlledCompany.Workers.Add(workerB);
+        ControlledCompany.Balance = 10000000;
         Project testProject = new Project("TEST");
+        testProject.UsedTechnologies.Add(ProjectTechnology.C);
+        testProject.UsedTechnologies.Add(ProjectTechnology.Cpp);
+        testProject.DaysSinceStart = 10;
         Scrum testScrum = gameObject.AddComponent(typeof(Scrum)) as Scrum;
-        testCompany.ScrumProcesses.Add(testScrum);
+        ControlledCompany.ScrumProcesses.Add(testScrum);
         testScrum.BindedProject = testProject;
     }
 

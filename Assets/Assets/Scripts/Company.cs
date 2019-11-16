@@ -16,7 +16,7 @@ public class Company
     /// <summary>
     /// Money balance of company
     /// </summary>
-    public float Balance { get; set; }
+    public int Balance { get; set; }
 
     /*Private methods*/
 

@@ -7,15 +7,16 @@ public class Worker
 {
     /*Private consts fields*/
 
+    /*Private fields*/
+
+    /*Public consts fields*/
+
+    public const int BASE_SALARY = 800;
     /// <summary>
     /// The maximum value of one ability that worker
     /// can have
     /// </summary>
-    private const float MAX_ABILITY_VALUE = 10.0f;
-
-    /*Private fields*/
-
-    /*Public consts fields*/
+    public const float MAX_ABILITY_VALUE = 10.0f;
 
     /*Public fields*/
 
@@ -56,13 +57,25 @@ public class Worker
     /// depending on worker experience. Ability level is indicated by value assigned
     /// to each of abilities key
     /// </summary>
-    public Dictionary<ProjectTechnology, float> Abilites { get; private set; }
+    public Dictionary<ProjectTechnology, float> Abilites { get; set; }
     public Project AssignedProject { get; set; }
     /// <summary>
     /// Shows how much of time of experience working in project worker has.
     /// This values is days in game time
     /// </summary>
     public int ExperienceTime { get; set; }
+    public int Salary { get; set; }
+    /// <summary>
+    /// Salary that needs to be offered to worker to hire him
+    /// from other player's company
+    /// </summary>
+    public int HireSalary
+    {
+        get
+        {
+            return (int)(Salary * 1.25f);
+        }
+    }
 
     /*Private methods*/
 
@@ -72,6 +85,6 @@ public class Worker
     {
         this.Name = name;
         this.Surename = surename;
-        Abilites = new Dictionary<ProjectTechnology, float>();
+        this.Salary = BASE_SALARY;
     }
 }

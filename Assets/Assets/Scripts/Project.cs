@@ -13,6 +13,7 @@ public class Project
     /*Private fields*/
 
     private float m_Progress;
+    private int m_DaysSinceStart;
 
     /*Public consts fields*/
 
@@ -20,8 +21,9 @@ public class Project
 
     /*Public fields*/
 
-    public event ProjectAction ProjectCompleted;
-    public event ProjectAction ProjectProgressUpdated;
+    public event ProjectAction DaysSinceStartUpdated;
+    public event ProjectAction Completed;
+    public event ProjectAction ProgressUpdated;
     public string Name { get; set; }
     /// <summary>
     /// Progress of project completed (in %)
@@ -38,13 +40,13 @@ public class Project
             if (m_Progress != value)
             {
                 m_Progress = value;
-                ProjectProgressUpdated?.Invoke(this);
+                ProgressUpdated?.Invoke(this);
 
                 if (m_Progress > 100.0f)
                 {
                     m_Progress = Mathf.Clamp(m_Progress, 0.0f, 100.0f);
-                    Completed = true;
-                    ProjectCompleted?.Invoke(this);
+                    IsCompleted = true;
+                    Completed?.Invoke(this);
                 }
             }
         }
@@ -52,7 +54,7 @@ public class Project
     /// <summary>
     /// Idicates whether the project is completed
     /// </summary>
-    public bool Completed { get; private set; }
+    public bool IsCompleted { get; private set; }
     /// <summary>
     /// Is project active and its state can be updated (project in progress)
     /// </summary>
@@ -63,7 +65,22 @@ public class Project
     public List<Worker> Workers { get; private set; }
     public List<ProjectTechnology> UsedTechnologies { get; private set; }
     public DateTime TimeOfStart { get; set; }
-    public int DaysSinceStart { get; set; }
+    public int DaysSinceStart
+    {
+        get
+        {
+            return m_DaysSinceStart;
+        }
+
+        set
+        {
+            if (value != m_DaysSinceStart)
+            {
+                m_DaysSinceStart = value;
+                DaysSinceStartUpdated?.Invoke(this);
+            }
+        }
+    }
 
     /*Private methods*/
 

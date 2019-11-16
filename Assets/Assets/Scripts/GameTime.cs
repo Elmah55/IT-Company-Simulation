@@ -22,7 +22,7 @@ public class GameTime : Photon.PunBehaviour
     /// How many minutes should pass in game time in one
     /// time update
     /// </summary>
-    private const float TIME_MINUTES_PER_UPDATE = 1.0f;
+    private const float TIME_MINUTES_PER_UPDATE = 30.0f;
 
     /*Private fields*/
 
@@ -37,7 +37,11 @@ public class GameTime : Photon.PunBehaviour
     /*Public fields*/
 
     public DateTime CurrentTime { get; private set; }
+    /// <summary>
+    /// How many days (game time) have passed since start of game
+    /// </summary>
     public int DaysSinceStart { get; private set; }
+    public Action DayChanged;
 
     /*Private methods*/
 
@@ -50,6 +54,7 @@ public class GameTime : Photon.PunBehaviour
             if (CurrentTime.Day != PreviousDayNumber)
             {
                 ++DaysSinceStart;
+                DayChanged?.Invoke();
                 PreviousDayNumber = CurrentTime.Day;
             }
 

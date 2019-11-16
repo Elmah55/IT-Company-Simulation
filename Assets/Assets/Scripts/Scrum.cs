@@ -29,7 +29,7 @@ public class Scrum : MonoBehaviour
     /// How many days since game start passed since start 
     /// of game when project was last updated
     /// </summary>
-    private int ProjectLastUpdateDaysSinceStart;
+    private int LastUpdateDaysSinceStart;
     private Coroutine ProjectUpdateCoroutine;
 
     /*Public consts fields*/
@@ -63,7 +63,7 @@ public class Scrum : MonoBehaviour
     private void UpdateProjectWorkers()
     {
         //How many days of expierience should be added to each of workers
-        int experienceDays = GameTimeComponent.DaysSinceStart - ProjectLastUpdateDaysSinceStart;
+        int experienceDays = GameTimeComponent.DaysSinceStart - LastUpdateDaysSinceStart;
 
         foreach (Worker projectWorker in BindedProject.Workers)
         {
@@ -76,14 +76,23 @@ public class Scrum : MonoBehaviour
         }
     }
 
+    private void UpdateBindedProject()
+    {
+        BindedProject.Progress += CalculateProjectProgress();
+        BindedProject.DaysSinceStart += GameTimeComponent.DaysSinceStart - LastUpdateDaysSinceStart;
+    }
+
     private IEnumerator UpdateProject()
     {
         while (true)
         {
             yield return new WaitForSeconds(PROJECT_UPDATE_FREQUENCY);
 
-            BindedProject.Progress += CalculateProjectProgress();
+
+            UpdateProjectWorkers();
+            UpdateBindedProject();
             Debug.Log("Project progress: " + BindedProject.Progress);
+            LastUpdateDaysSinceStart = GameTimeComponent.DaysSinceStart;
         }
     }
 
@@ -98,7 +107,7 @@ public class Scrum : MonoBehaviour
     public void OnEnable()
     {
         GameTimeComponent = GetComponent<GameTime>();
-        ProjectLastUpdateDaysSinceStart = GameTimeComponent.DaysSinceStart;
+        LastUpdateDaysSinceStart = GameTimeComponent.DaysSinceStart;
     }
 
     public void StartProject()
@@ -109,7 +118,7 @@ public class Scrum : MonoBehaviour
                 new object[] { companyWorker.Name, companyWorker.Surename });
         }
 
-        BindedProject.ProjectCompleted += OnProjectFinished;
+        BindedProject.Completed += OnProjectFinished;
         BindedProject.TimeOfStart = GameTimeComponent.CurrentTime;
         ProjectUpdateCoroutine = StartCoroutine(UpdateProject());
     }

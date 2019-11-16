@@ -29,6 +29,6 @@ public class UIProgressBarText : MonoBehaviour
         TextComponent = GetComponentInChildren<Text>();
         SliderComponent = GetComponent<Slider>();
         SliderComponent.onValueChanged.AddListener(OnProgressBarUpdate);
-        TextComponent.text = SliderComponent.value.ToString("0.00");
+        TextComponent.text = string.Format("{0} %", SliderComponent.value.ToString("0.00 "));
     }
 }

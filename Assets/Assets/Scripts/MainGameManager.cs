@@ -9,17 +9,26 @@ using UnityEngine.SceneManagement;
 /// </summary>
 public class MainGameManager : Photon.PunBehaviour
 {
-    public const string GAME_VERSION = "1.0";
+    /*Private consts fields*/
+
+    /*Private fields*/
 
     private MenuUIManager UIManagerComponent;
     private MultiplayerConnection MultiplayerConnectionComponent;
 
-    // Start is called before the first frame update
-    void Start()
+    /*Public consts fields*/
+
+    public const string GAME_VERSION = "1.0";
+
+    /*Private methods*/
+
+    private void Start()
     {
         DontDestroyOnLoad(this.gameObject);
         MultiplayerConnectionComponent = GetComponent<MultiplayerConnection>();
     }
+
+    /*Public methods*/
 
     public void StartGame()
     {

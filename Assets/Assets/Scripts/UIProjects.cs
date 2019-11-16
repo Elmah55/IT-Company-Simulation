@@ -5,7 +5,6 @@ using UnityEngine.Events;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-
 public class UIProjects : MonoBehaviour
 {
     /*Private consts fields*/
@@ -42,7 +41,8 @@ public class UIProjects : MonoBehaviour
     /// List of all projects in company will be placed here
     /// </summary>
     public Dropdown ProjectsListDropdown;
-    public Text ProjectInfoText;
+    public InputField ProjectInfoDaysSinceStartText;
+    public InputField ProjectInfoUsedTechnologies;
     public UIControlListView AvailableWorkersControlList;
     public UIControlListView AssignedWorkersControlList;
     public Button AssignWorkerButton;
@@ -53,21 +53,6 @@ public class UIProjects : MonoBehaviour
     public Slider ProjectProgressBar;
 
     /*Private methods*/
-
-    private void DisplayProjectInfo(Project displayedProject)
-    {
-        string projectsInfo = string.Empty;
-
-        foreach (Scrum scrumProcess in SimulationManagerComponent.testCompany.ScrumProcesses)
-        {
-            Project companyProject = scrumProcess.BindedProject;
-
-            string projectsInfoLine = string.Format("{0} {1}\n", companyProject.Name, companyProject.Progress);
-            projectsInfo += projectsInfoLine;
-        }
-
-        ProjectInfoText.text = projectsInfo;
-    }
 
     /// <summary>
     /// Creates button that will be added to list view
@@ -88,7 +73,7 @@ public class UIProjects : MonoBehaviour
 
     private void AddAvailableWorkersListViewButtons()
     {
-        foreach (Worker companyWorker in SimulationManagerComponent.testCompany.Workers)
+        foreach (Worker companyWorker in SimulationManagerComponent.ControlledCompany.Workers)
         {
             //Add only workers that dont have assigned any project
             if (null == companyWorker.AssignedProject)
@@ -121,18 +106,18 @@ public class UIProjects : MonoBehaviour
     /// </summary>
     private void AddProjects()
     {
-        ProjectsListDropdown.options.Clear();
-
-        foreach (Scrum scrumProcess in SimulationManagerComponent.testCompany.ScrumProcesses)
+        if (SimulationManagerComponent.ControlledCompany.ScrumProcesses.Count > 0)
         {
-            Project companyProject = scrumProcess.BindedProject;
-            Dropdown.OptionData projectOption = new Dropdown.OptionData(companyProject.Name);
-            ProjectsListDropdown.options.Add(projectOption);
-        }
+            ProjectsListDropdown.options.Clear();
 
-        if (SimulationManagerComponent.testCompany.ScrumProcesses.Count > 0)
-        {
-            SelectedProjectScrum = SimulationManagerComponent.testCompany.ScrumProcesses[ProjectsListDropdown.value];
+            foreach (Scrum scrumProcess in SimulationManagerComponent.ControlledCompany.ScrumProcesses)
+            {
+                Project companyProject = scrumProcess.BindedProject;
+                Dropdown.OptionData projectOption = new Dropdown.OptionData(companyProject.Name);
+                ProjectsListDropdown.options.Add(projectOption);
+            }
+
+            SelectedProjectScrum = SimulationManagerComponent.ControlledCompany.ScrumProcesses[ProjectsListDropdown.value];
         }
     }
 
@@ -196,19 +181,26 @@ public class UIProjects : MonoBehaviour
 
     private void InitializeProjectButtons()
     {
-        if (SelectedProjectScrum != null)
-        {
-            StartProjectButton.interactable = (false == SelectedProjectScrum.BindedProject.Active);
-            StopProjectButton.interactable = SelectedProjectScrum.BindedProject.Active;
-        }
+        StartProjectButton.interactable = (false == SelectedProjectScrum.BindedProject.Active);
+        StopProjectButton.interactable = SelectedProjectScrum.BindedProject.Active;
     }
 
     private void SetProjectProgressBar()
     {
-        if (null != SelectedProjectScrum)
+        OnProjectProgressChanged(SelectedProjectScrum.BindedProject);
+        SelectedProjectScrum.BindedProject.ProgressUpdated += OnProjectProgressChanged;
+    }
+
+    private void SetProjectInfo()
+    {
+        OnProjectDaysSinceStartChanged(SelectedProjectScrum.BindedProject);
+        SelectedProjectScrum.BindedProject.DaysSinceStartUpdated += OnProjectDaysSinceStartChanged;
+        ProjectInfoUsedTechnologies.text = string.Empty;
+
+        foreach (ProjectTechnology technology in SelectedProjectScrum.BindedProject.UsedTechnologies)
         {
-            ProjectProgressBar.value = SelectedProjectScrum.BindedProject.Progress;
-            SelectedProjectScrum.BindedProject.ProjectProgressUpdated += OnProjectProgressChanged;
+            string technologyName = (EnumToString.ProjectTechnologiesStrings[technology]) + " ";
+            ProjectInfoUsedTechnologies.text += technologyName;
         }
     }
 
@@ -217,10 +209,7 @@ public class UIProjects : MonoBehaviour
         WorkersButtons = new Dictionary<GameObject, Worker>();
         WorkersButtons = new Dictionary<GameObject, Worker>();
 
-        AddProjects();
-        InitializeProjectButtons();
-        AddAvailableWorkersListViewButtons();
-        SetProjectProgressBar();
+        OnProjectsListDropdownValueChanged(ProjectsListDropdown.value);
     }
 
     /// <summary>
@@ -272,13 +261,18 @@ public class UIProjects : MonoBehaviour
         if (null != SelectedProjectScrum)
         {
             //Unsubscribe progress bar event from previously selected project
-            SelectedProjectScrum.BindedProject.ProjectProgressUpdated -= OnProjectProgressChanged;
+            SelectedProjectScrum.BindedProject.ProgressUpdated -= OnProjectProgressChanged;
+            SelectedProjectScrum.BindedProject.DaysSinceStartUpdated -= OnProjectDaysSinceStartChanged;
         }
 
-        //DisplayProjectInfo(SimulationManagerComponent.testCompany.ScrumProcesses[index].BindedProject);
-        SelectedProjectScrum = SimulationManagerComponent.testCompany.ScrumProcesses[ProjectsListDropdown.value];
+        SelectedProjectScrum = SimulationManagerComponent.ControlledCompany.ScrumProcesses[ProjectsListDropdown.value];
+
         AddAssignedWorkersListViewButtons();
+        AddProjects();
+        InitializeProjectButtons();
+        AddAvailableWorkersListViewButtons();
         SetProjectProgressBar();
+        SetProjectInfo();
 
         if (null != AvailableWorkerSelectedButton)
         {
@@ -297,7 +291,7 @@ public class UIProjects : MonoBehaviour
     {
         SelectedProjectScrum.StartProject();
         StartProjectButton.interactable = false;
-        StopProjectButton.interactable =true;
+        StopProjectButton.interactable = true;
     }
 
     public void StopSelectedProject()
@@ -310,5 +304,10 @@ public class UIProjects : MonoBehaviour
     public void OnProjectProgressChanged(Project proj)
     {
         ProjectProgressBar.value = proj.Progress;
+    }
+
+    private void OnProjectDaysSinceStartChanged(Project proj)
+    {
+        ProjectInfoDaysSinceStartText.text = proj.DaysSinceStart.ToString();
     }
 }
