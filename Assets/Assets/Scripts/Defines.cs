@@ -70,3 +70,4 @@ public class WorkerData
 
 /*Delegates*/
 public delegate void ProjectAction(Project proj);
+public delegate void LoanAction(BankLoan load);

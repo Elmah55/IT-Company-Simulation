@@ -21,13 +21,18 @@ public class Bank : MonoBehaviour
 
     /*Public consts fields*/
 
+    /// <summary>
+    /// How many active loans player can have at a time
+    /// </summary>
+    public const int MAX_LOANS_COUNT = 5;
+
     /*Public fields*/
 
-    public int AmountToPayOff { get; private set; }
+    public List<BankLoan> Loans { get; private set; }
     /// <summary>
-    /// Single payment of loan occured
+    /// New loan has been taken by player
     /// </summary>
-    public event Action LoanPaid;
+    public event LoanAction LoanAdded;
 
     /*Private methods*/
 
@@ -37,36 +42,83 @@ public class Bank : MonoBehaviour
         {
             yield return new WaitForSeconds(LOAN_UPDATE_FREQUENCY);
 
-            if (AmountToPayOff > 0)
+            bool loansPaidOff = true;
+
+            foreach (BankLoan loan in Loans)
             {
-                int amountPaid = AmountToPayOff / 100;
-                SimulationManagerComponent.ControlledCompany.Balance -= amountPaid;
-                AmountToPayOff -= amountPaid;
-                AmountToPayOff = Mathf.Clamp(AmountToPayOff, 0, int.MaxValue);
-                LoanPaid?.Invoke();
+                if (false == loan.IsPaidOff)
+                {
+                    loansPaidOff = false;
+                    PaySinglePayment(loan);
+                }
             }
-            else
+
+            //All loans paid off
+            if (true == loansPaidOff)
             {
                 StopCoroutine(LoanUpdateCoroutine);
+                UpdateLoanActive = false;
             }
         }
+    }
+
+    private void PaySinglePayment(BankLoan loan)
+    {
+        ++loan.PaymentsPaid;
+        loan.AmountPaid += loan.SinglePayment;
+
+
+        int companyPayment;
+
+        //This might happen because single payment is calculated with ceil function
+        if (loan.AmountPaid > loan.Amount)
+        {
+            loan.AmountPaid = Mathf.Clamp(loan.AmountPaid, 0, loan.Amount);
+            companyPayment = loan.AmountPaid - loan.Amount;
+        }
+        else
+        {
+            companyPayment = loan.SinglePayment;
+        }
+
+        SimulationManagerComponent.ControlledCompany.Balance -= companyPayment;
     }
 
     private void Start()
     {
         SimulationManagerComponent = GetComponent<MainSimulationManager>();
+        Loans = new List<BankLoan>();
     }
 
     /*Public methods*/
 
-    public void TakeLoan(int amount)
+    public void TakeLoan(int amount, int paymentsCount)
     {
-        AmountToPayOff += amount + (int)(amount * INTEREST_RATE);
+        int amountToPayOff = CalculateLoanAmountWithInterest(amount);
+        BankLoan newLoan = new BankLoan(amountToPayOff, paymentsCount);
+        SimulationManagerComponent.ControlledCompany.Balance += amount;
+        Loans.Add(newLoan);
+        LoanAdded?.Invoke(newLoan);
+
+        if (Loans.Count > MAX_LOANS_COUNT)
+        {
+            throw new InvalidOperationException(
+                "Number of active loans cannot be greater than " + MAX_LOANS_COUNT);
+        }
 
         if (false == UpdateLoanActive)
         {
             LoanUpdateCoroutine = StartCoroutine(UpdateLoan());
             UpdateLoanActive = true;
         }
+    }
+
+    /// <summary>
+    /// Calculates loan amount with interest rate included
+    /// </summary>
+    public int CalculateLoanAmountWithInterest(int basicAmount)
+    {
+        int actualAmount = (int)(basicAmount + (basicAmount * INTEREST_RATE));
+        return actualAmount;
     }
 }
