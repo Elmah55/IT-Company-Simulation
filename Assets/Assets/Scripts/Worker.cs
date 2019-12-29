@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
+using System.Runtime.Serialization.Formatters.Binary;
+using System.Text;
 using UnityEngine;
 
 public class Worker
@@ -36,13 +39,16 @@ public class Worker
         {
             float score = 1.0f;
 
-            foreach (ProjectTechnology workerAbility in Abilites.Keys)
+            if (null != AssignedProject)
             {
-                foreach (ProjectTechnology technologyInProject in AssignedProject.UsedTechnologies)
+                foreach (ProjectTechnology workerAbility in Abilites.Keys)
                 {
-                    if (workerAbility == technologyInProject)
+                    foreach (ProjectTechnology technologyInProject in AssignedProject.UsedTechnologies)
                     {
-                        score += Abilites[workerAbility] * 0.1f;
+                        if (workerAbility == technologyInProject)
+                        {
+                            score += Abilites[workerAbility] * 0.1f;
+                        }
                     }
                 }
             }
@@ -80,6 +86,100 @@ public class Worker
     /*Private methods*/
 
     /*Public methods*/
+
+    public static byte[] Serialize(object workerObject)
+    {
+        Worker workerToSerialize = (Worker)workerObject;
+
+        byte[] nameBytes = Encoding.Unicode.GetBytes(workerToSerialize.Name);
+        byte[] surenameBytes = Encoding.Unicode.GetBytes(workerToSerialize.Surename);
+        byte[] expierienceTimeBytes = BitConverter.GetBytes(workerToSerialize.ExperienceTime);
+        byte[] salaryBytes = BitConverter.GetBytes(workerToSerialize.Salary);
+        byte[] abilitiesBytes;
+
+        //This is used so receiving client knows how much bytes of name and surename should be read
+        byte[] nameSize = BitConverter.GetBytes(nameBytes.Length);
+        byte[] surenameSize = BitConverter.GetBytes(surenameBytes.Length);
+        byte[] abilitiesSize;
+
+        using (MemoryStream memStream = new MemoryStream())
+        {
+            BinaryFormatter formatter = new BinaryFormatter();
+            formatter.Serialize(memStream, workerToSerialize.Abilites);
+            abilitiesBytes = memStream.ToArray();
+        }
+
+        abilitiesSize = BitConverter.GetBytes(abilitiesBytes.Length);
+
+        int workerBytesSize = nameBytes.Length
+                            + surenameBytes.Length
+                            + nameSize.Length
+                            + surenameSize.Length
+                            + abilitiesSize.Length
+                            + abilitiesBytes.Length
+                            + expierienceTimeBytes.Length
+                            + salaryBytes.Length;
+
+        byte[] workerBytes = new byte[workerBytesSize];
+
+        int offset = 0;
+
+        Array.Copy(nameSize, 0, workerBytes, offset, nameSize.Length);
+        offset += nameSize.Length;
+        Array.Copy(nameBytes, 0, workerBytes, offset, nameBytes.Length);
+        offset += nameBytes.Length;
+        Array.Copy(surenameSize, 0, workerBytes, offset, surenameSize.Length);
+        offset += surenameSize.Length;
+        Array.Copy(surenameBytes, 0, workerBytes, offset, surenameBytes.Length);
+        offset += surenameBytes.Length;
+        Array.Copy(abilitiesSize, 0, workerBytes, offset, abilitiesSize.Length);
+        offset += abilitiesSize.Length;
+        Array.Copy(abilitiesBytes, 0, workerBytes, offset, abilitiesBytes.Length);
+        offset += abilitiesBytes.Length;
+        Array.Copy(expierienceTimeBytes, 0, workerBytes, offset, expierienceTimeBytes.Length);
+        offset += expierienceTimeBytes.Length;
+        Array.Copy(salaryBytes, 0, workerBytes, offset, expierienceTimeBytes.Length);
+
+        return workerBytes;
+    }
+
+    public static object Deserialize(byte[] workerBytes)
+    {
+        int offset = 0;
+
+        int nameSize = BitConverter.ToInt32(workerBytes, offset);
+        offset += sizeof(int);
+        string name = Encoding.Unicode.GetString(workerBytes, offset, nameSize);
+        offset += nameSize;
+        int surenameSize = BitConverter.ToInt32(workerBytes, offset);
+        offset += sizeof(int);
+        string surename = Encoding.Unicode.GetString(workerBytes, offset, surenameSize);
+        offset += surenameSize;
+
+        Worker deserializedWorker = new Worker(name, surename);
+
+        int abilitiesSize = BitConverter.ToInt32(workerBytes, offset);
+        offset += sizeof(int);
+
+        Dictionary<ProjectTechnology, float> abilities;
+
+        using (MemoryStream memStream = new MemoryStream(workerBytes, offset, abilitiesSize))
+        {
+            BinaryFormatter formatter = new BinaryFormatter();
+            abilities = (Dictionary<ProjectTechnology, float>)formatter.Deserialize(memStream);
+        }
+
+        offset += abilitiesSize;
+        int expierienceTime = BitConverter.ToInt32(workerBytes, offset);
+        offset += sizeof(int);
+        int salary = BitConverter.ToInt32(workerBytes, offset);
+
+        deserializedWorker.Abilites = abilities;
+        deserializedWorker.ExperienceTime = expierienceTime;
+        deserializedWorker.Salary = salary;
+
+        return deserializedWorker;
+    }
 
     public Worker(string name, string surename)
     {

@@ -45,4 +45,5 @@ MonoBehaviour:
   - TaggedPlayer
   - StartTime
   - SetWorkers
+  - AddWorker
   DisableAutoOpenWizard: 1

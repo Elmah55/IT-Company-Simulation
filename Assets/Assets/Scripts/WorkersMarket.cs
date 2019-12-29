@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ExitGames.Client.Photon;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -44,7 +45,7 @@ public class WorkersMarket : Photon.PunBehaviour
 
     private int CalculateMaxWorkersOnMarket()
     {
-        int value = /*PhotonNetwork.room.PlayerCount **/ WORKERS_ON_MARKET_PER_PLAYER;
+        int value = PhotonNetwork.room.PlayerCount * WORKERS_ON_MARKET_PER_PLAYER;
         return value;
     }
 
@@ -145,26 +146,41 @@ public class WorkersMarket : Photon.PunBehaviour
     private void Start()
     {
         PhotonViewComponent = GetComponent<PhotonView>();
+        Workers = new List<Worker>();
+        //Register type for sending workers available on market to other players
+        PhotonPeer.RegisterType(typeof(Worker), 0, Worker.Serialize, Worker.Deserialize);
 
         //Master client will generate all the workers on market
         //then send it to other clients
-        if (true /*== PhotonNetwork.isMasterClient*/)
+        if (true == PhotonNetwork.isMasterClient)
         {
             MaxWorkersOnMarket = CalculateMaxWorkersOnMarket();
-            Workers = new List<Worker>();
             GenerateWorkers();
-            //TODO: Fix serialization for RPC
-            //PhotonViewComponent.RPC("SetWorkers", PhotonTargets.All, Workers as object);
+
+            foreach (Worker singleWorker in Workers)
+            {
+                PhotonViewComponent.RPC("AddWorker", PhotonTargets.Others, singleWorker);
+            }
         }
     }
 
     [PunRPC]
-    private void SetWorkers(object[] workersList)
+    private void AddWorker(object workerObject)
     {
-        this.Workers = workersList[0] as List<Worker>;
+        this.Workers.Add((Worker)workerObject);
     }
 
     /*Public methods*/
+
+    public override void OnPhotonPlayerConnected(PhotonPlayer newPlayer)
+    {
+        base.OnPhotonPlayerConnected(newPlayer);
+
+        foreach (Worker singleWorker in Workers)
+        {
+            PhotonViewComponent.RPC("AddWorker", newPlayer, singleWorker);
+        }
+    }
 
     public override void OnPhotonPlayerDisconnected(PhotonPlayer otherPlayer)
     {
