@@ -25,6 +25,8 @@ public class PlayerCompany : Company
     /// </summary>
     public List<Scrum> ScrumProcesses { get; private set; }
     public List<Project> CompletedProjects { get; private set; }
+    public event WorkerAction WorkerAdded;
+    public event WorkerAction WorkerRemoved;
 
     /*Private methods*/
 
@@ -42,5 +44,17 @@ public class PlayerCompany : Company
         Scrum projectScrum = new Scrum();
         projectScrum.BindedProject = projectInstance;
         ScrumProcesses.Add(projectScrum);
+    }
+
+    public void AddWorker(Worker workerToAdd)
+    {
+        Workers.Add(workerToAdd);
+        WorkerAdded?.Invoke(workerToAdd);
+    }
+
+    public void RemoveWorker(Worker workerToRemove)
+    {
+        Workers.Remove(workerToRemove);
+        WorkerRemoved?.Invoke(workerToRemove);
     }
 }

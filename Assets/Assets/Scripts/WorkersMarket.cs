@@ -1,8 +1,6 @@
 ﻿using ExitGames.Client.Photon;
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
 
 /// <summary>
 /// This class handles represents workers market. Each of player can hire worker
@@ -30,6 +28,10 @@ public class WorkersMarket : Photon.PunBehaviour
     /// How many workers can be on market at one time
     /// </summary>
     private int MaxWorkersOnMarket;
+    /// <summary>
+    /// Used to assing unique ID for each worker
+    /// </summary>
+    private int WorkerID;
     private PhotonView PhotonViewComponent;
 
     /*Public consts fields*/
@@ -40,6 +42,8 @@ public class WorkersMarket : Photon.PunBehaviour
     /// Workers available on market
     /// </summary>
     public List<Worker> Workers { get; private set; }
+    public event WorkerAction WorkerAdded;
+    public event WorkerAction WorkerRemoved;
 
     /*Private methods*/
 
@@ -71,6 +75,12 @@ public class WorkersMarket : Photon.PunBehaviour
         newMarketWorker.Abilites = CreateWorkerAbilities();
         newMarketWorker.ExperienceTime = CalculateWorkerExpierience(newMarketWorker);
         newMarketWorker.Salary = CalculateWorkerSalary(newMarketWorker);
+        newMarketWorker.ID = WorkerID++;
+
+        if (WorkerID < newMarketWorker.ID)
+        {
+            throw new OverflowException("Maximum number of generated workers exceeded");
+        }
 
         return newMarketWorker;
     }
@@ -159,26 +169,59 @@ public class WorkersMarket : Photon.PunBehaviour
 
             foreach (Worker singleWorker in Workers)
             {
-                PhotonViewComponent.RPC("AddWorker", PhotonTargets.Others, singleWorker);
+                PhotonViewComponent.RPC("AddWorkerInternal", PhotonTargets.Others, singleWorker);
             }
         }
     }
 
     [PunRPC]
-    private void AddWorker(object workerObject)
+    public void AddWorkerInternal(object workerToAdd)
     {
-        this.Workers.Add((Worker)workerObject);
+        Worker workerObject = (Worker)workerToAdd;
+        this.Workers.Add(workerObject);
+        this.WorkerAdded?.Invoke(workerObject);
+    }
+
+    [PunRPC]
+    private void RemoveWorkerInternal(int workerID)
+    {
+        Worker workerToRemove = null;
+
+        for (int i = 0; i < Workers.Count; i++)
+        {
+            if (workerID == Workers[i].ID)
+            {
+                workerToRemove = Workers[i];
+                Workers.RemoveAt(i);
+                break;
+            }
+        }
+
+        this.WorkerRemoved?.Invoke(workerToRemove);
     }
 
     /*Public methods*/
+
+    public void RemoveWorker(Worker workerToRemove)
+    {
+        PhotonViewComponent.RPC("RemoveWorkerInternal", PhotonTargets.All, workerToRemove.ID);
+    }
+
+    public void AddWorker(Worker workerToAdd)
+    {
+        PhotonViewComponent.RPC("AddWorkerInternal", PhotonTargets.All, workerToAdd);
+    }
 
     public override void OnPhotonPlayerConnected(PhotonPlayer newPlayer)
     {
         base.OnPhotonPlayerConnected(newPlayer);
 
-        foreach (Worker singleWorker in Workers)
+        if (true == PhotonNetwork.isMasterClient)
         {
-            PhotonViewComponent.RPC("AddWorker", newPlayer, singleWorker);
+            foreach (Worker singleWorker in Workers)
+            {
+                PhotonViewComponent.RPC("AddWorkerInternal", newPlayer, singleWorker);
+            }
         }
     }
 

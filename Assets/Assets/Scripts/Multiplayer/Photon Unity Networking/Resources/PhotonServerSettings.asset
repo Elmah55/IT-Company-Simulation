@@ -46,4 +46,7 @@ MonoBehaviour:
   - StartTime
   - SetWorkers
   - AddWorker
+  - RemoveWorker
+  - AddWorkerInternal
+  - RemoveWorkerInternal
   DisableAutoOpenWizard: 1

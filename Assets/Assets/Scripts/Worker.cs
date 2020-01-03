@@ -1,10 +1,8 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
-using UnityEngine;
 
 public class Worker
 {
@@ -43,12 +41,9 @@ public class Worker
             {
                 foreach (ProjectTechnology workerAbility in Abilites.Keys)
                 {
-                    foreach (ProjectTechnology technologyInProject in AssignedProject.UsedTechnologies)
+                    if (AssignedProject.UsedTechnologies.Contains(workerAbility))
                     {
-                        if (workerAbility == technologyInProject)
-                        {
-                            score += Abilites[workerAbility] * 0.1f;
-                        }
+                        score += Abilites[workerAbility] * 0.1f;
                     }
                 }
             }
@@ -82,6 +77,10 @@ public class Worker
             return (int)(Salary * 1.25f);
         }
     }
+    /// <summary>
+    /// Unique ID of worker
+    /// </summary>
+    public int ID { get; set; }
 
     /*Private methods*/
 
@@ -96,6 +95,7 @@ public class Worker
         byte[] expierienceTimeBytes = BitConverter.GetBytes(workerToSerialize.ExperienceTime);
         byte[] salaryBytes = BitConverter.GetBytes(workerToSerialize.Salary);
         byte[] abilitiesBytes;
+        byte[] IDBytes = BitConverter.GetBytes(workerToSerialize.ID);
 
         //This is used so receiving client knows how much bytes of name and surename should be read
         byte[] nameSize = BitConverter.GetBytes(nameBytes.Length);
@@ -118,10 +118,10 @@ public class Worker
                             + abilitiesSize.Length
                             + abilitiesBytes.Length
                             + expierienceTimeBytes.Length
-                            + salaryBytes.Length;
+                            + salaryBytes.Length
+                            + IDBytes.Length;
 
         byte[] workerBytes = new byte[workerBytesSize];
-
         int offset = 0;
 
         Array.Copy(nameSize, 0, workerBytes, offset, nameSize.Length);
@@ -139,6 +139,8 @@ public class Worker
         Array.Copy(expierienceTimeBytes, 0, workerBytes, offset, expierienceTimeBytes.Length);
         offset += expierienceTimeBytes.Length;
         Array.Copy(salaryBytes, 0, workerBytes, offset, expierienceTimeBytes.Length);
+        offset += salaryBytes.Length;
+        Array.Copy(IDBytes, 0, workerBytes, offset, IDBytes.Length);
 
         return workerBytes;
     }
@@ -173,10 +175,13 @@ public class Worker
         int expierienceTime = BitConverter.ToInt32(workerBytes, offset);
         offset += sizeof(int);
         int salary = BitConverter.ToInt32(workerBytes, offset);
+        offset += sizeof(int);
+        int workerID = BitConverter.ToInt32(workerBytes, offset);
 
         deserializedWorker.Abilites = abilities;
         deserializedWorker.ExperienceTime = expierienceTime;
         deserializedWorker.Salary = salary;
+        deserializedWorker.ID = workerID;
 
         return deserializedWorker;
     }

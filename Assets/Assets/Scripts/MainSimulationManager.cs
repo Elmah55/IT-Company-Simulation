@@ -27,6 +27,8 @@ public class MainSimulationManager : MonoBehaviour
         ControlledCompany = new PlayerCompany("TEST COMPANY");
         Worker workerA = new Worker("Jan", "Kowalski");
         Worker workerB = new Worker("Adam", "Nowak");
+        workerA.WorkingCompany = ControlledCompany;
+        workerB.WorkingCompany = ControlledCompany;
         ControlledCompany.Workers.Add(workerA);
         ControlledCompany.Workers.Add(workerB);
         ControlledCompany.Balance = 10000000;
