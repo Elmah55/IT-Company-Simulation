@@ -29,6 +29,8 @@ public class MainSimulationManager : MonoBehaviour
         Worker workerB = new Worker("Adam", "Nowak");
         workerA.WorkingCompany = ControlledCompany;
         workerB.WorkingCompany = ControlledCompany;
+        workerA.Abilites = new System.Collections.Generic.Dictionary<ProjectTechnology, float>();
+        workerB.Abilites = new System.Collections.Generic.Dictionary<ProjectTechnology, float>();
         ControlledCompany.Workers.Add(workerA);
         ControlledCompany.Workers.Add(workerB);
         ControlledCompany.Balance = 10000000;

@@ -71,7 +71,10 @@ public class Scrum : MonoBehaviour
 
             foreach (ProjectTechnology usedTechnolody in BindedProject.UsedTechnologies)
             {
-                projectWorker.Abilites[usedTechnolody] += ABILITY_UPDATE_VALUE;
+                if (true == projectWorker.Abilites.ContainsKey(usedTechnolody))
+                {
+                    projectWorker.Abilites[usedTechnolody] += ABILITY_UPDATE_VALUE;
+                }
             }
         }
     }
