@@ -41,7 +41,7 @@ public class GameTime : Photon.PunBehaviour
     /// How many days (game time) have passed since start of game
     /// </summary>
     public int DaysSinceStart { get; private set; }
-    public Action DayChanged;
+    public event Action DayChanged;
 
     /*Private methods*/
 
@@ -57,8 +57,6 @@ public class GameTime : Photon.PunBehaviour
                 DayChanged?.Invoke();
                 PreviousDayNumber = CurrentTime.Day;
             }
-
-            Debug.LogFormat("{0}:{1} {2}", new object[] { CurrentTime.Hour, CurrentTime.Minute, DaysSinceStart });
 
             yield return new WaitForSeconds(TIME_UPDATE_FREQUENCY);
         }

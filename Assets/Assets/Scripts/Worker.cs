@@ -81,6 +81,10 @@ public class Worker
     /// Unique ID of worker
     /// </summary>
     public int ID { get; set; }
+    /// <summary>
+    /// For how many days worker is employed in current company
+    /// </summary>
+    public int DaysInCompany { get; set; }
 
     /*Private methods*/
 
