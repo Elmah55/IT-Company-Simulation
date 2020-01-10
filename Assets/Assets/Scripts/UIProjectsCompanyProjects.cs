@@ -5,7 +5,7 @@ using UnityEngine.Events;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class UIProjects : MonoBehaviour
+public class UIProjectsCompanyProjects : MonoBehaviour
 {
     /*Private consts fields*/
 

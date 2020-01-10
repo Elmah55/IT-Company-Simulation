@@ -24,7 +24,7 @@ public class MainSimulationManager : MonoBehaviour
     private void CreateCompany()
     {
         //Testing scrum only for now
-        ControlledCompany = new PlayerCompany("TEST COMPANY");
+        ControlledCompany = new PlayerCompany("TEST COMPANY", gameObject);
         Worker workerA = new Worker("Jan", "Kowalski");
         Worker workerB = new Worker("Adam", "Nowak");
         workerA.WorkingCompany = ControlledCompany;

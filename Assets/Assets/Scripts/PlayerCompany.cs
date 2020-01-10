@@ -12,6 +12,12 @@ public class PlayerCompany : Company
 
     /*Private fields*/
 
+    /// <summary>
+    /// Game object that is used as placeholder for
+    /// scripts used in game
+    /// </summary>
+    private GameObject ScriptsGameObject;
+
     /*Public consts fields*/
 
     public const int MAX_WORKERS_PER_COMPANY = 10;
@@ -32,17 +38,18 @@ public class PlayerCompany : Company
 
     /*Public methods*/
 
-    public PlayerCompany(string name) : base(name)
+    public PlayerCompany(string name, GameObject scriptsGameObject) : base(name)
     {
         Workers = new List<Worker>();
         ScrumProcesses = new List<Scrum>();
+        this.ScriptsGameObject = scriptsGameObject;
     }
 
-    public void AddProject(Project projectInstance)
+    public void AddProject(Project projectToAdd)
     {
         //Scrum instance for project that will be added
-        Scrum projectScrum = new Scrum();
-        projectScrum.BindedProject = projectInstance;
+        Scrum projectScrum = (Scrum)ScriptsGameObject.AddComponent(typeof(Scrum));
+        projectScrum.BindedProject = projectToAdd;
         ScrumProcesses.Add(projectScrum);
     }
 

@@ -49,4 +49,6 @@ MonoBehaviour:
   - RemoveWorker
   - AddWorkerInternal
   - RemoveWorkerInternal
+  - AddProject
+  - RemoveProjectInternal
   DisableAutoOpenWizard: 1

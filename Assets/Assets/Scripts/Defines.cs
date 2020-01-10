@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 /// <summary>
 /// This file contains definitons of enum and types used
@@ -45,7 +46,7 @@ public class EnumToString
 /// <summary>
 /// Class that holds data that is used when creating new worker
 /// </summary>
-public class WorkerData
+public static class WorkerData
 {
     public static List<string> Names = new List<string>()
     {
@@ -66,6 +67,30 @@ public class WorkerData
         "Kendrick",
         "Sanny"
     };
+}
+
+/// <summary>
+/// Class that holds data that is used when creating new project
+/// </summary>
+public static class ProjectData
+{
+    public static List<string> Names = new List<string>()
+    {
+        "Automotive embedded",
+        "Telecommunications embedded",
+        "Website",
+        "Desktop application"
+    };
+}
+
+public static class NetworkingData
+{
+    /// <summary>
+    /// Bytes codes used for sending custom type data between clients
+    /// </summary>
+    public const byte WORKER_BYTE_CODE= 0;
+    public const byte PROJECT_BYTE_CODE = 1;
+
 }
 
 /*Delegates*/
