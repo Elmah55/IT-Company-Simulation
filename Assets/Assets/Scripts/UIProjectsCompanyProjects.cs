@@ -102,9 +102,9 @@ public class UIProjectsCompanyProjects : MonoBehaviour
     }
 
     /// <summary>
-    /// Adds project in company to dropdown control
+    /// Adds all projects in company to dropdown control
     /// </summary>
-    private void AddProjects()
+    private void AddProjectsToDropdown()
     {
         if (SimulationManagerComponent.ControlledCompany.ScrumProcesses.Count > 0)
         {
@@ -113,12 +113,17 @@ public class UIProjectsCompanyProjects : MonoBehaviour
             foreach (Scrum scrumProcess in SimulationManagerComponent.ControlledCompany.ScrumProcesses)
             {
                 Project companyProject = scrumProcess.BindedProject;
-                Dropdown.OptionData projectOption = new Dropdown.OptionData(companyProject.Name);
-                ProjectsListDropdown.options.Add(projectOption);
+                AddSingleProjectToDropdown(companyProject);
             }
 
             SelectedProjectScrum = SimulationManagerComponent.ControlledCompany.ScrumProcesses[ProjectsListDropdown.value];
         }
+    }
+
+    private void AddSingleProjectToDropdown(Project projectInstance)
+    {
+        Dropdown.OptionData projectOption = new Dropdown.OptionData(projectInstance.Name);
+        ProjectsListDropdown.options.Add(projectOption);
     }
 
     private void SelectWorkerListButton(ref ColorBlock savedColors, ref GameObject savedSelectedButton)
@@ -208,7 +213,9 @@ public class UIProjectsCompanyProjects : MonoBehaviour
     {
         WorkersButtons = new Dictionary<GameObject, Worker>();
         WorkersButtons = new Dictionary<GameObject, Worker>();
+        SimulationManagerComponent.ControlledCompany.ProjectAdded += AddSingleProjectToDropdown;
 
+        AddAvailableWorkersListViewButtons();
         OnProjectsListDropdownValueChanged(ProjectsListDropdown.value);
     }
 
@@ -268,9 +275,8 @@ public class UIProjectsCompanyProjects : MonoBehaviour
         SelectedProjectScrum = SimulationManagerComponent.ControlledCompany.ScrumProcesses[ProjectsListDropdown.value];
 
         AddAssignedWorkersListViewButtons();
-        AddProjects();
+        AddProjectsToDropdown();
         InitializeProjectButtons();
-        AddAvailableWorkersListViewButtons();
         SetProjectProgressBar();
         SetProjectInfo();
 

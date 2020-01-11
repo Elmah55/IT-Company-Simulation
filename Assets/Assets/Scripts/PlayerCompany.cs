@@ -33,6 +33,7 @@ public class PlayerCompany : Company
     public List<Project> CompletedProjects { get; private set; }
     public event WorkerAction WorkerAdded;
     public event WorkerAction WorkerRemoved;
+    public event ProjectAction ProjectAdded;
 
     /*Private methods*/
 
@@ -51,6 +52,7 @@ public class PlayerCompany : Company
         Scrum projectScrum = (Scrum)ScriptsGameObject.AddComponent(typeof(Scrum));
         projectScrum.BindedProject = projectToAdd;
         ScrumProcesses.Add(projectScrum);
+        ProjectAdded?.Invoke(projectToAdd);
     }
 
     public void AddWorker(Worker workerToAdd)
