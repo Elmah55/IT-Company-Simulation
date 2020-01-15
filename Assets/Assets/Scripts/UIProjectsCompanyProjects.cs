@@ -216,7 +216,12 @@ public class UIProjectsCompanyProjects : MonoBehaviour
         SimulationManagerComponent.ControlledCompany.ProjectAdded += AddSingleProjectToDropdown;
 
         AddAvailableWorkersListViewButtons();
-        OnProjectsListDropdownValueChanged(ProjectsListDropdown.value);
+        AddProjectsToDropdown();
+
+        if (ProjectsListDropdown.options.Count > 0)
+        {
+            OnProjectsListDropdownValueChanged(ProjectsListDropdown.value);
+        }
     }
 
     /// <summary>
@@ -275,7 +280,6 @@ public class UIProjectsCompanyProjects : MonoBehaviour
         SelectedProjectScrum = SimulationManagerComponent.ControlledCompany.ScrumProcesses[ProjectsListDropdown.value];
 
         AddAssignedWorkersListViewButtons();
-        AddProjectsToDropdown();
         InitializeProjectButtons();
         SetProjectProgressBar();
         SetProjectInfo();

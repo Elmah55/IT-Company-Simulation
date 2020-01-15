@@ -34,6 +34,7 @@ public class MainSimulationManager : MonoBehaviour
         ControlledCompany.Workers.Add(workerA);
         ControlledCompany.Workers.Add(workerB);
         ControlledCompany.Balance = 10000000;
+
         Project testProject = new Project("TEST");
         testProject.UsedTechnologies.Add(ProjectTechnology.C);
         testProject.UsedTechnologies.Add(ProjectTechnology.Cpp);
@@ -41,6 +42,14 @@ public class MainSimulationManager : MonoBehaviour
         Scrum testScrum = gameObject.AddComponent(typeof(Scrum)) as Scrum;
         ControlledCompany.ScrumProcesses.Add(testScrum);
         testScrum.BindedProject = testProject;
+
+        Project testProject2 = new Project("TEST 2222");
+        testProject2.UsedTechnologies.Add(ProjectTechnology.Java);
+        testProject2.UsedTechnologies.Add(ProjectTechnology.Python);
+        testProject2.DaysSinceStart = 134;
+        Scrum testScrum2 = gameObject.AddComponent(typeof(Scrum)) as Scrum;
+        ControlledCompany.ScrumProcesses.Add(testScrum2);
+        testScrum2.BindedProject = testProject2;
     }
 
     /*Public methods*/
