@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
@@ -13,24 +12,15 @@ public class GameTime : Photon.PunBehaviour
     /*Private consts fields*/
 
     /// <summary>
-    /// How often game time should be updated. This value
-    /// is seconds in game game time (scaled time)
+    /// How often game time should be updated. After time
+    /// specified by this value passes next day in game world
+    /// occurs. This value is seconds in game time (scaled time)
     /// </summary>
-    private const float TIME_UPDATE_FREQUENCY = 1.0f;
-
-    /// <summary>
-    /// How many minutes should pass in game time in one
-    /// time update
-    /// </summary>
-    private const float TIME_MINUTES_PER_UPDATE = 30.0f;
+    private const float TIME_UPDATE_FREQUENCY = 180.0f;
 
     /*Private fields*/
 
     private PhotonView PhotonViewComponent;
-    /// <summary>
-    /// Used to count passed days
-    /// </summary>
-    private int PreviousDayNumber;
 
     /*Public consts fields*/
 
@@ -49,35 +39,26 @@ public class GameTime : Photon.PunBehaviour
     {
         while (true)
         {
-            CurrentTime = CurrentTime.AddMinutes(TIME_MINUTES_PER_UPDATE);
-
-            if (CurrentTime.Day != PreviousDayNumber)
-            {
-                ++DaysSinceStart;
-                DayChanged?.Invoke();
-                PreviousDayNumber = CurrentTime.Day;
-            }
-
             yield return new WaitForSeconds(TIME_UPDATE_FREQUENCY);
+
+            //Next days occurs when time specified by
+            //TIME_UPDATE_FREQUENCY passes
+            CurrentTime = CurrentTime.AddDays(1);
+            ++DaysSinceStart;
+            DayChanged?.Invoke();
         }
     }
 
     private void StartTime()
     {
         CurrentTime = DateTime.Now;
-        StartTimeInternal();
+        StartCoroutine(UpdateGameTime());
     }
 
     [PunRPC]
-    private void StartTime(DateTime timeAtStart)
+    private void StartTime(int day, int month, int year)
     {
-        CurrentTime = timeAtStart;
-        StartTimeInternal();
-    }
-
-    private void StartTimeInternal()
-    {
-        PreviousDayNumber = CurrentTime.Day;
+        CurrentTime = new DateTime(year, month, day);
         StartCoroutine(UpdateGameTime());
     }
 
@@ -96,6 +77,8 @@ public class GameTime : Photon.PunBehaviour
         if (true == PhotonNetwork.isMasterClient)
         {
             StartTime();
+            PhotonViewComponent.RPC("StartTime", PhotonTargets.Others,
+                CurrentTime.Day, CurrentTime.Month, CurrentTime.Year);
         }
     }
 
@@ -106,7 +89,8 @@ public class GameTime : Photon.PunBehaviour
         //Synchronize connected client's time with master client's time
         if (true == PhotonNetwork.isMasterClient)
         {
-            PhotonViewComponent.RPC("StartTime", newPlayer, CurrentTime);
+            PhotonViewComponent.RPC("StartTime", newPlayer,
+                CurrentTime.Day, CurrentTime.Month, CurrentTime.Year);
         }
     }
 }
