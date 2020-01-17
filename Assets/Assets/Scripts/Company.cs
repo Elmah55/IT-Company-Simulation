@@ -13,10 +13,6 @@ public class Company
     /*Public fields*/
 
     public string Name { get; set; }
-    /// <summary>
-    /// Money balance of company
-    /// </summary>
-    public int Balance { get; set; }
 
     /*Private methods*/
 

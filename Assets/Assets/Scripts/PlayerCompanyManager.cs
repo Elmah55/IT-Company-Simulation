@@ -21,13 +21,12 @@ public class PlayerCompanyManager : MonoBehaviour
 
     /*Private fields*/
 
-    private MainSimulationManager SimulationManagerComponent;
-
     /*Public consts fields*/
 
     /*Public fields*/
 
     public GameTime GameTimeComponent;
+    public MainSimulationManager SimulationManagerComponent;
 
     /*Private methods*/
 
@@ -63,10 +62,24 @@ public class PlayerCompanyManager : MonoBehaviour
         }
     }
 
+    private void OnCompanyProjectAdded(Project newProject)
+    {
+        newProject.Completed += OnCompanyProjectCompleted;
+    }
+
+    private void OnCompanyProjectCompleted(Project newProject)
+    {
+        SimulationManagerComponent.ControlledCompany.Balance +=
+            newProject.CompleteBonus;
+        newProject.Completed -= OnCompanyProjectCompleted;
+    }
+
     private void Start()
     {
         GameTimeComponent.DayChanged += HandleCompanyExpenses;
         GameTimeComponent.DayChanged += UpdateWorkersState;
+
+        SimulationManagerComponent.ControlledCompany.ProjectAdded += OnCompanyProjectAdded;
     }
 
     /*Public methods*/

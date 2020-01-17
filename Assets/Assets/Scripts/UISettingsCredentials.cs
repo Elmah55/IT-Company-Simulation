@@ -2,7 +2,7 @@
 
 public class UISettingsCredentials : MonoBehaviour
 {
-    public GameSettingsManager SettingsManager;
+    public PlayerInfoSettings SettingsManager;
 
     private void OnEnable()
     {

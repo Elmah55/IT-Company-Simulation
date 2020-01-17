@@ -1,9 +1,10 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 /// <summary>
 /// This is core class for all aspects of gameplay that will
-/// happen during running simulation (adding workers, claiming
-/// projects, etc.)
+/// happen during running simulation (like ending game if gameplay
+/// target is reached)
 /// </summary>
 public class MainSimulationManager : MonoBehaviour
 {
@@ -11,7 +12,7 @@ public class MainSimulationManager : MonoBehaviour
 
     /*Private fields*/
 
-    private GameSettingsManager SettingsManager;
+    private SimulationSettings SimulationSettingsComponent;
 
     /*Public consts fields*/
 
@@ -33,7 +34,6 @@ public class MainSimulationManager : MonoBehaviour
         workerB.Abilites = new System.Collections.Generic.Dictionary<ProjectTechnology, float>();
         ControlledCompany.Workers.Add(workerA);
         ControlledCompany.Workers.Add(workerB);
-        ControlledCompany.Balance = 10000000;
 
         Project testProject = new Project("TEST");
         testProject.UsedTechnologies.Add(ProjectTechnology.C);
@@ -50,6 +50,28 @@ public class MainSimulationManager : MonoBehaviour
         Scrum testScrum2 = gameObject.AddComponent(typeof(Scrum)) as Scrum;
         ControlledCompany.ScrumProcesses.Add(testScrum2);
         testScrum2.BindedProject = testProject2;
+
+        ControlledCompany.BalanceChanged += OnControlledCompanyBalanceChanged;
+        ControlledCompany.Balance = 1000000000;
+    }
+
+    private void OnControlledCompanyBalanceChanged(int newBalance)
+    {
+        if (newBalance >= SimulationSettingsComponent.TargetBalance)
+        {
+            FinishGame();
+        }
+    }
+
+    private void FinishGame()
+    {
+        //TODO Add implementation of this methed
+        //(sending info of finished game to other players,
+        //updating GUI, etc.)
+
+        //Stop time so events in game are no longer updated
+        Time.timeScale = 0.0f;
+        Debug.Log("Game finished !");
     }
 
     /*Public methods*/
@@ -59,7 +81,7 @@ public class MainSimulationManager : MonoBehaviour
         //Obtain refence to game manager object wich was created in
         //menu scene
         GameObject gameManagerObject = GameObject.Find("GameManager");
-        SettingsManager = GetComponent<GameSettingsManager>();
+        SimulationSettingsComponent = gameManagerObject.GetComponent<SimulationSettings>();
 
         //TEST
         CreateCompany();

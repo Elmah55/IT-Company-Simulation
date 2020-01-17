@@ -1,9 +1,10 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using UnityEngine.UI;
+﻿using UnityEngine;
 
-public class GameSettingsManager : MonoBehaviour
+/// <summary>
+/// This class hold player defined preferences like nickname
+/// and company name that will be used during game
+/// </summary>
+public class PlayerInfoSettings : MonoBehaviour
 {
     /*Private consts fields*/
 
@@ -21,7 +22,6 @@ public class GameSettingsManager : MonoBehaviour
 
     public string CompanyName { get; private set; }
     public string Nickname { get; private set; }
-    public bool SettingsLoaded { get; private set; }
 
     /*Private methods*/
 
@@ -35,14 +35,11 @@ public class GameSettingsManager : MonoBehaviour
         PlayerPrefs.SetString(COMPANY_NAME_KEY, companyName);
         PlayerPrefs.SetString(NICKNAME_KEY, nickname);
         PlayerPrefs.Save();
-
-        SettingsLoaded = true;
     }
 
     public void LoadSettings()
     {
         CompanyName = PlayerPrefs.GetString(COMPANY_NAME_KEY, DEFAULT_KEY_VALUE);
         Nickname = PlayerPrefs.GetString(NICKNAME_KEY, DEFAULT_KEY_VALUE);
-        SettingsLoaded = true;
     }
 }

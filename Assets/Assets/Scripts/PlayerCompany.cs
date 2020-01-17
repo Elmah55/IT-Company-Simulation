@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -17,6 +18,7 @@ public class PlayerCompany : Company
     /// scripts used in game
     /// </summary>
     private GameObject ScriptsGameObject;
+    private int m_Balance;
 
     /*Public consts fields*/
 
@@ -24,6 +26,22 @@ public class PlayerCompany : Company
 
     /*Public fields*/
 
+    /// <summary>
+    /// Money balance of company
+    /// </summary>
+    public int Balance
+    {
+        get
+        {
+            return m_Balance;
+        }
+
+        set
+        {
+            m_Balance = value;
+            BalanceChanged?.Invoke(m_Balance);
+        }
+    }
     public List<Worker> Workers { get; private set; }
     /// <summary>
     /// List of scrum processes for this company. Every project
@@ -34,6 +52,7 @@ public class PlayerCompany : Company
     public event WorkerAction WorkerAdded;
     public event WorkerAction WorkerRemoved;
     public event ProjectAction ProjectAdded;
+    public event Action<int> BalanceChanged;
 
     /*Private methods*/
 
