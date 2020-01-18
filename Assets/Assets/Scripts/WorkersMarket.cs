@@ -1,6 +1,7 @@
 ﻿using ExitGames.Client.Photon;
 using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 /// <summary>
 /// This class handles represents workers market. Each of player can hire worker
@@ -33,11 +34,18 @@ public class WorkersMarket : Photon.PunBehaviour
     /// </summary>
     private int WorkerID;
     private PhotonView PhotonViewComponent;
+    private MainSimulationManager SimulationManagerComponent;
 
     /*Public consts fields*/
 
     /*Public fields*/
 
+    /// <summary>
+    /// How many workers should be generated in market
+    /// when simulation is run in offline mode
+    /// </summary>
+    [Range(1.0f, 1000.0f)]
+    public int NumberOfWorkersGeneratedInOfflineMode;
     /// <summary>
     /// Workers available on market
     /// </summary>
@@ -49,8 +57,10 @@ public class WorkersMarket : Photon.PunBehaviour
 
     private int CalculateMaxWorkersOnMarket()
     {
-        int value = PhotonNetwork.room.PlayerCount * WORKERS_ON_MARKET_PER_PLAYER;
-        return value;
+        int maxWorkersOnMarket = SimulationManagerComponent.GameManagerComponent.OfflineMode ?
+            (NumberOfWorkersGeneratedInOfflineMode) : (PhotonNetwork.room.PlayerCount * WORKERS_ON_MARKET_PER_PLAYER);
+
+        return maxWorkersOnMarket;
     }
 
     private void GenerateWorkers()
@@ -156,13 +166,14 @@ public class WorkersMarket : Photon.PunBehaviour
     private void Start()
     {
         PhotonViewComponent = GetComponent<PhotonView>();
+        SimulationManagerComponent = GetComponent<MainSimulationManager>();
         Workers = new List<Worker>();
         //Register type for sending workers available on market to other players
         PhotonPeer.RegisterType(typeof(Worker), 0, Worker.Serialize, Worker.Deserialize);
 
         //Master client will generate all the workers on market
         //then send it to other clients
-        if (true == PhotonNetwork.isMasterClient)
+        if (true == PhotonNetwork.isMasterClient || true == SimulationManagerComponent.GameManagerComponent.OfflineMode)
         {
             MaxWorkersOnMarket = CalculateMaxWorkersOnMarket();
             GenerateWorkers();
@@ -204,12 +215,26 @@ public class WorkersMarket : Photon.PunBehaviour
 
     public void RemoveWorker(Worker workerToRemove)
     {
-        PhotonViewComponent.RPC("RemoveWorkerInternal", PhotonTargets.All, workerToRemove.ID);
+        if (true == PhotonNetwork.isMasterClient)
+        {
+            PhotonViewComponent.RPC("RemoveWorkerInternal", PhotonTargets.All, workerToRemove.ID);
+        }
+        else if (true == SimulationManagerComponent.GameManagerComponent.OfflineMode)
+        {
+            RemoveWorkerInternal(workerToRemove.ID);
+        }
     }
 
     public void AddWorker(Worker workerToAdd)
     {
-        PhotonViewComponent.RPC("AddWorkerInternal", PhotonTargets.All, workerToAdd);
+        if (true == PhotonNetwork.isMasterClient)
+        {
+            PhotonViewComponent.RPC("AddWorkerInternal", PhotonTargets.All, workerToAdd);
+        }
+        else if (true == SimulationManagerComponent.GameManagerComponent.OfflineMode)
+        {
+            AddWorkerInternal(workerToAdd);
+        }
     }
 
     public override void OnPhotonPlayerConnected(PhotonPlayer newPlayer)

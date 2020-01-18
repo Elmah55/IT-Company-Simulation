@@ -20,6 +20,17 @@ public class MainGameManager : Photon.PunBehaviour
 
     public const string GAME_VERSION = "1.0";
 
+    /*Public fields*/
+
+    /// <summary>
+    /// When this is set to true simulation will be run in
+    /// Offline Mode. It means that this client won't be connected
+    /// to server and simulation will be run in local environment.
+    /// This will allow to run some of game mechanism like generation
+    /// of projects and workers without actually connecting to server
+    /// </summary>
+    public bool OfflineMode;
+
     /*Private methods*/
 
     private void Start()
@@ -32,7 +43,14 @@ public class MainGameManager : Photon.PunBehaviour
 
     public void StartGame()
     {
-        MultiplayerConnectionComponent.JoinOrCreateRoom();
+        if (false == OfflineMode)
+        {
+            MultiplayerConnectionComponent.JoinOrCreateRoom();
+        }
+        else
+        {
+            SceneManager.LoadScene(1);
+        }
     }
 
     public override void OnJoinedRoom()

@@ -4,7 +4,7 @@ using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 
-public class Worker
+public class Worker : ISharedObject
 {
     /*Private consts fields*/
 

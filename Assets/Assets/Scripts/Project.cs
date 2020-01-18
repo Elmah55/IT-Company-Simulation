@@ -7,7 +7,7 @@ using UnityEngine;
 /// <summary>
 /// This class represents IT project that company can work on
 /// </summary>
-public class Project
+public class Project : ISharedObject
 {
     /*Private consts fields*/
 

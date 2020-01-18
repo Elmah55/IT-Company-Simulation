@@ -18,6 +18,7 @@ public class MainSimulationManager : MonoBehaviour
 
     /*Public fields*/
 
+    public MainGameManager GameManagerComponent  { get; private set; }
     public PlayerCompany ControlledCompany { get; private set; }
 
     /*Private methods*/
@@ -82,6 +83,7 @@ public class MainSimulationManager : MonoBehaviour
         //menu scene
         GameObject gameManagerObject = GameObject.Find("GameManager");
         SimulationSettingsComponent = gameManagerObject.GetComponent<SimulationSettings>();
+        GameManagerComponent = gameManagerObject.GetComponent<MainGameManager>();
 
         //TEST
         CreateCompany();
