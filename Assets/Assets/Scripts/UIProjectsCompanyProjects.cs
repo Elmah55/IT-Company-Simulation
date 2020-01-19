@@ -1,4 +1,4 @@
-﻿using System.Collections;
+﻿using System.Linq;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
@@ -76,14 +76,44 @@ public class UIProjectsCompanyProjects : MonoBehaviour
         foreach (Worker companyWorker in SimulationManagerComponent.ControlledCompany.Workers)
         {
             //Add only workers that dont have assigned any project
+            //Available worker is considered worker without project assigned
             if (null == companyWorker.AssignedProject)
             {
-                GameObject createdButton = CreateWorkerButton(companyWorker, OnAvailableWorkersListButtonClicked);
-
-                AvailableWorkersControlList.AddControl(createdButton);
-                WorkersButtons.Add(createdButton, companyWorker);
+                AddAvailableSingleWorkerListVewButton(companyWorker);
             }
         }
+    }
+
+    private void RemoveWorkerListViewButton(Worker companyWorker)
+    {
+        KeyValuePair<GameObject, Worker> buttonWorkerPair =
+            WorkersButtons.First(x => x.Value == companyWorker);
+        WorkersButtons.Remove(buttonWorkerPair.Key);
+
+        if (null == buttonWorkerPair.Value.AssignedProject)
+        {
+            AvailableWorkersControlList.RemoveControl(buttonWorkerPair.Key);
+        }
+        else
+        {
+            AssignedWorkersControlList.RemoveControl(buttonWorkerPair.Key);
+        }
+
+    }
+
+    private void AddAvailableSingleWorkerListVewButton(Worker companyWorker)
+    {
+        GameObject createdButton = CreateWorkerButton(companyWorker, OnAvailableWorkersListButtonClicked);
+
+        AvailableWorkersControlList.AddControl(createdButton);
+        WorkersButtons.Add(createdButton, companyWorker);
+    }
+
+    private void OnCompanyWorkerAdded(Worker addedWorker)
+    {
+        //Worker that just has been added to company doesn't
+        //have assigned project so its available worker
+        AddAvailableSingleWorkerListVewButton(addedWorker);
     }
 
     private void AddAssignedWorkersListViewButtons()
@@ -214,6 +244,8 @@ public class UIProjectsCompanyProjects : MonoBehaviour
         WorkersButtons = new Dictionary<GameObject, Worker>();
         WorkersButtons = new Dictionary<GameObject, Worker>();
         SimulationManagerComponent.ControlledCompany.ProjectAdded += AddSingleProjectToDropdown;
+        SimulationManagerComponent.ControlledCompany.WorkerAdded += OnCompanyWorkerAdded;
+        SimulationManagerComponent.ControlledCompany.WorkerRemoved += RemoveWorkerListViewButton;
 
         AddAvailableWorkersListViewButtons();
         AddProjectsToDropdown();

@@ -60,7 +60,7 @@ public class MainSimulationManager : MonoBehaviour
     {
         if (newBalance >= SimulationSettingsComponent.TargetBalance)
         {
-            FinishGame();
+            //FinishGame();
         }
     }
 
