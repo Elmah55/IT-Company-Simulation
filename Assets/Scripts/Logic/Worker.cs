@@ -48,7 +48,8 @@ public class Worker : ISharedObject
                 }
             }
 
-            score += ExperienceTime * 0.3f;
+            score += ExperienceTime;
+            score *= 0.005f;
 
             return score;
         }

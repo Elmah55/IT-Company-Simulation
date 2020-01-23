@@ -21,12 +21,12 @@ public class PlayerCompanyManager : MonoBehaviour
 
     /*Private fields*/
 
+    private GameTime GameTimeComponent;
+    private MainSimulationManager SimulationManagerComponent;
+
     /*Public consts fields*/
 
     /*Public fields*/
-
-    public GameTime GameTimeComponent;
-    public MainSimulationManager SimulationManagerComponent;
 
     /*Private methods*/
 
@@ -76,6 +76,9 @@ public class PlayerCompanyManager : MonoBehaviour
 
     private void Start()
     {
+        GameTimeComponent = GetComponent<GameTime>();
+        SimulationManagerComponent = GetComponent<MainSimulationManager>();
+
         GameTimeComponent.DayChanged += HandleCompanyExpenses;
         GameTimeComponent.DayChanged += UpdateWorkersState;
 

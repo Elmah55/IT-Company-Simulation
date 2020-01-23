@@ -1,5 +1,6 @@
 ﻿using System;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 /// <summary>
 /// This is core class for all aspects of gameplay that will
@@ -13,12 +14,13 @@ public class MainSimulationManager : MonoBehaviour
     /*Private fields*/
 
     private SimulationSettings SimulationSettingsComponent;
+    private PhotonView PhotonViewComponent;
 
     /*Public consts fields*/
 
     /*Public fields*/
 
-    public MainGameManager GameManagerComponent  { get; private set; }
+    public MainGameManager GameManagerComponent { get; private set; }
     public PlayerCompany ControlledCompany { get; private set; }
 
     /*Private methods*/
@@ -52,18 +54,26 @@ public class MainSimulationManager : MonoBehaviour
         ControlledCompany.ScrumProcesses.Add(testScrum2);
         testScrum2.BindedProject = testProject2;
 
-        ControlledCompany.BalanceChanged += OnControlledCompanyBalanceChanged;
         ControlledCompany.Balance = 1000000000;
+        ControlledCompany.BalanceChanged += OnControlledCompanyBalanceChanged;
     }
 
     private void OnControlledCompanyBalanceChanged(int newBalance)
     {
         if (newBalance >= SimulationSettingsComponent.TargetBalance)
         {
-            //FinishGame();
+            if (true == GameManagerComponent.OfflineMode)
+            {
+                FinishGame();
+            }
+            else
+            {
+                PhotonViewComponent.RPC("FinishGame", PhotonTargets.All);
+            }
         }
     }
 
+    [PunRPC]
     private void FinishGame()
     {
         //TODO Add implementation of this methed
@@ -72,7 +82,8 @@ public class MainSimulationManager : MonoBehaviour
 
         //Stop time so events in game are no longer updated
         Time.timeScale = 0.0f;
-        Debug.Log("Game finished !");
+
+        SceneManager.LoadScene(0);
     }
 
     /*Public methods*/
@@ -82,8 +93,10 @@ public class MainSimulationManager : MonoBehaviour
         //Obtain refence to game manager object wich was created in
         //menu scene
         GameObject gameManagerObject = GameObject.Find("GameManager");
+
         SimulationSettingsComponent = gameManagerObject.GetComponent<SimulationSettings>();
         GameManagerComponent = gameManagerObject.GetComponent<MainGameManager>();
+        PhotonViewComponent = GetComponent<PhotonView>();
 
         //TEST
         CreateCompany();
