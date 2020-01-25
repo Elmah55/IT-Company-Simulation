@@ -25,7 +25,10 @@ public class MultiplayerConnection : Photon.PunBehaviour
 
         if (false == GameManagerComponent.OfflineMode)
         {
-            ConnectToServer();
+            if (false == PhotonNetwork.connected && false == PhotonNetwork.connecting)
+            {
+                ConnectToServer();
+            }
         }
     }
 
@@ -40,6 +43,15 @@ public class MultiplayerConnection : Photon.PunBehaviour
         options.MaxPlayers = MAX_PLAYERS_PER_ROOM;
 
         PhotonNetwork.JoinOrCreateRoom("IT Company", options, null);
+    }
+
+    public void LeaveRoom()
+    {
+        string msg = string.Format("Left room {0}", PhotonNetwork.room.Name);
+
+        PhotonNetwork.LeaveRoom();
+
+        Debug.Log(msg);
     }
 
     public override void OnPhotonPlayerConnected(PhotonPlayer newPlayer)

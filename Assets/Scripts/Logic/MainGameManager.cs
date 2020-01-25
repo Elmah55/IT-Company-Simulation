@@ -1,7 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using UnityEngine.SceneManagement;
+﻿using UnityEngine.SceneManagement;
 
 /// <summary>
 /// This class handles main game aspects like loading scenes and
@@ -13,8 +10,8 @@ public class MainGameManager : Photon.PunBehaviour
 
     /*Private fields*/
 
-    private MenuUIManager UIManagerComponent;
     private MultiplayerConnection MultiplayerConnectionComponent;
+    private bool MenuSceneLoadedAfterGameFinish;
 
     /*Public consts fields*/
 
@@ -49,7 +46,22 @@ public class MainGameManager : Photon.PunBehaviour
         }
         else
         {
-            SceneManager.LoadScene(1);
+            SceneManager.LoadScene((int)SceneIndex.Game);
+        }
+    }
+
+    public void FinishGame()
+    {
+        if (false == OfflineMode)
+        {
+            MultiplayerConnectionComponent.LeaveRoom();
+        }
+        else
+        {
+            SceneManager.LoadScene((int)SceneIndex.Menu);
+            //There is already another game object existing with this
+            //script when menu scene is loaded
+            Destroy(this.gameObject);
         }
     }
 
@@ -57,6 +69,19 @@ public class MainGameManager : Photon.PunBehaviour
     {
         base.OnJoinedRoom();
 
-        SceneManager.LoadScene("GameScene");
+        SceneManager.LoadScene((int)SceneIndex.Game);
+    }
+
+    public override void OnLeftRoom()
+    {
+        base.OnLeftRoom();
+        //TODO: Find way to prevent spawning other GameManager
+        //object when menu scene is loaded so destroying of this
+        //object is not needed and client won't have connect to
+        //photon server every time menu scene is loaded
+        SceneManager.LoadScene((int)SceneIndex.Menu);
+        //There is already another game object existing with this
+        //script when menu scene is loaded
+        Destroy(this.gameObject);
     }
 }

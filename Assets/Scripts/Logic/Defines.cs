@@ -24,6 +24,16 @@ public enum ProjectTechnology
     Java
 }
 
+/// <summary>
+/// This enum defines index of scene (as defined in
+/// build settings)
+/// </summary>
+public enum SceneIndex
+{
+    Menu = 0,
+    Game = 1
+}
+
 /*Classes*/
 
 /// <summary>
@@ -88,9 +98,8 @@ public static class NetworkingData
     /// <summary>
     /// Bytes codes used for sending custom type data between clients
     /// </summary>
-    public const byte WORKER_BYTE_CODE= 0;
+    public const byte WORKER_BYTE_CODE = 0;
     public const byte PROJECT_BYTE_CODE = 1;
-
 }
 
 /*Delegates*/

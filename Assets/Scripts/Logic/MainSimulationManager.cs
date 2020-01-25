@@ -1,6 +1,5 @@
 ﻿using System;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 /// <summary>
 /// This is core class for all aspects of gameplay that will
@@ -22,6 +21,7 @@ public class MainSimulationManager : MonoBehaviour
 
     public MainGameManager GameManagerComponent { get; private set; }
     public PlayerCompany ControlledCompany { get; private set; }
+    public event Action GameFinished;
 
     /*Private methods*/
 
@@ -55,7 +55,6 @@ public class MainSimulationManager : MonoBehaviour
         testScrum2.BindedProject = testProject2;
 
         ControlledCompany.Balance = 1000000000;
-        ControlledCompany.BalanceChanged += OnControlledCompanyBalanceChanged;
     }
 
     private void OnControlledCompanyBalanceChanged(int newBalance)
@@ -76,14 +75,10 @@ public class MainSimulationManager : MonoBehaviour
     [PunRPC]
     private void FinishGame()
     {
-        //TODO Add implementation of this methed
-        //(sending info of finished game to other players,
-        //updating GUI, etc.)
-
         //Stop time so events in game are no longer updated
         Time.timeScale = 0.0f;
 
-        SceneManager.LoadScene(0);
+        GameFinished?.Invoke();
     }
 
     /*Public methods*/
