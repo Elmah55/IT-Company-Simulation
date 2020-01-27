@@ -61,14 +61,7 @@ public class MainSimulationManager : MonoBehaviour
     {
         if (newBalance >= SimulationSettingsComponent.TargetBalance)
         {
-            if (true == GameManagerComponent.OfflineMode)
-            {
-                FinishGame();
-            }
-            else
-            {
-                PhotonViewComponent.RPC("FinishGame", PhotonTargets.All);
-            }
+            PhotonViewComponent.RPC("FinishGame", PhotonTargets.All);
         }
     }
 

@@ -24,7 +24,9 @@ public class MainGameManager : Photon.PunBehaviour
     /// Offline Mode. It means that this client won't be connected
     /// to server and simulation will be run in local environment.
     /// This will allow to run some of game mechanism like generation
-    /// of projects and workers without actually connecting to server
+    /// of projects and workers without actually connecting to server.
+    /// Value of this variable will be also set in PhotonNetwork.offlineMode
+    /// https://doc.photonengine.com/en-us/pun/current/gameplay/offlinemode
     /// </summary>
     public bool OfflineMode;
 
@@ -34,35 +36,19 @@ public class MainGameManager : Photon.PunBehaviour
     {
         DontDestroyOnLoad(this.gameObject);
         MultiplayerConnectionComponent = GetComponent<MultiplayerConnection>();
+        PhotonNetwork.offlineMode = this.OfflineMode;
     }
 
     /*Public methods*/
 
     public void StartGame()
     {
-        if (false == OfflineMode)
-        {
-            MultiplayerConnectionComponent.JoinOrCreateRoom();
-        }
-        else
-        {
-            SceneManager.LoadScene((int)SceneIndex.Game);
-        }
+        MultiplayerConnectionComponent.JoinOrCreateRoom();
     }
 
     public void FinishGame()
     {
-        if (false == OfflineMode)
-        {
-            MultiplayerConnectionComponent.LeaveRoom();
-        }
-        else
-        {
-            SceneManager.LoadScene((int)SceneIndex.Menu);
-            //There is already another game object existing with this
-            //script when menu scene is loaded
-            Destroy(this.gameObject);
-        }
+        MultiplayerConnectionComponent.LeaveRoom();
     }
 
     public override void OnJoinedRoom()

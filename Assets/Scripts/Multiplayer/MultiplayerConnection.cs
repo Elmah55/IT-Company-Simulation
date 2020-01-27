@@ -23,12 +23,9 @@ public class MultiplayerConnection : Photon.PunBehaviour
     {
         GameManagerComponent = GetComponent<MainGameManager>();
 
-        if (false == GameManagerComponent.OfflineMode)
+        if (false == PhotonNetwork.connected && false == PhotonNetwork.connecting)
         {
-            if (false == PhotonNetwork.connected && false == PhotonNetwork.connecting)
-            {
-                ConnectToServer();
-            }
+            ConnectToServer();
         }
     }
 

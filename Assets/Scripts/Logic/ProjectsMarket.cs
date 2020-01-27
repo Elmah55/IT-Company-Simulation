@@ -44,7 +44,6 @@ public class ProjectsMarket : MonoBehaviour
     /// </summary>
     private int ProjectID;
     private PhotonView PhotonViewComponent;
-    private MainSimulationManager SimulationManagerComponent;
 
     /*Public consts fields*/
 
@@ -64,7 +63,7 @@ public class ProjectsMarket : MonoBehaviour
 
     private int CalculateMaxProjectsOnMarket()
     {
-        int maxProjectsOnMarket = SimulationManagerComponent.GameManagerComponent.OfflineMode ?
+        int maxProjectsOnMarket = PhotonNetwork.offlineMode ?
             (NumberOfProjectsGeneratedInOfflineMode) : (PhotonNetwork.room.PlayerCount * PROJECTS_ON_MARKET_PER_PLAYER);
 
         return maxProjectsOnMarket;
@@ -159,14 +158,13 @@ public class ProjectsMarket : MonoBehaviour
     private void Start()
     {
         PhotonViewComponent = GetComponent<PhotonView>();
-        SimulationManagerComponent = GetComponent<MainSimulationManager>();
         Projects = new List<Project>();
         //Register type for sending projects available on market to other players
         PhotonPeer.RegisterType(typeof(Project), NetworkingData.PROJECT_BYTE_CODE, Project.Serialize, Project.Deserialize);
 
         //Master client will generate all the workers on market
         //then send it to other clients
-        if (true == PhotonNetwork.isMasterClient || true == SimulationManagerComponent.GameManagerComponent.OfflineMode)
+        if (true == PhotonNetwork.isMasterClient)
         {
             MaxProjectsOnMarket = CalculateMaxProjectsOnMarket();
             GenerateProjects();
@@ -185,10 +183,6 @@ public class ProjectsMarket : MonoBehaviour
         if (true == PhotonNetwork.isMasterClient)
         {
             PhotonViewComponent.RPC("RemoveProjectInternal", PhotonTargets.All, projectToRemove.ID);
-        }
-        else if (true == SimulationManagerComponent.GameManagerComponent.OfflineMode)
-        {
-            RemoveProjectInternal(projectToRemove.ID);
         }
     }
 }

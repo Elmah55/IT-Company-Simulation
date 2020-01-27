@@ -34,7 +34,6 @@ public class WorkersMarket : Photon.PunBehaviour
     /// </summary>
     private int WorkerID;
     private PhotonView PhotonViewComponent;
-    private MainSimulationManager SimulationManagerComponent;
 
     /*Public consts fields*/
 
@@ -57,7 +56,7 @@ public class WorkersMarket : Photon.PunBehaviour
 
     private int CalculateMaxWorkersOnMarket()
     {
-        int maxWorkersOnMarket = SimulationManagerComponent.GameManagerComponent.OfflineMode ?
+        int maxWorkersOnMarket = PhotonNetwork.offlineMode ?
             (NumberOfWorkersGeneratedInOfflineMode) : (PhotonNetwork.room.PlayerCount * WORKERS_ON_MARKET_PER_PLAYER);
 
         return maxWorkersOnMarket;
@@ -166,14 +165,13 @@ public class WorkersMarket : Photon.PunBehaviour
     private void Start()
     {
         PhotonViewComponent = GetComponent<PhotonView>();
-        SimulationManagerComponent = GetComponent<MainSimulationManager>();
         Workers = new List<Worker>();
         //Register type for sending workers available on market to other players
         PhotonPeer.RegisterType(typeof(Worker), 0, Worker.Serialize, Worker.Deserialize);
 
         //Master client will generate all the workers on market
         //then send it to other clients
-        if (true == PhotonNetwork.isMasterClient || true == SimulationManagerComponent.GameManagerComponent.OfflineMode)
+        if (true == PhotonNetwork.isMasterClient)
         {
             MaxWorkersOnMarket = CalculateMaxWorkersOnMarket();
             GenerateWorkers();
@@ -215,26 +213,12 @@ public class WorkersMarket : Photon.PunBehaviour
 
     public void RemoveWorker(Worker workerToRemove)
     {
-        if (true == PhotonNetwork.isMasterClient)
-        {
-            PhotonViewComponent.RPC("RemoveWorkerInternal", PhotonTargets.All, workerToRemove.ID);
-        }
-        else if (true == SimulationManagerComponent.GameManagerComponent.OfflineMode)
-        {
-            RemoveWorkerInternal(workerToRemove.ID);
-        }
+        PhotonViewComponent.RPC("RemoveWorkerInternal", PhotonTargets.All, workerToRemove.ID);
     }
 
     public void AddWorker(Worker workerToAdd)
     {
-        if (true == PhotonNetwork.isMasterClient)
-        {
-            PhotonViewComponent.RPC("AddWorkerInternal", PhotonTargets.All, workerToAdd);
-        }
-        else if (true == SimulationManagerComponent.GameManagerComponent.OfflineMode)
-        {
-            AddWorkerInternal(workerToAdd);
-        }
+        PhotonViewComponent.RPC("AddWorkerInternal", PhotonTargets.All, workerToAdd);
     }
 
     public override void OnPhotonPlayerConnected(PhotonPlayer newPlayer)
