@@ -19,6 +19,11 @@ public class MainSimulationManager : MonoBehaviour
 
     /*Public fields*/
 
+    /// <summary>
+    /// MainGameManager component will be fetched from "GameManager" object created
+    /// in menu scene. Its public field will be stored here for other objects that need
+    /// to use it
+    /// </summary>
     public MainGameManager GameManagerComponent { get; private set; }
     public PlayerCompany ControlledCompany { get; private set; }
     public event Action GameFinished;
@@ -54,7 +59,8 @@ public class MainSimulationManager : MonoBehaviour
         ControlledCompany.ScrumProcesses.Add(testScrum2);
         testScrum2.BindedProject = testProject2;
 
-        ControlledCompany.Balance = 1000000000;
+        ControlledCompany.Balance = SimulationSettingsComponent.InitialBalance;
+        ControlledCompany.BalanceChanged += OnControlledCompanyBalanceChanged;
     }
 
     private void OnControlledCompanyBalanceChanged(int newBalance)
@@ -70,7 +76,6 @@ public class MainSimulationManager : MonoBehaviour
     {
         //Stop time so events in game are no longer updated
         Time.timeScale = 0.0f;
-
         GameFinished?.Invoke();
     }
 

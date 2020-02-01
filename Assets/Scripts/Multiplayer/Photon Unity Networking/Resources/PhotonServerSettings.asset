@@ -52,4 +52,5 @@ MonoBehaviour:
   - AddProject
   - RemoveProjectInternal
   - FinishGame
+  - StartGameInternal
   DisableAutoOpenWizard: 1

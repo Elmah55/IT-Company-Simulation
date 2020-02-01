@@ -4180,12 +4180,12 @@ GameObject:
   - component: {fileID: 746701997}
   - component: {fileID: 746701998}
   - component: {fileID: 746701996}
-  - component: {fileID: 746701999}
   - component: {fileID: 746702000}
   - component: {fileID: 746702001}
   - component: {fileID: 746702002}
   - component: {fileID: 746702003}
   - component: {fileID: 746702004}
+  - component: {fileID: 746701999}
   m_Layer: 0
   m_Name: Scripts
   m_TagString: Untagged

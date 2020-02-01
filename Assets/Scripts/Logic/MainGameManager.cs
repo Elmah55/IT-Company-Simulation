@@ -1,4 +1,6 @@
-﻿using UnityEngine.SceneManagement;
+﻿using System;
+using UnityEngine;
+using UnityEngine.SceneManagement;
 
 /// <summary>
 /// This class handles main game aspects like loading scenes and
@@ -8,14 +10,17 @@ public class MainGameManager : Photon.PunBehaviour
 {
     /*Private consts fields*/
 
+    private const string GAME_VERSION = "1.0";
+
     /*Private fields*/
 
-    private MultiplayerConnection MultiplayerConnectionComponent;
+    private PhotonView PhotonViewComponent;
     private bool MenuSceneLoadedAfterGameFinish;
 
     /*Public consts fields*/
 
-    public const string GAME_VERSION = "1.0";
+    public const int MAX_NUMBER_OF_PLAYERS_PER_ROOM = 4;
+    public const int MIN_NUMBER_OF_PLAYERS_PER_ROOM = 2;
 
     /*Public fields*/
 
@@ -35,32 +40,39 @@ public class MainGameManager : Photon.PunBehaviour
     private void Start()
     {
         DontDestroyOnLoad(this.gameObject);
-        MultiplayerConnectionComponent = GetComponent<MultiplayerConnection>();
+        PhotonViewComponent = GetComponent<PhotonView>();
         PhotonNetwork.offlineMode = this.OfflineMode;
+        PhotonNetwork.ConnectUsingSettings(GAME_VERSION);
+    }
+
+    [PunRPC]
+    private void StartGameInternal()
+    {
+        //PhotonView component won't be need anymore since
+        //MainSimulationManager component will be used in game scene
+        GameObject.Destroy(PhotonViewComponent);
+        SceneManager.LoadScene((int)SceneIndex.Game);
     }
 
     /*Public methods*/
 
     public void StartGame()
     {
-        MultiplayerConnectionComponent.JoinOrCreateRoom();
+        if (null == PhotonNetwork.room)
+        {
+            throw new InvalidOperationException(
+                "Game can be started only when client is in room");
+        }
+
+        if (true == PhotonNetwork.isMasterClient)
+        {
+            PhotonViewComponent.RPC("StartGameInternal", PhotonTargets.All);
+        }
     }
 
     public void FinishGame()
     {
-        MultiplayerConnectionComponent.LeaveRoom();
-    }
-
-    public override void OnJoinedRoom()
-    {
-        base.OnJoinedRoom();
-
-        SceneManager.LoadScene((int)SceneIndex.Game);
-    }
-
-    public override void OnLeftRoom()
-    {
-        base.OnLeftRoom();
+        PhotonNetwork.LeaveRoom();
         //TODO: Find way to prevent spawning other GameManager
         //object when menu scene is loaded so destroying of this
         //object is not needed and client won't have connect to

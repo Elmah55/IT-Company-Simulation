@@ -4,7 +4,7 @@
 /// This class hold player defined preferences like nickname
 /// and company name that will be used during game
 /// </summary>
-public class PlayerInfoSettings : MonoBehaviour
+public class PlayerInfo : MonoBehaviour
 {
     /*Private consts fields*/
 
@@ -18,6 +18,8 @@ public class PlayerInfoSettings : MonoBehaviour
 
     /*Public consts fields*/
 
+    public const int COMPANY_NAME_MAX_LENGHT = 40;
+
     /*Public fields*/
 
     public string CompanyName { get; private set; }
@@ -25,9 +27,14 @@ public class PlayerInfoSettings : MonoBehaviour
 
     /*Private methods*/
 
+    private void Start()
+    {
+        Load();
+    }
+
     /*Public methods*/
 
-    public void ApplySettings(string companyName, string nickname)
+    public void Apply(string companyName, string nickname)
     {
         CompanyName = companyName;
         Nickname = nickname;
@@ -35,11 +42,14 @@ public class PlayerInfoSettings : MonoBehaviour
         PlayerPrefs.SetString(COMPANY_NAME_KEY, companyName);
         PlayerPrefs.SetString(NICKNAME_KEY, nickname);
         PlayerPrefs.Save();
+
+        PhotonNetwork.player.NickName = this.Nickname;
     }
 
-    public void LoadSettings()
+    public void Load()
     {
         CompanyName = PlayerPrefs.GetString(COMPANY_NAME_KEY, DEFAULT_KEY_VALUE);
         Nickname = PlayerPrefs.GetString(NICKNAME_KEY, DEFAULT_KEY_VALUE);
+        PhotonNetwork.player.NickName = this.Nickname;
     }
 }

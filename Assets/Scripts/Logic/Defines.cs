@@ -34,6 +34,24 @@ public enum SceneIndex
     Game = 1
 }
 
+/// <summary>
+/// Codes of events used for PhotonNetwork.RaiseEvent
+/// </summary>
+public enum RaiseEventCode : byte
+{
+    RoomLobbyPlayerStateChanged
+}
+
+/// <summary>
+/// Possible states for player in
+/// room lobby
+/// </summary>
+public enum RoomLobbyPlayerState
+{
+    Ready,
+    NotReady
+}
+
 /*Classes*/
 
 /// <summary>

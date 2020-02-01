@@ -2,10 +2,10 @@
 
 public class UISettingsCredentials : MonoBehaviour
 {
-    public PlayerInfoSettings SettingsManager;
+    public PlayerInfo SettingsManager;
 
     private void OnEnable()
     {
-        SettingsManager.LoadSettings();
+        SettingsManager.Load();
     }
 }
