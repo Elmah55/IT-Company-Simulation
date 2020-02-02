@@ -216,7 +216,7 @@ public class UIProjectsCompanyProjects : MonoBehaviour
 
     private void InitializeProjectButtons()
     {
-        StartProjectButton.interactable = (false == SelectedProjectScrum.BindedProject.Active);
+        StartProjectButton.interactable = !SelectedProjectScrum.BindedProject.Active;
         StopProjectButton.interactable = SelectedProjectScrum.BindedProject.Active;
     }
 

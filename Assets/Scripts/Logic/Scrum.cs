@@ -105,13 +105,13 @@ public class Scrum : MonoBehaviour
         Debug.Log("Project finished");
     }
 
-    /*Public methods*/
-
-    public void OnEnable()
+    private void Start()
     {
         GameTimeComponent = GetComponent<GameTime>();
         LastUpdateDaysSinceStart = GameTimeComponent.DaysSinceStart;
     }
+
+    /*Public methods*/
 
     public void StartProject()
     {
@@ -124,10 +124,12 @@ public class Scrum : MonoBehaviour
         BindedProject.Completed += OnProjectFinished;
         BindedProject.TimeOfStart = GameTimeComponent.CurrentTime;
         ProjectUpdateCoroutine = StartCoroutine(UpdateProject());
+        BindedProject.Active = true;
     }
 
     public void StopProject()
     {
         StopCoroutine(ProjectUpdateCoroutine);
+        BindedProject.Active = false;
     }
 }
