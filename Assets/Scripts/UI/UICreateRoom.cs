@@ -35,7 +35,7 @@ public class UICreateRoom : MonoBehaviour
 
     /*Public fields*/
 
-    public SimulationSettings SimulationSettingsComponent;
+    public MainGameManager GameManagerComponent;
     public GameObject RoomLobbyPanel;
     public InputField InputFieldRoomName;
     public InputField InputFieldTargetBalance;
@@ -223,8 +223,8 @@ public class UICreateRoom : MonoBehaviour
 
     public void OnCreateRoomButtonClicked()
     {
-        SimulationSettingsComponent.InitialBalance = (int)SliderInitialBalance.value;
-        SimulationSettingsComponent.TargetBalance = (int)SliderTargetBalance.value;
+        GameManagerComponent.SettingsOfSimulation.InitialBalance = (int)SliderInitialBalance.value;
+        GameManagerComponent.SettingsOfSimulation.TargetBalance = (int)SliderTargetBalance.value;
         RoomOptions options = new RoomOptions() { MaxPlayers = (byte)SliderNumberOfPlayers.value };
 
         PhotonNetwork.CreateRoom(InputFieldRoomName.text, options, PhotonNetwork.lobby);

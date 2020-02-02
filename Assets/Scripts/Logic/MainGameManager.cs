@@ -34,6 +34,13 @@ public class MainGameManager : Photon.PunBehaviour
     /// https://doc.photonengine.com/en-us/pun/current/gameplay/offlinemode
     /// </summary>
     public bool OfflineMode;
+    /// <summary>
+    /// If set to true before game starts user will have to create room and
+    /// define simulation settings. If false game will start without need to create
+    /// room and default room and simulation settings will be set
+    /// </summary>
+    public bool UseRoom;
+    public SimulationSettings SettingsOfSimulation { get; private set; }
 
     /*Private methods*/
 
@@ -41,8 +48,13 @@ public class MainGameManager : Photon.PunBehaviour
     {
         DontDestroyOnLoad(this.gameObject);
         PhotonViewComponent = GetComponent<PhotonView>();
+        SettingsOfSimulation = new SimulationSettings();
         PhotonNetwork.offlineMode = this.OfflineMode;
-        PhotonNetwork.ConnectUsingSettings(GAME_VERSION);
+
+        if (false == PhotonNetwork.offlineMode)
+        {
+            PhotonNetwork.ConnectUsingSettings(GAME_VERSION);
+        }
     }
 
     [PunRPC]
@@ -58,6 +70,13 @@ public class MainGameManager : Photon.PunBehaviour
 
     public void StartGame()
     {
+        if (false == UseRoom)
+        {
+            //Create room with default settings and join need
+            RoomOptions options = new RoomOptions() { MaxPlayers = MAX_NUMBER_OF_PLAYERS_PER_ROOM };
+            PhotonNetwork.JoinOrCreateRoom("Default", options, PhotonNetwork.lobby);
+        }
+
         if (null == PhotonNetwork.room)
         {
             throw new InvalidOperationException(

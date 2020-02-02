@@ -3,7 +3,7 @@
 /// <summary>
 /// This class defines settings of rules of simulation
 /// </summary>
-public class SimulationSettings : MonoBehaviour
+public class SimulationSettings
 {
     /*Private consts fields*/
 
@@ -31,4 +31,17 @@ public class SimulationSettings : MonoBehaviour
     /*Private methods*/
 
     /*Public methods*/
+
+    public SimulationSettings()
+    {
+        //Set default values
+        TargetBalance = 100000;
+        InitialBalance = 80000;
+    }
+
+    public SimulationSettings(int initialBalance,int targetBalance)
+    {
+        this.InitialBalance = initialBalance;
+        this.TargetBalance = targetBalance;
+    }
 }

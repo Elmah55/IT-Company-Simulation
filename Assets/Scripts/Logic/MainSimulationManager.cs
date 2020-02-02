@@ -12,7 +12,6 @@ public class MainSimulationManager : MonoBehaviour
 
     /*Private fields*/
 
-    private SimulationSettings SimulationSettingsComponent;
     private PhotonView PhotonViewComponent;
 
     /*Public consts fields*/
@@ -59,13 +58,13 @@ public class MainSimulationManager : MonoBehaviour
         ControlledCompany.ScrumProcesses.Add(testScrum2);
         testScrum2.BindedProject = testProject2;
 
-        ControlledCompany.Balance = SimulationSettingsComponent.InitialBalance;
+        ControlledCompany.Balance = GameManagerComponent.SettingsOfSimulation.InitialBalance;
         ControlledCompany.BalanceChanged += OnControlledCompanyBalanceChanged;
     }
 
     private void OnControlledCompanyBalanceChanged(int newBalance)
     {
-        if (newBalance >= SimulationSettingsComponent.TargetBalance)
+        if (newBalance >= GameManagerComponent.SettingsOfSimulation.TargetBalance)
         {
             PhotonViewComponent.RPC("FinishGame", PhotonTargets.All);
         }
@@ -87,7 +86,6 @@ public class MainSimulationManager : MonoBehaviour
         //menu scene
         GameObject gameManagerObject = GameObject.Find("GameManager");
 
-        SimulationSettingsComponent = gameManagerObject.GetComponent<SimulationSettings>();
         GameManagerComponent = gameManagerObject.GetComponent<MainGameManager>();
         PhotonViewComponent = GetComponent<PhotonView>();
 
