@@ -14,6 +14,8 @@ public class UIRoomLobby : Photon.PunBehaviour
     /*Private fields*/
 
     private Dictionary<PhotonPlayer, GameObject> PlayerButtonMap;
+    [SerializeField]
+    private Button ButtonStartGame;
 
     /*Public consts fields*/
 
@@ -52,6 +54,11 @@ public class UIRoomLobby : Photon.PunBehaviour
         {
             buttonText += " (You) ";
         }
+        else if (true == player.IsMasterClient)
+
+        {
+            buttonText += " (Room master) ";
+        }
 
         textComponent.text = buttonText;
 
@@ -76,7 +83,6 @@ public class UIRoomLobby : Photon.PunBehaviour
     private void Start()
     {
         PlayerButtonMap = new Dictionary<PhotonPlayer, GameObject>();
-        AddRoomPlayersButtons();
     }
 
     /*Public methods*/
@@ -100,5 +106,13 @@ public class UIRoomLobby : Photon.PunBehaviour
         GameObject playerButton = PlayerButtonMap[otherPlayer];
         PlayerButtonMap.Remove(otherPlayer);
         RoomPlayersButtonsListView.RemoveControl(playerButton);
+    }
+
+    public override void OnJoinedRoom()
+    {
+        base.OnJoinedRoom();
+
+        AddRoomPlayersButtons();
+        ButtonStartGame.interactable = PhotonNetwork.isMasterClient;
     }
 }

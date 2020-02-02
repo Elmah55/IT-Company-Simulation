@@ -24,6 +24,8 @@ public class UIMainLobby : Photon.PunBehaviour
     /// longer selected
     /// </summary>
     private ColorBlock SelectedRoomButtonColors;
+    [SerializeField]
+    private GameObject PanelRoomLobby;
 
     /*Public consts fields*/
 
@@ -76,7 +78,7 @@ public class UIMainLobby : Photon.PunBehaviour
             Text textComponent = buttonComponent.GetComponentInChildren<Text>();
 
             string roomStatusText = lobbyRoomInfo.IsOpen ? "In lobby" : "In progress";
-            string buttonText = string.Format("{0} {1}/{2} {3}",
+            string buttonText = string.Format("{0} {1}/{2} ({3})",
                                             lobbyRoomInfo.Name,
                                             lobbyRoomInfo.PlayerCount,
                                             lobbyRoomInfo.MaxPlayers,
@@ -85,12 +87,18 @@ public class UIMainLobby : Photon.PunBehaviour
 
             ButtonRoomInfoMap.Add(lobbyRoomButton, lobbyRoomInfo);
             LobbyRoomsButtonListView.AddControl(lobbyRoomButton);
+
+            if (false == lobbyRoomInfo.IsOpen)
+            {
+                buttonComponent.interactable = false;
+            }
         }
     }
 
     private void Start()
     {
         ButtonRoomInfoMap = new Dictionary<GameObject, RoomInfo>();
+        RefreshRoomList();
     }
 
     /*Public methods*/
@@ -98,7 +106,11 @@ public class UIMainLobby : Photon.PunBehaviour
     public void OnJoinRoomButtonClicked()
     {
         RoomInfo selectedRoomInfo = ButtonRoomInfoMap[SelectedRoomButton];
-        PhotonNetwork.JoinRoom(selectedRoomInfo.Name);
+        if (true == PhotonNetwork.JoinRoom(selectedRoomInfo.Name))
+        {
+            PanelRoomLobby.SetActive(true);
+            this.gameObject.SetActive(false);
+        }
     }
 
     public void RefreshRoomList()
@@ -106,6 +118,6 @@ public class UIMainLobby : Photon.PunBehaviour
         ButtonRoomInfoMap.Clear();
         LobbyRoomsButtonListView.RemoveAllControls();
         AddLobbbyRoomsButtons();
-        JoinRoomButton.interactable = !(0 == PhotonNetwork.GetRoomList().Length);
+        JoinRoomButton.interactable = (0 != PhotonNetwork.GetRoomList().Length);
     }
 }

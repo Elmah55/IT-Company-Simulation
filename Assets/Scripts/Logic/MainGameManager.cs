@@ -101,4 +101,55 @@ public class MainGameManager : Photon.PunBehaviour
         //script when menu scene is loaded
         Destroy(this.gameObject);
     }
+
+    /// <summary>
+    /// Is called when client is connected to photon since auto
+    /// join lobby is set to true
+    /// </summary>
+    public override void OnJoinedLobby()
+    {
+        base.OnJoinedLobby();
+
+        string msg = string.Format("Connected to Photon. Joined lobby: {0}",
+                                   PhotonNetwork.lobby.Name);
+        Debug.Log(msg);
+    }
+
+    public override void OnJoinedRoom()
+    {
+        base.OnJoinedRoom();
+
+        string msg = string.Format("Joined room\n" +
+                                   "Name: {0}\n" +
+                                   "Number of players: {1}\n" +
+                                   "Max number of players : {2}",
+                                   PhotonNetwork.room.Name,
+                                   PhotonNetwork.room.PlayerCount,
+                                   PhotonNetwork.room.MaxPlayers);
+        Debug.Log(msg);
+    }
+
+    public override void OnDisconnectedFromPhoton()
+    {
+        base.OnDisconnectedFromPhoton();
+
+        string msg = "Disconnected from Photon";
+        Debug.Log(msg);
+    }
+
+    public override void OnConnectionFail(DisconnectCause cause)
+    {
+        base.OnConnectionFail(cause);
+
+        string msg = string.Format("Connection failed. Reason: {0}", cause);
+        Debug.Log(msg);
+    }
+
+    public override void OnPhotonJoinRoomFailed(object[] codeAndMsg)
+    {
+        base.OnPhotonJoinRoomFailed(codeAndMsg);
+
+        string msg = "Failed to join the room";
+        Debug.Log(msg);
+    }
 }
