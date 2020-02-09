@@ -35,7 +35,7 @@ public class UIMainLobby : Photon.PunBehaviour
     /// This list view will hold buttons for
     /// joining rooms in multiplayer lobby
     /// </summary>
-    public UIControlListView LobbyRoomsButtonListView;
+    public ControlListView LobbyRoomsButtonListView;
     /// <summary>
     /// Prefab to be used in rooms list view
     /// </summary>

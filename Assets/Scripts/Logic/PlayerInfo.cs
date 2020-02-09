@@ -4,6 +4,7 @@
 /// This class hold player defined preferences like nickname
 /// and company name that will be used during game
 /// </summary>
+// Derive from MonoBehaviour because PlayerPrefs.GetString cannot be used in constructor
 public class PlayerInfo : MonoBehaviour
 {
     /*Private consts fields*/

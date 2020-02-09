@@ -124,3 +124,4 @@ public static class NetworkingData
 public delegate void ProjectAction(Project proj);
 public delegate void LoanAction(BankLoan load);
 public delegate void WorkerAction(Worker companyWorker);
+public delegate void MultiplayerWorkerAction(Worker playerWorker, PhotonPlayer player);

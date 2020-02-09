@@ -2,7 +2,7 @@
 using UnityEngine.UI;
 
 [RequireComponent(typeof(Slider))]
-public class UIProgressBarText : MonoBehaviour
+public class ProgressBarText : MonoBehaviour
 {
     /*Private consts fields*/
 

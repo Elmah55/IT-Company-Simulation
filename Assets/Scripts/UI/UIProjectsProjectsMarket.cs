@@ -21,7 +21,7 @@ public class UIProjectsProjectsMarket : MonoBehaviour
 
     /*Public fields*/
 
-    public UIControlListView MarketProjectsListView;
+    public ControlListView MarketProjectsListView;
     public ProjectsMarket ProjectsMarketComponent;
     public GameObject MarketProjectListViewButtonPrefab;
     public MainSimulationManager MainSimulationManagerComponent;

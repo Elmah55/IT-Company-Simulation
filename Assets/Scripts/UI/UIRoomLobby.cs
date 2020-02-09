@@ -26,7 +26,7 @@ public class UIRoomLobby : Photon.PunBehaviour
     /// Will hold buttons displaying info about players in
     /// current room
     /// </summary>
-    public UIControlListView RoomPlayersButtonsListView;
+    public ControlListView RoomPlayersButtonsListView;
     public MainGameManager GameManagerComponent;
 
     /*Private methods*/

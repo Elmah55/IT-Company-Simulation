@@ -51,7 +51,7 @@ public class UIBank : MonoBehaviour
     public InputField AmountToPayInputField;
     public GameObject LoanListViewButtonPrefab;
     public Button TakeLoanButton;
-    public UIControlListView LoanListView;
+    public ControlListView LoanListView;
 
     /*Private methods*/
 

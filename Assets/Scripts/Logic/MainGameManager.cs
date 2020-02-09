@@ -40,7 +40,15 @@ public class MainGameManager : Photon.PunBehaviour
     /// room and default room and simulation settings will be set
     /// </summary>
     public bool UseRoom;
-    public SimulationSettings SettingsOfSimulation { get; private set; }
+    public SimulationSettings SettingsOfSimulation { get; private set; } = new SimulationSettings();
+
+    /// <summary>
+    /// Below values can be used to set balance when game creation through room is not used
+    /// </summary>
+    [Range(SimulationSettings.MIN_INITIAL_BALANCE, SimulationSettings.MAX_TARGET_BALANCE)]
+    public int InitialCompanyBalance;
+    [Range(SimulationSettings.MIN_TARGET_BALANCE, SimulationSettings.MAX_TARGET_BALANCE)]
+    public int TargetCompanyBalance;
 
     /*Private methods*/
 
@@ -48,7 +56,6 @@ public class MainGameManager : Photon.PunBehaviour
     {
         DontDestroyOnLoad(this.gameObject);
         PhotonViewComponent = GetComponent<PhotonView>();
-        SettingsOfSimulation = new SimulationSettings();
         PhotonNetwork.offlineMode = this.OfflineMode;
 
         if (false == PhotonNetwork.offlineMode)
@@ -72,7 +79,9 @@ public class MainGameManager : Photon.PunBehaviour
     {
         if (false == UseRoom)
         {
-            //Create room with default settings and join need
+            //Create room with default settings and join it
+            SettingsOfSimulation.InitialBalance = this.InitialCompanyBalance;
+            SettingsOfSimulation.TargetBalance = this.TargetCompanyBalance;
             RoomOptions options = new RoomOptions() { MaxPlayers = MAX_NUMBER_OF_PLAYERS_PER_ROOM };
             PhotonNetwork.JoinOrCreateRoom("Default", options, PhotonNetwork.lobby);
         }

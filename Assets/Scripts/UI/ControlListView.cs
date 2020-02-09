@@ -8,7 +8,7 @@ using UnityEngine;
 /// Added controls will be ordered and placed according to
 /// attached layout component
 /// </summary>
-public class UIControlListView : MonoBehaviour
+public class ControlListView : MonoBehaviour
 {
     /*Private consts fields*/
 
@@ -26,7 +26,7 @@ public class UIControlListView : MonoBehaviour
     /// <summary>
     /// List of controls that this list view holds
     /// </summary>
-    public List<GameObject> Controls { get; private set; }
+    public List<GameObject> Controls { get; private set; } = new List<GameObject>();
 
     /*Private methods*/
 
@@ -79,13 +79,5 @@ public class UIControlListView : MonoBehaviour
         }
 
         Controls.Clear();
-    }
-
-    public void OnEnable()
-    {
-        if (null == Controls)
-        {
-            Controls = new List<GameObject>();
-        }
     }
 }

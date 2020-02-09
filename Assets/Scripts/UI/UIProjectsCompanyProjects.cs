@@ -43,8 +43,8 @@ public class UIProjectsCompanyProjects : MonoBehaviour
     public Dropdown ProjectsListDropdown;
     public InputField ProjectInfoDaysSinceStartText;
     public InputField ProjectInfoUsedTechnologies;
-    public UIControlListView AvailableWorkersControlList;
-    public UIControlListView AssignedWorkersControlList;
+    public ControlListView AvailableWorkersControlList;
+    public ControlListView AssignedWorkersControlList;
     public Button AssignWorkerButton;
     public Button UnassignWorkerButton;
     public Button StartProjectButton;
@@ -259,7 +259,7 @@ public class UIProjectsCompanyProjects : MonoBehaviour
     /// <summary>
     /// Moves worker between assigned and unassigned workers list
     /// </summary>
-    private void MoveWorker(UIControlListView listFrom, UIControlListView listTo,
+    private void MoveWorker(ControlListView listFrom, ControlListView listTo,
         ref GameObject selectedButton, ref ColorBlock selectedButtonSavedColors,
         ref Worker selectedWorker, UnityAction newButtonListener, Button moveWorkerButton)
     {

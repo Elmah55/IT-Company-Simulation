@@ -28,8 +28,8 @@ public class UIWorkers : MonoBehaviour
     /*Public fields*/
 
     public GameObject ListViewButtonPrefab;
-    public UIControlListView MarketWorkersListView;
-    public UIControlListView CompanyWorkersListView;
+    public ControlListView MarketWorkersListView;
+    public ControlListView CompanyWorkersListView;
     public MainSimulationManager SimulationManagerComponent;
     public WorkersMarket WorkersMarketComponent;
     public Button HireWorkerButton;
@@ -37,7 +37,7 @@ public class UIWorkers : MonoBehaviour
 
     /*Private methods*/
 
-    private void InitializeWorkersListView(UIControlListView listView, List<Worker> workers)
+    private void InitializeWorkersListView(ControlListView listView, List<Worker> workers)
     {
         foreach (Worker singleWorker in workers)
         {
