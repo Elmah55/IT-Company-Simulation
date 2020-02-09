@@ -41,6 +41,11 @@ public class MainGameManager : Photon.PunBehaviour
     /// </summary>
     public bool UseRoom;
     public SimulationSettings SettingsOfSimulation { get; private set; } = new SimulationSettings();
+    /// <summary>
+    /// Sets the time scale that simulation should be run with. 1.0 is default scale
+    /// </summary>
+    [Range(0.1f, 10.0f)]
+    public float SimulationTimeScale;
 
     /// <summary>
     /// Below values can be used to set balance when game creation through room is not used
@@ -62,6 +67,11 @@ public class MainGameManager : Photon.PunBehaviour
         {
             PhotonNetwork.ConnectUsingSettings(GAME_VERSION);
         }
+    }
+
+    private void Update()
+    {
+        Time.timeScale = SimulationTimeScale;
     }
 
     [PunRPC]
