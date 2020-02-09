@@ -43,6 +43,7 @@ public class Bank : MonoBehaviour
             yield return new WaitForSeconds(LOAN_UPDATE_FREQUENCY);
 
             bool loansPaidOff = true;
+            List<BankLoan> paidLoans = new List<BankLoan>();
 
             foreach (BankLoan loan in Loans)
             {
@@ -51,6 +52,15 @@ public class Bank : MonoBehaviour
                     loansPaidOff = false;
                     PaySinglePayment(loan);
                 }
+                else
+                {
+                    paidLoans.Add(loan);
+                }
+            }
+
+            foreach (BankLoan loan in paidLoans)
+            {
+                Loans.Remove(loan);
             }
 
             //All loans paid off
@@ -64,23 +74,21 @@ public class Bank : MonoBehaviour
 
     private void PaySinglePayment(BankLoan loan)
     {
-        ++loan.PaymentsPaid;
-        loan.AmountPaid += loan.SinglePayment;
-
-
         int companyPayment;
 
-        //This might happen because single payment is calculated with ceil function
-        if (loan.AmountPaid > loan.Amount)
+        //This might happen because single payment is floor of calculated value
+        //so last payment may be bigger than the others
+        if (loan.PaymentsPaid == loan.PaymentsCount - 1 && loan.AmountPaid < loan.Amount)
         {
-            loan.AmountPaid = Mathf.Clamp(loan.AmountPaid, 0, loan.Amount);
-            companyPayment = loan.AmountPaid - loan.Amount;
+            companyPayment = loan.Amount - loan.AmountPaid;
         }
         else
         {
             companyPayment = loan.SinglePayment;
         }
 
+        ++loan.PaymentsPaid;
+        loan.AmountPaid += companyPayment;
         SimulationManagerComponent.ControlledCompany.Balance -= companyPayment;
     }
 

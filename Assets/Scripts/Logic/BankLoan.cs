@@ -77,7 +77,7 @@ public class BankLoan
         this.Amount = amount;
         this.PaymentsCount = paymentsCount;
 
-        int singlePayment = (int)Mathf.Ceil(amount / paymentsCount);
+        int singlePayment = amount / paymentsCount;
         this.SinglePayment = singlePayment;
     }
 }
