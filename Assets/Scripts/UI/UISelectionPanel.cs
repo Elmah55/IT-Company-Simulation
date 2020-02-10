@@ -14,7 +14,7 @@ public class UISelectionPanel : MonoBehaviour
     /// Stores button that selects active panel 
     /// </summary>
     [SerializeField]
-    private readonly Button[] PanelSelectionButtons;
+    private Button[] PanelSelectionButtons;
     private ButtonSelector PanelSelectionButtonsSelector = new ButtonSelector();
 
     /*Public consts fields*/
