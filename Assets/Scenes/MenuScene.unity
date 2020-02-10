@@ -5088,6 +5088,21 @@ PrefabInstance:
       propertyPath: UseRoom
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 8872036503107201713, guid: a55daa6e907c9524db0bf2a8a219ae5e,
+        type: 3}
+      propertyPath: InitialCompanyBalance
+      value: 101181
+      objectReference: {fileID: 0}
+    - target: {fileID: 8872036503107201713, guid: a55daa6e907c9524db0bf2a8a219ae5e,
+        type: 3}
+      propertyPath: TargetCompanyBalance
+      value: 200000
+      objectReference: {fileID: 0}
+    - target: {fileID: 8872036503107201713, guid: a55daa6e907c9524db0bf2a8a219ae5e,
+        type: 3}
+      propertyPath: SimulationTimeScale
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents:
     - {fileID: 7594345501163065846, guid: a55daa6e907c9524db0bf2a8a219ae5e, type: 3}
   m_SourcePrefab: {fileID: 100100000, guid: a55daa6e907c9524db0bf2a8a219ae5e, type: 3}
