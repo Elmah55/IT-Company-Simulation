@@ -77,12 +77,14 @@ public class PlayerCompany : Company
     public void AddWorker(Worker workerToAdd)
     {
         Workers.Add(workerToAdd);
+        workerToAdd.WorkingCompany = this;
         WorkerAdded?.Invoke(workerToAdd);
     }
 
     public void RemoveWorker(Worker workerToRemove)
     {
         Workers.Remove(workerToRemove);
+        workerToRemove.WorkingCompany = null;
         WorkerRemoved?.Invoke(workerToRemove);
     }
 }

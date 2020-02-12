@@ -117,6 +117,7 @@ public class ButtonSelector
         {
             normalColor = Color.gray,
             selectedColor = Color.gray,
+            highlightedColor = Color.gray,
             colorMultiplier = 1.0f
         };
 
