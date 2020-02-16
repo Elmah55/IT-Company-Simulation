@@ -52,6 +52,17 @@ public enum RoomLobbyPlayerState
     NotReady
 }
 
+/// <summary>
+/// Reason of worker not being able to
+/// work
+/// </summary>
+public enum WorkerAbsenceReason
+{
+    Sickness,
+    Holiday
+}
+
+
 /*Classes*/
 
 /// <summary>

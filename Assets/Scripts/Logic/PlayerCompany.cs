@@ -78,6 +78,7 @@ public class PlayerCompany : Company
     {
         Workers.Add(workerToAdd);
         workerToAdd.WorkingCompany = this;
+        workerToAdd.DaysInCompany = 0;
         WorkerAdded?.Invoke(workerToAdd);
     }
 

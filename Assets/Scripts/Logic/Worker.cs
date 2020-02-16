@@ -12,6 +12,10 @@ public class Worker : ISharedObject
 
     /*Public consts fields*/
 
+    /// <summary>
+    /// How many days of holidays per year worker can use in one year
+    /// </summary>
+    public const int DAYS_OF_HOLIDAYS_PER_YEAR = 25;
     public const int BASE_SALARY = 800;
     /// <summary>
     /// The maximum value of one ability that worker
@@ -86,10 +90,39 @@ public class Worker : ISharedObject
     /// For how many days worker is employed in current company
     /// </summary>
     public int DaysInCompany { get; set; }
+    /// <summary>
+    /// Indicates whether worker can contribute in project. If this is set to false
+    /// worker won't be considered when calculating project progress. This can be
+    /// used to simulate events like sickness or holiday leave of worker
+    /// </summary>
+    public bool Available { get; set; }
+    /// <summary>
+    /// How many days have passed since worker was not available
+    /// </summary>
+    public int DaysSinceAbsent { get; set; }
+    /// <summary>
+    /// Defines absence type of worker
+    /// </summary>
+    public WorkerAbsenceReason AbsenceReason { get; set; }
+    /// <summary>
+    /// How many days in game time will pass until worker will be available again
+    /// </summary>
+    public int DaysUntilAvailable { get; set; }
+    /// <summary>
+    /// How many days of holidays worker can yet use. This value should be reset
+    /// every new year in game time
+    /// </summary>
+    public int DaysOfHolidaysLeft { get; set; } = DAYS_OF_HOLIDAYS_PER_YEAR;
+    public event WorkerAction AbsenceStarted;
 
     /*Private methods*/
 
     /*Public methods*/
+
+    public void StartAbsence()
+    {
+        this.AbsenceStarted.Invoke(this);
+    }
 
     public static byte[] Serialize(object workerObject)
     {
