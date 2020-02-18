@@ -37,7 +37,7 @@ public class UIWorkersWorkersMarket : MonoBehaviour
     [SerializeField]
     private InputField InputFieldSalary;
     private Button SelectedWorkerButton;
-    private ButtonSelector WorkersButtonSelector = new ButtonSelector();
+    private IButtonSelector WorkersButtonSelector = new ButtonSelector();
 
     /*Public consts fields*/
 
@@ -53,7 +53,7 @@ public class UIWorkersWorkersMarket : MonoBehaviour
 
             listView.AddControl(newListViewButton.gameObject);
             ButtonWorkerDictionary.Add(newListViewButton, singleWorker);
-            WorkersButtonSelector.Buttons.Add(newListViewButton);
+            WorkersButtonSelector.AddButton(newListViewButton);
         }
     }
 
@@ -150,14 +150,14 @@ public class UIWorkersWorkersMarket : MonoBehaviour
         Button newWorkerButton = CreateWorkerButton(addedWorker);
         ListViewMarketWorkers.AddControl(newWorkerButton.gameObject);
         ButtonWorkerDictionary.Add(newWorkerButton, addedWorker);
-        WorkersButtonSelector.Buttons.Add(newWorkerButton);
+        WorkersButtonSelector.AddButton(newWorkerButton);
     }
 
     private void OnMarketWorkerRemoved(Worker removedWorker)
     {
         Button workerButton = ButtonWorkerDictionary.First(x => x.Value == removedWorker).Key;
         ListViewMarketWorkers.RemoveControl(workerButton.gameObject);
-        WorkersButtonSelector.Buttons.Remove(workerButton);
+        WorkersButtonSelector.RemoveButton(workerButton);
         ButtonWorkerDictionary.Remove(workerButton);
     }
 
@@ -166,14 +166,14 @@ public class UIWorkersWorkersMarket : MonoBehaviour
         Button newWorkerButton = CreateWorkerButton(addedWorker);
         ListViewCompanyWorkers.AddControl(newWorkerButton.gameObject);
         ButtonWorkerDictionary.Add(newWorkerButton, addedWorker);
-        WorkersButtonSelector.Buttons.Add(newWorkerButton);
+        WorkersButtonSelector.AddButton(newWorkerButton);
     }
 
     private void OnCompanyWorkerRemoved(Worker removedWorker)
     {
         Button workerButton = ButtonWorkerDictionary.First(x => x.Value == removedWorker).Key;
         ListViewCompanyWorkers.RemoveControl(workerButton.gameObject);
-        WorkersButtonSelector.Buttons.Remove(workerButton);
+        WorkersButtonSelector.RemoveButton(workerButton);
         ButtonWorkerDictionary.Remove(workerButton);
     }
 

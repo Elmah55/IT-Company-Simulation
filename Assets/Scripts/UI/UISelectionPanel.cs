@@ -15,7 +15,7 @@ public class UISelectionPanel : MonoBehaviour
     /// </summary>
     [SerializeField]
     private Button[] PanelSelectionButtons;
-    private ButtonSelector PanelSelectionButtonsSelector = new ButtonSelector();
+    private IButtonSelector PanelSelectionButtonsSelector = new ButtonSelector();
 
     /*Public consts fields*/
 
@@ -27,7 +27,7 @@ public class UISelectionPanel : MonoBehaviour
     {
         foreach (Button panelSelectionButton in PanelSelectionButtons)
         {
-            PanelSelectionButtonsSelector.Buttons.Add(panelSelectionButton);
+            PanelSelectionButtonsSelector.AddButton(panelSelectionButton);
         }
     }
 
