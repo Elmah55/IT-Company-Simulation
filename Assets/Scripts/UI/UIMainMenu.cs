@@ -43,7 +43,7 @@ public class UIMainMenu : Photon.PunBehaviour
         if (true == GameManagerComponent.UseRoom)
         {
             UIMultiplayer.SetActive(true);
-            this.gameObject.SetActive(false);
+            this.gameObject.transform.parent.gameObject.SetActive(false);
         }
         else
         {

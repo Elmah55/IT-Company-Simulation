@@ -2845,18 +2845,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 893662671}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 159318603}
-        m_MethodName: OnButtonStartGameClicked
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 1
-        m_CallState: 2
+      m_Calls: []
     m_TypeName: UnityEngine.UI.Button+ButtonClickedEvent, UnityEngine.UI, Version=1.0.0.0,
       Culture=neutral, PublicKeyToken=null
 --- !u!114 &893662671
@@ -5081,22 +5070,22 @@ PrefabInstance:
     - target: {fileID: 8872036503107201713, guid: a55daa6e907c9524db0bf2a8a219ae5e,
         type: 3}
       propertyPath: OfflineMode
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 8872036503107201713, guid: a55daa6e907c9524db0bf2a8a219ae5e,
-        type: 3}
-      propertyPath: UseRoom
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8872036503107201713, guid: a55daa6e907c9524db0bf2a8a219ae5e,
         type: 3}
+      propertyPath: UseRoom
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8872036503107201713, guid: a55daa6e907c9524db0bf2a8a219ae5e,
+        type: 3}
       propertyPath: InitialCompanyBalance
-      value: 101181
+      value: 233328
       objectReference: {fileID: 0}
     - target: {fileID: 8872036503107201713, guid: a55daa6e907c9524db0bf2a8a219ae5e,
         type: 3}
       propertyPath: TargetCompanyBalance
-      value: 1490827
+      value: 421084
       objectReference: {fileID: 0}
     - target: {fileID: 8872036503107201713, guid: a55daa6e907c9524db0bf2a8a219ae5e,
         type: 3}
@@ -6661,7 +6650,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ButtonStartGame: {fileID: 1067022284}
-  RoomPlayerButtonPrefab: {fileID: 979871923992476843, guid: ac016834607b90f43a6a320e2e9b1bd3,
+  RoomPlayerButtonPrefab: {fileID: 7165338793607544966, guid: e60d36827c7dd3342b4576167d17df9e,
     type: 3}
   RoomPlayersButtonsListView: {fileID: 1145670070}
   GameManagerComponent: {fileID: 1381847282}

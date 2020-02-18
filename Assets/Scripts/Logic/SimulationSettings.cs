@@ -11,10 +11,10 @@ public class SimulationSettings
 
     /*Public consts fields*/
 
-    public const int MAX_TARGET_BALANCE = 10000000;
+    public const int MAX_TARGET_BALANCE = 1000000;
     public const int MIN_TARGET_BALANCE = 1;
-    public const int MAX_INITIAL_BALANCE = MAX_TARGET_BALANCE - 1;
-    public const int MIN_INITIAL_BALANCE = MIN_TARGET_BALANCE - 1;
+    public const int MAX_INITIAL_BALANCE = MAX_TARGET_BALANCE;
+    public const int MIN_INITIAL_BALANCE = MIN_TARGET_BALANCE;
 
     /*Public fields*/
 

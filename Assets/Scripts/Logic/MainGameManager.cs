@@ -50,7 +50,7 @@ public class MainGameManager : Photon.PunBehaviour
     /// <summary>
     /// Below values can be used to set balance when game creation through room is not used
     /// </summary>
-    [Range(SimulationSettings.MIN_INITIAL_BALANCE, SimulationSettings.MAX_TARGET_BALANCE)]
+    [Range(SimulationSettings.MIN_INITIAL_BALANCE, SimulationSettings.MAX_INITIAL_BALANCE)]
     public int InitialCompanyBalance;
     [Range(SimulationSettings.MIN_TARGET_BALANCE, SimulationSettings.MAX_TARGET_BALANCE)]
     public int TargetCompanyBalance;

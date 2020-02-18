@@ -28,7 +28,11 @@ public class MainSimulationManager : Photon.PunBehaviour
     /// </summary>
     public MainGameManager GameManagerComponent { get; private set; }
     public PlayerCompany ControlledCompany { get; private set; }
-    public event Action GameFinished;
+    /// <summary>
+    /// Invoked when any of player has reached the target balance
+    /// and won game
+    /// </summary>
+    public event Action<int> SimulationFinished;
     /// <summary>
     /// Called when worker is added to company of other player
     /// present in simulation
@@ -42,14 +46,21 @@ public class MainSimulationManager : Photon.PunBehaviour
     /// <summary>
     /// This will map ID of photon player to list of player that his company has.
     /// </summary>
-    public Dictionary<PhotonPlayer, List<Worker>> OtherPlayersWorkers { get; private set; }
+    public Dictionary<PhotonPlayer, List<Worker>> OtherPlayersWorkers { get; private set; } = new Dictionary<PhotonPlayer, List<Worker>>();
+    /// <summary>
+    /// True when any of player has won the game
+    /// </summary>
+    public bool IsSimulationFinished { get; private set; }
+    /// <summary>
+    /// ID of PhotonPlayer object of winner player valid only
+    /// when IsSimulationFinished is true
+    /// </summary>
+    public int WinnerPhotonPlayerID { get; private set; }
 
     /*Private methods*/
 
     private void InitPlayersWorkers()
     {
-        OtherPlayersWorkers = new Dictionary<PhotonPlayer, List<Worker>>();
-
         //Init PlayersWorkers
         foreach (PhotonPlayer player in PhotonNetwork.playerList)
         {
@@ -68,15 +79,15 @@ public class MainSimulationManager : Photon.PunBehaviour
         ControlledCompany = new PlayerCompany("", gameObject);
 
         ControlledCompany.WorkerAdded += OnControlledCompanyWorkerAdded;
-        ControlledCompany.Balance = GameManagerComponent.SettingsOfSimulation.InitialBalance;
         ControlledCompany.BalanceChanged += OnControlledCompanyBalanceChanged;
+        ControlledCompany.Balance = GameManagerComponent.SettingsOfSimulation.InitialBalance;
     }
 
     private void OnControlledCompanyBalanceChanged(int newBalance)
     {
         if (newBalance >= GameManagerComponent.SettingsOfSimulation.TargetBalance)
         {
-            PhotonViewComponent.RPC("FinishGame", PhotonTargets.All);
+            PhotonViewComponent.RPC("FinishGame", PhotonTargets.All, PhotonNetwork.player.ID);
         }
     }
 
@@ -111,11 +122,13 @@ public class MainSimulationManager : Photon.PunBehaviour
     }
 
     [PunRPC]
-    private void FinishGame()
+    private void FinishGame(int winnerPhotonPlayerID)
     {
         //Stop time so events in game are no longer updated
         Time.timeScale = 0.0f;
-        GameFinished?.Invoke();
+        IsSimulationFinished = true;
+        this.WinnerPhotonPlayerID = winnerPhotonPlayerID;
+        SimulationFinished?.Invoke(winnerPhotonPlayerID);
     }
 
     /*Public methods*/
@@ -124,10 +137,10 @@ public class MainSimulationManager : Photon.PunBehaviour
     {
         base.OnPhotonPlayerDisconnected(otherPlayer);
 
-        //Only one player is left in room so he wins the game
+        //Only one player is left in room (local player) so he wins the game
         if (1 == PhotonNetwork.room.PlayerCount)
         {
-            FinishGame();
+            FinishGame(PhotonNetwork.player.ID);
         }
         else
         {
