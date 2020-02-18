@@ -132,6 +132,11 @@ PrefabInstance:
       propertyPath: m_Colors.m_SelectedColor.b
       value: 0.9607843
       objectReference: {fileID: 0}
+    - target: {fileID: 7165338793607544960, guid: e60d36827c7dd3342b4576167d17df9e,
+        type: 3}
+      propertyPath: m_PreferredHeight
+      value: 20
+      objectReference: {fileID: 0}
     - target: {fileID: 7165338793547908531, guid: e60d36827c7dd3342b4576167d17df9e,
         type: 3}
       propertyPath: m_FontData.m_FontSize

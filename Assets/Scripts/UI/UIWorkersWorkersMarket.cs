@@ -15,23 +15,23 @@ public class UIWorkersWorkersMarket : MonoBehaviour
     /// </summary>
     private Dictionary<Button, Worker> ButtonWorkerDictionary = new Dictionary<Button, Worker>();
     [SerializeField]
-    public Button ListViewButtonPrefab;
+    private Button ListViewButtonPrefab;
     [SerializeField]
-    public ControlListView MarketWorkersListView;
+    private ControlListView ListViewMarketWorkers;
     [SerializeField]
-    public ControlListView CompanyWorkersListView;
+    private ControlListView ListViewCompanyWorkers;
     [SerializeField]
-    public MainSimulationManager SimulationManagerComponent;
+    private ControlListView ListViewWorkerAbilities;
     [SerializeField]
-    public WorkersMarket WorkersMarketComponent;
+    private MainSimulationManager SimulationManagerComponent;
     [SerializeField]
-    public Button HireWorkerButton;
+    private WorkersMarket WorkersMarketComponent;
     [SerializeField]
-    public Button FireWorkerButton;
+    private Button ButtonHireWorker;
+    [SerializeField]
+    private Button ButtonFireWorker;
     [SerializeField]
     private InputField InputFieldNameAndSurename;
-    [SerializeField]
-    private Dropdown DropdownAbilities;
     [SerializeField]
     private InputField InputFieldExpierienceTime;
     [SerializeField]
@@ -54,6 +54,17 @@ public class UIWorkersWorkersMarket : MonoBehaviour
             listView.AddControl(newListViewButton.gameObject);
             ButtonWorkerDictionary.Add(newListViewButton, singleWorker);
             WorkersButtonSelector.Buttons.Add(newListViewButton);
+        }
+    }
+
+    private void UpdateWorkerAbilitiesListView(ControlListView listView, Worker workerToDisplay)
+    {
+        listView.RemoveAllControls();
+
+        foreach (KeyValuePair<ProjectTechnology, float> ability in workerToDisplay.Abilites)
+        {
+            Button workerAbilityButton = CreateWorkerAbilityButton(ability);
+            listView.AddControl(workerAbilityButton.gameObject);
         }
     }
 
@@ -84,29 +95,29 @@ public class UIWorkersWorkersMarket : MonoBehaviour
         }
     }
 
+    private Button CreateWorkerAbilityButton(KeyValuePair<ProjectTechnology, float> ability)
+    {
+        Button workerAbilityButton = GameObject.Instantiate<Button>(ListViewButtonPrefab);
+        Text buttonTextComponent = workerAbilityButton.gameObject.GetComponentInChildren<Text>(workerAbilityButton);
+        string buttonText = string.Format("{0} {1}", ability.Key, ability.Value.ToString("0.00"));
+        buttonTextComponent.text = buttonText;
+
+        return workerAbilityButton;
+    }
+
     private void UpdateWorkerInfo(Worker selectedWorker)
     {
         //Name and surename
         InputFieldNameAndSurename.text = string.Format("{0} {1}", selectedWorker.Name, selectedWorker.Surename);
-
-        //Abitilies
-        DropdownAbilities.ClearOptions();
-        List<string> dropdownOptions = new List<string>();
-
-        foreach (KeyValuePair<ProjectTechnology, float> technology in selectedWorker.Abilites)
-        {
-            string abilityName = EnumToString.ProjectTechnologiesStrings[technology.Key];
-            string dropdownOption = string.Format("{0} {1}", abilityName, technology.Value.ToString("0.00"));
-            dropdownOptions.Add(dropdownOption);
-        }
-
-        DropdownAbilities.AddOptions(dropdownOptions);
 
         //Expierience time
         InputFieldExpierienceTime.text = string.Format("{0} days", selectedWorker.ExperienceTime);
 
         //Salary
         InputFieldSalary.text = string.Format("{0} $", selectedWorker.Salary);
+
+        //Abilites
+        UpdateWorkerAbilitiesListView(ListViewWorkerAbilities, selectedWorker);
     }
 
     /// <summary>
@@ -119,25 +130,25 @@ public class UIWorkersWorkersMarket : MonoBehaviour
         //Does not have company assigned so its market worker
         if (null == selectedWorker.WorkingCompany)
         {
-            FireWorkerButton.interactable = false;
-            HireWorkerButton.interactable = true;
+            ButtonFireWorker.interactable = false;
+            ButtonHireWorker.interactable = true;
         }
         else
         {
-            FireWorkerButton.interactable = true;
-            HireWorkerButton.interactable = false;
+            ButtonFireWorker.interactable = true;
+            ButtonHireWorker.interactable = false;
         }
 
         if (PlayerCompany.MAX_WORKERS_PER_COMPANY == SimulationManagerComponent.ControlledCompany.Workers.Count)
         {
-            HireWorkerButton.interactable = false;
+            ButtonHireWorker.interactable = false;
         }
     }
 
     private void OnMarketWorkerAdded(Worker addedWorker)
     {
         Button newWorkerButton = CreateWorkerButton(addedWorker);
-        MarketWorkersListView.AddControl(newWorkerButton.gameObject);
+        ListViewMarketWorkers.AddControl(newWorkerButton.gameObject);
         ButtonWorkerDictionary.Add(newWorkerButton, addedWorker);
         WorkersButtonSelector.Buttons.Add(newWorkerButton);
     }
@@ -145,7 +156,7 @@ public class UIWorkersWorkersMarket : MonoBehaviour
     private void OnMarketWorkerRemoved(Worker removedWorker)
     {
         Button workerButton = ButtonWorkerDictionary.First(x => x.Value == removedWorker).Key;
-        MarketWorkersListView.RemoveControl(workerButton.gameObject);
+        ListViewMarketWorkers.RemoveControl(workerButton.gameObject);
         WorkersButtonSelector.Buttons.Remove(workerButton);
         ButtonWorkerDictionary.Remove(workerButton);
     }
@@ -153,7 +164,7 @@ public class UIWorkersWorkersMarket : MonoBehaviour
     private void OnCompanyWorkerAdded(Worker addedWorker)
     {
         Button newWorkerButton = CreateWorkerButton(addedWorker);
-        CompanyWorkersListView.AddControl(newWorkerButton.gameObject);
+        ListViewCompanyWorkers.AddControl(newWorkerButton.gameObject);
         ButtonWorkerDictionary.Add(newWorkerButton, addedWorker);
         WorkersButtonSelector.Buttons.Add(newWorkerButton);
     }
@@ -161,15 +172,15 @@ public class UIWorkersWorkersMarket : MonoBehaviour
     private void OnCompanyWorkerRemoved(Worker removedWorker)
     {
         Button workerButton = ButtonWorkerDictionary.First(x => x.Value == removedWorker).Key;
-        CompanyWorkersListView.RemoveControl(workerButton.gameObject);
+        ListViewCompanyWorkers.RemoveControl(workerButton.gameObject);
         WorkersButtonSelector.Buttons.Remove(workerButton);
         ButtonWorkerDictionary.Remove(workerButton);
     }
 
     private void Start()
     {
-        InitializeWorkersListView(MarketWorkersListView, WorkersMarketComponent.Workers);
-        InitializeWorkersListView(CompanyWorkersListView, SimulationManagerComponent.ControlledCompany.Workers);
+        InitializeWorkersListView(ListViewMarketWorkers, WorkersMarketComponent.Workers);
+        InitializeWorkersListView(ListViewCompanyWorkers, SimulationManagerComponent.ControlledCompany.Workers);
         SimulationManagerComponent.ControlledCompany.WorkerAdded += OnCompanyWorkerAdded;
         SimulationManagerComponent.ControlledCompany.WorkerRemoved += OnCompanyWorkerRemoved;
         WorkersMarketComponent.WorkerAdded += OnMarketWorkerAdded;
