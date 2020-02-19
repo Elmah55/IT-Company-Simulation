@@ -96,6 +96,7 @@ public class UIRoomLobby : Photon.PunBehaviour
 
     public void OnButtonStartGameClicked()
     {
+        ButtonStartGame.interactable = false;
         GameManagerComponent.StartGame();
     }
 

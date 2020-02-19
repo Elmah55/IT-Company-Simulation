@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -14,7 +15,6 @@ public class MainGameManager : Photon.PunBehaviour
 
     /*Private fields*/
 
-    private PhotonView PhotonViewComponent;
     private bool MenuSceneLoadedAfterGameFinish;
 
     /*Public consts fields*/
@@ -47,6 +47,7 @@ public class MainGameManager : Photon.PunBehaviour
     [Range(0.1f, 10.0f)]
     public float SimulationTimeScale;
 
+
     /// <summary>
     /// Below values can be used to set balance when game creation through room is not used
     /// </summary>
@@ -60,7 +61,6 @@ public class MainGameManager : Photon.PunBehaviour
     private void Start()
     {
         DontDestroyOnLoad(this.gameObject);
-        PhotonViewComponent = GetComponent<PhotonView>();
         PhotonNetwork.offlineMode = this.OfflineMode;
 
         if (false == PhotonNetwork.offlineMode)
@@ -74,13 +74,27 @@ public class MainGameManager : Photon.PunBehaviour
         Time.timeScale = SimulationTimeScale;
     }
 
+    private IEnumerator StartGameCoroutine()
+    {
+        //Start game for other clients firts so their game scene is loaded
+        //and data from master client can be sent to them
+        //TODO: This is temp fix. Add synchronization mechanism in case when one client
+        //scene loading is slower than other clients and delay time is not enough
+        //(data will be sent when some of scripts are not started and will result in photon
+        //RPC error)
+        float delayTime = (true == PhotonNetwork.isMasterClient && false == PhotonNetwork.offlineMode) ?
+            2.0f : 0.0f;
+        yield return new WaitForSecondsRealtime(delayTime);
+        SceneManager.LoadScene((int)SceneIndex.Game);
+    }
+
     [PunRPC]
     private void StartGameInternal()
     {
         //PhotonView component won't be need anymore since
-        //MainSimulationManager component will be used in game scene
-        GameObject.Destroy(PhotonViewComponent);
-        SceneManager.LoadScene((int)SceneIndex.Game);
+        //MainSimulationManager's PhotonView component will be used in game scene
+        GameObject.Destroy(this.photonView);
+        StartCoroutine(StartGameCoroutine());
     }
 
     /*Public methods*/
@@ -104,7 +118,7 @@ public class MainGameManager : Photon.PunBehaviour
 
         if (true == PhotonNetwork.isMasterClient)
         {
-            PhotonViewComponent.RPC("StartGameInternal", PhotonTargets.All);
+            this.photonView.RPC("StartGameInternal", PhotonTargets.All);
         }
     }
 
