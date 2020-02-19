@@ -6,30 +6,40 @@ public class UIRoomLobby : Photon.PunBehaviour
 {
     /*Private consts fields*/
 
-    private readonly ColorBlock READY_PLAYER_BUTTON_COLORS =
-        new ColorBlock { normalColor = Color.green, selectedColor = Color.green };
-    private readonly ColorBlock NOT_READY_PLAYER_BUTTON_COLORS =
-        new ColorBlock { normalColor = Color.red, selectedColor = Color.red };
+    //private readonly ColorBlock READY_PLAYER_BUTTON_COLORS =
+    //    new ColorBlock { normalColor = Color.green, selectedColor = Color.green };
+    //private readonly ColorBlock NOT_READY_PLAYER_BUTTON_COLORS =
+    //    new ColorBlock { normalColor = Color.red, selectedColor = Color.red };
 
     /*Private fields*/
 
-    private Dictionary<PhotonPlayer, GameObject> PlayerButtonMap;
+    private Dictionary<PhotonPlayer, Button> PlayerButtonMap = new Dictionary<PhotonPlayer, Button>();
     [SerializeField]
     private Button ButtonStartGame;
+    [SerializeField]
+    private Button RoomPlayerListViewButtonPrefab;
+    /// <summary>
+    /// Will hold buttons displaying info about players in
+    /// current room
+    /// </summary>
+    [SerializeField]
+    private ControlListView RoomPlayersButtonsListView;
+    [SerializeField]
+    private MainGameManager GameManagerComponent;
+    [SerializeField]
+    private GameObject PanelMainLobby;
 
     /*Public consts fields*/
 
     /*Public fields*/
 
-    public GameObject RoomPlayerButtonPrefab;
-    /// <summary>
-    /// Will hold buttons displaying info about players in
-    /// current room
-    /// </summary>
-    public ControlListView RoomPlayersButtonsListView;
-    public MainGameManager GameManagerComponent;
-
     /*Private methods*/
+
+    private void OnDisable()
+    {
+        PlayerButtonMap.Clear();
+        RoomPlayersButtonsListView.RemoveAllControls();
+    }
 
     private void AddRoomPlayersButtons()
     {
@@ -41,12 +51,12 @@ public class UIRoomLobby : Photon.PunBehaviour
 
     private void AddRoomPlayerButton(PhotonPlayer player)
     {
-        GameObject newRoomPlayerButton = GameObject.Instantiate(RoomPlayerButtonPrefab);
+        Button newRoomPlayerButton = GameObject.Instantiate<Button>(RoomPlayerListViewButtonPrefab);
         Button buttonComponent = newRoomPlayerButton.GetComponent<Button>();
         Text textComponent = buttonComponent.GetComponentInChildren<Text>();
 
         PlayerButtonMap.Add(player, newRoomPlayerButton);
-        RoomPlayersButtonsListView.AddControl(newRoomPlayerButton);
+        RoomPlayersButtonsListView.AddControl(newRoomPlayerButton.gameObject);
 
         string buttonText = player.NickName;
 
@@ -57,11 +67,13 @@ public class UIRoomLobby : Photon.PunBehaviour
         else if (true == player.IsMasterClient)
 
         {
+            //TODO: Update button when MasterClient is transfered to other client
             buttonText += " (Room master) ";
         }
 
         textComponent.text = buttonText;
 
+        //TODO: Add player ready / not ready state
         //Currently only one player property will be kept so 0 will be used to access it
         //RoomLobbyPlayerState playerState = (RoomLobbyPlayerState)player.CustomProperties[0];
 
@@ -80,16 +92,18 @@ public class UIRoomLobby : Photon.PunBehaviour
         //}
     }
 
-    private void Start()
-    {
-        PlayerButtonMap = new Dictionary<PhotonPlayer, GameObject>();
-    }
-
     /*Public methods*/
 
-    public void OnStartGameButtonClicked()
+    public void OnButtonStartGameClicked()
     {
         GameManagerComponent.StartGame();
+    }
+
+    public void OnButtonLeaveRoomClicked()
+    {
+        PhotonNetwork.LeaveRoom();
+        PanelMainLobby.SetActive(true);
+        this.gameObject.SetActive(false);
     }
 
     public override void OnPhotonPlayerConnected(PhotonPlayer newPlayer)
@@ -97,15 +111,27 @@ public class UIRoomLobby : Photon.PunBehaviour
         base.OnPhotonPlayerConnected(newPlayer);
 
         AddRoomPlayerButton(newPlayer);
+
+        //At least two players are needed to start game and only master client can start game
+        if (1 < PhotonNetwork.playerList.Length && true == PhotonNetwork.isMasterClient)
+        {
+            ButtonStartGame.interactable = true;
+        }
     }
 
     public override void OnPhotonPlayerDisconnected(PhotonPlayer otherPlayer)
     {
         base.OnPhotonPlayerDisconnected(otherPlayer);
 
-        GameObject playerButton = PlayerButtonMap[otherPlayer];
+        Button playerButton = PlayerButtonMap[otherPlayer];
         PlayerButtonMap.Remove(otherPlayer);
-        RoomPlayersButtonsListView.RemoveControl(playerButton);
+        RoomPlayersButtonsListView.RemoveControl(playerButton.gameObject);
+
+        //At least two players are needed to start game and only master client can start game
+        if (1 == PhotonNetwork.playerList.Length && true == PhotonNetwork.isMasterClient)
+        {
+            ButtonStartGame.interactable = false;
+        }
     }
 
     public override void OnJoinedRoom()
@@ -113,6 +139,5 @@ public class UIRoomLobby : Photon.PunBehaviour
         base.OnJoinedRoom();
 
         AddRoomPlayersButtons();
-        ButtonStartGame.interactable = PhotonNetwork.isMasterClient;
     }
 }

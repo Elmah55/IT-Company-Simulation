@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using UnityEditor;
+using UnityEngine;
 using UnityEngine.UI;
 
 public class UIMainMenu : Photon.PunBehaviour
@@ -22,6 +23,18 @@ public class UIMainMenu : Photon.PunBehaviour
 
     /*Private methods*/
 
+    private void OnEnable()
+    {
+        //Other view can be enabled before connetion is made
+        //so to avoid button showing wrong status it should be
+        //set again OnEnable
+        if (true == PhotonNetwork.connected)
+        {
+            TextButtonStartGame.text = "Start";
+            ButtonStartGame.interactable = true;
+        }
+    }
+
     private void Start()
     {
         if (false == PhotonNetwork.offlineMode)
@@ -37,6 +50,15 @@ public class UIMainMenu : Photon.PunBehaviour
     }
 
     /*Public methods*/
+
+    public void OnButtonExitClicked()
+    {
+#if UNITY_EDITOR
+        EditorApplication.isPlaying = false;
+#else
+        Application.Quit();
+#endif
+    }
 
     public void OnButtonStartGameClicked()
     {

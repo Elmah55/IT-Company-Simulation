@@ -1066,7 +1066,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   PanelRoomLobby: {fileID: 1621945848}
   LobbyRoomsButtonListView: {fileID: 207657736}
-  LobbyRoomButtonPrefab: {fileID: 7165338793607544966, guid: e60d36827c7dd3342b4576167d17df9e,
+  LobbyRoomButtonPrefab: {fileID: 7165338793607544961, guid: e60d36827c7dd3342b4576167d17df9e,
     type: 3}
   JoinRoomButton: {fileID: 1454390569}
 --- !u!1 &252565142
@@ -2845,7 +2845,18 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 893662671}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 159318603}
+        m_MethodName: OnButtonStartGameClicked
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 1
+        m_CallState: 2
     m_TypeName: UnityEngine.UI.Button+ButtonClickedEvent, UnityEngine.UI, Version=1.0.0.0,
       Culture=neutral, PublicKeyToken=null
 --- !u!114 &893662671
@@ -3703,7 +3714,7 @@ PrefabInstance:
     - target: {fileID: 6748209082760490779, guid: c63ca5ebc1ff9c7418212e09c1369fd0,
         type: 3}
       propertyPath: m_Interactable
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6748209082760490779, guid: c63ca5ebc1ff9c7418212e09c1369fd0,
         type: 3}
@@ -3723,7 +3734,7 @@ PrefabInstance:
     - target: {fileID: 6748209082760490779, guid: c63ca5ebc1ff9c7418212e09c1369fd0,
         type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
-      value: OnStartGameButtonClicked
+      value: OnButtonStartGameClicked
       objectReference: {fileID: 0}
     - target: {fileID: 6748209082760490779, guid: c63ca5ebc1ff9c7418212e09c1369fd0,
         type: 3}
@@ -4944,7 +4955,18 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1293158565}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 159318603}
+        m_MethodName: OnButtonExitClicked
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
     m_TypeName: UnityEngine.UI.Button+ButtonClickedEvent, UnityEngine.UI, Version=1.0.0.0,
       Culture=neutral, PublicKeyToken=null
 --- !u!114 &1293158565
@@ -6650,10 +6672,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ButtonStartGame: {fileID: 1067022284}
-  RoomPlayerButtonPrefab: {fileID: 7165338793607544966, guid: e60d36827c7dd3342b4576167d17df9e,
+  RoomPlayerListViewButtonPrefab: {fileID: 7165338793607544961, guid: e60d36827c7dd3342b4576167d17df9e,
     type: 3}
   RoomPlayersButtonsListView: {fileID: 1145670070}
   GameManagerComponent: {fileID: 1381847282}
+  PanelMainLobby: {fileID: 249401270}
 --- !u!1 &1630137058
 GameObject:
   m_ObjectHideFlags: 0
@@ -7365,7 +7388,7 @@ PrefabInstance:
     - target: {fileID: 6748209082760490779, guid: c63ca5ebc1ff9c7418212e09c1369fd0,
         type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.size
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6748209082760490779, guid: c63ca5ebc1ff9c7418212e09c1369fd0,
         type: 3}
@@ -7386,16 +7409,16 @@ PrefabInstance:
         type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 1621945852}
     - target: {fileID: 6748209082760490779, guid: c63ca5ebc1ff9c7418212e09c1369fd0,
         type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
-      value: 
+      value: OnButtonLeaveRoomClicked
       objectReference: {fileID: 0}
     - target: {fileID: 6748209082760490779, guid: c63ca5ebc1ff9c7418212e09c1369fd0,
         type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
-      value: 
+      value: UnityEngine.Object, UnityEngine
       objectReference: {fileID: 0}
     - target: {fileID: 6748209082760490779, guid: c63ca5ebc1ff9c7418212e09c1369fd0,
         type: 3}

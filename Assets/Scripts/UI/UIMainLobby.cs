@@ -17,64 +17,35 @@ public class UIMainLobby : Photon.PunBehaviour
     /// <summary>
     /// Maps room info to coresponding button in lobby rooms list view
     /// </summary>
-    private Dictionary<GameObject, RoomInfo> ButtonRoomInfoMap;
-    private GameObject SelectedRoomButton;
-    /// <summary>
-    /// Used to restore colors of button when its no
-    /// longer selected
-    /// </summary>
-    private ColorBlock SelectedRoomButtonColors;
+    private Dictionary<Button, RoomInfo> ButtonRoomInfoMap = new Dictionary<Button, RoomInfo>();
     [SerializeField]
     private GameObject PanelRoomLobby;
+    private IButtonSelector RoomButtonSelector = new ButtonSelector();
+    /// <summary>
+    /// This list view will hold buttons for
+    /// joining rooms in multiplayer lobby
+    /// </summary>
+    [SerializeField]
+    public ControlListView LobbyRoomsButtonListView;
+    /// <summary>
+    /// Prefab to be used in rooms list view
+    /// </summary>
+    [SerializeField]
+    public Button LobbyRoomButtonPrefab;
+    [SerializeField]
+    public Button JoinRoomButton;
 
     /*Public consts fields*/
 
     /*Public fields*/
 
-    /// <summary>
-    /// This list view will hold buttons for
-    /// joining rooms in multiplayer lobby
-    /// </summary>
-    public ControlListView LobbyRoomsButtonListView;
-    /// <summary>
-    /// Prefab to be used in rooms list view
-    /// </summary>
-    public GameObject LobbyRoomButtonPrefab;
-    public Button JoinRoomButton;
-
     /*Private methods*/
-
-    private void OnRoomListViewButtonClicked()
-    {
-        Button buttonComponent;
-
-        if (null != SelectedRoomButton)
-        {
-            //Restore colors to previously selected button
-            buttonComponent = SelectedRoomButton.GetComponent<Button>();
-            buttonComponent.colors = SelectedRoomButtonColors;
-        }
-
-        //We know its project list view button because its clicked event has been just called
-        GameObject selectedButton = EventSystem.current.currentSelectedGameObject;
-        buttonComponent = selectedButton.GetComponent<Button>();
-        SelectedRoomButtonColors = buttonComponent.colors;
-
-        ColorBlock newButtonColor = new ColorBlock();
-        newButtonColor.selectedColor = SELECTED_ROOM_BUTTON_COLOR;
-        newButtonColor.normalColor = SELECTED_ROOM_BUTTON_COLOR;
-
-        buttonComponent.colors = newButtonColor;
-        this.SelectedRoomButton = selectedButton;
-    }
 
     private void AddLobbbyRoomsButtons()
     {
         foreach (RoomInfo lobbyRoomInfo in PhotonNetwork.GetRoomList())
         {
-            GameObject lobbyRoomButton = GameObject.Instantiate(LobbyRoomButtonPrefab);
-            Button buttonComponent = lobbyRoomButton.GetComponent<Button>();
-            buttonComponent.onClick.AddListener(OnRoomListViewButtonClicked);
+            Button buttonComponent = GameObject.Instantiate<Button>(LobbyRoomButtonPrefab);
             Text textComponent = buttonComponent.GetComponentInChildren<Text>();
 
             string roomStatusText = lobbyRoomInfo.IsOpen ? "In lobby" : "In progress";
@@ -85,8 +56,9 @@ public class UIMainLobby : Photon.PunBehaviour
                                             roomStatusText);
             textComponent.text = buttonText;
 
-            ButtonRoomInfoMap.Add(lobbyRoomButton, lobbyRoomInfo);
-            LobbyRoomsButtonListView.AddControl(lobbyRoomButton);
+            ButtonRoomInfoMap.Add(buttonComponent, lobbyRoomInfo);
+            LobbyRoomsButtonListView.AddControl(buttonComponent.gameObject);
+            RoomButtonSelector.AddButton(buttonComponent);
 
             if (false == lobbyRoomInfo.IsOpen)
             {
@@ -95,17 +67,23 @@ public class UIMainLobby : Photon.PunBehaviour
         }
     }
 
-    private void Start()
+    private void OnEnable()
     {
-        ButtonRoomInfoMap = new Dictionary<GameObject, RoomInfo>();
         RefreshRoomList();
     }
 
     /*Public methods*/
 
+    public override void OnJoinedLobby()
+    {
+        base.OnJoinedLobby();
+
+        RefreshRoomList();
+    }
+
     public void OnJoinRoomButtonClicked()
     {
-        RoomInfo selectedRoomInfo = ButtonRoomInfoMap[SelectedRoomButton];
+        RoomInfo selectedRoomInfo = ButtonRoomInfoMap[RoomButtonSelector.GetSelectedButton()];
         if (true == PhotonNetwork.JoinRoom(selectedRoomInfo.Name))
         {
             PanelRoomLobby.SetActive(true);
