@@ -42,6 +42,7 @@ public class ButtonSelector : IButtonSelector
 
     /*Public fields*/
 
+    public event Action<Button> SelectedButtonChanged;
 
     /*Private methods*/
 
@@ -62,6 +63,8 @@ public class ButtonSelector : IButtonSelector
         //Change colors of selcted button
         SavedButtonColors = SelectedButton.colors;
         SelectedButton.colors = SelectedButtonColors;
+
+        SelectedButtonChanged?.Invoke(buttonComponent);
     }
 
     /*Public methods*/

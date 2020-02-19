@@ -1,4 +1,5 @@
-﻿using UnityEngine.UI;
+﻿using System;
+using UnityEngine.UI;
 
 public interface IButtonSelector
 {
@@ -7,4 +8,5 @@ public interface IButtonSelector
     bool RemoveButton(Button buttonComponent);
     void RemoveAllButtons();
     void SetSelectedButtonColor(ColorBlock selectedButtonColors);
+    event Action<Button> SelectedButtonChanged;
 }

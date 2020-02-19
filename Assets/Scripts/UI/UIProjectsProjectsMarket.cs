@@ -10,31 +10,43 @@ public class UIProjectsProjectsMarket : MonoBehaviour
 
     /*Private fields*/
 
+    private IButtonSelector MarketProjectsButtonSelector = new ButtonSelector();
     private Project SelectedProject;
     /// <summary>
     /// Dictionary for mapping each of project list view button to
     /// its coresponding project
     /// </summary>
-    private Dictionary<GameObject, Project> ButtonProjectDicionary;
+    private Dictionary<Button, Project> ButtonProjectDicionary = new Dictionary<Button, Project>();
+    [SerializeField]
+    private ControlListView ListViewProjectsMarket;
+    [SerializeField]
+    private ProjectsMarket ProjectsMarketComponent;
+    [SerializeField]
+    private Button MarketProjectListViewButtonPrefab;
+    [SerializeField]
+    private MainSimulationManager MainSimulationManagerComponent;
+    [SerializeField]
+    private Button ButtonTakeProject;
 
     /*Public consts fields*/
 
     /*Public fields*/
 
-    public ControlListView MarketProjectsListView;
-    public ProjectsMarket ProjectsMarketComponent;
-    public GameObject MarketProjectListViewButtonPrefab;
-    public MainSimulationManager MainSimulationManagerComponent;
-
     /*Private methods*/
 
-    private void OnMarketProjectsListViewButtonClicked()
+    private void InitListViewProjectsMarket()
     {
-        //We know its project list view button because its clicked event has been just called
-        GameObject selectedButton = EventSystem.current.currentSelectedGameObject;
-        SelectedProject = ButtonProjectDicionary[selectedButton];
+        foreach (Project marketProject in ProjectsMarketComponent.Projects)
+        {
+            Button projectsMartketListViewButton = CreateProjectsMarketListViewButton(marketProject);
+        }
+    }
 
+    private void OnMarketProjectsListViewButtonClicked(Button selectedButton)
+    {
+        SelectedProject = ButtonProjectDicionary[selectedButton];
         DisplaySelectedProjectInfo();
+        ButtonTakeProject.interactable = true;
     }
 
     private void DisplaySelectedProjectInfo()
@@ -44,29 +56,39 @@ public class UIProjectsProjectsMarket : MonoBehaviour
 
     private void OnMarketProjectRemoved(Project projectRemoved)
     {
-        GameObject removedProjectButton = 
+        Button removedProjectButton =
             ButtonProjectDicionary.First(x => x.Value == projectRemoved).Key;
         ButtonProjectDicionary.Remove(removedProjectButton);
-        MarketProjectsListView.RemoveControl(removedProjectButton);
+        ListViewProjectsMarket.RemoveControl(removedProjectButton.gameObject);
+        MarketProjectsButtonSelector.RemoveButton(removedProjectButton);
+    }
+
+    private void OnMarketProjectAdded(Project proj)
+    {
+        CreateProjectsMarketListViewButton(proj);
+    }
+
+    private Button CreateProjectsMarketListViewButton(Project marketProject)
+    {
+        Button projectButton = GameObject.Instantiate<Button>(MarketProjectListViewButtonPrefab);
+        Text textComponent = projectButton.GetComponentInChildren<Text>();
+
+        textComponent.text = string.Format("{0} / {1} $", marketProject.Name, marketProject.CompleteBonus);
+
+        ListViewProjectsMarket.AddControl(projectButton.gameObject);
+        ButtonProjectDicionary.Add(projectButton, marketProject);
+        MarketProjectsButtonSelector.AddButton(projectButton);
+
+        return projectButton;
     }
 
     private void Start()
     {
-        ButtonProjectDicionary = new Dictionary<GameObject, Project>();
+        ProjectsMarketComponent.ProjectAdded += OnMarketProjectAdded;
         ProjectsMarketComponent.ProjectRemoved += OnMarketProjectRemoved;
+        MarketProjectsButtonSelector.SelectedButtonChanged += OnMarketProjectsListViewButtonClicked;
 
-        foreach (Project marketProject in ProjectsMarketComponent.Projects)
-        {
-            GameObject newProjectButton = GameObject.Instantiate(MarketProjectListViewButtonPrefab);
-            Button buttonComponent = newProjectButton.GetComponent<Button>();
-            Text textComponent = newProjectButton.GetComponentInChildren<Text>();
-
-            textComponent.text = string.Format("{0} / {1} $", marketProject.Name, marketProject.CompleteBonus);
-            buttonComponent.onClick.AddListener(OnMarketProjectsListViewButtonClicked);
-
-            MarketProjectsListView.AddControl(newProjectButton);
-            ButtonProjectDicionary.Add(newProjectButton, marketProject);
-        }
+        InitListViewProjectsMarket();
     }
 
     /*Public methods*/
@@ -78,6 +100,7 @@ public class UIProjectsProjectsMarket : MonoBehaviour
             ProjectsMarketComponent.RemoveProject(SelectedProject);
             MainSimulationManagerComponent.ControlledCompany.AddProject(SelectedProject);
             SelectedProject = null;
+            ButtonTakeProject.interactable = false;
         }
     }
 }
