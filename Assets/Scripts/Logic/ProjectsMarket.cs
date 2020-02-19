@@ -8,7 +8,7 @@ using UnityEngine;
 /// from market. Each of project can only be progressed by one player.
 /// Projects market is shared across all players
 /// </summary>
-public class ProjectsMarket : MonoBehaviour
+public class ProjectsMarket : Photon.PunBehaviour
 {
     /*Private consts fields*/
 
@@ -32,6 +32,12 @@ public class ProjectsMarket : MonoBehaviour
     /// Base amount of money for completing project
     /// </summary>
     private const int PROJECT_BONUS_BASE = 20000;
+    /// <summary>
+    /// Probability in % of adding new project each day
+    /// (only when number of projects did not reach maximum
+    /// number of projects) - MaxProjectsOnMarket
+    /// </summary>
+    private const int PROJECT_ADD_PROBABILITY_DAILY = 10;
 
     /*Private fields*/
 
@@ -43,23 +49,38 @@ public class ProjectsMarket : MonoBehaviour
     /// Used to assing unique ID for each project
     /// </summary>
     private int ProjectID;
-    private PhotonView PhotonViewComponent;
-
-    /*Public consts fields*/
-
-    /*Public fields*/
-
+    private GameTime GameTimeComponent;
     /// <summary>
     /// How many projects should be generated in market
     /// when simulation is run in offline mode
     /// </summary>
     [Range(1.0f, 1000.0f)]
-    public int NumberOfProjectsGeneratedInOfflineMode;
+    [SerializeField]
+    private int NumberOfProjectsGeneratedInOfflineMode;
+
+    /*Public consts fields*/
+
+    /*Public fields*/
+
     public event ProjectAction ProjectRemoved;
     public event ProjectAction ProjectAdded;
-    public List<Project> Projects;
+    public List<Project> Projects { get; private set; } = new List<Project>();
 
     /*Private methods*/
+
+    private void OnGameTimeDayChanged()
+    {
+        if (Projects.Count < MaxProjectsOnMarket)
+        {
+            int randomNumber = UnityEngine.Random.Range(1, 100);
+
+            if (randomNumber < PROJECT_ADD_PROBABILITY_DAILY)
+            {
+                Project newProject = GenerateSingleProject();
+                this.photonView.RPC("AddProject", PhotonTargets.All, newProject);
+            }
+        }
+    }
 
     private int CalculateMaxProjectsOnMarket()
     {
@@ -102,12 +123,15 @@ public class ProjectsMarket : MonoBehaviour
         return projectCompleteBonus;
     }
 
-    private void GenerateProjects()
+    /// <summary>
+    /// Generates projects on market and sends it to other clients
+    /// </summary>
+    private void GenerateAndSendProjects()
     {
         while (MaxProjectsOnMarket != Projects.Count)
         {
             Project newProject = GenerateSingleProject();
-            Projects.Add(newProject);
+            this.photonView.RPC("AddProject", PhotonTargets.All, newProject);
         }
     }
 
@@ -157,22 +181,18 @@ public class ProjectsMarket : MonoBehaviour
 
     private void Start()
     {
-        PhotonViewComponent = GetComponent<PhotonView>();
-        Projects = new List<Project>();
         //Register type for sending projects available on market to other players
         PhotonPeer.RegisterType(typeof(Project), NetworkingData.PROJECT_BYTE_CODE, Project.Serialize, Project.Deserialize);
+
+        GameTimeComponent = GetComponent<GameTime>();
+        GameTimeComponent.DayChanged += OnGameTimeDayChanged;
 
         //Master client will generate all the workers on market
         //then send it to other clients
         if (true == PhotonNetwork.isMasterClient)
         {
             MaxProjectsOnMarket = CalculateMaxProjectsOnMarket();
-            GenerateProjects();
-
-            foreach (Project singleProject in Projects)
-            {
-                PhotonViewComponent.RPC("AddProject", PhotonTargets.Others, singleProject);
-            }
+            GenerateAndSendProjects();
         }
     }
 
@@ -182,7 +202,14 @@ public class ProjectsMarket : MonoBehaviour
     {
         if (true == PhotonNetwork.isMasterClient)
         {
-            PhotonViewComponent.RPC("RemoveProjectInternal", PhotonTargets.All, projectToRemove.ID);
+            this.photonView.RPC("RemoveProjectInternal", PhotonTargets.All, projectToRemove.ID);
         }
+    }
+
+    public override void OnPhotonPlayerDisconnected(PhotonPlayer otherPlayer)
+    {
+        base.OnPhotonPlayerDisconnected(otherPlayer);
+
+        MaxProjectsOnMarket = CalculateMaxProjectsOnMarket();
     }
 }
