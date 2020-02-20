@@ -8,5 +8,9 @@ public interface IButtonSelector
     bool RemoveButton(Button buttonComponent);
     void RemoveAllButtons();
     void SetSelectedButtonColor(ColorBlock selectedButtonColors);
+    /// <summary>
+    /// Deselects currently selected button
+    /// </summary>
+    void DeselectButton();
     event Action<Button> SelectedButtonChanged;
 }

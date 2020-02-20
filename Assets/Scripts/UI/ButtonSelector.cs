@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Collections.Specialized;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -35,7 +33,31 @@ public class ButtonSelector : IButtonSelector
             }
         }
     }
-    private Button SelectedButton;
+    private Button m_SelectedButton;
+    private Button SelectedButton
+    {
+        get
+        {
+            return m_SelectedButton;
+        }
+
+        set
+        {
+            if (null != SelectedButton)
+            {
+                //Restore colors to previously selected button
+                SelectedButton.colors = SavedButtonColors;
+            }
+
+            m_SelectedButton = value;
+
+            if (null != SelectedButton)
+            {
+                SavedButtonColors = SelectedButton.colors;
+                SelectedButton.colors = SelectedButtonColors;
+            }
+        }
+    }
     private List<Button> Buttons = new List<Button>();
 
     /*Public consts fields*/
@@ -52,19 +74,11 @@ public class ButtonSelector : IButtonSelector
         GameObject selectedButton = EventSystem.current.currentSelectedGameObject;
         Button buttonComponent = selectedButton.GetComponent<Button>();
 
-        if (null != SelectedButton)
+        if (buttonComponent != SelectedButton)
         {
-            //Restore colors of previously selected button
-            SelectedButton.colors = SavedButtonColors;
+            SelectedButton = buttonComponent;
+            SelectedButtonChanged?.Invoke(buttonComponent);
         }
-
-        SelectedButton = buttonComponent;
-
-        //Change colors of selcted button
-        SavedButtonColors = SelectedButton.colors;
-        SelectedButton.colors = SelectedButtonColors;
-
-        SelectedButtonChanged?.Invoke(buttonComponent);
     }
 
     /*Public methods*/
@@ -83,6 +97,13 @@ public class ButtonSelector : IButtonSelector
     public bool RemoveButton(Button buttonComponent)
     {
         buttonComponent.onClick.RemoveListener(OnButtonClicked);
+
+        if (SelectedButton == buttonComponent)
+        {
+            SelectedButton = null;
+            SelectedButtonChanged.Invoke(SelectedButton);
+        }
+
         return Buttons.Remove(buttonComponent);
     }
 
@@ -90,15 +111,18 @@ public class ButtonSelector : IButtonSelector
     {
         foreach (Button buttonComponent in Buttons)
         {
-            buttonComponent.onClick.RemoveListener(OnButtonClicked);
+            RemoveButton(buttonComponent);
         }
-
-        Buttons.Clear();
     }
 
     public void SetSelectedButtonColor(ColorBlock selectedButtonColors)
     {
         this.SelectedButtonColors = selectedButtonColors;
+    }
+
+    public void DeselectButton()
+    {
+        SelectedButton = null;
     }
 
     public ButtonSelector()
