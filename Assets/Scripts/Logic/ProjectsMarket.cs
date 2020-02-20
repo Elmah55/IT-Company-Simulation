@@ -74,7 +74,7 @@ public class ProjectsMarket : Photon.PunBehaviour
         {
             int randomNumber = UnityEngine.Random.Range(1, 100);
 
-            if (randomNumber < PROJECT_ADD_PROBABILITY_DAILY)
+            if (randomNumber <= PROJECT_ADD_PROBABILITY_DAILY)
             {
                 Project newProject = GenerateSingleProject();
                 this.photonView.RPC("AddProject", PhotonTargets.All, newProject);
@@ -138,7 +138,7 @@ public class ProjectsMarket : Photon.PunBehaviour
     private List<ProjectTechnology> GenerateProjectTechnologies()
     {
         List<ProjectTechnology> projectTechnologies = new List<ProjectTechnology>();
-        int numberOfTechnologies = UnityEngine.Random.Range(0, MAX_NUMBER_OF_PROJECT_ABILITIES);
+        int numberOfTechnologies = UnityEngine.Random.Range(1, MAX_NUMBER_OF_PROJECT_ABILITIES);
 
         for (int i = 0; i < numberOfTechnologies; i++)
         {
