@@ -95,7 +95,7 @@ public class Worker : ISharedObject
     /// worker won't be considered when calculating project progress. This can be
     /// used to simulate events like sickness or holiday leave of worker
     /// </summary>
-    public bool Available { get; set; }
+    public bool Available { get; set; } = true;
     /// <summary>
     /// How many days have passed since worker was not available
     /// </summary>
