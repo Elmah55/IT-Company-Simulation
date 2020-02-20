@@ -2145,7 +2145,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 449.9, y: 20.1}
+  m_AnchoredPosition: {x: 440, y: 20.1}
   m_SizeDelta: {x: 400, y: 40}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &420828356
@@ -5700,7 +5700,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 48033cb840be67a4392f198500bc15ac, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  NumberOfWorkersGeneratedInOfflineMode: 1000
+  NumberOfWorkersGeneratedInOfflineMode: 175
 --- !u!114 &746702002
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5725,7 +5725,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bbd0954bdfbefb143abb18a9973e9a06, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  NumberOfProjectsGeneratedInOfflineMode: 419
+  NumberOfProjectsGeneratedInOfflineMode: 132
 --- !u!114 &746702004
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6971,7 +6971,7 @@ MonoBehaviour:
     m_PressedTrigger: Pressed
     m_SelectedTrigger: Selected
     m_DisabledTrigger: Disabled
-  m_Interactable: 1
+  m_Interactable: 0
   m_TargetGraphic: {fileID: 886400402}
   m_OnClick:
     m_PersistentCalls:
@@ -23436,7 +23436,7 @@ MonoBehaviour:
   UnassignWorkerButton: {fileID: 1932628590}
   StartProjectButton: {fileID: 436011221}
   StopProjectButton: {fileID: 1223037608}
-  ListViewButtonPrefab: {fileID: 7165338793607544966, guid: e60d36827c7dd3342b4576167d17df9e,
+  ListViewButtonPrefab: {fileID: 7165338793607544961, guid: e60d36827c7dd3342b4576167d17df9e,
     type: 3}
   ProjectProgressBar: {fileID: 8845141556227169527}
 --- !u!114 &1283439343 stripped
@@ -26738,7 +26738,7 @@ MonoBehaviour:
     m_PressedTrigger: Pressed
     m_SelectedTrigger: Selected
     m_DisabledTrigger: Disabled
-  m_Interactable: 1
+  m_Interactable: 0
   m_TargetGraphic: {fileID: 1497073027}
   m_OnClick:
     m_PersistentCalls:
@@ -29590,8 +29590,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0.23904419}
+  m_SizeDelta: {x: 0, y: 0.47803}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1895891945
 MonoBehaviour:
@@ -30477,8 +30477,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 444.95, y: -20.100006}
-  m_SizeDelta: {x: 390.1, y: 40}
+  m_AnchoredPosition: {x: 440.00003, y: -20.100006}
+  m_SizeDelta: {x: 400, y: 40}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1981008709
 MonoBehaviour:

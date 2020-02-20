@@ -42,11 +42,14 @@ public class UIProjectsProjectsMarket : MonoBehaviour
         }
     }
 
-    private void OnMarketProjectsListViewButtonClicked(Button selectedButton)
+    private void OnMarketProjectsListViewSelectedButtonChanged(Button selectedButton)
     {
-        SelectedProject = ButtonProjectDicionary[selectedButton];
-        DisplaySelectedProjectInfo();
-        ButtonTakeProject.interactable = true;
+        if (null != selectedButton)
+        {
+            SelectedProject = ButtonProjectDicionary[selectedButton];
+            DisplaySelectedProjectInfo();
+            ButtonTakeProject.interactable = true;
+        }
     }
 
     private void DisplaySelectedProjectInfo()
@@ -86,7 +89,7 @@ public class UIProjectsProjectsMarket : MonoBehaviour
     {
         ProjectsMarketComponent.ProjectAdded += OnMarketProjectAdded;
         ProjectsMarketComponent.ProjectRemoved += OnMarketProjectRemoved;
-        MarketProjectsButtonSelector.SelectedButtonChanged += OnMarketProjectsListViewButtonClicked;
+        MarketProjectsButtonSelector.SelectedButtonChanged += OnMarketProjectsListViewSelectedButtonChanged;
 
         InitListViewProjectsMarket();
     }
