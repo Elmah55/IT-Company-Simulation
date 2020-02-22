@@ -105,7 +105,6 @@ public class PlayerCompanyManager : MonoBehaviour
             companyWorker.DaysSinceAbsent = 0;
             companyWorker.DaysUntilAvailable = sicknessDuration;
             companyWorker.Available = false;
-            companyWorker.StartAbsence();
         }
     }
 
@@ -124,9 +123,8 @@ public class PlayerCompanyManager : MonoBehaviour
             companyWorker.AbsenceReason = WorkerAbsenceReason.Holiday;
             companyWorker.DaysSinceAbsent = 0;
             companyWorker.DaysUntilAvailable = holidayDuration;
-            companyWorker.Available = false;
             companyWorker.DaysOfHolidaysLeft -= holidayDuration;
-            companyWorker.StartAbsence();
+            companyWorker.Available = false;
         }
     }
 

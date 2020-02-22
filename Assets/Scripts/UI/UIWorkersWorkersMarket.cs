@@ -1,10 +1,9 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using System.Linq;
 
-public class UIWorkersWorkersMarket : MonoBehaviour
+public class UIWorkersWorkersMarket : UIWorkers
 {
     /*Private consts fields*/
 
@@ -15,13 +14,9 @@ public class UIWorkersWorkersMarket : MonoBehaviour
     /// </summary>
     private Dictionary<Button, Worker> ButtonWorkerDictionary = new Dictionary<Button, Worker>();
     [SerializeField]
-    private Button ListViewButtonPrefab;
-    [SerializeField]
     private ControlListView ListViewMarketWorkers;
     [SerializeField]
     private ControlListView ListViewCompanyWorkers;
-    [SerializeField]
-    private ControlListView ListViewWorkerAbilities;
     [SerializeField]
     private MainSimulationManager SimulationManagerComponent;
     [SerializeField]
@@ -30,13 +25,8 @@ public class UIWorkersWorkersMarket : MonoBehaviour
     private Button ButtonHireWorker;
     [SerializeField]
     private Button ButtonFireWorker;
-    [SerializeField]
-    private InputField InputFieldNameAndSurename;
-    [SerializeField]
-    private InputField InputFieldExpierienceTime;
-    [SerializeField]
-    private InputField InputFieldSalary;
     private IButtonSelector WorkersButtonSelector = new ButtonSelector();
+    private Worker SelectedWorker;
 
     /*Public consts fields*/
 
@@ -53,17 +43,6 @@ public class UIWorkersWorkersMarket : MonoBehaviour
             listView.AddControl(newListViewButton.gameObject);
             ButtonWorkerDictionary.Add(newListViewButton, singleWorker);
             WorkersButtonSelector.AddButton(newListViewButton);
-        }
-    }
-
-    private void UpdateWorkerAbilitiesListView(ControlListView listView, Worker workerToDisplay)
-    {
-        listView.RemoveAllControls();
-
-        foreach (KeyValuePair<ProjectTechnology, float> ability in workerToDisplay.Abilites)
-        {
-            Button workerAbilityButton = CreateWorkerAbilityButton(ability);
-            listView.AddControl(workerAbilityButton.gameObject);
         }
     }
 
@@ -84,6 +63,9 @@ public class UIWorkersWorkersMarket : MonoBehaviour
         if (null != workerButton)
         {
             Worker selectedWorker = ButtonWorkerDictionary[WorkersButtonSelector.GetSelectedButton()];
+
+            InputFieldDaysInCompany.gameObject.SetActive(null != selectedWorker.WorkingCompany);
+
             UpdateActionButtonsState(selectedWorker);
             UpdateWorkerInfo(selectedWorker);
         }
@@ -92,37 +74,6 @@ public class UIWorkersWorkersMarket : MonoBehaviour
             ClearWorkerInfo();
             UpdateActionButtonsState(null);
         }
-    }
-
-    private Button CreateWorkerAbilityButton(KeyValuePair<ProjectTechnology, float> ability)
-    {
-        Button workerAbilityButton = GameObject.Instantiate<Button>(ListViewButtonPrefab);
-        Text buttonTextComponent = workerAbilityButton.gameObject.GetComponentInChildren<Text>(workerAbilityButton);
-        string buttonText = string.Format("{0} {1}", ability.Key, ability.Value.ToString("0.00"));
-        buttonTextComponent.text = buttonText;
-
-        return workerAbilityButton;
-    }
-
-    private void UpdateWorkerInfo(Worker selectedWorker)
-    {
-        //Name and surename
-        InputFieldNameAndSurename.text = string.Format("{0} {1}", selectedWorker.Name, selectedWorker.Surename);
-
-        //Expierience time
-        InputFieldExpierienceTime.text = string.Format("{0} days", selectedWorker.ExperienceTime);
-
-        //Salary
-        InputFieldSalary.text = string.Format("{0} $", selectedWorker.Salary);
-
-        //Abilites
-        UpdateWorkerAbilitiesListView(ListViewWorkerAbilities, selectedWorker);
-    }
-
-    private void ClearWorkerInfo()
-    {
-        InputFieldNameAndSurename.text = InputFieldExpierienceTime.text = InputFieldSalary.text = string.Empty;
-        ListViewWorkerAbilities.RemoveAllControls();
     }
 
     /// <summary>
@@ -202,6 +153,18 @@ public class UIWorkersWorkersMarket : MonoBehaviour
         WorkersMarketComponent.WorkerRemoved += OnMarketWorkerRemoved;
 
         WorkersButtonSelector.SelectedButtonChanged += OnSelectedWorkerButtonChanged;
+    }
+
+    private void SubscribeToWorkerEvents(Worker selectedWorker)
+    {
+        selectedWorker.SalaryChanged += UpdateWorkerInfo;
+        selectedWorker.DaysInCompanyChanged += UpdateWorkerInfo;
+    }
+
+    private void UnsubscribeFromWorkerEvent(Worker deselectedWorker)
+    {
+        deselectedWorker.SalaryChanged -= UpdateWorkerInfo;
+        deselectedWorker.DaysInCompanyChanged -= UpdateWorkerInfo;
     }
 
     /*Public methods*/

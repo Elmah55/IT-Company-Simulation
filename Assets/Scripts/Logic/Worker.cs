@@ -10,6 +10,10 @@ public class Worker : ISharedObject
 
     /*Private fields*/
 
+    private int m_DaysInCompany;
+    private int m_Salary;
+    private bool m_Available = true;
+
     /*Public consts fields*/
 
     /// <summary>
@@ -70,7 +74,22 @@ public class Worker : ISharedObject
     /// This values is days in game time
     /// </summary>
     public int ExperienceTime { get; set; }
-    public int Salary { get; set; }
+    public int Salary
+    {
+        get
+        {
+            return m_Salary;
+        }
+
+        set
+        {
+            if (m_Salary != value)
+            {
+                m_Salary = value;
+                SalaryChanged?.Invoke(this);
+            }
+        }
+    }
     /// <summary>
     /// Salary that needs to be offered to worker to hire him
     /// from other player's company
@@ -89,13 +108,52 @@ public class Worker : ISharedObject
     /// <summary>
     /// For how many days worker is employed in current company
     /// </summary>
-    public int DaysInCompany { get; set; }
+    public int DaysInCompany
+    {
+        get
+        {
+            return m_DaysInCompany;
+        }
+
+        set
+        {
+            if (m_DaysInCompany != value)
+            {
+                m_DaysInCompany = value;
+                DaysInCompanyChanged?.Invoke(this);
+            }
+        }
+    }
     /// <summary>
     /// Indicates whether worker can contribute in project. If this is set to false
     /// worker won't be considered when calculating project progress. This can be
-    /// used to simulate events like sickness or holiday leave of worker
+    /// used to simulate events like sickness or holiday leave of worker. Changing its
+    /// value will invoke AbsenceStarted or AbsenceFinished
     /// </summary>
-    public bool Available { get; set; } = true;
+    public bool Available
+    {
+        get
+        {
+            return m_Available;
+        }
+
+        set
+        {
+            if (m_Available != value)
+            {
+                m_Available = value;
+
+                if (true == m_Available)
+                {
+                    AbsenceStarted?.Invoke(this);
+                }
+                else
+                {
+                    AbsenceFinished?.Invoke(this);
+                }
+            }
+        }
+    }
     /// <summary>
     /// How many days have passed since worker was not available
     /// </summary>
@@ -114,15 +172,13 @@ public class Worker : ISharedObject
     /// </summary>
     public int DaysOfHolidaysLeft { get; set; } = DAYS_OF_HOLIDAYS_PER_YEAR;
     public event WorkerAction AbsenceStarted;
+    public event WorkerAction AbsenceFinished;
+    public event WorkerAction DaysInCompanyChanged;
+    public event WorkerAction SalaryChanged;
 
     /*Private methods*/
 
     /*Public methods*/
-
-    public void StartAbsence()
-    {
-        this.AbsenceStarted.Invoke(this);
-    }
 
     public static byte[] Serialize(object workerObject)
     {

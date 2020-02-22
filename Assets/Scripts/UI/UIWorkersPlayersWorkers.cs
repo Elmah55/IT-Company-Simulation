@@ -1,14 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 /// <summary>
 /// This class handles display of UI with workers of other
 /// players in simulation
 /// </summary>
-public class UIWorkersPlayersWorkers : MonoBehaviour
+public class UIWorkersPlayersWorkers : UIWorkers
 {
     /*Private consts fields*/
 
@@ -19,19 +17,22 @@ public class UIWorkersPlayersWorkers : MonoBehaviour
     [SerializeField]
     private ControlListView ListViewPlayersWorkers;
     [SerializeField]
-    private GameObject ListViewPlayersWorkersButtonPrefab;
+    private Button ButtonHireWorker;
     /// <summary>
     /// Dropdown that holds list of other players in room
     /// </summary>
     [SerializeField]
     private Dropdown DropdownPlayersList;
-    [SerializeField]
-    private InputField InputFieldWorkerAbilities;
     private PhotonPlayer DropdownPlayersListSelectedPlayer;
     /// <summary>
     /// Maps button in players list view to its coresponding worker
     /// </summary>
-    private Dictionary<GameObject, Worker> ListViewPlayersWorkersButtonWorkerMap = new Dictionary<GameObject, Worker>();
+    private Dictionary<Button, Worker> ListViewPlayersWorkersButtonWorkerMap = new Dictionary<Button, Worker>();
+    /// <summary>
+    /// Maps photon player to its index in players dropdown
+    /// </summary>
+    private Dictionary<PhotonPlayer, int> PhotonPlayerDropdownMap = new Dictionary<PhotonPlayer, int>();
+    private IButtonSelector WorkersButtonSelector = new ButtonSelector();
 
     /*Public consts fields*/
 
@@ -45,10 +46,7 @@ public class UIWorkersPlayersWorkers : MonoBehaviour
     /// </summary>
     private void AddPlayerWorkerButton(Worker playerWorker)
     {
-        GameObject playerWorkerButton = GameObject.Instantiate(ListViewPlayersWorkersButtonPrefab);
-
-        Button buttonComponent = playerWorkerButton.GetComponent<Button>();
-        buttonComponent.onClick.AddListener(OnListViewPlayersWorkersButtonClicked);
+        Button playerWorkerButton = GameObject.Instantiate<Button>(ListViewButtonPrefab);
 
         Text buttonTextComponent = playerWorkerButton.GetComponentInChildren<Text>();
         string buttonText = string.Format("{0} {1} / {2} days / {3} $",
@@ -59,7 +57,8 @@ public class UIWorkersPlayersWorkers : MonoBehaviour
         buttonTextComponent.text = buttonText;
 
         ListViewPlayersWorkersButtonWorkerMap.Add(playerWorkerButton, playerWorker);
-        ListViewPlayersWorkers.AddControl(playerWorkerButton);
+        ListViewPlayersWorkers.AddControl(playerWorkerButton.gameObject);
+        WorkersButtonSelector.AddButton(playerWorkerButton);
     }
 
     private void OnDropdownPlayersListValueChanged(int index)
@@ -71,7 +70,7 @@ public class UIWorkersPlayersWorkers : MonoBehaviour
 
     private void OnOtherPlayerWorkerAdded(Worker addedWorker, PhotonPlayer player)
     {
-        if (DropdownPlayersListSelectedPlayer == player)
+        if (DropdownPlayersListSelectedPlayer.ID == player.ID)
         {
             AddPlayerWorkerButton(addedWorker);
         }
@@ -81,22 +80,11 @@ public class UIWorkersPlayersWorkers : MonoBehaviour
     {
         SimulationManagerComponent.OtherPlayerWorkerAdded += OnOtherPlayerWorkerAdded;
         DropdownPlayersList.onValueChanged.AddListener(OnDropdownPlayersListValueChanged);
+        WorkersButtonSelector.SelectedButtonChanged += OnListViewPlayersWorkersButtonClicked;
         InitDropdownPlayersList();
-    }
-
-    private void DisplayWorkerAbilities(Worker playerWorker)
-    {
-        string abilities = string.Empty;
-
-        foreach (KeyValuePair<ProjectTechnology, float> workerAbilityPair in playerWorker.Abilites)
-        {
-            abilities += string.Format("{0} {1}{2}",
-                                       workerAbilityPair.Key.ToString().PadRight(20),
-                                       workerAbilityPair.Value.ToString(),
-                                       Environment.NewLine);
-        }
-
-        InputFieldWorkerAbilities.text = abilities;
+        //Initialize player's workers list at script start
+        DropdownPlayersListSelectedPlayer = PhotonNetwork.playerList[DropdownPlayersList.value];
+        OnDropdownPlayersListValueChanged(DropdownPlayersList.value);
     }
 
     private void AddListViewPlayersWorkersButtons(PhotonPlayer otherPlayer)
@@ -109,12 +97,19 @@ public class UIWorkersPlayersWorkers : MonoBehaviour
         }
     }
 
-    private void OnListViewPlayersWorkersButtonClicked()
+    private void OnListViewPlayersWorkersButtonClicked(Button selectedButton)
     {
-        //We know its worker list button because its clicked event has been just called
-        GameObject selectedButton = EventSystem.current.currentSelectedGameObject;
-        Worker selectedWorker = ListViewPlayersWorkersButtonWorkerMap[selectedButton];
-        DisplayWorkerAbilities(selectedWorker);
+        ButtonHireWorker.interactable = (selectedButton != null);
+
+        if (null != selectedButton)
+        {
+            Worker selectedWorker = ListViewPlayersWorkersButtonWorkerMap[selectedButton];
+            UpdateWorkerInfo(selectedWorker);
+        }
+        else
+        {
+            base.ClearWorkerInfo();
+        }
     }
 
     private void InitDropdownPlayersList()
@@ -125,6 +120,7 @@ public class UIWorkersPlayersWorkers : MonoBehaviour
         {
             foreach (KeyValuePair<PhotonPlayer, List<Worker>> workersListPair in SimulationManagerComponent.OtherPlayersWorkers)
             {
+                //No need to add local player
                 if (PhotonNetwork.player.ID == workersListPair.Key.ID)
                 {
                     continue;
@@ -133,6 +129,8 @@ public class UIWorkersPlayersWorkers : MonoBehaviour
                 string dropdownOptionText = string.Format("({0}) {1}",
                                                           workersListPair.Key.ID,
                                                           workersListPair.Key.NickName);
+
+                PhotonPlayerDropdownMap.Add(workersListPair.Key, dropdownOptions.Count);
                 dropdownOptions.Add(dropdownOptionText);
             }
         }
@@ -140,6 +138,27 @@ public class UIWorkersPlayersWorkers : MonoBehaviour
         DropdownPlayersList.AddOptions(dropdownOptions);
     }
 
+    protected override void UpdateWorkerInfo(Worker selectedWorker)
+    {
+        base.UpdateWorkerInfo(selectedWorker);
+
+        InputFieldSalary.text = string.Format("{0} $", selectedWorker.HireSalary);
+    }
+
     /*Public methods*/
 
+    public override void OnPhotonPlayerDisconnected(PhotonPlayer otherPlayer)
+    {
+        base.OnPhotonPlayerDisconnected(otherPlayer);
+
+        int playerDropdownIndex = PhotonPlayerDropdownMap[otherPlayer];
+        PhotonPlayerDropdownMap.Remove(otherPlayer);
+        DropdownPlayersList.options.RemoveAt(playerDropdownIndex);
+
+        if (DropdownPlayersListSelectedPlayer.ID == otherPlayer.ID)
+        {
+            ListViewPlayersWorkers.RemoveAllControls();
+            WorkersButtonSelector.RemoveAllButtons();
+        }
+    }
 }
