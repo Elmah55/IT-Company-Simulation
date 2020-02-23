@@ -164,6 +164,7 @@ public class Project : ISharedObject
         for (int i = 0; i < technologiesSize; i++)
         {
             ProjectTechnology technology = (ProjectTechnology)projectBytes[offset];
+            technologies.Add(technology);
             offset += sizeof(byte);
         }
 

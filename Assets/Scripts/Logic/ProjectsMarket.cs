@@ -184,13 +184,12 @@ public class ProjectsMarket : Photon.PunBehaviour
         //Register type for sending projects available on market to other players
         PhotonPeer.RegisterType(typeof(Project), NetworkingData.PROJECT_BYTE_CODE, Project.Serialize, Project.Deserialize);
 
-        GameTimeComponent = GetComponent<GameTime>();
-        GameTimeComponent.DayChanged += OnGameTimeDayChanged;
-
         //Master client will generate all the workers on market
         //then send it to other clients
         if (true == PhotonNetwork.isMasterClient)
         {
+            GameTimeComponent = GetComponent<GameTime>();
+            GameTimeComponent.DayChanged += OnGameTimeDayChanged;
             MaxProjectsOnMarket = CalculateMaxProjectsOnMarket();
             GenerateAndSendProjects();
         }
@@ -200,10 +199,7 @@ public class ProjectsMarket : Photon.PunBehaviour
 
     public void RemoveProject(Project projectToRemove)
     {
-        if (true == PhotonNetwork.isMasterClient)
-        {
-            this.photonView.RPC("RemoveProjectInternal", PhotonTargets.All, projectToRemove.ID);
-        }
+        this.photonView.RPC("RemoveProjectInternal", PhotonTargets.All, projectToRemove.ID);
     }
 
     public override void OnPhotonPlayerDisconnected(PhotonPlayer otherPlayer)
