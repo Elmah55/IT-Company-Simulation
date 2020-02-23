@@ -39,7 +39,8 @@ public enum SceneIndex
 /// </summary>
 public enum RaiseEventCode : byte
 {
-    RoomLobbyPlayerStateChanged
+    RoomLobbyPlayerStateChanged,
+    ClientReadyToReceiveData
 }
 
 /// <summary>
