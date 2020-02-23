@@ -151,6 +151,7 @@ public class MainGameManager : Photon.PunBehaviour
         //then start game
         if (true == PhotonNetwork.isMasterClient)
         {
+            PhotonNetwork.room.IsOpen = false;
             //In offline mode game will be started immediately
             PhotonTargets targets = PhotonNetwork.offlineMode ? PhotonTargets.All : PhotonTargets.Others;
             this.photonView.RPC("StartGameInternal", targets);

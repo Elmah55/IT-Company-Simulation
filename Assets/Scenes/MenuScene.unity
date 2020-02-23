@@ -1069,7 +1069,7 @@ MonoBehaviour:
   LobbyRoomsButtonListView: {fileID: 207657736}
   LobbyRoomButtonPrefab: {fileID: 7165338793607544961, guid: e60d36827c7dd3342b4576167d17df9e,
     type: 3}
-  JoinRoomButton: {fileID: 1454390569}
+  ButtonJoinRoom: {fileID: 1454390569}
 --- !u!1 &252565142
 GameObject:
   m_ObjectHideFlags: 0
@@ -5713,7 +5713,7 @@ PrefabInstance:
     - target: {fileID: 6631888369371241496, guid: c63ca5ebc1ff9c7418212e09c1369fd0,
         type: 3}
       propertyPath: m_Name
-      value: ButtonJoin
+      value: ButtonJoinRoom
       objectReference: {fileID: 0}
     - target: {fileID: 7192403403896837910, guid: c63ca5ebc1ff9c7418212e09c1369fd0,
         type: 3}

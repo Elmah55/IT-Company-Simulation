@@ -109,9 +109,9 @@ public class ButtonSelector : IButtonSelector
 
     public void RemoveAllButtons()
     {
-        foreach (Button buttonComponent in Buttons)
+        while (0 != Buttons.Count)
         {
-            RemoveButton(buttonComponent);
+            RemoveButton(Buttons[Buttons.Count - 1]);
         }
     }
 
