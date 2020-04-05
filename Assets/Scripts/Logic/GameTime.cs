@@ -16,7 +16,7 @@ public class GameTime : Photon.PunBehaviour
     /// specified by this value passes next day in game world
     /// occurs. This value is seconds in game time (scaled time)
     /// </summary>
-    private const float TIME_UPDATE_FREQUENCY = 180.0f;
+    private const float TIME_UPDATE_FREQUENCY = 6.0f;
 
     /*Private fields*/
 
@@ -32,6 +32,7 @@ public class GameTime : Photon.PunBehaviour
     /// </summary>
     public int DaysSinceStart { get; private set; }
     public event Action DayChanged;
+    public event Action MonthChanged;
 
     /*Private methods*/
 
@@ -43,9 +44,17 @@ public class GameTime : Photon.PunBehaviour
 
             //Next days occurs when time specified by
             //TIME_UPDATE_FREQUENCY passes
-            CurrentTime = CurrentTime.AddDays(1);
+            DateTime newTime = CurrentTime.AddDays(1);
+
             ++DaysSinceStart;
             DayChanged?.Invoke();
+
+            if (newTime.Month != CurrentTime.Month)
+            {
+                MonthChanged?.Invoke();
+            }
+
+            CurrentTime = newTime;
         }
     }
 

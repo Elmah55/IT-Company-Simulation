@@ -12,9 +12,9 @@ public class SimulationSettings
     /*Public consts fields*/
 
     public const int MAX_TARGET_BALANCE = 1000000;
-    public const int MIN_TARGET_BALANCE = 1;
-    public const int MAX_INITIAL_BALANCE = MAX_TARGET_BALANCE;
-    public const int MIN_INITIAL_BALANCE = MIN_TARGET_BALANCE;
+    public const int MIN_TARGET_BALANCE = 10000;
+    public const int MAX_INITIAL_BALANCE = MAX_TARGET_BALANCE - 1;
+    public const int MIN_INITIAL_BALANCE = MIN_TARGET_BALANCE - 1;
 
     /*Public fields*/
 
@@ -39,7 +39,7 @@ public class SimulationSettings
         InitialBalance = 80000;
     }
 
-    public SimulationSettings(int initialBalance,int targetBalance)
+    public SimulationSettings(int initialBalance, int targetBalance)
     {
         this.InitialBalance = initialBalance;
         this.TargetBalance = targetBalance;

@@ -10,6 +10,9 @@ public class BankLoan
 
     /*Public consts fields*/
 
+    public const int MIN_PAYMENTS_COUNT = 12;
+    public const int MAX_PAYMENTS_COUNT = 60;
+
     /*Public fields*/
 
     /// <summary>

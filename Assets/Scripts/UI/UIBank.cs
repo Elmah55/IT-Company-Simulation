@@ -1,14 +1,11 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 public class UIBank : MonoBehaviour
 {
     /*Private consts fields*/
-
-    private readonly Color SELECTED_LOAN_BUTTON_COLOR = Color.gray;
 
     /*Private fields*/
 
@@ -16,42 +13,47 @@ public class UIBank : MonoBehaviour
     /// Used to store text reference to each of buttons text to update
     /// it when loan state changes
     /// </summary>
-    private Dictionary<BankLoan, Text> LoanButtonsText;
+    private Dictionary<BankLoan, Text> LoanButtonsTextMap = new Dictionary<BankLoan, Text>();
     /// <summary>
     /// Used to store text reference to each of buttons to delete
     /// it from list view when loan is paid off
     /// </summary>
-    private Dictionary<BankLoan, GameObject> LoanButtons;
-    /// <summary>
-    /// Button that is currently selected in list of loans
-    /// </summary>
-    private GameObject LoanSelectedButton;
-    /// <summary>
-    /// Used to restore button's colors to default value
-    /// </summary>
-    private ColorBlock LoanButtonColors;
+    private Dictionary<BankLoan, Button> LoanButtonsMap = new Dictionary<BankLoan, Button>();
+    private IButtonSelector LoansButtonSelector = new ButtonSelector();
     /// <summary>
     /// Loan that is currently selected from loans list
     /// </summary>
     private BankLoan SelectedLoan;
+    [SerializeField]
+    private Bank BankComponent;
+    [SerializeField]
+    private InputField LoanPaymentsCountInputField;
+    [SerializeField]
+    private InputField LoanAmountInputField;
+    [SerializeField]
+    private Text LoanAmountText;
+    [SerializeField]
+    private Text LoanPaymentsText;
+    [SerializeField]
+    private Slider LoanAmountSlider;
+    [SerializeField]
+    private Slider LoanPaymentsCountSlider;
+    [SerializeField]
+    private MainSimulationManager SimulationManagerComponent;
+    [SerializeField]
+    private InputField CompanyBalanceInputField;
+    [SerializeField]
+    private InputField AmountToPayInputField;
+    [SerializeField]
+    private GameObject LoanListViewButtonPrefab;
+    [SerializeField]
+    private Button TakeLoanButton;
+    [SerializeField]
+    private ControlListView LoanListView;
 
     /*Public consts fields*/
 
     /*Public fields*/
-
-    public InputField LoanPaymentsCountInputField;
-    public InputField LoanAmountInputField;
-    public Text LoanAmountText;
-    public Text LoanPaymentsText;
-    public Slider LoanAmountSlider;
-    public Slider LoanPaymentsCountSlider;
-    public Bank BankComponent;
-    public MainSimulationManager SimulationManagerComponent;
-    public InputField CompanyBalanceInputField;
-    public InputField AmountToPayInputField;
-    public GameObject LoanListViewButtonPrefab;
-    public Button TakeLoanButton;
-    public ControlListView LoanListView;
 
     /*Private methods*/
 
@@ -59,12 +61,12 @@ public class UIBank : MonoBehaviour
     {
         GameObject newLoanButton = GameObject.Instantiate(LoanListViewButtonPrefab);
         Button buttonComponent = newLoanButton.GetComponent<Button>();
-        buttonComponent.onClick.AddListener(OnLoanButtonClicked);
         Text buttonText = newLoanButton.GetComponentInChildren<Text>();
         buttonText.text = string.Format("{0} / {1} $", newLoan.AmountPaid, newLoan.Amount);
-        LoanButtons.Add(newLoan, newLoanButton);
-        LoanButtonsText.Add(newLoan, buttonText);
+        LoanButtonsMap.Add(newLoan, buttonComponent);
+        LoanButtonsTextMap.Add(newLoan, buttonText);
         LoanListView.AddControl(newLoanButton);
+        LoansButtonSelector.AddButton(buttonComponent);
 
         newLoan.SinglePaymentPaid += OnLoanSinglePaymentPaid;
         newLoan.PaidOff += OnLoanPaidOff;
@@ -83,7 +85,7 @@ public class UIBank : MonoBehaviour
 
     private void OnLoanSinglePaymentPaid(BankLoan loan)
     {
-        Text loanText = LoanButtonsText[loan];
+        Text loanText = LoanButtonsTextMap[loan];
         loanText.text = string.Format("{0} / {1} $", loan.AmountPaid, loan.Amount);
 
         SetMoneyAmounts();
@@ -96,42 +98,25 @@ public class UIBank : MonoBehaviour
 
     private void OnLoanPaidOff(BankLoan loan)
     {
-        GameObject loanButton = LoanButtons[loan];
-        LoanListView.RemoveControl(loanButton);
-        LoanButtonsText.Remove(loan);
-        LoanButtons.Remove(loan);
+        Button loanButton = LoanButtonsMap[loan];
+        LoanListView.RemoveControl(loanButton.gameObject);
+        LoanButtonsTextMap.Remove(loan);
+        LoanButtonsMap.Remove(loan);
+        LoansButtonSelector.RemoveButton(loanButton);
 
         TakeLoanButton.interactable = true;
     }
 
-    private void OnLoanButtonClicked()
+    private void OnLoanSelectedButtonChanged(Button clickedButton)
     {
-        //We know its worker list button because its clicked event has been just called
-        GameObject selectedButton = EventSystem.current.currentSelectedGameObject;
-
-        if (selectedButton != LoanSelectedButton)
+        if (null != clickedButton)
         {
-            if (null != LoanSelectedButton)
-            {
-                Button previouslySelectedLoanButtonComponent = LoanSelectedButton.GetComponent<Button>();
-                //Restore default values for button that was previously selected
-                previouslySelectedLoanButtonComponent.colors = LoanButtonColors;
-            }
-
-            Button buttonComponent = selectedButton.GetComponent<Button>();
-            ColorBlock buttonColors = buttonComponent.colors;
-            LoanButtonColors = buttonColors;
-            //We remember button as selected long as any other worker button
-            //won't be selected. That's why color will always stay even when
-            //button is not reckognized as selected anymore by unity UI engine
-            buttonColors.normalColor = SELECTED_LOAN_BUTTON_COLOR;
-            buttonColors.selectedColor = SELECTED_LOAN_BUTTON_COLOR;
-            buttonComponent.colors = buttonColors;
-
-            LoanSelectedButton = selectedButton;
-            SelectedLoan = LoanButtons.First(x => x.Value == LoanSelectedButton).Key;
-
+            SelectedLoan = LoanButtonsMap.First(x => x.Value == clickedButton).Key;
             SetLoanInfo();
+        }
+        else
+        {
+            ClearLoanInfo();
         }
     }
 
@@ -142,14 +127,28 @@ public class UIBank : MonoBehaviour
             "{0} / {1}", SelectedLoan.PaymentsPaid, SelectedLoan.PaymentsCount);
     }
 
+    private void ClearLoanInfo()
+    {
+        LoanAmountInputField.text = string.Empty;
+        LoanPaymentsCountInputField.text = string.Empty;
+    }
+
+    private void InitLoanSliders()
+    {
+        LoanAmountSlider.minValue = BankComponent.MinLoanAmount;
+        LoanAmountSlider.maxValue = BankComponent.MaxLoanAmout;
+        LoanPaymentsCountSlider.minValue = BankLoan.MIN_PAYMENTS_COUNT;
+        LoanPaymentsCountSlider.maxValue = BankLoan.MAX_PAYMENTS_COUNT;
+    }
+
     private void Start()
     {
-        LoanButtons = new Dictionary<BankLoan, GameObject>();
-        LoanButtonsText = new Dictionary<BankLoan, Text>();
+        InitLoanSliders();
         SetMoneyAmounts();
         UpdateLoanAmount(LoanAmountSlider.value);
         UpdateLoanPaymentsCount(LoanPaymentsCountSlider.value);
         BankComponent.LoanAdded += OnLoadAdded;
+        LoansButtonSelector.SelectedButtonChanged += OnLoanSelectedButtonChanged;
     }
 
     /*Public methods*/
@@ -176,7 +175,7 @@ public class UIBank : MonoBehaviour
         BankComponent.TakeLoan((int)LoanAmountSlider.value, (int)LoanPaymentsCountSlider.value);
         SetMoneyAmounts();
 
-        if (BankComponent.Loans.Count==Bank.MAX_LOANS_COUNT)
+        if (BankComponent.Loans.Count == Bank.MAX_LOANS_COUNT)
         {
             TakeLoanButton.interactable = false;
         }

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -7,7 +6,6 @@ public class Bank : MonoBehaviour
 {
     /*Private consts fields*/
 
-    private const float LOAN_UPDATE_FREQUENCY = 5.0f;
     /// <summary>
     /// Interest rate of bank 
     /// </summary>
@@ -16,8 +14,8 @@ public class Bank : MonoBehaviour
     /*Private fields*/
 
     private MainSimulationManager SimulationManagerComponent;
-    private Coroutine LoanUpdateCoroutine;
-    private bool UpdateLoanActive;
+    private GameTime GameTimeComponent;
+    private bool AllLoansPaidOff;
 
     /*Public consts fields*/
 
@@ -28,7 +26,13 @@ public class Bank : MonoBehaviour
 
     /*Public fields*/
 
-    public List<BankLoan> Loans { get; private set; }
+    public List<BankLoan> Loans { get; private set; } = new List<BankLoan>();
+    /// <summary>
+    /// Determines maximum amount of one loan. It is based
+    /// on set target balance of simulation
+    /// </summary>
+    public int MaxLoanAmout { get; private set; }
+    public int MinLoanAmount { get; private set; }
     /// <summary>
     /// New loan has been taken by player
     /// </summary>
@@ -36,20 +40,16 @@ public class Bank : MonoBehaviour
 
     /*Private methods*/
 
-    private IEnumerator UpdateLoan()
+    private void UpdateLoan()
     {
-        while (true)
+        if (false == AllLoansPaidOff)
         {
-            yield return new WaitForSeconds(LOAN_UPDATE_FREQUENCY);
-
-            bool loansPaidOff = true;
             List<BankLoan> paidLoans = new List<BankLoan>();
 
             foreach (BankLoan loan in Loans)
             {
                 if (false == loan.IsPaidOff)
                 {
-                    loansPaidOff = false;
                     PaySinglePayment(loan);
                 }
                 else
@@ -58,16 +58,11 @@ public class Bank : MonoBehaviour
                 }
             }
 
+            AllLoansPaidOff = (paidLoans.Count == Loans.Count);
+
             foreach (BankLoan loan in paidLoans)
             {
                 Loans.Remove(loan);
-            }
-
-            //All loans paid off
-            if (true == loansPaidOff)
-            {
-                StopCoroutine(LoanUpdateCoroutine);
-                UpdateLoanActive = false;
             }
         }
     }
@@ -95,7 +90,12 @@ public class Bank : MonoBehaviour
     private void Start()
     {
         SimulationManagerComponent = GetComponent<MainSimulationManager>();
-        Loans = new List<BankLoan>();
+        GameTimeComponent = GetComponent<GameTime>();
+
+        MaxLoanAmout = SimulationManagerComponent.GameManagerComponent.SettingsOfSimulation.TargetBalance / 10;
+        MinLoanAmount = MaxLoanAmout / 10;
+
+        GameTimeComponent.MonthChanged += UpdateLoan;
     }
 
     /*Public methods*/
@@ -107,17 +107,12 @@ public class Bank : MonoBehaviour
         SimulationManagerComponent.ControlledCompany.Balance += amount;
         Loans.Add(newLoan);
         LoanAdded?.Invoke(newLoan);
+        AllLoansPaidOff = false;
 
         if (Loans.Count > MAX_LOANS_COUNT)
         {
             throw new InvalidOperationException(
                 "Number of active loans cannot be greater than " + MAX_LOANS_COUNT);
-        }
-
-        if (false == UpdateLoanActive)
-        {
-            LoanUpdateCoroutine = StartCoroutine(UpdateLoan());
-            UpdateLoanActive = true;
         }
     }
 
