@@ -2,14 +2,13 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
-using UnityEngine.EventSystems;
 using UnityEngine.UI;
+using UnityEngine.EventSystems;
+using System;
 
 public class UIProjectsCompanyProjects : MonoBehaviour
 {
     /*Private consts fields*/
-
-    private readonly Color SELECTED_WORKER_BUTTON_COLOR = Color.gray;
 
     /*Private fields*/
 
@@ -60,14 +59,12 @@ public class UIProjectsCompanyProjects : MonoBehaviour
     /// Creates button that will be added to list view
     /// with workers
     /// </summary>
-    private Button CreateWorkerButton(Worker workerData, UnityAction listener)
+    private Button CreateWorkerButton(Worker workerData)
     {
         Button createdButton = GameObject.Instantiate<Button>(ListViewButtonPrefab);
 
         Text buttonTextComponent = createdButton.GetComponentInChildren<Text>();
         buttonTextComponent.text = string.Format("{0} {1}", workerData.Name, workerData.Surename);
-
-        createdButton.onClick.AddListener(OnAvailableWorkersListButtonClicked);
 
         return createdButton;
     }
@@ -104,10 +101,11 @@ public class UIProjectsCompanyProjects : MonoBehaviour
 
     private void AddAvailableSingleWorkerListVewButton(Worker companyWorker)
     {
-        Button createdButton = CreateWorkerButton(companyWorker, OnAvailableWorkersListButtonClicked);
+        Button createdButton = CreateWorkerButton(companyWorker);
 
         AvailableWorkersControlList.AddControl(createdButton.gameObject);
         ButtonWorkerMap.Add(createdButton, companyWorker);
+        AvailableWorkersButtonSelector.AddButton(createdButton);
     }
 
     private void OnCompanyWorkerAdded(Worker addedWorker)
@@ -125,7 +123,7 @@ public class UIProjectsCompanyProjects : MonoBehaviour
 
         foreach (Worker projectWorker in SelectedProjectScrum.BindedProject.Workers)
         {
-            Button createdButton = CreateWorkerButton(projectWorker, OnAssignedWorkersListButtonClicked);
+            Button createdButton = CreateWorkerButton(projectWorker);
 
             AssignedWorkersControlList.AddControl(createdButton.gameObject);
             ButtonWorkerMap.Add(createdButton, projectWorker);
@@ -157,20 +155,23 @@ public class UIProjectsCompanyProjects : MonoBehaviour
         ProjectsListDropdown.options.Add(projectOption);
     }
 
-    private void OnAvailableWorkersListButtonClicked()
+    private void OnAvailableWorkersListSelectedButtonChanged(Button clickedButton)
     {
-        if (null != SelectedProjectScrum)
+        if (null != SelectedProjectScrum && null != clickedButton)
         {
+            SelectedAvailableWorker = ButtonWorkerMap[clickedButton];
             AssignWorkerButton.interactable = true;
         }
     }
 
-    private void OnAssignedWorkersListButtonClicked()
+    private void OnAssignedWorkersListSelectedButtonChanged(Button clickedButton)
     {
-        if (null != SelectedProjectScrum)
+        if (null != SelectedProjectScrum && null != clickedButton)
         {
+            SelectedAssignedWorker = ButtonWorkerMap[clickedButton];
             UnassignWorkerButton.interactable = true;
         }
+
     }
 
     private void InitializeProjectButtons()
@@ -204,6 +205,8 @@ public class UIProjectsCompanyProjects : MonoBehaviour
         SimulationManagerComponent.ControlledCompany.ProjectAdded += AddSingleProjectToDropdown;
         SimulationManagerComponent.ControlledCompany.WorkerAdded += OnCompanyWorkerAdded;
         SimulationManagerComponent.ControlledCompany.WorkerRemoved += RemoveWorkerListViewButton;
+        AssignedWorkersButtonSelector.SelectedButtonChanged += OnAssignedWorkersListSelectedButtonChanged;
+        AvailableWorkersButtonSelector.SelectedButtonChanged += OnAvailableWorkersListSelectedButtonChanged;
 
         AddAvailableWorkersListViewButtons();
         AddProjectsToDropdown();
@@ -219,19 +222,15 @@ public class UIProjectsCompanyProjects : MonoBehaviour
     /// </summary>
     private void MoveWorker(ControlListView listViewForm, ControlListView listViewTo,
                             IButtonSelector buttonSelectorFrom, IButtonSelector buttonSelectorTo,
-                            ref Worker selectedWorker, UnityAction newButtonListener, Button moveWorkerButton)
+                            Button moveWorkerButton)
     {
         Button selectedButton = buttonSelectorFrom.GetSelectedButton();
         listViewForm.RemoveControl(selectedButton.gameObject, false);
         listViewTo.AddControl(selectedButton.gameObject);
 
-        selectedButton.onClick.RemoveAllListeners();
-        selectedButton.onClick.AddListener(newButtonListener);
-
         buttonSelectorFrom.RemoveButton(selectedButton);
         buttonSelectorTo.AddButton(selectedButton);
 
-        selectedWorker = null;
         moveWorkerButton.interactable = false;
     }
 
@@ -260,10 +259,9 @@ public class UIProjectsCompanyProjects : MonoBehaviour
                    AssignedWorkersControlList,
                    AvailableWorkersButtonSelector,
                    AssignedWorkersButtonSelector,
-                   ref SelectedAvailableWorker,
-                   OnAssignedWorkersListButtonClicked,
                    AssignWorkerButton);
 
+        SelectedAvailableWorker = null;
     }
 
     public void UnassignWorker()
@@ -274,9 +272,9 @@ public class UIProjectsCompanyProjects : MonoBehaviour
                    AvailableWorkersControlList,
                    AssignedWorkersButtonSelector,
                    AvailableWorkersButtonSelector,
-                   ref SelectedAssignedWorker,
-                   OnAvailableWorkersListButtonClicked,
                    UnassignWorkerButton);
+
+        SelectedAssignedWorker = null;
     }
 
     public void OnProjectsListDropdownValueChanged(int index)
