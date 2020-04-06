@@ -77,33 +77,24 @@ public class UIMainMenu : Photon.PunBehaviour
     {
         base.OnJoinedLobby();
 
-        if (false == PhotonNetwork.offlineMode)
-        {
-            TextButtonStartGame.text = "Start";
-            ButtonStartGame.interactable = true;
-        }
+        TextButtonStartGame.text = "Start";
+        ButtonStartGame.interactable = true;
     }
 
     public override void OnDisconnectedFromPhoton()
     {
         base.OnDisconnectedFromPhoton();
 
-        if (false == PhotonNetwork.offlineMode)
-        {
-            TextButtonStartGame.text = "Connecting...";
-            ButtonStartGame.interactable = false;
-        }
+        TextButtonStartGame.text = "Connecting...";
+        ButtonStartGame.interactable = false;
     }
 
     public override void OnConnectionFail(DisconnectCause cause)
     {
         base.OnConnectionFail(cause);
 
-        if (false == PhotonNetwork.offlineMode)
-        {
-            TextButtonStartGame.text = "Connecting...";
-            ButtonStartGame.interactable = false;
-        }
+        TextButtonStartGame.text = "Connecting...";
+        ButtonStartGame.interactable = false;
     }
 
 }

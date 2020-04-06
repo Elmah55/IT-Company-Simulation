@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 
-public class UICreateRoom : MonoBehaviour
+public class UICreateRoom : Photon.PunBehaviour
 {
     /*Private consts fields*/
 
@@ -229,7 +229,21 @@ public class UICreateRoom : MonoBehaviour
 
         PhotonNetwork.CreateRoom(InputFieldRoomName.text, options, PhotonNetwork.lobby);
 
+        ButtonCreateRoom.interactable = false;
+    }
+
+    public override void OnJoinedRoom()
+    {
+        base.OnJoinedRoom();
+
         RoomLobbyPanel.SetActive(true);
         this.gameObject.SetActive(false);
+    }
+
+    public override void OnPhotonJoinRoomFailed(object[] codeAndMsg)
+    {
+        base.OnPhotonJoinRoomFailed(codeAndMsg);
+
+        ButtonCreateRoom.interactable = true;
     }
 }
