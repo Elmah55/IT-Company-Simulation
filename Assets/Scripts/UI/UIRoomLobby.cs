@@ -34,6 +34,15 @@ public class UIRoomLobby : Photon.PunBehaviour
     /*Public fields*/
 
     /*Private methods*/
+    private void OnEnable()
+    {
+        //There's no OnJoinedRoom callback in offline mode
+        if (true == PhotonNetwork.offlineMode)
+        {
+            AddRoomPlayersButtons();
+            ButtonStartGame.interactable = true;
+        }
+    }
 
     private void OnDisable()
     {
