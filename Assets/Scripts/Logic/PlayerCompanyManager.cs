@@ -8,14 +8,6 @@ public class PlayerCompanyManager : MonoBehaviour
 {
     /*Private consts fields*/
 
-    private const int MIN_WORKER_SICKNESS_DURATION = 1;
-    private const int MAX_WORKER_SICKNESS_DURATION = 25;
-    private const int MIN_WORKER_HOLIDAY_DURATION = 1;
-    private const int MAX_WORKER_HOLIDAY_DURATION = Worker.DAYS_OF_HOLIDAYS_PER_YEAR;
-    /// <summary>
-    /// Which day of month monthly expenses will be charged
-    /// </summary>
-    private const int DAY_NUMBER_OF_MONTHY_EXPENSES = 1;
     /// <summary>
     /// How many it will cost monthly to have one worker.
     /// This cost is expenses other than salary (electricty,
@@ -34,12 +26,23 @@ public class PlayerCompanyManager : MonoBehaviour
 
     /*Private methods*/
 
+    /// <summary>
+    /// This expenses will be handled at start of every month
+    /// </summary>
     private void HandleCompanyExpenses()
     {
-        if (DAY_NUMBER_OF_MONTHY_EXPENSES == GameTimeComponent.CurrentTime.Day)
+        HandleWorkerSalaries();
+        HandleWorkerExpenses();
+    }
+
+    /// <summary>
+    /// Holidays limits for each worker in company will be renewed every year
+    /// </summary>
+    private void HandleWorkerHolidayLimits()
+    {
+        foreach (Worker companyWorker in SimulationManagerComponent.ControlledCompany.Workers)
         {
-            HandleWorkerSalaries();
-            HandleWorkerExpenses();
+            companyWorker.DaysOfHolidaysLeft = Worker.DAYS_OF_HOLIDAYS_PER_YEAR;
         }
     }
 
@@ -100,7 +103,7 @@ public class PlayerCompanyManager : MonoBehaviour
         if (randomNumber >= notSickProbability)
         {
             //Worker is sick
-            int sicknessDuration = Random.Range(MIN_WORKER_SICKNESS_DURATION, MAX_WORKER_SICKNESS_DURATION);
+            int sicknessDuration = Random.Range(Worker.MIN_SICKNESS_DURATION, Worker.MAX_SICKNESS_DURATION);
             companyWorker.AbsenceReason = WorkerAbsenceReason.Sickness;
             companyWorker.DaysSinceAbsent = 0;
             companyWorker.DaysUntilAvailable = sicknessDuration;
@@ -118,7 +121,7 @@ public class PlayerCompanyManager : MonoBehaviour
         if (randomNumber >= holidayProbability)
         {
             //Worker is on holidays
-            int holidayDuration = Random.Range(MIN_WORKER_HOLIDAY_DURATION, MAX_WORKER_HOLIDAY_DURATION);
+            int holidayDuration = Random.Range(Worker.MIN_HOLIDAY_DURATION, Worker.MAX_HOLIDAY_DURATION);
             holidayDuration = Mathf.Clamp(holidayDuration, 1, companyWorker.DaysOfHolidaysLeft);
             companyWorker.AbsenceReason = WorkerAbsenceReason.Holiday;
             companyWorker.DaysSinceAbsent = 0;
@@ -145,8 +148,9 @@ public class PlayerCompanyManager : MonoBehaviour
         GameTimeComponent = GetComponent<GameTime>();
         SimulationManagerComponent = GetComponent<MainSimulationManager>();
 
-        GameTimeComponent.DayChanged += HandleCompanyExpenses;
+        GameTimeComponent.MonthChanged += HandleCompanyExpenses;
         GameTimeComponent.DayChanged += UpdateWorkersState;
+        GameTimeComponent.YearChanged += HandleWorkerHolidayLimits;
 
         SimulationManagerComponent.ControlledCompany.ProjectAdded += OnCompanyProjectAdded;
     }

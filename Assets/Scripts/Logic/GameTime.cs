@@ -33,6 +33,7 @@ public class GameTime : Photon.PunBehaviour
     public int DaysSinceStart { get; private set; }
     public event Action DayChanged;
     public event Action MonthChanged;
+    public event Action YearChanged;
 
     /*Private methods*/
 
@@ -52,6 +53,11 @@ public class GameTime : Photon.PunBehaviour
             if (newTime.Month != CurrentTime.Month)
             {
                 MonthChanged?.Invoke();
+            }
+
+            if (newTime.Year != CurrentTime.Year)
+            {
+                YearChanged?.Invoke();
             }
 
             CurrentTime = newTime;

@@ -16,6 +16,10 @@ public class Worker : ISharedObject
 
     /*Public consts fields*/
 
+    public const int MIN_SICKNESS_DURATION = 1;
+    public const int MAX_SICKNESS_DURATION = 25;
+    public const int MIN_HOLIDAY_DURATION = 1;
+    public const int MAX_HOLIDAY_DURATION = DAYS_OF_HOLIDAYS_PER_YEAR;
     /// <summary>
     /// How many days of holidays per year worker can use in one year
     /// </summary>
