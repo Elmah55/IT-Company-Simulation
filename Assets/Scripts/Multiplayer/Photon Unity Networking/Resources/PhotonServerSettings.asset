@@ -55,4 +55,5 @@ MonoBehaviour:
   - StartGameInternal
   - OnControlledCompanyWorkerAddedRPC
   - OnControlledCompanyWorkerRemovedRPC
+  - RemoveControlledCompanyWorkerRPC
   DisableAutoOpenWizard: 1

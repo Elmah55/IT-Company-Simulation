@@ -72,7 +72,7 @@ public class ProjectsMarket : Photon.PunBehaviour
     {
         if (Projects.Count < MaxProjectsOnMarket)
         {
-            int randomNumber = UnityEngine.Random.Range(1, 100);
+            int randomNumber = UnityEngine.Random.Range(1, 101);
 
             if (randomNumber <= PROJECT_ADD_PROBABILITY_DAILY)
             {

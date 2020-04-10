@@ -22,6 +22,12 @@ public class WorkersMarket : Photon.PunBehaviour
     /// per one player in game
     /// </summary>
     private const int WORKERS_ON_MARKET_PER_PLAYER = 3;
+    /// <summary>
+    /// Probability in % of adding new worker each day
+    /// (only when number of workers did not reach maximum
+    /// number of projects) - MaxWorkersOnMarket
+    /// </summary>
+    private const int WORKER_ADD_PROBABILITY_DAILY = 10;
 
     /*Private fields*/
 
@@ -33,7 +39,7 @@ public class WorkersMarket : Photon.PunBehaviour
     /// Used to assing unique ID for each worker
     /// </summary>
     private int WorkerID;
-    private PhotonView PhotonViewComponent;
+    private GameTime GameTimeComponent;
 
     /*Public consts fields*/
 
@@ -48,7 +54,7 @@ public class WorkersMarket : Photon.PunBehaviour
     /// <summary>
     /// Workers available on market
     /// </summary>
-    public List<Worker> Workers { get; private set; }
+    public List<Worker> Workers { get; private set; } = new List<Worker>();
     public event WorkerAction WorkerAdded;
     public event WorkerAction WorkerRemoved;
 
@@ -156,7 +162,7 @@ public class WorkersMarket : Photon.PunBehaviour
 
         foreach (KeyValuePair<ProjectTechnology, float> workerAbility in newWorker.Abilites)
         {
-            workerExpierience += (int)(20 * workerAbility.Value);
+            workerExpierience += (int)(45 * workerAbility.Value);
         }
 
         return workerExpierience;
@@ -164,10 +170,11 @@ public class WorkersMarket : Photon.PunBehaviour
 
     private void Start()
     {
-        PhotonViewComponent = GetComponent<PhotonView>();
-        Workers = new List<Worker>();
         //Register type for sending workers available on market to other players
         PhotonPeer.RegisterType(typeof(Worker), 0, Worker.Serialize, Worker.Deserialize);
+
+        GameTimeComponent = GetComponent<GameTime>();
+        GameTimeComponent.DayChanged += OnGameTimeDayChanged;
 
         //Master client will generate all the workers on market
         //then send it to other clients
@@ -178,7 +185,21 @@ public class WorkersMarket : Photon.PunBehaviour
 
             foreach (Worker singleWorker in Workers)
             {
-                PhotonViewComponent.RPC("AddWorkerInternal", PhotonTargets.Others, singleWorker);
+                this.photonView.RPC("AddWorkerInternal", PhotonTargets.Others, singleWorker);
+            }
+        }
+    }
+
+    private void OnGameTimeDayChanged()
+    {
+        if ( Workers.Count < MaxWorkersOnMarket)
+        {
+            int randomNuber = UnityEngine.Random.Range(0, 101);
+
+            if (randomNuber <= WORKER_ADD_PROBABILITY_DAILY)
+            {
+                Worker newWorker = GenerateSingleWorker();
+                AddWorker(newWorker);
             }
         }
     }
@@ -213,12 +234,12 @@ public class WorkersMarket : Photon.PunBehaviour
 
     public void RemoveWorker(Worker workerToRemove)
     {
-        PhotonViewComponent.RPC("RemoveWorkerInternal", PhotonTargets.All, workerToRemove.ID);
+        this.photonView.RPC("RemoveWorkerInternal", PhotonTargets.All, workerToRemove.ID);
     }
 
     public void AddWorker(Worker workerToAdd)
     {
-        PhotonViewComponent.RPC("AddWorkerInternal", PhotonTargets.All, workerToAdd);
+        this.photonView.RPC("AddWorkerInternal", PhotonTargets.All, workerToAdd);
     }
 
     public override void OnPhotonPlayerConnected(PhotonPlayer newPlayer)
@@ -229,7 +250,7 @@ public class WorkersMarket : Photon.PunBehaviour
         {
             foreach (Worker singleWorker in Workers)
             {
-                PhotonViewComponent.RPC("AddWorkerInternal", newPlayer, singleWorker);
+                this.photonView.RPC("AddWorkerInternal", newPlayer, singleWorker);
             }
         }
     }
@@ -239,12 +260,5 @@ public class WorkersMarket : Photon.PunBehaviour
         base.OnPhotonPlayerDisconnected(otherPlayer);
 
         MaxWorkersOnMarket = CalculateMaxWorkersOnMarket();
-
-        //Remove additional workers from market so workers count
-        //matches new number of players
-        while (Workers.Count > MaxWorkersOnMarket)
-        {
-            Workers.RemoveAt(Workers.Count - 1);
-        }
     }
 }
