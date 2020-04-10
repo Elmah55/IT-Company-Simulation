@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -76,9 +77,21 @@ public class UIWorkersPlayersWorkers : UIWorkers
         }
     }
 
+    private void OnOtherPlayerWorkerRemoved(Worker removedWorker, PhotonPlayer player)
+    {
+        if (DropdownPlayersListSelectedPlayer.ID == player.ID)
+        {
+            Button removedWorkerButton = ListViewPlayersWorkersButtonWorkerMap.First(x => x.Value.ID == removedWorker.ID).Key;
+            ListViewPlayersWorkersButtonWorkerMap.Remove(removedWorkerButton);
+            ListViewPlayersWorkers.RemoveControl(removedWorkerButton.gameObject);
+            WorkersButtonSelector.RemoveButton(removedWorkerButton);
+        }
+    }
+
     private void Start()
     {
         SimulationManagerComponent.OtherPlayerWorkerAdded += OnOtherPlayerWorkerAdded;
+        SimulationManagerComponent.OtherPlayerWorkerRemoved += OnOtherPlayerWorkerRemoved;
         DropdownPlayersList.onValueChanged.AddListener(OnDropdownPlayersListValueChanged);
         WorkersButtonSelector.SelectedButtonChanged += OnListViewPlayersWorkersButtonClicked;
         InitDropdownPlayersList();
@@ -146,6 +159,23 @@ public class UIWorkersPlayersWorkers : UIWorkers
     }
 
     /*Public methods*/
+
+    public void OnButtonHireWorkerClick()
+    {
+        Button selectedWorkerButton = WorkersButtonSelector.GetSelectedButton();
+        Worker selectedWorker = ListViewPlayersWorkersButtonWorkerMap[selectedWorkerButton];
+        List<Worker> otherPlayerWorkers =
+            SimulationManagerComponent.OtherPlayersWorkers[DropdownPlayersListSelectedPlayer];
+
+        selectedWorker.Salary = selectedWorker.HireSalary;
+
+        otherPlayerWorkers.Remove(selectedWorker);
+        WorkersButtonSelector.RemoveButton(selectedWorkerButton);
+        ListViewPlayersWorkers.RemoveControl(selectedWorkerButton.gameObject);
+        SimulationManagerComponent.RemoveOtherPlayerControlledCompanyWorker(DropdownPlayersListSelectedPlayer, selectedWorker.ID);
+        ClearWorkerInfo();
+        SimulationManagerComponent.ControlledCompany.AddWorker(selectedWorker);
+    }
 
     public override void OnPhotonPlayerDisconnected(PhotonPlayer otherPlayer)
     {

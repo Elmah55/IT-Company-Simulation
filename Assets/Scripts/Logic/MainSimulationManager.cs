@@ -14,7 +14,6 @@ public class MainSimulationManager : Photon.PunBehaviour
 
     /*Private fields*/
 
-    private PhotonView PhotonViewComponent;
     private PlayerInfo PlayerInfoComponent;
 
     /*Public consts fields*/
@@ -79,6 +78,7 @@ public class MainSimulationManager : Photon.PunBehaviour
         ControlledCompany = new PlayerCompany("", gameObject);
 
         ControlledCompany.WorkerAdded += OnControlledCompanyWorkerAdded;
+        ControlledCompany.WorkerRemoved += OnControlledCompanyWorkerRemoved;
         ControlledCompany.BalanceChanged += OnControlledCompanyBalanceChanged;
         ControlledCompany.Balance = GameManagerComponent.SettingsOfSimulation.InitialBalance;
     }
@@ -87,7 +87,7 @@ public class MainSimulationManager : Photon.PunBehaviour
     {
         if (newBalance >= GameManagerComponent.SettingsOfSimulation.TargetBalance)
         {
-            PhotonViewComponent.RPC("FinishGame", PhotonTargets.All, PhotonNetwork.player.ID);
+            this.photonView.RPC("FinishGame", PhotonTargets.All, PhotonNetwork.player.ID);
         }
     }
 
@@ -103,6 +103,10 @@ public class MainSimulationManager : Photon.PunBehaviour
             "OnControlledCompanyWorkerRemovedRPC", PhotonTargets.Others, removedWorker, PhotonNetwork.player.ID);
     }
 
+    /// <summary>
+    /// Called by client that removed worker from controlled company so other clients can update list
+    /// of other players' workers
+    /// </summary>
     [PunRPC]
     private void OnControlledCompanyWorkerRemovedRPC(Worker removedWorker, int photonPlayerID)
     {
@@ -112,6 +116,10 @@ public class MainSimulationManager : Photon.PunBehaviour
         OtherPlayerWorkerRemoved?.Invoke(removedWorker, workerPair.Key);
     }
 
+    /// <summary>
+    /// Called by client that added worker to controlled company so other clients can update list
+    /// of other players' workers
+    /// </summary>
     [PunRPC]
     private void OnControlledCompanyWorkerAddedRPC(Worker addedWorker, int photonPlayerID)
     {
@@ -119,6 +127,13 @@ public class MainSimulationManager : Photon.PunBehaviour
         List<Worker> workers = workerPair.Value;
         workers.Add(addedWorker);
         OtherPlayerWorkerAdded?.Invoke(addedWorker, workerPair.Key);
+    }
+
+    [PunRPC]
+    private void RemoveControlledCompanyWorkerRPC(int workerID)
+    {
+        Worker workerToRemove = this.ControlledCompany.Workers.First(x => x.ID == workerID);
+        this.ControlledCompany.RemoveWorker(workerToRemove);
     }
 
     [PunRPC]
@@ -132,6 +147,15 @@ public class MainSimulationManager : Photon.PunBehaviour
     }
 
     /*Public methods*/
+
+    /// <summary>
+    /// Removes worker with given ID from company of target PhotonPlayer
+    /// </summary>
+    public void RemoveOtherPlayerControlledCompanyWorker(PhotonPlayer target, int workerID)
+    {
+        this.photonView.RPC(
+            "RemoveControlledCompanyWorkerRPC", target, workerID);
+    }
 
     public override void OnPhotonPlayerDisconnected(PhotonPlayer otherPlayer)
     {
@@ -156,7 +180,6 @@ public class MainSimulationManager : Photon.PunBehaviour
 
         GameManagerComponent = gameManagerObject.GetComponent<MainGameManager>();
         PlayerInfoComponent = gameManagerObject.GetComponent<PlayerInfo>();
-        PhotonViewComponent = GetComponent<PhotonView>();
 
         InitPlayersWorkers();
         //TEST

@@ -2173,13 +2173,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b117637e70c36ae4db2e31f252d4d37c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  BankComponent: {fileID: 746702002}
   LoanPaymentsCountInputField: {fileID: 1124621010}
   LoanAmountInputField: {fileID: 56477086}
   LoanAmountText: {fileID: 1353691718}
   LoanPaymentsText: {fileID: 1063943863}
   LoanAmountSlider: {fileID: 1746203867}
   LoanPaymentsCountSlider: {fileID: 1071928276}
-  BankComponent: {fileID: 746702002}
   SimulationManagerComponent: {fileID: 746701996}
   CompanyBalanceInputField: {fileID: 1524621047}
   AmountToPayInputField: {fileID: 56477086}
@@ -24834,6 +24834,36 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Text
       value: Hire
+      objectReference: {fileID: 0}
+    - target: {fileID: 6748209082760490779, guid: c63ca5ebc1ff9c7418212e09c1369fd0,
+        type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6748209082760490779, guid: c63ca5ebc1ff9c7418212e09c1369fd0,
+        type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Mode
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6748209082760490779, guid: c63ca5ebc1ff9c7418212e09c1369fd0,
+        type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_CallState
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 6748209082760490779, guid: c63ca5ebc1ff9c7418212e09c1369fd0,
+        type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      value: 
+      objectReference: {fileID: 614546519}
+    - target: {fileID: 6748209082760490779, guid: c63ca5ebc1ff9c7418212e09c1369fd0,
+        type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: OnButtonHireWorkerClick
+      objectReference: {fileID: 0}
+    - target: {fileID: 6748209082760490779, guid: c63ca5ebc1ff9c7418212e09c1369fd0,
+        type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
+      value: UnityEngine.Object, UnityEngine
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: c63ca5ebc1ff9c7418212e09c1369fd0, type: 3}
