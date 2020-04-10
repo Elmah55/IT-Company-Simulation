@@ -14,6 +14,10 @@ public class UIRoomLobby : Photon.PunBehaviour
     /*Private fields*/
 
     private Dictionary<PhotonPlayer, Button> PlayerButtonMap = new Dictionary<PhotonPlayer, Button>();
+    /// <summary>
+    /// Reference to master client used to update button text when new client becomes master client
+    /// </summary>
+    private PhotonPlayer CurrentMasterClient;
     [SerializeField]
     private Button ButtonStartGame;
     [SerializeField]
@@ -37,7 +41,12 @@ public class UIRoomLobby : Photon.PunBehaviour
     private void OnEnable()
     {
         AddRoomPlayersButtons();
-        ButtonStartGame.interactable = true;
+        CurrentMasterClient = PhotonNetwork.masterClient;
+
+        if (true == PhotonNetwork.isMasterClient)
+        {
+            ButtonStartGame.interactable = true;
+        }
     }
 
     private void OnDisable()
@@ -54,6 +63,27 @@ public class UIRoomLobby : Photon.PunBehaviour
         }
     }
 
+    /// <summary>
+    /// Returns button's text of single player in a room lobby. Text contains
+    /// player's nickname and role in a room lobby
+    /// </summary>
+    private string CreatePlayerButtonText(PhotonPlayer player)
+    {
+        string buttonText = player.NickName + " ";
+
+        if (true == player.IsLocal)
+        {
+            buttonText += "(You) ";
+        }
+
+        if (true == player.IsMasterClient)
+        {
+            buttonText += "(Room master) ";
+        }
+
+        return buttonText;
+    }
+
     private void AddRoomPlayerButton(PhotonPlayer player)
     {
         Button newRoomPlayerButton = GameObject.Instantiate<Button>(RoomPlayerListViewButtonPrefab);
@@ -63,19 +93,7 @@ public class UIRoomLobby : Photon.PunBehaviour
         PlayerButtonMap.Add(player, newRoomPlayerButton);
         RoomPlayersButtonsListView.AddControl(newRoomPlayerButton.gameObject);
 
-        string buttonText = player.NickName;
-
-        if (true == player.IsLocal)
-        {
-            buttonText += " (You) ";
-        }
-        else if (true == player.IsMasterClient)
-
-        {
-            //TODO: Update button when MasterClient is transfered to other client
-            buttonText += " (Room master) ";
-        }
-
+        string buttonText = CreatePlayerButtonText(player);
         textComponent.text = buttonText;
 
         //TODO: Add player ready / not ready state
@@ -138,5 +156,25 @@ public class UIRoomLobby : Photon.PunBehaviour
         {
             ButtonStartGame.interactable = false;
         }
+    }
+
+    public override void OnMasterClientSwitched(PhotonPlayer newMasterClient)
+    {
+        base.OnMasterClientSwitched(newMasterClient);
+
+        Button oldMasterClientButton = PlayerButtonMap[CurrentMasterClient];
+        Text textComponent = oldMasterClientButton.GetComponentInChildren<Text>();
+        textComponent.text = CreatePlayerButtonText(CurrentMasterClient);
+
+        Button masterClientButton = PlayerButtonMap[newMasterClient];
+        textComponent = masterClientButton.GetComponentInChildren<Text>();
+        textComponent.text += CreatePlayerButtonText(newMasterClient);
+
+        if (true == PhotonNetwork.isMasterClient)
+        {
+            ButtonStartGame.interactable = true;
+        }
+
+        CurrentMasterClient = PhotonNetwork.masterClient;
     }
 }
