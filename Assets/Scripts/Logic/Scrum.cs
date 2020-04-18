@@ -91,7 +91,6 @@ public class Scrum : MonoBehaviour
     private void UpdateBindedProject()
     {
         BindedProject.Progress += CalculateProjectProgress();
-        BindedProject.DaysSinceStart += GameTimeComponent.DaysSinceStart - LastUpdateDaysSinceStart;
     }
 
     private IEnumerator UpdateProject()
@@ -104,7 +103,6 @@ public class Scrum : MonoBehaviour
             UpdateProjectWorkers();
             UpdateBindedProject();
             Debug.Log("Project progress: " + BindedProject.Progress);
-            LastUpdateDaysSinceStart = GameTimeComponent.DaysSinceStart;
         }
     }
 
@@ -117,7 +115,15 @@ public class Scrum : MonoBehaviour
     private void Start()
     {
         GameTimeComponent = GetComponent<GameTime>();
-        LastUpdateDaysSinceStart = GameTimeComponent.DaysSinceStart;
+        GameTimeComponent.DayChanged += OnGameTimeDayChanged;
+    }
+
+    private void OnGameTimeDayChanged()
+    {
+        if (true == BindedProject.StartedOnce && false == BindedProject.IsCompleted)
+        {
+            BindedProject.DaysSinceStart++;
+        }
     }
 
     /*Public methods*/

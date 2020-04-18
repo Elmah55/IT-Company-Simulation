@@ -70,6 +70,10 @@ public class Project : ISharedObject
     /// </summary>
     public bool Active { get; set; }
     /// <summary>
+    /// True if project was started at least once (started for the first time)
+    /// </summary>
+    public bool StartedOnce { get; set; }
+    /// <summary>
     /// Workers that are working on this project
     /// </summary>
     public List<Worker> Workers { get; private set; }
@@ -190,6 +194,7 @@ public class Project : ISharedObject
 
     public void Start()
     {
+        StartedOnce = true;
         this.Active = true;
         this.Started?.Invoke(this);
     }
