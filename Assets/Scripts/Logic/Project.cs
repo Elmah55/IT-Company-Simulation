@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Text;
 using UnityEngine;
 
 /// <summary>
@@ -25,6 +23,11 @@ public class Project : ISharedObject
     public event ProjectAction DaysSinceStartUpdated;
     public event ProjectAction Completed;
     public event ProjectAction ProgressUpdated;
+    public event ProjectAction Started;
+    public event ProjectAction Stopped;
+    public event WorkerAction WorkerAdded;
+    public event WorkerAction WorkerRemoved;
+
     public string Name { get; set; }
     /// <summary>
     /// Progress of project completed (in %)
@@ -46,6 +49,7 @@ public class Project : ISharedObject
                 if (m_Progress >= 100.0f)
                 {
                     m_Progress = Mathf.Clamp(m_Progress, 0.0f, 100.0f);
+                    Active = false;
                     Completed?.Invoke(this);
                 }
             }
@@ -182,5 +186,31 @@ public class Project : ISharedObject
 
         Workers = new List<Worker>();
         UsedTechnologies = new List<ProjectTechnology>();
+    }
+
+    public void Start()
+    {
+        this.Active = true;
+        this.Started?.Invoke(this);
+    }
+
+    public void Stop()
+    {
+        this.Active = false;
+        this.Stopped?.Invoke(this);
+    }
+
+    public void AddWorker(Worker projectWorker)
+    {
+        projectWorker.AssignedProject = this;
+        this.Workers.Add(projectWorker);
+        WorkerAdded?.Invoke(projectWorker);
+    }
+
+    public void RemoveWorker(Worker projectWorker)
+    {
+        projectWorker.AssignedProject = null;
+        this.Workers.Remove(projectWorker);
+        WorkerRemoved.Invoke(projectWorker);
     }
 }

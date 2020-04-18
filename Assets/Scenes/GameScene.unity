@@ -4683,7 +4683,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 1250085132}
-        m_MethodName: AssignWorker
+        m_MethodName: OnAssignWorkerButtonClick
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -32663,7 +32663,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 1250085132}
-        m_MethodName: UnassignWorker
+        m_MethodName: OnUnassignWorkerButtonClick
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}

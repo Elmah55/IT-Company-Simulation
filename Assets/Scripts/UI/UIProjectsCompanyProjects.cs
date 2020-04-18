@@ -1,10 +1,7 @@
 ﻿using System.Linq;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Events;
 using UnityEngine.UI;
-using UnityEngine.EventSystems;
-using System;
 
 public class UIProjectsCompanyProjects : MonoBehaviour
 {
@@ -77,7 +74,7 @@ public class UIProjectsCompanyProjects : MonoBehaviour
             //Available worker is considered worker without project assigned
             if (null == companyWorker.AssignedProject)
             {
-                AddAvailableSingleWorkerListVewButton(companyWorker);
+                AddWorkerListViewButton(companyWorker);
             }
         }
     }
@@ -87,19 +84,29 @@ public class UIProjectsCompanyProjects : MonoBehaviour
         KeyValuePair<Button, Worker> buttonWorkerPair =
             ButtonWorkerMap.First(x => x.Value == companyWorker);
         ButtonWorkerMap.Remove(buttonWorkerPair.Key);
+        RemoveWorkerListViewButton(buttonWorkerPair.Key, companyWorker);
+    }
 
-        if (null == buttonWorkerPair.Value.AssignedProject)
+    private void RemoveWorkerListViewButton(Button workerButton, Worker companyWorker)
+    {
+        if (null == companyWorker.AssignedProject)
         {
-            AvailableWorkersControlList.RemoveControl(buttonWorkerPair.Key.gameObject);
+            AvailableWorkersControlList.RemoveControl(workerButton.gameObject);
+            AvailableWorkersButtonSelector.RemoveButton(workerButton);
         }
         else
         {
-            AssignedWorkersControlList.RemoveControl(buttonWorkerPair.Key.gameObject);
+            AssignedWorkersControlList.RemoveControl(workerButton.gameObject);
+            AssignedWorkersButtonSelector.RemoveButton(workerButton);
         }
-
     }
 
-    private void AddAvailableSingleWorkerListVewButton(Worker companyWorker)
+    /// <summary>
+    /// Add worker's button to available workers list view. It will be always added
+    /// to available workers list view since worker that was just added to company
+    /// will not have any project assigned
+    /// </summary>
+    private void AddWorkerListViewButton(Worker companyWorker)
     {
         Button createdButton = CreateWorkerButton(companyWorker);
 
@@ -112,7 +119,7 @@ public class UIProjectsCompanyProjects : MonoBehaviour
     {
         //Worker that just has been added to company doesn't
         //have assigned project so its available worker
-        AddAvailableSingleWorkerListVewButton(addedWorker);
+        AddWorkerListViewButton(addedWorker);
     }
 
     private void AddAssignedWorkersListViewButtons()
@@ -149,10 +156,20 @@ public class UIProjectsCompanyProjects : MonoBehaviour
         }
     }
 
-    private void AddSingleProjectToDropdown(Project projectInstance)
+    private void AddSingleProjectToDropdown(Project proj)
     {
-        Dropdown.OptionData projectOption = new Dropdown.OptionData(projectInstance.Name);
+        string projectOptionText = GetProjectListDropdownOptionText(proj);
+        Dropdown.OptionData projectOption = new Dropdown.OptionData(proj.Name);
         ProjectsListDropdown.options.Add(projectOption);
+    }
+
+    private string GetProjectListDropdownOptionText(Project proj)
+    {
+        string projectOptionText = string.Format("{0} {1}",
+                                         proj.Name,
+                                         proj.IsCompleted ? "(Completed)" : string.Empty);
+
+        return projectOptionText;
     }
 
     private void OnAvailableWorkersListSelectedButtonChanged(Button clickedButton)
@@ -162,6 +179,10 @@ public class UIProjectsCompanyProjects : MonoBehaviour
             SelectedAvailableWorker = ButtonWorkerMap[clickedButton];
             AssignWorkerButton.interactable = true;
         }
+        else
+        {
+            AssignWorkerButton.interactable = false;
+        }
     }
 
     private void OnAssignedWorkersListSelectedButtonChanged(Button clickedButton)
@@ -170,6 +191,10 @@ public class UIProjectsCompanyProjects : MonoBehaviour
         {
             SelectedAssignedWorker = ButtonWorkerMap[clickedButton];
             UnassignWorkerButton.interactable = true;
+        }
+        else
+        {
+            UnassignWorkerButton.interactable = false;
         }
 
     }
@@ -218,20 +243,17 @@ public class UIProjectsCompanyProjects : MonoBehaviour
     }
 
     /// <summary>
-    /// Moves worker between assigned and unassigned workers list
+    /// Moves workers list button between assigned and unassigned workers list
     /// </summary>
-    private void MoveWorker(ControlListView listViewForm, ControlListView listViewTo,
+    private void MoveWorkersListButton(ControlListView listViewFrom, ControlListView listViewTo,
                             IButtonSelector buttonSelectorFrom, IButtonSelector buttonSelectorTo,
-                            Button moveWorkerButton)
+                            Button workersListButton)
     {
-        Button selectedButton = buttonSelectorFrom.GetSelectedButton();
-        listViewForm.RemoveControl(selectedButton.gameObject, false);
-        listViewTo.AddControl(selectedButton.gameObject);
+        listViewFrom.RemoveControl(workersListButton.gameObject, false);
+        listViewTo.AddControl(workersListButton.gameObject);
 
-        buttonSelectorFrom.RemoveButton(selectedButton);
-        buttonSelectorTo.AddButton(selectedButton);
-
-        moveWorkerButton.interactable = false;
+        buttonSelectorFrom.RemoveButton(workersListButton);
+        buttonSelectorTo.AddButton(workersListButton);
     }
 
     private void OnSelectedProjectProgressChanged(Project proj)
@@ -244,36 +266,78 @@ public class UIProjectsCompanyProjects : MonoBehaviour
         ProjectInfoDaysSinceStartText.text = proj.DaysSinceStart.ToString();
     }
 
-    /*Public methods*/
+    private void OnSelectedProjectCompleted(Project proj)
+    {
+        StartProjectButton.interactable = false;
+        StopProjectButton.interactable = false;
 
-    public void Start()
+        foreach (Worker projectWorker in proj.Workers)
+        {
+            Button workerButton = ButtonWorkerMap.First(x => x.Value.ID == projectWorker.ID).Key;
+            MoveWorkersListButton(AssignedWorkersControlList, AvailableWorkersControlList, AssignedWorkersButtonSelector,
+                AvailableWorkersButtonSelector, workerButton);
+        }
+
+        ProjectsListDropdown.options[ProjectsListDropdown.value].text = GetProjectListDropdownOptionText(proj);
+    }
+
+    private void OnSelectedProjectWorkerRemoved(Worker companyWorker)
+    {
+        Button selectedWorkerListButton = AssignedWorkersButtonSelector.GetSelectedButton();
+
+        //Check if worker left project because he left company
+        if (null != companyWorker.WorkingCompany)
+        {
+            MoveWorkersListButton(AssignedWorkersControlList,
+                                  AvailableWorkersControlList,
+                                  AssignedWorkersButtonSelector,
+                                  AvailableWorkersButtonSelector,
+                                  selectedWorkerListButton);
+        }
+        else
+        {
+            RemoveWorkerListViewButton(companyWorker);
+        }
+    }
+
+    private void OnSelectedProjectWorkerAdded(Worker companyWorker)
+    {
+        Button selectedWorkerListButton = AvailableWorkersButtonSelector.GetSelectedButton();
+        MoveWorkersListButton(AvailableWorkersControlList,
+                              AssignedWorkersControlList,
+                              AvailableWorkersButtonSelector,
+                              AssignedWorkersButtonSelector,
+                              selectedWorkerListButton);
+    }
+
+    private void OnSelectedProjectStopped(Project proj)
+    {
+        StartProjectButton.interactable = true;
+        StopProjectButton.interactable = false;
+    }
+
+    private void OnSelectedProjectStarted(Project proj)
+    {
+        StartProjectButton.interactable = false;
+        StopProjectButton.interactable = true;
+    }
+
+    private void Start()
     {
         Initialize();
     }
 
-    public void AssignWorker()
-    {
-        SelectedAvailableWorker.AssignedProject = SelectedProjectScrum.BindedProject;
-        SelectedProjectScrum.BindedProject.Workers.Add(SelectedAvailableWorker);
-        MoveWorker(AvailableWorkersControlList,
-                   AssignedWorkersControlList,
-                   AvailableWorkersButtonSelector,
-                   AssignedWorkersButtonSelector,
-                   AssignWorkerButton);
+    /*Public methods*/
 
+    public void OnAssignWorkerButtonClick()
+    {
+        SelectedProjectScrum.BindedProject.AddWorker(SelectedAvailableWorker);
         SelectedAvailableWorker = null;
     }
 
-    public void UnassignWorker()
+    public void OnUnassignWorkerButtonClick()
     {
-        SelectedProjectScrum.BindedProject.Workers.Remove(SelectedAssignedWorker);
-        SelectedAssignedWorker.AssignedProject = null;
-        MoveWorker(AssignedWorkersControlList,
-                   AvailableWorkersControlList,
-                   AssignedWorkersButtonSelector,
-                   AvailableWorkersButtonSelector,
-                   UnassignWorkerButton);
-
+        SelectedProjectScrum.BindedProject.RemoveWorker(SelectedAssignedWorker);
         SelectedAssignedWorker = null;
     }
 
@@ -284,9 +348,21 @@ public class UIProjectsCompanyProjects : MonoBehaviour
             //Unsubscribe progress bar event from previously selected project
             SelectedProjectScrum.BindedProject.ProgressUpdated -= OnSelectedProjectProgressChanged;
             SelectedProjectScrum.BindedProject.DaysSinceStartUpdated -= OnSelectedProjectDaysSinceStartChanged;
+            SelectedProjectScrum.BindedProject.Completed -= OnSelectedProjectCompleted;
+            SelectedProjectScrum.BindedProject.WorkerAdded -= OnSelectedProjectWorkerAdded;
+            SelectedProjectScrum.BindedProject.WorkerRemoved -= OnSelectedProjectWorkerRemoved;
+            SelectedProjectScrum.BindedProject.Stopped -= OnSelectedProjectStopped;
+            SelectedProjectScrum.BindedProject.Started -= OnSelectedProjectStarted;
+
         }
 
         SelectedProjectScrum = SimulationManagerComponent.ControlledCompany.ScrumProcesses[ProjectsListDropdown.value];
+
+        SelectedProjectScrum.BindedProject.Completed += OnSelectedProjectCompleted;
+        SelectedProjectScrum.BindedProject.WorkerAdded += OnSelectedProjectWorkerAdded;
+        SelectedProjectScrum.BindedProject.WorkerRemoved += OnSelectedProjectWorkerRemoved;
+        SelectedProjectScrum.BindedProject.Started += OnSelectedProjectStarted;
+        SelectedProjectScrum.BindedProject.Stopped += OnSelectedProjectStopped;
 
         AddAssignedWorkersListViewButtons();
         InitializeProjectButtons();
@@ -297,14 +373,10 @@ public class UIProjectsCompanyProjects : MonoBehaviour
     public void StartSelectedProject()
     {
         SelectedProjectScrum.StartProject();
-        StartProjectButton.interactable = false;
-        StopProjectButton.interactable = true;
     }
 
     public void StopSelectedProject()
     {
         SelectedProjectScrum.StopProject();
-        StopProjectButton.interactable = false;
-        StartProjectButton.interactable = true;
     }
 }

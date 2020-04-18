@@ -110,7 +110,7 @@ public class Scrum : MonoBehaviour
 
     private void OnProjectFinished(Project finishedProject)
     {
-        StopProject();
+        StopCoroutine(ProjectUpdateCoroutine);
         Debug.Log("Project finished");
     }
 
@@ -124,6 +124,11 @@ public class Scrum : MonoBehaviour
 
     public void StartProject()
     {
+        if (true == BindedProject.IsCompleted)
+        {
+            throw new InvalidOperationException("Cannot start project that is already completed");
+        }
+
         foreach (Worker companyWorker in BindedProject.Workers)
         {
             Debug.LogFormat("Worker {0} {1}",
@@ -132,13 +137,14 @@ public class Scrum : MonoBehaviour
 
         BindedProject.Completed += OnProjectFinished;
         BindedProject.TimeOfStart = GameTimeComponent.CurrentTime;
+
+        BindedProject.Start();
         ProjectUpdateCoroutine = StartCoroutine(UpdateProject());
-        BindedProject.Active = true;
     }
 
     public void StopProject()
     {
+        BindedProject.Stop();
         StopCoroutine(ProjectUpdateCoroutine);
-        BindedProject.Active = false;
     }
 }
