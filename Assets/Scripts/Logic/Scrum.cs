@@ -21,25 +21,64 @@ public class Scrum : MonoBehaviour
     /// one update
     /// </summary>
     private const float ABILITY_UPDATE_VALUE = 0.001f;
+    private const int DAYS_PER_SPRINT = 30;
 
     /*Private fields*/
 
     private GameTime GameTimeComponent;
     /// <summary>
-    /// How many days since game start passed since start 
-    /// of game when project was last updated
+    /// How many days since start of current sprint
     /// </summary>
-    private int LastUpdateDaysSinceStart;
+    private int CurrentSprintDays;
     private Coroutine ProjectUpdateCoroutine;
+    private SprintStage m_CurrentSprintStage;
+    private int m_SprintNumber = 1;
 
     /*Public consts fields*/
+
+    /*Public fields*/
 
     /// <summary>
     /// Project binded to this instance of scrum
     /// </summary>
     public Project BindedProject { get; set; }
+    /// <summary>
+    /// Number of sprint sprint is currently in progress
+    /// </summary>
+    public int SprintNumber
+    {
+        get
+        {
+            return m_SprintNumber;
+        }
 
-    /*Public fields*/
+        set
+        {
+            if (value != m_SprintNumber)
+            {
+                m_SprintNumber = value;
+                SprintNumberChanged?.Invoke(this);
+            }
+        }
+    }
+    public SprintStage CurrentSprintStage
+    {
+        get
+        {
+            return m_CurrentSprintStage;
+        }
+
+        private set
+        {
+            if (value != m_CurrentSprintStage)
+            {
+                m_CurrentSprintStage = value;
+                SprintStageChanged?.Invoke(this);
+            }
+        }
+    }
+    public event ScrumAtion SprintStageChanged;
+    public event ScrumAtion SprintNumberChanged;
 
     /*Private methods*/
 
@@ -63,15 +102,10 @@ public class Scrum : MonoBehaviour
     }
 
 
-    private void UpdateProjectWorkers()
+    private void UpdateProjectWorkersAbilites()
     {
-        //How many days of expierience should be added to each of workers
-        int experienceDays = GameTimeComponent.DaysSinceStart - LastUpdateDaysSinceStart;
-
         foreach (Worker projectWorker in BindedProject.Workers)
         {
-            projectWorker.ExperienceTime += experienceDays;
-
             if (true == projectWorker.Available)
             {
                 foreach (ProjectTechnology usedTechnolody in BindedProject.UsedTechnologies)
@@ -88,6 +122,17 @@ public class Scrum : MonoBehaviour
         }
     }
 
+    private void UpdateProjectWorkersExpierience()
+    {
+        foreach (Worker projectWorker in BindedProject.Workers)
+        {
+            if (true == projectWorker.Available)
+            {
+                projectWorker.ExperienceTime++;
+            }
+        }
+    }
+
     private void UpdateBindedProject()
     {
         BindedProject.Progress += CalculateProjectProgress();
@@ -99,8 +144,7 @@ public class Scrum : MonoBehaviour
         {
             yield return new WaitForSeconds(PROJECT_UPDATE_FREQUENCY);
 
-
-            UpdateProjectWorkers();
+            UpdateProjectWorkersAbilites();
             UpdateBindedProject();
             Debug.Log("Project progress: " + BindedProject.Progress);
         }
@@ -118,12 +162,42 @@ public class Scrum : MonoBehaviour
         GameTimeComponent.DayChanged += OnGameTimeDayChanged;
     }
 
+    private void UpdateSprintInfo()
+    {
+        if (true == BindedProject.Active)
+        {
+            CurrentSprintDays++;
+
+            if (DAYS_PER_SPRINT == CurrentSprintDays)
+            {
+                CurrentSprintDays = 0;
+                SprintNumber++;
+            }
+
+            if (CurrentSprintDays < 2)
+            {
+                CurrentSprintStage = SprintStage.Planning;
+            }
+            else if (CurrentSprintDays < 29)
+            {
+                CurrentSprintStage = SprintStage.Developing;
+            }
+            else
+            {
+                CurrentSprintStage = SprintStage.Retrospective;
+            }
+        }
+    }
+
     private void OnGameTimeDayChanged()
     {
         if (true == BindedProject.StartedOnce && false == BindedProject.IsCompleted)
         {
             BindedProject.DaysSinceStart++;
         }
+
+        UpdateProjectWorkersExpierience();
+        UpdateSprintInfo();
     }
 
     /*Public methods*/
@@ -141,8 +215,11 @@ public class Scrum : MonoBehaviour
                 new object[] { companyWorker.Name, companyWorker.Surename });
         }
 
-        BindedProject.Completed += OnProjectFinished;
-        BindedProject.TimeOfStart = GameTimeComponent.CurrentTime;
+        if (false == BindedProject.StartedOnce)
+        {
+            BindedProject.Completed += OnProjectFinished;
+            BindedProject.TimeOfStart = GameTimeComponent.CurrentTime;
+        }
 
         BindedProject.Start();
         ProjectUpdateCoroutine = StartCoroutine(UpdateProject());

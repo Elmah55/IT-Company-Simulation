@@ -63,6 +63,13 @@ public enum WorkerAbsenceReason
     Holiday
 }
 
+public enum SprintStage
+{
+    Planning,
+    Developing,
+    Retrospective
+}
+
 
 /*Classes*/
 
@@ -137,3 +144,4 @@ public delegate void ProjectAction(Project proj);
 public delegate void LoanAction(BankLoan load);
 public delegate void WorkerAction(Worker companyWorker);
 public delegate void MultiplayerWorkerAction(Worker playerWorker, PhotonPlayer player);
+public delegate void ScrumAtion(Scrum scrumObj);

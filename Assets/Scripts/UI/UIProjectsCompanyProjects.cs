@@ -26,9 +26,13 @@ public class UIProjectsCompanyProjects : MonoBehaviour
     [SerializeField]
     private Dropdown ProjectsListDropdown;
     [SerializeField]
-    private InputField ProjectInfoDaysSinceStartText;
+    private InputField InputFieldProjectInfoDaysSinceStartText;
     [SerializeField]
-    private InputField ProjectInfoUsedTechnologies;
+    private InputField InputFieldProjectInfoUsedTechnologies;
+    [SerializeField]
+    private InputField InputFieldScrumInfoSprintStage;
+    [SerializeField]
+    private InputField InputFieldScrumInfoSprintNumber;
     [SerializeField]
     private ControlListView AvailableWorkersControlList;
     [SerializeField]
@@ -216,13 +220,22 @@ public class UIProjectsCompanyProjects : MonoBehaviour
     {
         OnSelectedProjectDaysSinceStartChanged(SelectedProjectScrum.BindedProject);
         SelectedProjectScrum.BindedProject.DaysSinceStartUpdated += OnSelectedProjectDaysSinceStartChanged;
-        ProjectInfoUsedTechnologies.text = string.Empty;
+        InputFieldProjectInfoUsedTechnologies.text = string.Empty;
 
         foreach (ProjectTechnology technology in SelectedProjectScrum.BindedProject.UsedTechnologies)
         {
             string technologyName = (EnumToString.ProjectTechnologiesStrings[technology]) + " ";
-            ProjectInfoUsedTechnologies.text += technologyName;
+            InputFieldProjectInfoUsedTechnologies.text += technologyName;
         }
+    }
+
+    private void SetScrumInfo()
+    {
+        SelectedProjectScrum.SprintNumberChanged += OnSelectedProjectScrumSprintNumberChanged;
+        SelectedProjectScrum.SprintStageChanged += OnSelectedProjectScrumSprintStageChanged;
+
+        InputFieldScrumInfoSprintNumber.text = SelectedProjectScrum.SprintNumber.ToString();
+        InputFieldScrumInfoSprintStage.text = SelectedProjectScrum.CurrentSprintStage.ToString();
     }
 
     private void Initialize()
@@ -263,7 +276,7 @@ public class UIProjectsCompanyProjects : MonoBehaviour
 
     private void OnSelectedProjectDaysSinceStartChanged(Project proj)
     {
-        ProjectInfoDaysSinceStartText.text = proj.DaysSinceStart.ToString();
+        InputFieldProjectInfoDaysSinceStartText.text = proj.DaysSinceStart.ToString();
     }
 
     private void OnSelectedProjectCompleted(Project proj)
@@ -322,9 +335,27 @@ public class UIProjectsCompanyProjects : MonoBehaviour
         StopProjectButton.interactable = true;
     }
 
+    private void OnSelectedProjectScrumSprintStageChanged(Scrum scrumObj)
+    {
+        InputFieldScrumInfoSprintStage.text = scrumObj.CurrentSprintStage.ToString();
+    }
+
+    private void OnSelectedProjectScrumSprintNumberChanged(Scrum scrumObj)
+    {
+        InputFieldScrumInfoSprintNumber.text = scrumObj.SprintNumber.ToString();
+    }
+
     private void Start()
     {
         Initialize();
+    }
+
+    private void OnEnable()
+    {
+        if (null == SelectedProjectScrum && ProjectsListDropdown.options.Count > 0)
+        {
+            OnProjectsListDropdownValueChanged(ProjectsListDropdown.value);
+        }
     }
 
     /*Public methods*/
@@ -345,7 +376,7 @@ public class UIProjectsCompanyProjects : MonoBehaviour
     {
         if (null != SelectedProjectScrum)
         {
-            //Unsubscribe progress bar event from previously selected project
+            //Unsubscribe events from previously selected project
             SelectedProjectScrum.BindedProject.ProgressUpdated -= OnSelectedProjectProgressChanged;
             SelectedProjectScrum.BindedProject.DaysSinceStartUpdated -= OnSelectedProjectDaysSinceStartChanged;
             SelectedProjectScrum.BindedProject.Completed -= OnSelectedProjectCompleted;
@@ -353,7 +384,8 @@ public class UIProjectsCompanyProjects : MonoBehaviour
             SelectedProjectScrum.BindedProject.WorkerRemoved -= OnSelectedProjectWorkerRemoved;
             SelectedProjectScrum.BindedProject.Stopped -= OnSelectedProjectStopped;
             SelectedProjectScrum.BindedProject.Started -= OnSelectedProjectStarted;
-
+            SelectedProjectScrum.SprintNumberChanged -= OnSelectedProjectScrumSprintNumberChanged;
+            SelectedProjectScrum.SprintStageChanged -= OnSelectedProjectScrumSprintStageChanged;
         }
 
         SelectedProjectScrum = SimulationManagerComponent.ControlledCompany.ScrumProcesses[ProjectsListDropdown.value];
@@ -368,6 +400,7 @@ public class UIProjectsCompanyProjects : MonoBehaviour
         InitializeProjectButtons();
         SetProjectProgressBar();
         SetProjectInfo();
+        SetScrumInfo();
     }
 
     public void StartSelectedProject()
