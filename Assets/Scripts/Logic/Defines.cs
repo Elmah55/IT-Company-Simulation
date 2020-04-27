@@ -70,6 +70,13 @@ public enum SprintStage
     Retrospective
 }
 
+public enum SimulationFinishReason
+{
+    PlayerCompanyReachedTargetBalance,
+    PlayerCompanyReachedMinimalBalance,
+    OnePlayerInRoom
+}
+
 
 /*Classes*/
 
@@ -145,3 +152,4 @@ public delegate void LoanAction(BankLoan load);
 public delegate void WorkerAction(Worker companyWorker);
 public delegate void MultiplayerWorkerAction(Worker playerWorker, PhotonPlayer player);
 public delegate void ScrumAtion(Scrum scrumObj);
+public delegate void PhotonPlayerAction(PhotonPlayer player);

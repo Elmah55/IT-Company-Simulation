@@ -31,7 +31,7 @@ public class MainSimulationManager : Photon.PunBehaviour
     /// Invoked when any of player has reached the target balance
     /// and won game
     /// </summary>
-    public event Action<int> SimulationFinished;
+    public event Action<int, SimulationFinishReason> SimulationFinished;
     /// <summary>
     /// Called when worker is added to company of other player
     /// present in simulation
@@ -42,6 +42,11 @@ public class MainSimulationManager : Photon.PunBehaviour
     /// present in simulation
     /// </summary>
     public event MultiplayerWorkerAction OtherPlayerWorkerRemoved;
+    /// <summary>
+    /// Called when company of other player reaches minimal balance defined in settings
+    /// of simulation
+    /// </summary>
+    public event PhotonPlayerAction OtherPlayerCompanyMinimalBalanceReached;
     /// <summary>
     /// This will map ID of photon player to list of player that his company has.
     /// </summary>
@@ -55,6 +60,7 @@ public class MainSimulationManager : Photon.PunBehaviour
     /// when IsSimulationFinished is true
     /// </summary>
     public int WinnerPhotonPlayerID { get; private set; }
+    public SimulationFinishReason FinishReason { get; private set; }
 
     /*Private methods*/
 
@@ -87,7 +93,20 @@ public class MainSimulationManager : Photon.PunBehaviour
     {
         if (newBalance >= GameManagerComponent.SettingsOfSimulation.TargetBalance)
         {
-            this.photonView.RPC("FinishGame", PhotonTargets.All, PhotonNetwork.player.ID);
+            this.photonView.RPC("FinishGameRPC",
+                                PhotonTargets.All,
+                                PhotonNetwork.player.ID,
+                                (int)SimulationFinishReason.PlayerCompanyReachedTargetBalance);
+        }
+        else if (newBalance <= GameManagerComponent.SettingsOfSimulation.MinimalBalance)
+        {
+            SimulationFinishReason finishReason = SimulationFinishReason.PlayerCompanyReachedMinimalBalance;
+
+            this.photonView.RPC("OnOtherPlayerControlledCompanyMinimalBalanceReachedRPC",
+                                PhotonTargets.Others,
+                                PhotonNetwork.player.ID);
+
+            FinishGameRPC(PhotonNetwork.player.ID, (int)finishReason);
         }
     }
 
@@ -129,6 +148,12 @@ public class MainSimulationManager : Photon.PunBehaviour
         OtherPlayerWorkerAdded?.Invoke(addedWorker, workerPair.Key);
     }
 
+    private void OnOtherPlayerControlledCompanyMinimalBalanceReachedRPC(int photonPlayerID)
+    {
+        KeyValuePair<PhotonPlayer, List<Worker>> workerPair = OtherPlayersWorkers.First(x => x.Key.ID == photonPlayerID);
+        this.OtherPlayerCompanyMinimalBalanceReached?.Invoke(workerPair.Key);
+    }
+
     [PunRPC]
     private void RemoveControlledCompanyWorkerRPC(int workerID)
     {
@@ -137,13 +162,14 @@ public class MainSimulationManager : Photon.PunBehaviour
     }
 
     [PunRPC]
-    private void FinishGame(int winnerPhotonPlayerID)
+    private void FinishGameRPC(int winnerPhotonPlayerID, int finishReason)
     {
         //Stop time so events in game are no longer updated
         Time.timeScale = 0.0f;
         IsSimulationFinished = true;
         this.WinnerPhotonPlayerID = winnerPhotonPlayerID;
-        SimulationFinished?.Invoke(winnerPhotonPlayerID);
+        this.FinishReason = (SimulationFinishReason)finishReason;
+        SimulationFinished?.Invoke(winnerPhotonPlayerID, (SimulationFinishReason)finishReason);
     }
 
     /*Public methods*/
@@ -164,7 +190,7 @@ public class MainSimulationManager : Photon.PunBehaviour
         //Only one player is left in room (local player) so he wins the game
         if (1 == PhotonNetwork.room.PlayerCount)
         {
-            FinishGame(PhotonNetwork.player.ID);
+            FinishGameRPC(PhotonNetwork.player.ID, (int)SimulationFinishReason.OnePlayerInRoom);
         }
         else
         {

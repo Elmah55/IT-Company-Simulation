@@ -1,7 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using UnityEngine.SceneManagement;
+﻿using UnityEngine;
 using UnityEngine.UI;
 using System.Linq;
 
@@ -32,11 +29,30 @@ public class UIGameFinish : MonoBehaviour
 
     private void Start()
     {
-        //Game object will be started on game finish
+        //Game object will be started on simulation finish
 
-        PhotonPlayer winnerPlayer = PhotonNetwork.playerList.First(x => x.ID == SimulationManagerComponent.WinnerPhotonPlayerID);
-        string winnerInfo = (winnerPlayer.IsLocal ? "You" : winnerPlayer.NickName) + " won";
-        string finishGameInfoMsg = string.Format("Game finished ! {0}", winnerInfo);
+        string finishGameInfoMsg = string.Empty;
+
+        switch (SimulationManagerComponent.FinishReason)
+        {
+            case SimulationFinishReason.PlayerCompanyReachedTargetBalance:
+                PhotonPlayer winnerPlayer = PhotonNetwork.playerList.First(x => x.ID == SimulationManagerComponent.WinnerPhotonPlayerID);
+                string winnerInfo = (winnerPlayer.IsLocal ? "You have" : winnerPlayer.NickName) + " won";
+                finishGameInfoMsg = string.Format("Game finished ! {0}", winnerInfo);
+                break;
+            //This will be called only on local client
+            case SimulationFinishReason.PlayerCompanyReachedMinimalBalance:
+                finishGameInfoMsg = string.Format("Your company's balance reached minimum allowed balance ({0} $)",
+                                                         SimulationManagerComponent.GameManagerComponent.SettingsOfSimulation.MinimalBalance);
+                break;
+            case SimulationFinishReason.OnePlayerInRoom:
+                finishGameInfoMsg = "You are the only player left in simulation. You have won !";
+                break;
+            default:
+                finishGameInfoMsg = "Game finished";
+                break;
+        }
+
         FinishGameInfoText.text = finishGameInfoMsg;
     }
 

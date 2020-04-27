@@ -22,13 +22,22 @@ public class MainGameManager : Photon.PunBehaviour
     /// </summary>
     private int NumberOfClientsReadyToReceiveData;
 
-    /*Public consts fields*/
+    /// <summary>
+    /// Below values can be used to set balance when game creation through room is not used
+    /// </summary>
+    [SerializeField]
+    private int InitialCompanyBalance;
+    [SerializeField]
+    private int TargetCompanyBalance;
+    [SerializeField]
+    private int MinimalCompanyBalance;
 
-    public const int MAX_NUMBER_OF_PLAYERS_PER_ROOM = 4;
-    public const int MIN_NUMBER_OF_PLAYERS_PER_ROOM = 2;
-
-    /*Public fields*/
-
+    /// <summary>
+    /// Sets the time scale that simulation should be run with. 1.0 is default scale
+    /// </summary>
+    [SerializeField]
+    [Range(0.1f, 10.0f)]
+    private float SimulationTimeScale;
     /// <summary>
     /// When this is set to true simulation will be run in
     /// Offline Mode. It means that this client won't be connected
@@ -38,7 +47,16 @@ public class MainGameManager : Photon.PunBehaviour
     /// Value of this variable will be also set in PhotonNetwork.offlineMode
     /// https://doc.photonengine.com/en-us/pun/current/gameplay/offlinemode
     /// </summary>
-    public bool OfflineMode;
+    [SerializeField]
+    private bool OfflineMode;
+
+    /*Public consts fields*/
+
+    public const int MAX_NUMBER_OF_PLAYERS_PER_ROOM = 4;
+    public const int MIN_NUMBER_OF_PLAYERS_PER_ROOM = 2;
+
+    /*Public fields*/
+
     /// <summary>
     /// If set to true before game starts user will have to create room and
     /// define simulation settings. If false game will start without need to create
@@ -46,20 +64,6 @@ public class MainGameManager : Photon.PunBehaviour
     /// </summary>
     public bool UseRoom;
     public SimulationSettings SettingsOfSimulation { get; private set; } = new SimulationSettings();
-    /// <summary>
-    /// Sets the time scale that simulation should be run with. 1.0 is default scale
-    /// </summary>
-    [Range(0.1f, 10.0f)]
-    public float SimulationTimeScale;
-
-
-    /// <summary>
-    /// Below values can be used to set balance when game creation through room is not used
-    /// </summary>
-    [Range(SimulationSettings.MIN_INITIAL_BALANCE, SimulationSettings.MAX_INITIAL_BALANCE)]
-    public int InitialCompanyBalance;
-    [Range(SimulationSettings.MIN_TARGET_BALANCE, SimulationSettings.MAX_TARGET_BALANCE)]
-    public int TargetCompanyBalance;
 
     /*Private methods*/
 
@@ -137,6 +141,7 @@ public class MainGameManager : Photon.PunBehaviour
             //Create room with default settings and join it
             SettingsOfSimulation.InitialBalance = this.InitialCompanyBalance;
             SettingsOfSimulation.TargetBalance = this.TargetCompanyBalance;
+            SettingsOfSimulation.MinimalBalance = this.MinimalCompanyBalance;
             RoomOptions options = new RoomOptions() { MaxPlayers = MAX_NUMBER_OF_PLAYERS_PER_ROOM };
             PhotonNetwork.JoinOrCreateRoom("Default", options, PhotonNetwork.lobby);
         }

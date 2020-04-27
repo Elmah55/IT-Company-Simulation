@@ -29,31 +29,54 @@ public class UICreateRoom : Photon.PunBehaviour
     private ColorBlock InputFieldNormalColor;
     private bool TargetBalanceValid = true;
     private bool InitialBalanceValid = true;
+    private bool MinimalBalanceValid = true;
     private bool RoomNameValid = false;
-
-    /*Public consts fields*/
-
-    /*Public fields*/
-
-    public MainGameManager GameManagerComponent;
-    public GameObject RoomLobbyPanel;
-    public InputField InputFieldRoomName;
-    public InputField InputFieldTargetBalance;
-    public InputField InputFieldInitialBalance;
-    public Button ButtonCreateRoom;
-    public Slider SliderNumberOfPlayers;
-    public Slider SliderTargetBalance;
-    public Slider SliderInitialBalance;
-    public Text TextRoomName;
-    public Text TextNumberOfPlayers;
-    public Text TextTargetBalance;
-    public Text TextInitialBalance;
+    [SerializeField]
+    private MainGameManager GameManagerComponent;
+    [SerializeField]
+    private GameObject RoomLobbyPanel;
+    [SerializeField]
+    private InputField InputFieldRoomName;
+    [SerializeField]
+    private InputField InputFieldTargetBalance;
+    [SerializeField]
+    private InputField InputFieldInitialBalance;
+    [SerializeField]
+    private InputField InputFieldMinimalBalance;
+    [SerializeField]
+    private Button ButtonCreateRoom;
+    [SerializeField]
+    private Slider SliderNumberOfPlayers;
+    [SerializeField]
+    private Slider SliderTargetBalance;
+    [SerializeField]
+    private Slider SliderInitialBalance;
+    [SerializeField]
+    private Slider SliderMinimalBalance;
+    [SerializeField]
+    private Text TextRoomName;
+    [SerializeField]
+    private Text TextNumberOfPlayers;
+    [SerializeField]
+    private Text TextTargetBalance;
+    [SerializeField]
+    private Text TextInitialBalance;
+    [SerializeField]
+    private Text TextMinimalBalance;
 
     //Below are defined "HelperText" fields that will display
     //information with hints how to fill in input field 
     //when coresponding input field will contain invalid values
-    public Text InputFieldTargetBalanceHelperText;
-    public Text InputFieldInitialBalanceHelperText;
+    [SerializeField]
+    private Text InputFieldTargetBalanceHelperText;
+    [SerializeField]
+    private Text InputFieldInitialBalanceHelperText;
+    [SerializeField]
+    private Text InputFieldMinimalBalanceHelperText;
+
+    /*Public consts fields*/
+
+    /*Public fields*/
 
     /*Private methods*/
 
@@ -67,16 +90,21 @@ public class UICreateRoom : Photon.PunBehaviour
         SliderTargetBalance.value = SliderTargetBalance.maxValue / 2.0f;
         SliderInitialBalance.minValue = SimulationSettings.MIN_INITIAL_BALANCE;
         SliderInitialBalance.maxValue = SliderTargetBalance.value - 1;
-        SliderInitialBalance.value = SliderInitialBalance.maxValue / 2.0f;
+        SliderInitialBalance.value = SliderTargetBalance.value - 50000;
         SliderNumberOfPlayers.minValue = MainGameManager.MIN_NUMBER_OF_PLAYERS_PER_ROOM;
         SliderNumberOfPlayers.maxValue = MainGameManager.MAX_NUMBER_OF_PLAYERS_PER_ROOM;
+        SliderMinimalBalance.maxValue = SimulationSettings.MAX_MINIMAL_BALANCE;
+        SliderMinimalBalance.minValue = SimulationSettings.MIN_MINIMAL_BALANCE;
+        SliderMinimalBalance.value = SliderInitialBalance.value - 100000;
 
         TextNumberOfPlayers.text =
-            "Maximum number of players " + SliderNumberOfPlayers.value.ToString();
+            "Maximum number of players " + SliderNumberOfPlayers.value;
         TextTargetBalance.text =
             "Target balance " + SliderTargetBalance.value + " $";
         TextInitialBalance.text =
             "Initial balance " + SliderInitialBalance.value + " $";
+        TextMinimalBalance.text =
+            "Minimal balance " + SliderMinimalBalance.value + " $";
     }
 
     /// <summary>
@@ -145,7 +173,7 @@ public class UICreateRoom : Photon.PunBehaviour
 
     private void CheckInput()
     {
-        bool result = InitialBalanceValid && TargetBalanceValid && RoomNameValid;
+        bool result = InitialBalanceValid && TargetBalanceValid && RoomNameValid && MinimalBalanceValid;
         ButtonCreateRoom.interactable = result;
 
         //No need to check max number of players since its value is always
@@ -177,8 +205,22 @@ public class UICreateRoom : Photon.PunBehaviour
     {
         TextInitialBalance.text = "Initial balance " + SliderInitialBalance.value + " $";
         InputFieldInitialBalance.text = SliderInitialBalance.value.ToString() + " $";
+
+        //Initial balance cannot be higher or equal to target balance
+        //otherwise all players would lose game at start
+        SliderMinimalBalance.maxValue = SliderInitialBalance.value - 1;
+
         InitialBalanceValid = true;
         InputFieldInitialBalanceHelperText.gameObject.SetActive(false);
+        CheckInput();
+    }
+
+    public void OnSliderMinimalBalanceValueChanged(float value)
+    {
+        TextMinimalBalance.text = "Minimal balance " + SliderMinimalBalance.value + " $";
+        InputFieldMinimalBalance.text = SliderMinimalBalance.value.ToString() + " $";
+        MinimalBalanceValid = true;
+        InputFieldMinimalBalanceHelperText.gameObject.SetActive(false);
         CheckInput();
     }
 
@@ -203,10 +245,24 @@ public class UICreateRoom : Photon.PunBehaviour
                                                       InputFieldInitialBalanceHelperText,
                                                       SliderInitialBalance,
                                                       SimulationSettings.MIN_INITIAL_BALANCE,
-                                                      SimulationSettings.MAX_INITIAL_BALANCE);
+                                                      (int)(SliderTargetBalance.value - 1)); //Initial value cannot be bigger than target
         if (true == InitialBalanceValid)
         {
             TextInitialBalance.text = "Initial balance " + InputFieldInitialBalance.text + " $";
+            CheckInput();
+        }
+    }
+
+    public void OnInputFiledMinimalBalanceEndEdit(string value)
+    {
+        MinimalBalanceValid = CheckAndSetNumericInput(InputFieldMinimalBalance,
+                                                      InputFieldMinimalBalanceHelperText,
+                                                      SliderMinimalBalance,
+                                                      SimulationSettings.MIN_MINIMAL_BALANCE,
+                                                      (int)(SliderInitialBalance.value - 1)); //Minimal value cannot be bigger than initial
+        if (true == InitialBalanceValid)
+        {
+            TextMinimalBalance.text = "Minimal balance " + InputFieldMinimalBalance.text + " $";
             CheckInput();
         }
     }
@@ -225,6 +281,8 @@ public class UICreateRoom : Photon.PunBehaviour
     {
         GameManagerComponent.SettingsOfSimulation.InitialBalance = (int)SliderInitialBalance.value;
         GameManagerComponent.SettingsOfSimulation.TargetBalance = (int)SliderTargetBalance.value;
+        GameManagerComponent.SettingsOfSimulation.MinimalBalance = (int)SliderMinimalBalance.value;
+
         RoomOptions options = new RoomOptions() { MaxPlayers = (byte)SliderNumberOfPlayers.value };
 
         PhotonNetwork.CreateRoom(InputFieldRoomName.text, options, PhotonNetwork.lobby);

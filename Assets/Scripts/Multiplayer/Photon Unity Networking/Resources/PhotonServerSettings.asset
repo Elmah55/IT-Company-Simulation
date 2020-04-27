@@ -56,4 +56,5 @@ MonoBehaviour:
   - OnControlledCompanyWorkerAddedRPC
   - OnControlledCompanyWorkerRemovedRPC
   - RemoveControlledCompanyWorkerRPC
+  - FinishGameRPC
   DisableAutoOpenWizard: 1

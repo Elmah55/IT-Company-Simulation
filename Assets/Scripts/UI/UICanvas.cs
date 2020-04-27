@@ -27,7 +27,7 @@ public class UICanvas : MonoBehaviour
 
     /*Private methods*/
 
-    private void OnGameFinished(int winnerPhotonPlayerID)
+    private void OnGameFinished(int winnerPhotonPlayerID, SimulationFinishReason reason)
     {
         foreach (GameObject UIGameObject in UIObjects)
         {

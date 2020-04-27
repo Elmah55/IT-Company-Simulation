@@ -1,7 +1,5 @@
-﻿using UnityEngine;
-
-/// <summary>
-/// This class defines settings of rules of simulation
+﻿/// <summary>
+/// This class defines settings of simulation
 /// </summary>
 public class SimulationSettings
 {
@@ -12,9 +10,10 @@ public class SimulationSettings
     /*Public consts fields*/
 
     public const int MAX_TARGET_BALANCE = 1000000;
-    public const int MIN_TARGET_BALANCE = 10000;
-    public const int MAX_INITIAL_BALANCE = MAX_TARGET_BALANCE - 1;
-    public const int MIN_INITIAL_BALANCE = MIN_TARGET_BALANCE - 1;
+    public const int MIN_TARGET_BALANCE = MIN_INITIAL_BALANCE;
+    public const int MIN_MINIMAL_BALANCE = -1000000;
+    public const int MAX_MINIMAL_BALANCE = MAX_TARGET_BALANCE;
+    public const int MIN_INITIAL_BALANCE = 20000;
 
     /*Public fields*/
 
@@ -27,6 +26,10 @@ public class SimulationSettings
     /// of game
     /// </summary>
     public int InitialBalance { get; set; }
+    /// <summary>
+    /// If the balance of player's company is lower than this then he loses
+    /// </summary>
+    public int MinimalBalance { get; set; }
 
     /*Private methods*/
 
@@ -35,13 +38,15 @@ public class SimulationSettings
     public SimulationSettings()
     {
         //Set default values
-        TargetBalance = 100000;
+        TargetBalance = MAX_TARGET_BALANCE;
         InitialBalance = 80000;
+        MinimalBalance = MIN_MINIMAL_BALANCE;
     }
 
-    public SimulationSettings(int initialBalance, int targetBalance)
+    public SimulationSettings(int initialBalance, int targetBalance, int minBalance)
     {
         this.InitialBalance = initialBalance;
         this.TargetBalance = targetBalance;
+        this.MinimalBalance = minBalance;
     }
 }
