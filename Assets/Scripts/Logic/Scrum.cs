@@ -110,13 +110,7 @@ public class Scrum : MonoBehaviour
             {
                 foreach (ProjectTechnology usedTechnolody in BindedProject.UsedTechnologies)
                 {
-                    if (false == projectWorker.Abilites.ContainsKey(usedTechnolody))
-                    {
-                        //Worker will learn new technologies when working in projects
-                        projectWorker.Abilites.Add(usedTechnolody, 0.0f);
-                    }
-
-                    projectWorker.Abilites[usedTechnolody] += ABILITY_UPDATE_VALUE;
+                    projectWorker.UpdateAbility(usedTechnolody, ABILITY_UPDATE_VALUE);
                 }
             }
         }

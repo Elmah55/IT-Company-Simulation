@@ -57,4 +57,8 @@ MonoBehaviour:
   - OnControlledCompanyWorkerRemovedRPC
   - RemoveControlledCompanyWorkerRPC
   - FinishGameRPC
+  - OnCompanyWorkerSalaryChangedRPC
+  - OnOtherPlayerCompanyWorkerSalaryChangedRPC
+  - OnOtherPlayerCompanyWorkerAttirbuteChangedRPC
+  - OnOtherPlayerCompanyWorkerAbilityChangedRPC
   DisableAutoOpenWizard: 1

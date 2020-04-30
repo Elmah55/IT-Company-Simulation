@@ -15,6 +15,7 @@ public class MainSimulationManager : Photon.PunBehaviour
     /*Private fields*/
 
     private PlayerInfo PlayerInfoComponent;
+    private GameTime GameTimeComponent;
 
     /*Public consts fields*/
 
@@ -114,12 +115,88 @@ public class MainSimulationManager : Photon.PunBehaviour
     {
         this.photonView.RPC(
             "OnControlledCompanyWorkerAddedRPC", PhotonTargets.Others, addedWorker, PhotonNetwork.player.ID);
+
+        addedWorker.SalaryChanged += OnCompanyWorkerSalaryChanged;
+        addedWorker.DaysOfHolidaysLeftChanged += OnCompanyWorkerDaysOfHolidaysLeftChanged;
+        addedWorker.AbilityUpdated += OnCompanyWorkerAbilityUpdated;
+    }
+
+    private void OnCompanyWorkerAbilityUpdated(Worker companyWorker, ProjectTechnology workerAbility, float workerAbilityValue)
+    {
+        this.photonView.RPC("OnOtherPlayerCompanyWorkerAbilityChangedRPC",
+                            PhotonTargets.Others,
+                            PhotonNetwork.player.ID,
+                            companyWorker.ID,
+                            (int)workerAbility,
+                            workerAbilityValue);
+    }
+
+    private void OnCompanyWorkerDaysOfHolidaysLeftChanged(Worker companyWorker)
+    {
+        this.photonView.RPC("OnOtherPlayerCompanyWorkerAttirbuteChangedRPC",
+                            PhotonTargets.Others,
+                            PhotonNetwork.player.ID,
+                            companyWorker.ID,
+                            companyWorker.DaysOfHolidaysLeft,
+                            (int)WorkerAttribute.DaysOfHolidaysLeft);
+    }
+
+    private void OnCompanyWorkerSalaryChanged(Worker companyWorker)
+    {
+        this.photonView.RPC("OnOtherPlayerCompanyWorkerAttirbuteChangedRPC",
+                            PhotonTargets.Others,
+                            PhotonNetwork.player.ID,
+                            companyWorker.ID,
+                            companyWorker.Salary,
+                            (int)WorkerAttribute.Salary);
+    }
+
+    /// <summary>
+    /// This method is called when ability of worker of other player is updated so it can be
+    /// also updated in this client's list of other player's workers
+    /// </summary>
+    [PunRPC]
+    private void OnOtherPlayerCompanyWorkerAbilityChangedRPC(int photonPlayerID, int workerID, int updatedAbility, float updatedAbilityValue)
+    {
+        Worker updatedWorker =
+            OtherPlayersWorkers.First(x => x.Key.ID == photonPlayerID).Value.First(x => x.ID == workerID);
+        ProjectTechnology updatedAbilityEnum = (ProjectTechnology)updatedAbility;
+        updatedWorker.UpdateAbility(updatedAbilityEnum, updatedAbilityValue);
+    }
+
+    /// <summary>
+    /// This method is called when salary of worker of other player is updated so it can be
+    /// also updated in this client's list of other player's workers
+    /// </summary>
+    [PunRPC]
+    private void OnOtherPlayerCompanyWorkerAttirbuteChangedRPC(int photonPlayerID, int workerID, object attributeValue, int changedAttirbute)
+    {
+        WorkerAttribute attribute = (WorkerAttribute)changedAttirbute;
+        Worker updatedWorker =
+            OtherPlayersWorkers.First(x => x.Key.ID == photonPlayerID).Value.First(x => x.ID == workerID);
+
+        switch (attribute)
+        {
+            case WorkerAttribute.Salary:
+                int newSalary = (int)attributeValue;
+                updatedWorker.Salary = newSalary;
+                break;
+            case WorkerAttribute.DaysOfHolidaysLeft:
+                int newDaysOfHolidayLeft = (int)attributeValue;
+                updatedWorker.DaysOfHolidaysLeft = newDaysOfHolidayLeft;
+                break;
+            default:
+                break;
+        }
     }
 
     private void OnControlledCompanyWorkerRemoved(Worker removedWorker)
     {
         this.photonView.RPC(
             "OnControlledCompanyWorkerRemovedRPC", PhotonTargets.Others, removedWorker, PhotonNetwork.player.ID);
+
+        removedWorker.SalaryChanged -= OnCompanyWorkerSalaryChanged;
+        removedWorker.DaysOfHolidaysLeftChanged -= OnCompanyWorkerDaysOfHolidaysLeftChanged;
     }
 
     /// <summary>
@@ -172,6 +249,26 @@ public class MainSimulationManager : Photon.PunBehaviour
         SimulationFinished?.Invoke(winnerPhotonPlayerID, (SimulationFinishReason)finishReason);
     }
 
+    private void UpdateOtherPlayersWorkersDaysInCompany()
+    {
+        foreach (KeyValuePair<PhotonPlayer, List<Worker>> otherPlayerWorkersPair in OtherPlayersWorkers)
+        {
+            List<Worker> otherPlayerWorkers = otherPlayerWorkersPair.Value;
+
+            foreach (Worker otherPlayerCompanyWorker in otherPlayerWorkers)
+            {
+                //This does not need to be updated via RPC since value always will be increased by
+                //one every day
+                ++otherPlayerCompanyWorker.DaysInCompany;
+            }
+        }
+    }
+
+    private void OnGameTimeDayChanged()
+    {
+        UpdateOtherPlayersWorkersDaysInCompany();
+    }
+
     /*Public methods*/
 
     /// <summary>
@@ -206,6 +303,9 @@ public class MainSimulationManager : Photon.PunBehaviour
 
         GameManagerComponent = gameManagerObject.GetComponent<MainGameManager>();
         PlayerInfoComponent = gameManagerObject.GetComponent<PlayerInfo>();
+        GameTimeComponent = GetComponent<GameTime>();
+
+        GameTimeComponent.DayChanged += OnGameTimeDayChanged;
 
         InitPlayersWorkers();
         //TEST

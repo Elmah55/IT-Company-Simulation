@@ -13,6 +13,7 @@ public class Worker : ISharedObject
     private int m_DaysInCompany;
     private int m_Salary;
     private bool m_Available = true;
+    private int m_DaysOfHolidaysLeft = DAYS_OF_HOLIDAYS_PER_YEAR;
 
     /*Public consts fields*/
 
@@ -174,11 +175,28 @@ public class Worker : ISharedObject
     /// How many days of holidays worker can yet use. This value should be reset
     /// every new year in game time
     /// </summary>
-    public int DaysOfHolidaysLeft { get; set; } = DAYS_OF_HOLIDAYS_PER_YEAR;
+    public int DaysOfHolidaysLeft
+    {
+        get
+        {
+            return m_DaysOfHolidaysLeft;
+        }
+
+        set
+        {
+            if (value!=m_DaysOfHolidaysLeft)
+            {
+                m_DaysOfHolidaysLeft = value;
+                DaysInCompanyChanged?.Invoke(this);
+            }
+        }
+    }
     public event WorkerAction AbsenceStarted;
     public event WorkerAction AbsenceFinished;
     public event WorkerAction DaysInCompanyChanged;
     public event WorkerAction SalaryChanged;
+    public event WorkerAction DaysOfHolidaysLeftChanged;
+    public event WorkerAbilityAction AbilityUpdated;
 
     /*Private methods*/
 
@@ -282,6 +300,25 @@ public class Worker : ISharedObject
         deserializedWorker.ID = workerID;
 
         return deserializedWorker;
+    }
+
+    /// <summary>
+    /// Increases given ability of worker by provided value. In case worker does
+    /// not have given ability it will be added to his abilites list and value of
+    /// ability will be set to provided value
+    /// </summary>
+    public void UpdateAbility(ProjectTechnology ability, float abilityValue)
+    {
+        if (true == Abilites.ContainsKey(ability))
+        {
+            Abilites[ability] += abilityValue;
+        }
+        else
+        {
+            Abilites.Add(ability, abilityValue);
+        }
+
+        AbilityUpdated?.Invoke(this, ability, abilityValue);
     }
 
     public Worker(string name, string surename)

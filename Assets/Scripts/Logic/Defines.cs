@@ -77,6 +77,12 @@ public enum SimulationFinishReason
     OnePlayerInRoom
 }
 
+public enum WorkerAttribute
+{
+    Salary,
+    DaysOfHolidaysLeft
+}
+
 
 /*Classes*/
 
@@ -150,6 +156,7 @@ public static class NetworkingData
 public delegate void ProjectAction(Project proj);
 public delegate void LoanAction(BankLoan load);
 public delegate void WorkerAction(Worker companyWorker);
+public delegate void WorkerAbilityAction(Worker companyWorker, ProjectTechnology workerAbility, float workerAbilityValue);
 public delegate void MultiplayerWorkerAction(Worker playerWorker, PhotonPlayer player);
 public delegate void ScrumAtion(Scrum scrumObj);
 public delegate void PhotonPlayerAction(PhotonPlayer player);
