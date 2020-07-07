@@ -64,9 +64,12 @@ public class UIWorkersPlayersWorkers : UIWorkers
 
     private void OnDropdownPlayersListValueChanged(int index)
     {
-        DropdownPlayersListSelectedPlayer = PhotonNetwork.playerList[index];
-        ListViewPlayersWorkers.RemoveAllControls();
-        AddListViewPlayersWorkersButtons(DropdownPlayersListSelectedPlayer);
+        if (1 != PhotonNetwork.room.PlayerCount)
+        {
+            DropdownPlayersListSelectedPlayer = PhotonNetwork.playerList[index];
+            ListViewPlayersWorkers.RemoveAllControls();
+            AddListViewPlayersWorkersButtons(DropdownPlayersListSelectedPlayer);
+        }
     }
 
     private void OnOtherPlayerWorkerAdded(Worker addedWorker, PhotonPlayer player)
