@@ -27,11 +27,11 @@ public class ProjectsMarket : Photon.PunBehaviour
     /// How much money will be added to bonus for completing
     /// project per one technology in project
     /// </summary>
-    private const int PROJECT_BONUS_PER_TECHNOLOGY = 15000;
+    private const int PROJECT_BONUS_PER_TECHNOLOGY = 25000;
     /// <summary>
     /// Base amount of money for completing project
     /// </summary>
-    private const int PROJECT_BONUS_BASE = 20000;
+    private const int PROJECT_BONUS_BASE = 40000;
     /// <summary>
     /// Probability in % of adding new project each day
     /// (only when number of projects did not reach maximum
