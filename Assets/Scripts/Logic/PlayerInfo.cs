@@ -25,6 +25,14 @@ public class PlayerInfo : MonoBehaviour
 
     public string CompanyName { get; private set; }
     public string Nickname { get; private set; }
+    public bool CredentialsCompleted
+    {
+        get
+        {
+            return false == string.IsNullOrWhiteSpace(CompanyName)
+                && false == string.IsNullOrWhiteSpace(Nickname);
+        }
+    }
 
     /*Private methods*/
 
