@@ -42,11 +42,7 @@ public class UIRoomLobby : Photon.PunBehaviour
     {
         AddRoomPlayersButtons();
         CurrentMasterClient = PhotonNetwork.masterClient;
-
-        if (true == PhotonNetwork.isMasterClient)
-        {
-            ButtonStartGame.interactable = true;
-        }
+        ButtonStartGame.interactable = PhotonNetwork.offlineMode;
     }
 
     private void OnDisable()
