@@ -84,6 +84,7 @@ public class Scrum : MonoBehaviour
 
     /// <summary>
     /// Calculates value (in %) of project advancment
+    /// for single update
     /// </summary>
     /// <returns></returns>
     private float CalculateProjectProgress()
@@ -100,7 +101,6 @@ public class Scrum : MonoBehaviour
 
         return projectProgressValue;
     }
-
 
     private void UpdateProjectWorkersAbilites()
     {
@@ -223,5 +223,31 @@ public class Scrum : MonoBehaviour
     {
         BindedProject.Stop();
         StopCoroutine(ProjectUpdateCoroutine);
+    }
+
+    /// <summary>
+    /// Returns number of estimated days (game time) needed to complete binded project
+    /// Returns -1 if estimated time is infinity
+    /// </summary>
+    public int GetProjectEstimatedCompletionTime()
+    {
+        float secondsToCompletion = (100 - this.BindedProject.Progress);
+        float projSingleUpdateProgress = CalculateProjectProgress();
+        int daysToCompletionGameTime;
+
+        //Check if estimated time is not ifinity
+        if (0 != projSingleUpdateProgress)
+        {
+            secondsToCompletion /= projSingleUpdateProgress;
+            secondsToCompletion *= PROJECT_UPDATE_FREQUENCY;
+            daysToCompletionGameTime = Mathf.RoundToInt(secondsToCompletion / GameTime.SecondsInDay);
+        }
+        else
+        {
+            daysToCompletionGameTime = -1;
+        }
+
+
+        return daysToCompletionGameTime;
     }
 }

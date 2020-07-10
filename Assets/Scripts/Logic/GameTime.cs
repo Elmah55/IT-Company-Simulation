@@ -31,6 +31,16 @@ public class GameTime : Photon.PunBehaviour
     /// How many days (game time) have passed since start of game
     /// </summary>
     public int DaysSinceStart { get; private set; }
+    /// <summary>
+    /// Returns number of seconds in one day (scaled time)
+    /// </summary>
+    public static float SecondsInDay
+    {
+        get
+        {
+            return TIME_UPDATE_FREQUENCY;
+        }
+    }
     public event Action DayChanged;
     public event Action MonthChanged;
     public event Action YearChanged;

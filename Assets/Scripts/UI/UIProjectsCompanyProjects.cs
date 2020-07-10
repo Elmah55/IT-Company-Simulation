@@ -30,6 +30,8 @@ public class UIProjectsCompanyProjects : MonoBehaviour
     [SerializeField]
     private InputField InputFieldProjectInfoUsedTechnologies;
     [SerializeField]
+    private InputField InputFieldProjectInfoEstimatedCompletionTime;
+    [SerializeField]
     private InputField InputFieldScrumInfoSprintStage;
     [SerializeField]
     private InputField InputFieldScrumInfoSprintNumber;
@@ -124,6 +126,7 @@ public class UIProjectsCompanyProjects : MonoBehaviour
         //Worker that just has been added to company doesn't
         //have assigned project so its available worker
         AddWorkerListViewButton(addedWorker);
+
     }
 
     private void AddAssignedWorkersListViewButtons()
@@ -227,6 +230,24 @@ public class UIProjectsCompanyProjects : MonoBehaviour
             string technologyName = (EnumToString.ProjectTechnologiesStrings[technology]) + " ";
             InputFieldProjectInfoUsedTechnologies.text += technologyName;
         }
+
+        SetProjectEstimatedCompletionTime();
+    }
+
+    /// <summary>
+    /// Set project info that has changed when workers in project
+    /// are modified
+    /// </summary>
+    private void SetProjectInfoWorkersChanged()
+    {
+        SetProjectEstimatedCompletionTime();
+    }
+
+    private void SetProjectEstimatedCompletionTime()
+    {
+        int estimatedCompletionTime = SelectedProjectScrum.GetProjectEstimatedCompletionTime();
+        InputFieldProjectInfoEstimatedCompletionTime.text =
+            (-1 == estimatedCompletionTime) ? string.Empty : estimatedCompletionTime.ToString() + " days";
     }
 
     private void SetScrumInfo()
@@ -272,6 +293,7 @@ public class UIProjectsCompanyProjects : MonoBehaviour
     private void OnSelectedProjectProgressChanged(Project proj)
     {
         ProjectProgressBar.value = proj.Progress;
+        SetProjectInfoWorkersChanged();
     }
 
     private void OnSelectedProjectDaysSinceStartChanged(Project proj)
@@ -311,6 +333,8 @@ public class UIProjectsCompanyProjects : MonoBehaviour
         {
             RemoveWorkerListViewButton(companyWorker);
         }
+
+        SetProjectInfoWorkersChanged();
     }
 
     private void OnSelectedProjectWorkerAdded(Worker companyWorker)
@@ -321,6 +345,7 @@ public class UIProjectsCompanyProjects : MonoBehaviour
                               AvailableWorkersButtonSelector,
                               AssignedWorkersButtonSelector,
                               selectedWorkerListButton);
+        SetProjectInfoWorkersChanged();
     }
 
     private void OnSelectedProjectStopped(Project proj)
