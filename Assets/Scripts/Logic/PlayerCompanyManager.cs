@@ -14,6 +14,15 @@ public class PlayerCompanyManager : MonoBehaviour
     /// cleaning office, etc.)
     /// </summary>
     private const int MONTHLY_COST_PER_WORKER = 50;
+    /// <summary>
+    /// How many percent of satisfaction worker will lose each day
+    /// </summary>
+    private const float WORKER_DAILY_SATISFACTION_LOSS = 0.06f;
+    /// <summary>
+    /// If satisfaction level of worker will fall below this level he will leave 
+    /// the company
+    /// </summary>
+    private const float WORKER_SATISFACTION_LEAVE_TRESHOLD = 20.0f;
 
     /*Private fields*/
 
@@ -66,8 +75,9 @@ public class PlayerCompanyManager : MonoBehaviour
 
     private void UpdateWorkersState()
     {
-        foreach (Worker companyWorker in SimulationManagerComponent.ControlledCompany.Workers)
+        for (int i = 0; i < SimulationManagerComponent.ControlledCompany.Workers.Count; i++)
         {
+            Worker companyWorker = SimulationManagerComponent.ControlledCompany.Workers[i];
             companyWorker.DaysInCompany += 1;
 
             if (true == companyWorker.Available)
@@ -76,7 +86,28 @@ public class PlayerCompanyManager : MonoBehaviour
             }
 
             SimulateWorkerAbsence(companyWorker);
+            SimulateWorkerSatisfaction(companyWorker);
         }
+    }
+
+    private void SimulateWorkerSatisfaction(Worker companyWorker)
+    {
+        CalculateWorkerSatisfactionSalaryDays(companyWorker);
+
+        if (companyWorker.Satiscation < WORKER_SATISFACTION_LEAVE_TRESHOLD)
+        {
+            SimulationManagerComponent.ControlledCompany.RemoveWorker(companyWorker);
+        }
+    }
+
+    /// <summary>
+    /// Calculates satisfaction based on days since salary raise
+    /// </summary>
+    private void CalculateWorkerSatisfactionSalaryDays(Worker companyWorker)
+    {
+        companyWorker.Satiscation -= WORKER_DAILY_SATISFACTION_LOSS;
+        //Satisfaction is percent value
+        companyWorker.Satiscation = Mathf.Clamp(companyWorker.Satiscation, 0.0f, 100.0f);
     }
 
     private void SimulateWorkerAbsence(Worker companyWorker)
@@ -143,6 +174,33 @@ public class PlayerCompanyManager : MonoBehaviour
         newProject.Completed -= OnCompanyProjectCompleted;
     }
 
+    private void OnCompanyWorkerSalaryChanged(Worker companyWorker)
+    {
+        CalculateSatisfactionSalaryRaise(companyWorker);
+    }
+
+    /// <summary>
+    /// Calculates satisfaction based on salary change amount
+    /// </summary>
+    private static void CalculateSatisfactionSalaryRaise(Worker companyWorker)
+    {
+        float satisfactionChange = companyWorker.LastSalaryChange / (float)(companyWorker.Salary - companyWorker.LastSalaryChange);
+        satisfactionChange *= 100.0f;
+        companyWorker.Satiscation += satisfactionChange;
+        //Satisfaction is percent value
+        companyWorker.Satiscation = Mathf.Clamp(companyWorker.Satiscation, 0.0f, 100.0f);
+    }
+
+    private void OnCompanyWorkerRemoved(Worker removedWorker)
+    {
+        removedWorker.SalaryChanged -= OnCompanyWorkerSalaryChanged;
+    }
+
+    private void OnCompanyWorkerAdded(Worker addedWorker)
+    {
+        addedWorker.SalaryChanged += OnCompanyWorkerSalaryChanged;
+    }
+
     private void Start()
     {
         GameTimeComponent = GetComponent<GameTime>();
@@ -153,6 +211,13 @@ public class PlayerCompanyManager : MonoBehaviour
         GameTimeComponent.YearChanged += HandleWorkerHolidayLimits;
 
         SimulationManagerComponent.ControlledCompany.ProjectAdded += OnCompanyProjectAdded;
+        SimulationManagerComponent.ControlledCompany.WorkerRemoved += OnCompanyWorkerRemoved;
+        SimulationManagerComponent.ControlledCompany.WorkerAdded += OnCompanyWorkerAdded;
+
+        foreach (Worker companyWorker in SimulationManagerComponent.ControlledCompany.Workers)
+        {
+            companyWorker.SalaryChanged += OnCompanyWorkerSalaryChanged;
+        }
     }
 
     /*Public methods*/

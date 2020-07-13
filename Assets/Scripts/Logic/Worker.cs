@@ -12,6 +12,7 @@ public class Worker : ISharedObject
 
     private int m_DaysInCompany;
     private int m_Salary;
+    private float m_Satisfaction = DEFAULT_SATISFACTION_LEVEL;
     private bool m_Available = true;
     private int m_DaysOfHolidaysLeft = DAYS_OF_HOLIDAYS_PER_YEAR;
 
@@ -21,6 +22,7 @@ public class Worker : ISharedObject
     public const int MAX_SICKNESS_DURATION = 25;
     public const int MIN_HOLIDAY_DURATION = 1;
     public const int MAX_HOLIDAY_DURATION = DAYS_OF_HOLIDAYS_PER_YEAR;
+    public const float DEFAULT_SATISFACTION_LEVEL = 50.0f;
     /// <summary>
     /// How many days of holidays per year worker can use in one year
     /// </summary>
@@ -96,6 +98,10 @@ public class Worker : ISharedObject
         }
     }
     /// <summary>
+    /// Amount of salary increase or decrease last time it was changed
+    /// </summary>
+    public int LastSalaryChange { get; set; }
+    /// <summary>
     /// Salary that needs to be offered to worker to hire him
     /// from other player's company
     /// </summary>
@@ -164,6 +170,28 @@ public class Worker : ISharedObject
     /// </summary>
     public int DaysSinceAbsent { get; set; }
     /// <summary>
+    /// Indicates level of satisfaction of worker in %.
+    /// Level of satisfaction describers how good worker feels
+    /// while working in company. If level falls below some value
+    /// he will leave company
+    /// </summary>
+    public float Satiscation
+    {
+        get
+        {
+            return m_Satisfaction;
+        }
+
+        set
+        {
+            if (value != m_Satisfaction)
+            {
+                m_Satisfaction = value;
+                SatisfactionChanged?.Invoke(this);
+            }
+        }
+    }
+    /// <summary>
     /// Defines absence type of worker
     /// </summary>
     public WorkerAbsenceReason AbsenceReason { get; set; }
@@ -184,7 +212,7 @@ public class Worker : ISharedObject
 
         set
         {
-            if (value!=m_DaysOfHolidaysLeft)
+            if (value != m_DaysOfHolidaysLeft)
             {
                 m_DaysOfHolidaysLeft = value;
                 DaysInCompanyChanged?.Invoke(this);
@@ -196,6 +224,7 @@ public class Worker : ISharedObject
     public event WorkerAction DaysInCompanyChanged;
     public event WorkerAction SalaryChanged;
     public event WorkerAction DaysOfHolidaysLeftChanged;
+    public event WorkerAction SatisfactionChanged;
     public event WorkerAbilityAction AbilityUpdated;
 
     /*Private methods*/
@@ -206,6 +235,7 @@ public class Worker : ISharedObject
     {
         Worker workerToSerialize = (Worker)workerObject;
 
+        //TODO: send string index instead of sending an actual string
         byte[] nameBytes = Encoding.Unicode.GetBytes(workerToSerialize.Name);
         byte[] surenameBytes = Encoding.Unicode.GetBytes(workerToSerialize.Surename);
         byte[] expierienceTimeBytes = BitConverter.GetBytes(workerToSerialize.ExperienceTime);
@@ -319,6 +349,16 @@ public class Worker : ISharedObject
         }
 
         AbilityUpdated?.Invoke(this, ability, abilityValue);
+    }
+
+    public void SetSalary(int amount)
+    {
+        if (amount > this.Salary)
+        {
+            this.LastSalaryChange = amount - this.Salary;
+        }
+
+        this.Salary = amount;
     }
 
     public Worker(string name, string surename)
