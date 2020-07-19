@@ -26,6 +26,7 @@ public class Scrum : MonoBehaviour
     /*Private fields*/
 
     private GameTime GameTimeComponent;
+    private MainSimulationManager SimulationManagerComponent;
     /// <summary>
     /// How many days since start of current sprint
     /// </summary>
@@ -154,6 +155,22 @@ public class Scrum : MonoBehaviour
     {
         GameTimeComponent = GetComponent<GameTime>();
         GameTimeComponent.DayChanged += OnGameTimeDayChanged;
+        SimulationManagerComponent = GetComponent<MainSimulationManager>();
+
+        SimulationManagerComponent.ControlledCompany.WorkerRemoved += OnControlledCompanyWorkerRemoved;
+    }
+
+    private void OnControlledCompanyWorkerRemoved(Worker companyWorker)
+    {
+        if (BindedProject == companyWorker.AssignedProject)
+        {
+            BindedProject.RemoveWorker(companyWorker);
+
+            if (0 == BindedProject.Workers.Count)
+            {
+                StopProject();
+            }
+        }
     }
 
     private void UpdateSprintInfo()
@@ -203,10 +220,9 @@ public class Scrum : MonoBehaviour
             throw new InvalidOperationException("Cannot start project that is already completed");
         }
 
-        foreach (Worker companyWorker in BindedProject.Workers)
+        if (0 == BindedProject.Workers.Count)
         {
-            Debug.LogFormat("Worker {0} {1}",
-                new object[] { companyWorker.Name, companyWorker.Surename });
+            throw new InvalidOperationException("Cannot start project without no workers");
         }
 
         if (false == BindedProject.StartedOnce)

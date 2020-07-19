@@ -194,15 +194,21 @@ public class Project : ISharedObject
 
     public void Start()
     {
-        StartedOnce = true;
-        this.Active = true;
-        this.Started?.Invoke(this);
+        if (false == Active)
+        {
+            StartedOnce = true;
+            this.Active = true;
+            this.Started?.Invoke(this);
+        }
     }
 
     public void Stop()
     {
-        this.Active = false;
-        this.Stopped?.Invoke(this);
+        if (true == Active)
+        {
+            this.Active = false;
+            this.Stopped?.Invoke(this);
+        }
     }
 
     public void AddWorker(Worker projectWorker)

@@ -88,9 +88,16 @@ public class UIProjectsCompanyProjects : MonoBehaviour
     private void RemoveWorkerListViewButton(Worker companyWorker)
     {
         KeyValuePair<Button, Worker> buttonWorkerPair =
-            ButtonWorkerMap.First(x => x.Value == companyWorker);
-        ButtonWorkerMap.Remove(buttonWorkerPair.Key);
-        RemoveWorkerListViewButton(buttonWorkerPair.Key, companyWorker);
+            ButtonWorkerMap.FirstOrDefault(x => x.Value == companyWorker);
+
+        //Check if pair still exists in case worker button was removed
+        //by event when worker is removed from project before
+        //event when worker is removed from company is fired or vice versa
+        if (false == buttonWorkerPair.Equals(default(KeyValuePair<Button, Worker>)))
+        {
+            ButtonWorkerMap.Remove(buttonWorkerPair.Key);
+            RemoveWorkerListViewButton(buttonWorkerPair.Key, companyWorker);
+        }
     }
 
     private void RemoveWorkerListViewButton(Button workerButton, Worker companyWorker)
