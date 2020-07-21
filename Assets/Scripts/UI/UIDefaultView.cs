@@ -60,7 +60,9 @@ public class UIDefaultView : MonoBehaviour
 
     private string GetCompanyBalanceText(int companyBalance)
     {
-        return string.Format("Money: {0} $", companyBalance);
+        return string.Format("Money: {0} $ ({1} $) ",
+                             companyBalance,
+                             SimulationManagerComponent.GameManagerComponent.SettingsOfSimulation.TargetBalance);
     }
 
     private string GetWorkersCountText(int workersCount)

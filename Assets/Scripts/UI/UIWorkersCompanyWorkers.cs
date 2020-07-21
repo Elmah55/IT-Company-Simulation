@@ -129,7 +129,8 @@ public class UIWorkersCompanyWorkers : MonoBehaviour
 
         foreach (KeyValuePair<ProjectTechnology, float> workerAbility in companyWorker.Abilites)
         {
-            workerInfo += string.Format("{0} {1} | ", workerAbility.Key, workerAbility.Value.ToString("0.00"));
+            string abilityName = EnumToString.ProjectTechnologiesStrings[workerAbility.Key];
+            workerInfo += string.Format("{0} {1} | ", abilityName, workerAbility.Value.ToString("0.00"));
         }
 
         workerInfo += string.Format("\nSalary: {0}$\n" +

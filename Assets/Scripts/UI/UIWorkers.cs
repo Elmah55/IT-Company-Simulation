@@ -73,7 +73,8 @@ public abstract class UIWorkers : Photon.PunBehaviour
     {
         Button workerAbilityButton = GameObject.Instantiate<Button>(ListViewButtonPrefab);
         Text buttonTextComponent = workerAbilityButton.gameObject.GetComponentInChildren<Text>(workerAbilityButton);
-        string buttonText = string.Format("{0} {1}", ability.Key, ability.Value.ToString("0.00"));
+        string abilityName = EnumToString.ProjectTechnologiesStrings[ability.Key];
+        string buttonText = string.Format("{0} {1}", abilityName, ability.Value.ToString("0.00"));
         buttonTextComponent.text = buttonText;
 
         return workerAbilityButton;
