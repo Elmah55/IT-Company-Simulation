@@ -9,13 +9,17 @@ public class UIMainMenu : Photon.PunBehaviour
     /*Private fields*/
 
     [SerializeField]
+    private GameObject CredentialsPanel;
+    [SerializeField]
     private MainGameManager GameManagerComponent;
     [SerializeField]
     private Button ButtonStartGame;
     [SerializeField]
     private Text TextButtonStartGame;
     [SerializeField]
-    private GameObject UIMultiplayer;
+    private GameObject UIObjectMainMenuPanel;
+    [SerializeField]
+    private GameObject UIObjectMultiplayer;
     private PlayerInfo PlayerInfoComponent;
 
     /*Public consts fields*/
@@ -68,12 +72,31 @@ public class UIMainMenu : Photon.PunBehaviour
     private void ButtonStartGameStateMissingCredentials()
     {
         TextButtonStartGame.text = "Enter credentials";
-        ButtonStartGame.interactable = false;
+        ButtonStartGame.onClick.RemoveAllListeners();
+        ButtonStartGame.onClick.AddListener(() =>
+        {
+            CredentialsPanel.SetActive(true);
+            this.gameObject.SetActive(false);
+        });
+        ButtonStartGame.interactable = true;
     }
 
     private void ButtonStartGameStateConnected()
     {
         TextButtonStartGame.text = "Start";
+        ButtonStartGame.onClick.RemoveAllListeners();
+        ButtonStartGame.onClick.AddListener(() =>
+        {
+            if (true == GameManagerComponent.UseRoom)
+            {
+                UIObjectMultiplayer.SetActive(true);
+                UIObjectMainMenuPanel.SetActive(false);
+            }
+            else
+            {
+                GameManagerComponent.StartGame();
+            }
+        });
         ButtonStartGame.interactable = true;
     }
 
@@ -86,19 +109,6 @@ public class UIMainMenu : Photon.PunBehaviour
 #else
         Application.Quit();
 #endif
-    }
-
-    public void OnButtonStartGameClicked()
-    {
-        if (true == GameManagerComponent.UseRoom)
-        {
-            UIMultiplayer.SetActive(true);
-            this.gameObject.transform.parent.gameObject.SetActive(false);
-        }
-        else
-        {
-            GameManagerComponent.StartGame();
-        }
     }
 
     public override void OnJoinedLobby()
