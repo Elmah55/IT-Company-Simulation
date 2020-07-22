@@ -1,6 +1,5 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -36,6 +35,8 @@ public class UIDefaultView : MonoBehaviour
     private GameTime GameTimeComponent;
     [SerializeField]
     private MainSimulationManager SimulationManagerComponent;
+    [SerializeField]
+    private TMP_Dropdown DropdownNotificationList;
 
     /*Public consts fields*/
 
@@ -54,8 +55,22 @@ public class UIDefaultView : MonoBehaviour
         SimulationManagerComponent.ControlledCompany.BalanceChanged += OnControlledCompanyBalanceChanged;
         SimulationManagerComponent.ControlledCompany.WorkerAdded += OnControlledCompanyWorkerAddedOrRemoved;
         SimulationManagerComponent.ControlledCompany.WorkerRemoved += OnControlledCompanyWorkerAddedOrRemoved;
+        SimulationManagerComponent.NotificatorComponent.NotificationReceived += OnNotificationReceived;
         TextCompanyBalance.text = GetCompanyBalanceText(SimulationManagerComponent.ControlledCompany.Balance);
         TextWorkersCount.text = GetWorkersCountText(SimulationManagerComponent.ControlledCompany.Workers.Count);
+    }
+
+    private void OnNotificationReceived(SimulationEventNotification notification)
+    {
+        List<TMP_Dropdown.OptionData> dropdownOptions = new List<TMP_Dropdown.OptionData>();
+        string option = string.Format("{0}.{1}.{2} {3}",
+                                      notification.Timestamp.Day,
+                                      notification.Timestamp.Month,
+                                      notification.Timestamp.Year,
+                                      notification.Text);
+        dropdownOptions.Add(new TMP_Dropdown.OptionData(option));
+        dropdownOptions.AddRange(DropdownNotificationList.options);
+        DropdownNotificationList.options = dropdownOptions;
     }
 
     private string GetCompanyBalanceText(int companyBalance)

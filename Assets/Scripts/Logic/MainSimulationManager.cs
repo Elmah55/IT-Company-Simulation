@@ -17,6 +17,7 @@ public class MainSimulationManager : Photon.PunBehaviour
     private PlayerInfo PlayerInfoComponent;
     private GameTime GameTimeComponent;
 
+
     /*Public consts fields*/
 
     /*Public fields*/
@@ -28,6 +29,7 @@ public class MainSimulationManager : Photon.PunBehaviour
     /// </summary>
     public MainGameManager GameManagerComponent { get; private set; }
     public PlayerCompany ControlledCompany { get; private set; }
+    public SimulationEventNotificator NotificatorComponent { get; private set; }
     /// <summary>
     /// Invoked when any of player has reached the target balance
     /// and won game
@@ -304,6 +306,7 @@ public class MainSimulationManager : Photon.PunBehaviour
         GameManagerComponent = gameManagerObject.GetComponent<MainGameManager>();
         PlayerInfoComponent = gameManagerObject.GetComponent<PlayerInfo>();
         GameTimeComponent = GetComponent<GameTime>();
+        NotificatorComponent = new SimulationEventNotificator(GameTimeComponent);
 
         GameTimeComponent.DayChanged += OnGameTimeDayChanged;
 

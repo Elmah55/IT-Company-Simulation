@@ -90,7 +90,6 @@ public class UIProjectsCompanyProjects : MonoBehaviour
             ptrEvtData.pointerCurrentRaycast.gameObject.transform.parent.gameObject.GetComponent<Button>();
             SetWorkerButtonTooltipText(buttonUnderPointer);
             TooltipText.transform.parent.gameObject.SetActive(true);
-            Debug.Log(ptrEvtData.pointerCurrentRaycast.gameObject);
         });
         workerButtonEventTrigger.triggers.Add(newTrigger);
 
@@ -440,7 +439,7 @@ public class UIProjectsCompanyProjects : MonoBehaviour
 
     private void Update()
     {
-        if (true)
+        if (true == TooltipText.transform.parent.gameObject.GetActive())
         {
             RectTransform tooltipTransform = transform.parent.parent.gameObject.GetComponent<RectTransform>();
             Vector3 mousePos = Input.mousePosition;
@@ -449,7 +448,6 @@ public class UIProjectsCompanyProjects : MonoBehaviour
             RectTransformUtility.ScreenPointToLocalPointInRectangle(ParentRectTransform, tooltipPostion, null, out finalPostion);
 
             TooltipText.gameObject.transform.parent.transform.localPosition = finalPostion;
-            Debug.Log(finalPostion.x + " " + finalPostion.y);
         }
     }
 

@@ -83,6 +83,12 @@ public enum WorkerAttribute
     DaysOfHolidaysLeft
 }
 
+public enum SimulationEventNotificationPriority
+{
+    Normal,
+    High
+}
+
 
 /*Classes*/
 
