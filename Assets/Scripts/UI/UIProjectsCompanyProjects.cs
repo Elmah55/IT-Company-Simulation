@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.EventSystems;
+using TMPro;
 
 public class UIProjectsCompanyProjects : MonoBehaviour
 {
@@ -51,6 +53,13 @@ public class UIProjectsCompanyProjects : MonoBehaviour
     private Button ListViewButtonPrefab;
     [SerializeField]
     private Slider ProjectProgressBar;
+    [SerializeField]
+    private TextMeshProUGUI TooltipText;
+    /// <summary>
+    /// Used to map mouse pointer position to UI coordinates
+    /// </summary>
+    [SerializeField]
+    RectTransform ParentRectTransform;
 
     /*Public consts fields*/
 
@@ -68,6 +77,30 @@ public class UIProjectsCompanyProjects : MonoBehaviour
 
         Text buttonTextComponent = createdButton.GetComponentInChildren<Text>();
         buttonTextComponent.text = string.Format("{0} {1}", workerData.Name, workerData.Surename);
+
+        //Set up tooltip component
+        EventTrigger workerButtonEventTrigger = createdButton.gameObject.AddComponent<EventTrigger>();
+
+        EventTrigger.Entry newTrigger = new EventTrigger.Entry();
+        newTrigger.eventID = EventTriggerType.PointerEnter;
+        newTrigger.callback.AddListener((BaseEventData evtData) =>
+        {
+            PointerEventData ptrEvtData = (PointerEventData)evtData;
+            Button buttonUnderPointer =
+            ptrEvtData.pointerCurrentRaycast.gameObject.transform.parent.gameObject.GetComponent<Button>();
+            SetWorkerButtonTooltipText(buttonUnderPointer);
+            TooltipText.transform.parent.gameObject.SetActive(true);
+            Debug.Log(ptrEvtData.pointerCurrentRaycast.gameObject);
+        });
+        workerButtonEventTrigger.triggers.Add(newTrigger);
+
+        newTrigger = new EventTrigger.Entry();
+        newTrigger.eventID = EventTriggerType.PointerExit;
+        newTrigger.callback.AddListener((BaseEventData evtData) =>
+        {
+            TooltipText.transform.parent.gameObject.SetActive(false);
+        });
+        workerButtonEventTrigger.triggers.Add(newTrigger);
 
         return createdButton;
     }
@@ -377,6 +410,21 @@ public class UIProjectsCompanyProjects : MonoBehaviour
         InputFieldScrumInfoSprintNumber.text = scrumObj.SprintNumber.ToString();
     }
 
+    private void SetWorkerButtonTooltipText(Button buttonUnderPointer)
+    {
+        Worker buttonWorker = ButtonWorkerMap.First(x => x.Key.GetInstanceID() == buttonUnderPointer.GetInstanceID()).Value;
+
+        string tooltipString = "Abilities\n";
+        foreach (KeyValuePair<ProjectTechnology, float> workerAbility in buttonWorker.Abilites)
+        {
+            tooltipString += string.Format("{0} {1}\n",
+                                         EnumToString.ProjectTechnologiesStrings[workerAbility.Key],
+                                         workerAbility.Value.ToString("0.00"));
+        }
+
+        TooltipText.SetText(tooltipString);
+    }
+
     private void Start()
     {
         Initialize();
@@ -387,6 +435,21 @@ public class UIProjectsCompanyProjects : MonoBehaviour
         if (null == SelectedProjectScrum && ProjectsListDropdown.options.Count > 0)
         {
             OnProjectsListDropdownValueChanged(ProjectsListDropdown.value);
+        }
+    }
+
+    private void Update()
+    {
+        if (true)
+        {
+            RectTransform tooltipTransform = transform.parent.parent.gameObject.GetComponent<RectTransform>();
+            Vector3 mousePos = Input.mousePosition;
+            Vector2 tooltipPostion = new Vector2(mousePos.x + 20f, mousePos.y);
+            Vector2 finalPostion;
+            RectTransformUtility.ScreenPointToLocalPointInRectangle(ParentRectTransform, tooltipPostion, null, out finalPostion);
+
+            TooltipText.gameObject.transform.parent.transform.localPosition = finalPostion;
+            Debug.Log(finalPostion.x + " " + finalPostion.y);
         }
     }
 
