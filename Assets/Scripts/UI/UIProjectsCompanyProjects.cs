@@ -434,6 +434,8 @@ public class UIProjectsCompanyProjects : MonoBehaviour
         if (null == SelectedProjectScrum && ProjectsListDropdown.options.Count > 0)
         {
             OnProjectsListDropdownValueChanged(ProjectsListDropdown.value);
+            OnAvailableWorkersListSelectedButtonChanged(AvailableWorkersButtonSelector.GetSelectedButton());
+            OnAssignedWorkersListSelectedButtonChanged(AssignedWorkersButtonSelector.GetSelectedButton());
         }
     }
 
