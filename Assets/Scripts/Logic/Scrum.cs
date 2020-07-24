@@ -141,14 +141,21 @@ public class Scrum : MonoBehaviour
 
             UpdateProjectWorkersAbilites();
             UpdateBindedProject();
-            Debug.Log("Project progress: " + BindedProject.Progress);
         }
     }
 
     private void OnProjectFinished(Project finishedProject)
     {
         StopCoroutine(ProjectUpdateCoroutine);
-        Debug.Log("Project finished");
+        string playerNotification = string.Format("Project {0} finished. Your company has earned {1} $",
+            finishedProject.Name, finishedProject.CompleteBonus);
+        SimulationManagerComponent.NotificatorComponent.Notify(playerNotification);
+
+#if DEVELOPMENT_BUILD || UNITY_EDITOR
+        string debugInfo = string.Format("Project {0} (ID {2}) finished. {1} $ added to company's balance",
+            finishedProject.Name, finishedProject.CompleteBonus, finishedProject.ID);
+        Debug.Log(debugInfo);
+#endif
     }
 
     private void Start()
@@ -251,7 +258,7 @@ public class Scrum : MonoBehaviour
         float projSingleUpdateProgress = CalculateProjectProgress();
         int daysToCompletionGameTime;
 
-        //Check if estimated time is not ifinity
+        //Check if estimated time is not infinity
         if (0 != projSingleUpdateProgress)
         {
             secondsToCompletion /= projSingleUpdateProgress;

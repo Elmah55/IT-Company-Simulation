@@ -72,6 +72,12 @@ public class PlayerCompany : Company
         projectScrum.BindedProject = projectToAdd;
         ScrumProcesses.Add(projectScrum);
         ProjectAdded?.Invoke(projectToAdd);
+
+#if DEVELOPMENT_BUILD || UNITY_EDITOR
+        string debugInfo = string.Format("Project added to company\nName {0}\nID {1}\nComplete bonus {2}",
+            projectToAdd.Name, projectToAdd.ID, projectToAdd.CompleteBonus);
+        Debug.Log(debugInfo);
+#endif
     }
 
     public void AddWorker(Worker workerToAdd)
@@ -80,6 +86,12 @@ public class PlayerCompany : Company
         workerToAdd.WorkingCompany = this;
         workerToAdd.DaysInCompany = 0;
         WorkerAdded?.Invoke(workerToAdd);
+
+#if DEVELOPMENT_BUILD || UNITY_EDITOR
+        string debugInfo = string.Format("Worker added to company\nName {0} {1}\nID {2}\n",
+            workerToAdd.Name, workerToAdd.Surename, workerToAdd.ID);
+        Debug.Log(debugInfo);
+#endif
     }
 
     public void RemoveWorker(Worker workerToRemove)
@@ -87,5 +99,12 @@ public class PlayerCompany : Company
         Workers.Remove(workerToRemove);
         workerToRemove.WorkingCompany = null;
         WorkerRemoved?.Invoke(workerToRemove);
+
+
+#if DEVELOPMENT_BUILD || UNITY_EDITOR
+        string debugInfo = string.Format("Worker removed from company\nName {0} {1}\nID {2}\n",
+            workerToRemove.Name, workerToRemove.Surename, workerToRemove.ID);
+        Debug.Log(debugInfo);
+#endif
     }
 }

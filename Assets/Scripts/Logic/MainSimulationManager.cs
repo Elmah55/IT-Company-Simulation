@@ -212,6 +212,13 @@ public class MainSimulationManager : Photon.PunBehaviour
         List<Worker> workers = workerPair.Value;
         workers.Remove(removedWorker);
         OtherPlayerWorkerRemoved?.Invoke(removedWorker, workerPair.Key);
+
+#if DEVELOPMENT_BUILD || UNITY_EDITOR
+        string debugInfo = string.Format("Received worker update from player {0} (ID: {1}).\n" +
+            "Worker removed (ID: {2}). Local workers collection synchronized",
+            workerPair.Key.NickName, workerPair.Key.ID, removedWorker.ID);
+        Debug.Log(debugInfo);
+#endif
     }
 
     /// <summary>
@@ -225,6 +232,13 @@ public class MainSimulationManager : Photon.PunBehaviour
         List<Worker> workers = workerPair.Value;
         workers.Add(addedWorker);
         OtherPlayerWorkerAdded?.Invoke(addedWorker, workerPair.Key);
+
+#if DEVELOPMENT_BUILD || UNITY_EDITOR
+        string debugInfo = string.Format("Received worker update from player {0} (ID: {1}).\n" +
+            "Worker added (ID: {2}). Local workers collection synchronized",
+            workerPair.Key.NickName, workerPair.Key.ID, addedWorker.ID);
+        Debug.Log(debugInfo);
+#endif
     }
 
     private void OnOtherPlayerControlledCompanyMinimalBalanceReachedRPC(int photonPlayerID)
@@ -234,10 +248,17 @@ public class MainSimulationManager : Photon.PunBehaviour
     }
 
     [PunRPC]
-    private void RemoveControlledCompanyWorkerRPC(int workerID)
+    private void RemoveControlledCompanyWorkerRPC(int workerID, int senderID)
     {
         Worker workerToRemove = this.ControlledCompany.Workers.First(x => x.ID == workerID);
         this.ControlledCompany.RemoveWorker(workerToRemove);
+
+        PhotonPlayer sender = PhotonNetwork.playerList.FirstOrDefault(x => x.ID == senderID);
+        string notification;
+        notification = string.Format("Player {0} hired your worker !",
+            //Check if player didnt disconnect since sending RPC
+            default(PhotonPlayer) == sender ? string.Empty : sender.NickName);
+        NotificatorComponent.Notify(notification);
     }
 
     [PunRPC]
@@ -279,7 +300,7 @@ public class MainSimulationManager : Photon.PunBehaviour
     public void RemoveOtherPlayerControlledCompanyWorker(PhotonPlayer target, int workerID)
     {
         this.photonView.RPC(
-            "RemoveControlledCompanyWorkerRPC", target, workerID);
+            "RemoveControlledCompanyWorkerRPC", target, workerID, PhotonNetwork.player.ID);
     }
 
     public override void OnPhotonPlayerDisconnected(PhotonPlayer otherPlayer)

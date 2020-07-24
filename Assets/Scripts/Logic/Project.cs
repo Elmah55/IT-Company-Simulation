@@ -216,6 +216,19 @@ public class Project : ISharedObject
         projectWorker.AssignedProject = this;
         this.Workers.Add(projectWorker);
         WorkerAdded?.Invoke(projectWorker);
+
+#if DEVELOPMENT_BUILD || UNITY_EDITOR
+        string debugInfo = string.Format(
+            "Worker added to project\n" +
+            "PROJECT -------------------\n" +
+            "Name: {0}\n" +
+            "ID: {1}\n" +
+            "WORKER -------------------\n" +
+            "Name: {2} {3}\n" +
+            "ID: {4}",
+            this.Name, this.ID, projectWorker.Name, projectWorker.Surename, projectWorker.ID);
+        Debug.Log(debugInfo);
+#endif
     }
 
     public void RemoveWorker(Worker projectWorker)
@@ -223,5 +236,18 @@ public class Project : ISharedObject
         projectWorker.AssignedProject = null;
         this.Workers.Remove(projectWorker);
         WorkerRemoved.Invoke(projectWorker);
+
+#if DEVELOPMENT_BUILD || UNITY_EDITOR
+        string debugInfo = string.Format(
+            "Worker removed from project\n" +
+            "PROJECT -------------------\n" +
+            "Name: {0}\n" +
+            "ID: {1}\n" +
+            "WORKER -------------------\n" +
+            "Name: {2} {3}\n" +
+            "ID: {4}",
+            this.Name, this.ID, projectWorker.Name, projectWorker.Surename, projectWorker.ID);
+        Debug.Log(debugInfo);
+#endif
     }
 }

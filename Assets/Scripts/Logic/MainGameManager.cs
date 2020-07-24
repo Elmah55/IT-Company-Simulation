@@ -184,46 +184,58 @@ public class MainGameManager : Photon.PunBehaviour
     {
         base.OnJoinedLobby();
 
+#if DEVELOPMENT_BUILD || UNITY_EDITOR
         string msg = string.Format("Connected to Photon. Joined lobby: {0}",
                                    PhotonNetwork.lobby.Name);
         Debug.Log(msg);
+#endif
     }
 
     public override void OnJoinedRoom()
     {
         base.OnJoinedRoom();
 
+#if DEVELOPMENT_BUILD || UNITY_EDITOR
         string msg = string.Format("Joined room\n" +
-                                   "Name: {0}\n" +
-                                   "Number of players: {1}\n" +
-                                   "Max number of players : {2}",
-                                   PhotonNetwork.room.Name,
-                                   PhotonNetwork.room.PlayerCount,
-                                   PhotonNetwork.room.MaxPlayers);
+                           "Name: {0}\n" +
+                           "Number of players: {1}\n" +
+                           "Max number of players : {2}" +
+                           "Open: {3}",
+                           PhotonNetwork.room.Name,
+                           PhotonNetwork.room.PlayerCount,
+                           PhotonNetwork.room.MaxPlayers,
+                           PhotonNetwork.room.IsOpen);
         Debug.Log(msg);
+#endif
     }
 
     public override void OnDisconnectedFromPhoton()
     {
         base.OnDisconnectedFromPhoton();
 
+#if DEVELOPMENT_BUILD || UNITY_EDITOR
         string msg = "Disconnected from Photon";
         Debug.Log(msg);
+#endif
     }
 
     public override void OnConnectionFail(DisconnectCause cause)
     {
         base.OnConnectionFail(cause);
 
+#if DEVELOPMENT_BUILD || UNITY_EDITOR
         string msg = string.Format("Connection failed. Reason: {0}", cause);
         Debug.Log(msg);
+#endif
     }
 
     public override void OnPhotonJoinRoomFailed(object[] codeAndMsg)
     {
         base.OnPhotonJoinRoomFailed(codeAndMsg);
 
+#if DEVELOPMENT_BUILD || UNITY_EDITOR
         string msg = "Failed to join the room";
         Debug.Log(msg);
+#endif
     }
 }

@@ -128,11 +128,24 @@ public class ProjectsMarket : Photon.PunBehaviour
     /// </summary>
     private void GenerateAndSendProjects()
     {
+#if DEVELOPMENT_BUILD || UNITY_EDITOR
+        string className = this.GetType().Name;
+        string debugInfo = string.Format("{0} generating {1} projects...",
+            className, MaxProjectsOnMarket);
+        Debug.Log(debugInfo);
+#endif
+
         while (MaxProjectsOnMarket != Projects.Count)
         {
             Project newProject = GenerateSingleProject();
             this.photonView.RPC("AddProject", PhotonTargets.All, newProject);
         }
+
+#if DEVELOPMENT_BUILD || UNITY_EDITOR
+        debugInfo = string.Format("{0} generated {1} projects",
+           className, this.Projects.Count);
+        Debug.Log(debugInfo);
+#endif
     }
 
     private List<ProjectTechnology> GenerateProjectTechnologies()

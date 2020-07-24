@@ -28,6 +28,7 @@ public class PlayerCompanyManager : MonoBehaviour
 
     private GameTime GameTimeComponent;
     private MainSimulationManager SimulationManagerComponent;
+    private int TotalMonthlyExpenses;
 
     /*Public consts fields*/
 
@@ -40,8 +41,13 @@ public class PlayerCompanyManager : MonoBehaviour
     /// </summary>
     private void HandleCompanyExpenses()
     {
+        TotalMonthlyExpenses = 0;
         HandleWorkerSalaries();
         HandleWorkerExpenses();
+
+        string notification = string.Format("Your company spent {0} $ this month",
+            TotalMonthlyExpenses);
+        SimulationManagerComponent.NotificatorComponent.Notify(notification);
     }
 
     /// <summary>
@@ -60,6 +66,7 @@ public class PlayerCompanyManager : MonoBehaviour
         foreach (Worker companyWorker in SimulationManagerComponent.ControlledCompany.Workers)
         {
             SimulationManagerComponent.ControlledCompany.Balance -= companyWorker.Salary;
+            TotalMonthlyExpenses += companyWorker.Salary;
         }
     }
 
@@ -71,6 +78,7 @@ public class PlayerCompanyManager : MonoBehaviour
         int companyWorkerExpenses =
             SimulationManagerComponent.ControlledCompany.Workers.Count * MONTHLY_COST_PER_WORKER;
         SimulationManagerComponent.ControlledCompany.Balance -= companyWorkerExpenses;
+        TotalMonthlyExpenses += companyWorkerExpenses;
     }
 
     private void UpdateWorkersState()
@@ -108,6 +116,15 @@ public class PlayerCompanyManager : MonoBehaviour
         companyWorker.Satiscation -= WORKER_DAILY_SATISFACTION_LOSS;
         //Satisfaction is percent value
         companyWorker.Satiscation = Mathf.Clamp(companyWorker.Satiscation, 0.0f, 100.0f);
+
+        float notifySatisfactionLvl = 30f;
+        if (companyWorker.Satiscation <= notifySatisfactionLvl)
+        {
+            string notification = string.Format("Your worker's {0} {1} satisfaction level fell below {2}. " +
+                 "Try to increase it as soon as possible or worker will leave your company !",
+                 companyWorker.Name, companyWorker.Surename, (int)notifySatisfactionLvl);
+            SimulationManagerComponent.NotificatorComponent.Notify(notification);
+        }
     }
 
     private void SimulateWorkerAbsence(Worker companyWorker)
@@ -139,6 +156,16 @@ public class PlayerCompanyManager : MonoBehaviour
             companyWorker.DaysSinceAbsent = 0;
             companyWorker.DaysUntilAvailable = sicknessDuration;
             companyWorker.Available = false;
+
+            string playerNotification = string.Format("Your worker {0} {1} just got sick ! {2} days until he will get back to work",
+                companyWorker.Name, companyWorker.Surename, companyWorker.DaysUntilAvailable);
+            SimulationManagerComponent.NotificatorComponent.Notify(playerNotification);
+
+#if DEVELOPMENT_BUILD || UNITY_EDITOR
+            string debugInfo = string.Format("Worker {0} {1} (ID {2}) is sick\n{3} days until available\n",
+                companyWorker.Name, companyWorker.Surename, companyWorker.ID, companyWorker.DaysUntilAvailable);
+            Debug.Log(debugInfo);
+#endif
         }
     }
 
@@ -159,6 +186,16 @@ public class PlayerCompanyManager : MonoBehaviour
             companyWorker.DaysUntilAvailable = holidayDuration;
             companyWorker.DaysOfHolidaysLeft -= holidayDuration;
             companyWorker.Available = false;
+
+            string playerNotification = string.Format("Your worker {0} {1} is on holidays now. {2} days until he will get back to work",
+                companyWorker.Name, companyWorker.Surename, companyWorker.DaysUntilAvailable);
+            SimulationManagerComponent.NotificatorComponent.Notify(playerNotification);
+
+#if DEVELOPMENT_BUILD || UNITY_EDITOR
+            string debugInfo = string.Format("Worker {0} {1} (ID {2}) is on holidays\n{3} days until available\n",
+                companyWorker.Name, companyWorker.Surename, companyWorker.ID, companyWorker.DaysUntilAvailable);
+            Debug.Log(debugInfo);
+#endif
         }
     }
 
