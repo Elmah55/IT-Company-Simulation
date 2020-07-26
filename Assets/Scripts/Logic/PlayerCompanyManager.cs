@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 
 /// <summary>
 /// This class handles updating state of company. It includes updating company's workers
@@ -29,6 +30,11 @@ public class PlayerCompanyManager : MonoBehaviour
     private GameTime GameTimeComponent;
     private MainSimulationManager SimulationManagerComponent;
     private int TotalMonthlyExpenses;
+    /// <summary>
+    /// This list hold reference to workers whom satifaction level fell below
+    /// threshold level. It is stored to prevent notifying player more than one time
+    /// </summary>
+    private List<Worker> WorkersSatisfactionNotificationSent = new List<Worker>();
 
     /*Public consts fields*/
 
@@ -118,12 +124,25 @@ public class PlayerCompanyManager : MonoBehaviour
         companyWorker.Satiscation = Mathf.Clamp(companyWorker.Satiscation, 0.0f, 100.0f);
 
         float notifySatisfactionLvl = 30f;
-        if (companyWorker.Satiscation <= notifySatisfactionLvl)
+
+        if (companyWorker.Satiscation > notifySatisfactionLvl)
         {
-            string notification = string.Format("Your worker's {0} {1} satisfaction level fell below {2}. " +
+            for (int i = 0; i < WorkersSatisfactionNotificationSent.Count; i++)
+            {
+                if (companyWorker == WorkersSatisfactionNotificationSent[i])
+                {
+                    WorkersSatisfactionNotificationSent.RemoveAt(i);
+                    break;
+                }
+            }
+        }
+        else if (false == WorkersSatisfactionNotificationSent.Contains(companyWorker))
+        {
+            string notification = string.Format("Your worker's {0} {1} satisfaction level fell below {2} %. " +
                  "Try to increase it as soon as possible or worker will leave your company !",
                  companyWorker.Name, companyWorker.Surename, (int)notifySatisfactionLvl);
             SimulationManagerComponent.NotificatorComponent.Notify(notification);
+            WorkersSatisfactionNotificationSent.Add(companyWorker);
         }
     }
 
