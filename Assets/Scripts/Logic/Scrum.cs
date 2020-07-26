@@ -171,9 +171,11 @@ public class Scrum : MonoBehaviour
     {
         if (BindedProject == companyWorker.AssignedProject)
         {
+            //TODO: Make leaving project event fire first (before worker leaves company).
+            //Make this event fired by Company class
             BindedProject.RemoveWorker(companyWorker);
 
-            if (0 == BindedProject.Workers.Count)
+            if (0 == BindedProject.Workers.Count && true == BindedProject.Active)
             {
                 StopProject();
             }

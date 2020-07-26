@@ -235,7 +235,7 @@ public class Project : ISharedObject
     {
         projectWorker.AssignedProject = null;
         this.Workers.Remove(projectWorker);
-        WorkerRemoved.Invoke(projectWorker);
+        WorkerRemoved?.Invoke(projectWorker);
 
 #if DEVELOPMENT_BUILD || UNITY_EDITOR
         string debugInfo = string.Format(

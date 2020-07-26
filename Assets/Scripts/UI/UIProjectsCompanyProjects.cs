@@ -16,6 +16,10 @@ public class UIProjectsCompanyProjects : MonoBehaviour
     /// List of workers buttons with each button mapped to its worker
     /// </summary>
     private Dictionary<Button, Worker> ButtonWorkerMap = new Dictionary<Button, Worker>();
+    /// <summary>
+    /// This will map ID of project to index in projects dropdown
+    /// </summary>
+    private Dictionary<int, int> ProjectIDDropdownIndexMap = new Dictionary<int, int>();
     private Worker SelectedAvailableWorker;
     private Worker SelectedAssignedWorker;
     private IButtonSelector AvailableWorkersButtonSelector = new ButtonSelector();
@@ -119,30 +123,34 @@ public class UIProjectsCompanyProjects : MonoBehaviour
 
     private void RemoveWorkerListViewButton(Worker companyWorker)
     {
+        //Check if button was not removed when player left company.
+        //First event will be called when player leaves company and
+        //then when he leaves company he leaves projects 1st so another
+        //event will be fired
         KeyValuePair<Button, Worker> buttonWorkerPair =
             ButtonWorkerMap.FirstOrDefault(x => x.Value == companyWorker);
 
-        //Check if pair still exists in case worker button was removed
-        //by event when worker is removed from project before
-        //event when worker is removed from company is fired or vice versa
         if (false == buttonWorkerPair.Equals(default(KeyValuePair<Button, Worker>)))
         {
             ButtonWorkerMap.Remove(buttonWorkerPair.Key);
-            RemoveWorkerListViewButton(buttonWorkerPair.Key, companyWorker);
+            RemoveWorkerListViewButton(buttonWorkerPair.Key);
         }
     }
 
-    private void RemoveWorkerListViewButton(Button workerButton, Worker companyWorker)
+    private void RemoveWorkerListViewButton(Button workerButton)
     {
-        if (null == companyWorker.AssignedProject)
+        if (null != workerButton)
         {
-            AvailableWorkersControlList.RemoveControl(workerButton.gameObject);
-            AvailableWorkersButtonSelector.RemoveButton(workerButton);
-        }
-        else
-        {
-            AssignedWorkersControlList.RemoveControl(workerButton.gameObject);
-            AssignedWorkersButtonSelector.RemoveButton(workerButton);
+            if (true == AvailableWorkersControlList.Controls.Contains(workerButton.gameObject))
+            {
+                AvailableWorkersButtonSelector.RemoveButton(workerButton);
+                AvailableWorkersControlList.RemoveControl(workerButton.gameObject);
+            }
+            else if (true == AssignedWorkersControlList.Controls.Contains(workerButton.gameObject))
+            {
+                AssignedWorkersButtonSelector.RemoveButton(workerButton);
+                AssignedWorkersControlList.RemoveControl(workerButton.gameObject);
+            }
         }
     }
 
@@ -180,6 +188,7 @@ public class UIProjectsCompanyProjects : MonoBehaviour
 
             AssignedWorkersControlList.AddControl(createdButton.gameObject);
             ButtonWorkerMap.Add(createdButton, projectWorker);
+            AssignedWorkersButtonSelector.AddButton(createdButton);
         }
     }
 
@@ -205,8 +214,10 @@ public class UIProjectsCompanyProjects : MonoBehaviour
     private void AddSingleProjectToDropdown(Project proj)
     {
         string projectOptionText = GetProjectListDropdownOptionText(proj);
+        proj.Completed += OnProjectCompleted;
         Dropdown.OptionData projectOption = new Dropdown.OptionData(proj.Name);
         ProjectsListDropdown.options.Add(projectOption);
+        ProjectIDDropdownIndexMap.Add(proj.ID, ProjectsListDropdown.options.Count - 1);
     }
 
     private string GetProjectListDropdownOptionText(Project proj)
@@ -245,10 +256,11 @@ public class UIProjectsCompanyProjects : MonoBehaviour
 
     }
 
-    private void InitializeProjectButtons()
+    private void SetProjectButtons()
     {
-        StartProjectButton.interactable = (false == SelectedProjectScrum.BindedProject.Active)
-            && (false == SelectedProjectScrum.BindedProject.IsCompleted);
+        StartProjectButton.interactable = false == SelectedProjectScrum.BindedProject.Active
+            && false == SelectedProjectScrum.BindedProject.IsCompleted
+            && 0 != SelectedProjectScrum.BindedProject.Workers.Count;
         StopProjectButton.interactable = SelectedProjectScrum.BindedProject.Active;
     }
 
@@ -340,19 +352,13 @@ public class UIProjectsCompanyProjects : MonoBehaviour
         InputFieldProjectInfoDaysSinceStartText.text = proj.DaysSinceStart.ToString();
     }
 
-    private void OnSelectedProjectCompleted(Project proj)
+    private void OnProjectCompleted(Project proj)
     {
         StartProjectButton.interactable = false;
         StopProjectButton.interactable = false;
 
-        foreach (Worker projectWorker in proj.Workers)
-        {
-            Button workerButton = ButtonWorkerMap.First(x => x.Value.ID == projectWorker.ID).Key;
-            MoveWorkersListButton(AssignedWorkersControlList, AvailableWorkersControlList, AssignedWorkersButtonSelector,
-                AvailableWorkersButtonSelector, workerButton);
-        }
-
-        ProjectsListDropdown.options[ProjectsListDropdown.value].text = GetProjectListDropdownOptionText(proj);
+        int projectDropdownIndex = ProjectIDDropdownIndexMap[proj.ID];
+        ProjectsListDropdown.options[projectDropdownIndex].text = GetProjectListDropdownOptionText(proj);
     }
 
     private void OnSelectedProjectWorkerRemoved(Worker companyWorker)
@@ -374,6 +380,7 @@ public class UIProjectsCompanyProjects : MonoBehaviour
         }
 
         SetProjectInfoWorkersChanged();
+        SetProjectButtons();
     }
 
     private void OnSelectedProjectWorkerAdded(Worker companyWorker)
@@ -385,6 +392,7 @@ public class UIProjectsCompanyProjects : MonoBehaviour
                               AssignedWorkersButtonSelector,
                               selectedWorkerListButton);
         SetProjectInfoWorkersChanged();
+        SetProjectButtons();
     }
 
     private void OnSelectedProjectStopped(Project proj)
@@ -474,7 +482,6 @@ public class UIProjectsCompanyProjects : MonoBehaviour
             //Unsubscribe events from previously selected project
             SelectedProjectScrum.BindedProject.ProgressUpdated -= OnSelectedProjectProgressChanged;
             SelectedProjectScrum.BindedProject.DaysSinceStartUpdated -= OnSelectedProjectDaysSinceStartChanged;
-            SelectedProjectScrum.BindedProject.Completed -= OnSelectedProjectCompleted;
             SelectedProjectScrum.BindedProject.WorkerAdded -= OnSelectedProjectWorkerAdded;
             SelectedProjectScrum.BindedProject.WorkerRemoved -= OnSelectedProjectWorkerRemoved;
             SelectedProjectScrum.BindedProject.Stopped -= OnSelectedProjectStopped;
@@ -485,14 +492,13 @@ public class UIProjectsCompanyProjects : MonoBehaviour
 
         SelectedProjectScrum = SimulationManagerComponent.ControlledCompany.ScrumProcesses[ProjectsListDropdown.value];
 
-        SelectedProjectScrum.BindedProject.Completed += OnSelectedProjectCompleted;
         SelectedProjectScrum.BindedProject.WorkerAdded += OnSelectedProjectWorkerAdded;
         SelectedProjectScrum.BindedProject.WorkerRemoved += OnSelectedProjectWorkerRemoved;
         SelectedProjectScrum.BindedProject.Started += OnSelectedProjectStarted;
         SelectedProjectScrum.BindedProject.Stopped += OnSelectedProjectStopped;
 
         AddAssignedWorkersListViewButtons();
-        InitializeProjectButtons();
+        SetProjectButtons();
         SetProjectProgressBar();
         SetProjectInfo();
         SetScrumInfo();
