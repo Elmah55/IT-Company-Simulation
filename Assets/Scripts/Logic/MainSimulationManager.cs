@@ -259,6 +259,12 @@ public class MainSimulationManager : Photon.PunBehaviour
             //Check if player didnt disconnect since sending RPC
             default(PhotonPlayer) == sender ? string.Empty : sender.NickName);
         NotificatorComponent.Notify(notification);
+
+#if DEVELOPMENT_BUILD || UNITY_EDITOR
+        string debugInfo = string.Format("Player {0} (ID: {1}) removed worker ID: {2} from your company",
+            sender.NickName, sender.ID, workerToRemove.ID);
+        Debug.Log(debugInfo);
+#endif
     }
 
     [PunRPC]
