@@ -89,6 +89,20 @@ public enum SimulationEventNotificationPriority
     High
 }
 
+namespace ITCompanySimulation.Character
+{
+    public enum CharacterMovement
+    {
+        RunS,
+        RunW,
+        RunE,
+        RunN,
+        StandS,
+        StandW,
+        StandE,
+        StandN
+    }
+}
 
 /*Classes*/
 
