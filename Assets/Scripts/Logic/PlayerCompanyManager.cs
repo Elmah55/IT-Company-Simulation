@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using ITCompanySimulation.Character;
+using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
@@ -34,7 +35,7 @@ public class PlayerCompanyManager : MonoBehaviour
     /// This list hold reference to workers whom satifaction level fell below
     /// threshold level. It is stored to prevent notifying player more than one time
     /// </summary>
-    private List<Worker> WorkersSatisfactionNotificationSent = new List<Worker>();
+    private List<LocalWorker> WorkersSatisfactionNotificationSent = new List<LocalWorker>();
 
     /*Public consts fields*/
 
@@ -61,15 +62,15 @@ public class PlayerCompanyManager : MonoBehaviour
     /// </summary>
     private void HandleWorkerHolidayLimits()
     {
-        foreach (Worker companyWorker in SimulationManagerComponent.ControlledCompany.Workers)
+        foreach (LocalWorker companyWorker in SimulationManagerComponent.ControlledCompany.Workers)
         {
-            companyWorker.DaysOfHolidaysLeft = Worker.DAYS_OF_HOLIDAYS_PER_YEAR;
+            companyWorker.DaysOfHolidaysLeft = LocalWorker.DAYS_OF_HOLIDAYS_PER_YEAR;
         }
     }
 
     private void HandleWorkerSalaries()
     {
-        foreach (Worker companyWorker in SimulationManagerComponent.ControlledCompany.Workers)
+        foreach (LocalWorker companyWorker in SimulationManagerComponent.ControlledCompany.Workers)
         {
             SimulationManagerComponent.ControlledCompany.Balance -= companyWorker.Salary;
             TotalMonthlyExpenses += companyWorker.Salary;
@@ -91,7 +92,7 @@ public class PlayerCompanyManager : MonoBehaviour
     {
         for (int i = 0; i < SimulationManagerComponent.ControlledCompany.Workers.Count; i++)
         {
-            Worker companyWorker = SimulationManagerComponent.ControlledCompany.Workers[i];
+            LocalWorker companyWorker = SimulationManagerComponent.ControlledCompany.Workers[i];
             companyWorker.DaysInCompany += 1;
 
             if (true == companyWorker.Available)
@@ -104,7 +105,7 @@ public class PlayerCompanyManager : MonoBehaviour
         }
     }
 
-    private void SimulateWorkerSatisfaction(Worker companyWorker)
+    private void SimulateWorkerSatisfaction(LocalWorker companyWorker)
     {
         CalculateWorkerSatisfactionSalaryDays(companyWorker);
 
@@ -117,7 +118,7 @@ public class PlayerCompanyManager : MonoBehaviour
     /// <summary>
     /// Calculates satisfaction based on days since salary raise
     /// </summary>
-    private void CalculateWorkerSatisfactionSalaryDays(Worker companyWorker)
+    private void CalculateWorkerSatisfactionSalaryDays(LocalWorker companyWorker)
     {
         companyWorker.Satiscation -= WORKER_DAILY_SATISFACTION_LOSS;
         //Satisfaction is percent value
@@ -146,7 +147,7 @@ public class PlayerCompanyManager : MonoBehaviour
         }
     }
 
-    private void SimulateWorkerAbsence(Worker companyWorker)
+    private void SimulateWorkerAbsence(LocalWorker companyWorker)
     {
         --companyWorker.DaysUntilAvailable;
 
@@ -161,7 +162,7 @@ public class PlayerCompanyManager : MonoBehaviour
         }
     }
 
-    private void SimulateWorkerSickenss(Worker companyWorker)
+    private void SimulateWorkerSickenss(LocalWorker companyWorker)
     {
         //What is the probability of worker being sick (in %)
         int notSickProbability = 100 - (int)(companyWorker.DaysSinceAbsent * 0.2);
@@ -170,7 +171,7 @@ public class PlayerCompanyManager : MonoBehaviour
         if (randomNumber >= notSickProbability)
         {
             //Worker is sick
-            int sicknessDuration = Random.Range(Worker.MIN_SICKNESS_DURATION, Worker.MAX_SICKNESS_DURATION);
+            int sicknessDuration = Random.Range(LocalWorker.MIN_SICKNESS_DURATION, LocalWorker.MAX_SICKNESS_DURATION);
             companyWorker.AbsenceReason = WorkerAbsenceReason.Sickness;
             companyWorker.DaysSinceAbsent = 0;
             companyWorker.DaysUntilAvailable = sicknessDuration;
@@ -188,7 +189,7 @@ public class PlayerCompanyManager : MonoBehaviour
         }
     }
 
-    private void SimulateWorkerHoliday(Worker companyWorker)
+    private void SimulateWorkerHoliday(LocalWorker companyWorker)
     {
         //What is the probability of worker going to holidays (in %)
         int holidayProbability = 100 - (int)(companyWorker.DaysSinceAbsent * 0.2);
@@ -198,7 +199,7 @@ public class PlayerCompanyManager : MonoBehaviour
         if (randomNumber >= holidayProbability)
         {
             //Worker is on holidays
-            int holidayDuration = Random.Range(Worker.MIN_HOLIDAY_DURATION, Worker.MAX_HOLIDAY_DURATION);
+            int holidayDuration = Random.Range(LocalWorker.MIN_HOLIDAY_DURATION, LocalWorker.MAX_HOLIDAY_DURATION);
             holidayDuration = Mathf.Clamp(holidayDuration, 1, companyWorker.DaysOfHolidaysLeft);
             companyWorker.AbsenceReason = WorkerAbsenceReason.Holiday;
             companyWorker.DaysSinceAbsent = 0;
@@ -230,15 +231,16 @@ public class PlayerCompanyManager : MonoBehaviour
         newProject.Completed -= OnCompanyProjectCompleted;
     }
 
-    private void OnCompanyWorkerSalaryChanged(Worker companyWorker)
+    private void OnCompanyWorkerSalaryChanged(SharedWorker worker)
     {
+        LocalWorker companyWorker = (LocalWorker)worker;
         CalculateSatisfactionSalaryRaise(companyWorker);
     }
 
     /// <summary>
     /// Calculates satisfaction based on salary change amount
     /// </summary>
-    private static void CalculateSatisfactionSalaryRaise(Worker companyWorker)
+    private static void CalculateSatisfactionSalaryRaise(LocalWorker companyWorker)
     {
         float satisfactionChange = companyWorker.LastSalaryChange / (float)(companyWorker.Salary - companyWorker.LastSalaryChange);
         satisfactionChange *= 100.0f;
@@ -247,12 +249,12 @@ public class PlayerCompanyManager : MonoBehaviour
         companyWorker.Satiscation = Mathf.Clamp(companyWorker.Satiscation, 0.0f, 100.0f);
     }
 
-    private void OnCompanyWorkerRemoved(Worker removedWorker)
+    private void OnCompanyWorkerRemoved(SharedWorker removedWorker)
     {
         removedWorker.SalaryChanged -= OnCompanyWorkerSalaryChanged;
     }
 
-    private void OnCompanyWorkerAdded(Worker addedWorker)
+    private void OnCompanyWorkerAdded(SharedWorker addedWorker)
     {
         addedWorker.SalaryChanged += OnCompanyWorkerSalaryChanged;
     }
@@ -270,7 +272,7 @@ public class PlayerCompanyManager : MonoBehaviour
         SimulationManagerComponent.ControlledCompany.WorkerRemoved += OnCompanyWorkerRemoved;
         SimulationManagerComponent.ControlledCompany.WorkerAdded += OnCompanyWorkerAdded;
 
-        foreach (Worker companyWorker in SimulationManagerComponent.ControlledCompany.Workers)
+        foreach (LocalWorker companyWorker in SimulationManagerComponent.ControlledCompany.Workers)
         {
             companyWorker.SalaryChanged += OnCompanyWorkerSalaryChanged;
         }

@@ -1,11 +1,12 @@
-﻿using System;
+﻿using ITCompanySimulation.Character;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
 /// This class represents IT project that company can work on
 /// </summary>
-public class Project : ISharedObject
+public class Project
 {
     /*Private consts fields*/
 
@@ -76,7 +77,7 @@ public class Project : ISharedObject
     /// <summary>
     /// Workers that are working on this project
     /// </summary>
-    public List<Worker> Workers { get; private set; }
+    public List<LocalWorker> Workers { get; private set; }
     public List<ProjectTechnology> UsedTechnologies { get; set; }
     public DateTime TimeOfStart { get; set; }
     public int DaysSinceStart
@@ -188,7 +189,7 @@ public class Project : ISharedObject
     {
         this.Name = projectName;
 
-        Workers = new List<Worker>();
+        Workers = new List<LocalWorker>();
         UsedTechnologies = new List<ProjectTechnology>();
     }
 
@@ -211,7 +212,7 @@ public class Project : ISharedObject
         }
     }
 
-    public void AddWorker(Worker projectWorker)
+    public void AddWorker(LocalWorker projectWorker)
     {
         projectWorker.AssignedProject = this;
         this.Workers.Add(projectWorker);
@@ -231,7 +232,7 @@ public class Project : ISharedObject
 #endif
     }
 
-    public void RemoveWorker(Worker projectWorker)
+    public void RemoveWorker(LocalWorker projectWorker)
     {
         projectWorker.AssignedProject = null;
         this.Workers.Remove(projectWorker);

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using ITCompanySimulation.Character;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -30,7 +31,7 @@ public abstract class UIWorkers : Photon.PunBehaviour
 
     /*Private methods*/
 
-    protected virtual void UpdateWorkerInfo(Worker selectedWorker)
+    protected virtual void UpdateWorkerInfo(SharedWorker selectedWorker)
     {
         //Name and surename
         InputFieldNameAndSurename.text = string.Format("{0} {1}", selectedWorker.Name, selectedWorker.Surename);
@@ -42,10 +43,10 @@ public abstract class UIWorkers : Photon.PunBehaviour
         InputFieldSalary.text = string.Format("{0} $", selectedWorker.Salary);
 
         //Days in company
-        if (null != selectedWorker.WorkingCompany)
+        if (selectedWorker is LocalWorker)
         {
-            InputFieldDaysInCompany.text = string.Format("{0} days", selectedWorker.DaysInCompany);
-
+            LocalWorker localSelectedWorker = (LocalWorker)selectedWorker;
+            InputFieldDaysInCompany.text = string.Format("{0} days", localSelectedWorker.DaysInCompany);
         }
 
         //Abilites
@@ -58,7 +59,7 @@ public abstract class UIWorkers : Photon.PunBehaviour
         ListViewWorkerAbilities.RemoveAllControls();
     }
 
-    protected void UpdateWorkerAbilitiesListView(ControlListView listView, Worker workerToDisplay)
+    protected void UpdateWorkerAbilitiesListView(ControlListView listView, SharedWorker workerToDisplay)
     {
         listView.RemoveAllControls();
 

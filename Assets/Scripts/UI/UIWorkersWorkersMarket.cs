@@ -2,6 +2,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using System.Linq;
+using ITCompanySimulation.Character;
 
 public class UIWorkersWorkersMarket : UIWorkers
 {
@@ -12,7 +13,7 @@ public class UIWorkersWorkersMarket : UIWorkers
     /// <summary>
     /// Used to map button in workers list to appriopriate worker
     /// </summary>
-    private Dictionary<Button, Worker> ButtonWorkerDictionary = new Dictionary<Button, Worker>();
+    private Dictionary<Button, SharedWorker> ButtonWorkerDictionary = new Dictionary<Button, SharedWorker>();
     [SerializeField]
     private ControlListView ListViewMarketWorkers;
     [SerializeField]
@@ -26,7 +27,7 @@ public class UIWorkersWorkersMarket : UIWorkers
     [SerializeField]
     private Button ButtonFireWorker;
     private IButtonSelector WorkersButtonSelector = new ButtonSelector();
-    private Worker SelectedWorker;
+    private SharedWorker SelectedWorker;
 
     /*Public consts fields*/
 
@@ -34,9 +35,9 @@ public class UIWorkersWorkersMarket : UIWorkers
 
     /*Private methods*/
 
-    private void InitializeWorkersListView(ControlListView listView, List<Worker> workers)
+    private void InitializeWorkersListView(ControlListView listView, List<SharedWorker> workers)
     {
-        foreach (Worker singleWorker in workers)
+        foreach (SharedWorker singleWorker in workers)
         {
             Button newListViewButton = CreateWorkerButton(singleWorker);
 
@@ -46,7 +47,7 @@ public class UIWorkersWorkersMarket : UIWorkers
         }
     }
 
-    private Button CreateWorkerButton(Worker workerObject)
+    private Button CreateWorkerButton(SharedWorker workerObject)
     {
         Button newWorkerButton = GameObject.Instantiate<Button>(ListViewButtonPrefab);
 
@@ -62,9 +63,9 @@ public class UIWorkersWorkersMarket : UIWorkers
     {
         if (null != workerButton)
         {
-            Worker selectedWorker = ButtonWorkerDictionary[WorkersButtonSelector.GetSelectedButton()];
+            SharedWorker selectedWorker = ButtonWorkerDictionary[WorkersButtonSelector.GetSelectedButton()];
 
-            InputFieldDaysInCompany.gameObject.SetActive(null != selectedWorker.WorkingCompany);
+            InputFieldDaysInCompany.gameObject.SetActive(selectedWorker is LocalWorker);
 
             UpdateActionButtonsState(selectedWorker);
             UpdateWorkerInfo(selectedWorker);
@@ -81,12 +82,12 @@ public class UIWorkersWorkersMarket : UIWorkers
     /// for hiring of firing workers based on which worker
     /// is selected (market worker or company worker)
     /// </summary>
-    private void UpdateActionButtonsState(Worker selectedWorker)
+    private void UpdateActionButtonsState(SharedWorker selectedWorker)
     {
         if (null != selectedWorker)
         {
             //Does not have company assigned so its market worker
-            if (null == selectedWorker.WorkingCompany)
+            if (false == (selectedWorker is LocalWorker))
             {
                 ButtonFireWorker.interactable = false;
                 ButtonHireWorker.interactable = true;
@@ -109,7 +110,7 @@ public class UIWorkersWorkersMarket : UIWorkers
         }
     }
 
-    private void OnMarketWorkerAdded(Worker addedWorker)
+    private void OnMarketWorkerAdded(SharedWorker addedWorker)
     {
         Button newWorkerButton = CreateWorkerButton(addedWorker);
         ListViewMarketWorkers.AddControl(newWorkerButton.gameObject);
@@ -117,7 +118,7 @@ public class UIWorkersWorkersMarket : UIWorkers
         WorkersButtonSelector.AddButton(newWorkerButton);
     }
 
-    private void OnMarketWorkerRemoved(Worker removedWorker)
+    private void OnMarketWorkerRemoved(SharedWorker removedWorker)
     {
         Button workerButton = ButtonWorkerDictionary.First(x => x.Value == removedWorker).Key;
         ListViewMarketWorkers.RemoveControl(workerButton.gameObject);
@@ -125,7 +126,7 @@ public class UIWorkersWorkersMarket : UIWorkers
         WorkersButtonSelector.RemoveButton(workerButton);
     }
 
-    private void OnCompanyWorkerAdded(Worker addedWorker)
+    private void OnCompanyWorkerAdded(SharedWorker addedWorker)
     {
         Button newWorkerButton = CreateWorkerButton(addedWorker);
         ListViewCompanyWorkers.AddControl(newWorkerButton.gameObject);
@@ -133,7 +134,7 @@ public class UIWorkersWorkersMarket : UIWorkers
         WorkersButtonSelector.AddButton(newWorkerButton);
     }
 
-    private void OnCompanyWorkerRemoved(Worker removedWorker)
+    private void OnCompanyWorkerRemoved(SharedWorker removedWorker)
     {
         Button workerButton = ButtonWorkerDictionary.First(x => x.Value == removedWorker).Key;
         ListViewCompanyWorkers.RemoveControl(workerButton.gameObject);
@@ -144,7 +145,7 @@ public class UIWorkersWorkersMarket : UIWorkers
     private void Start()
     {
         InitializeWorkersListView(ListViewMarketWorkers, WorkersMarketComponent.Workers);
-        InitializeWorkersListView(ListViewCompanyWorkers, SimulationManagerComponent.ControlledCompany.Workers);
+        InitializeWorkersListView(ListViewCompanyWorkers, SimulationManagerComponent.ControlledCompany.Workers.Cast<SharedWorker>().ToList());
 
         SimulationManagerComponent.ControlledCompany.WorkerAdded += OnCompanyWorkerAdded;
         SimulationManagerComponent.ControlledCompany.WorkerRemoved += OnCompanyWorkerRemoved;
@@ -155,13 +156,13 @@ public class UIWorkersWorkersMarket : UIWorkers
         WorkersButtonSelector.SelectedButtonChanged += OnSelectedWorkerButtonChanged;
     }
 
-    private void SubscribeToWorkerEvents(Worker selectedWorker)
+    private void SubscribeToWorkerEvents(LocalWorker selectedWorker)
     {
         selectedWorker.SalaryChanged += UpdateWorkerInfo;
         selectedWorker.DaysInCompanyChanged += UpdateWorkerInfo;
     }
 
-    private void UnsubscribeFromWorkerEvent(Worker deselectedWorker)
+    private void UnsubscribeFromWorkerEvent(LocalWorker deselectedWorker)
     {
         deselectedWorker.SalaryChanged -= UpdateWorkerInfo;
         deselectedWorker.DaysInCompanyChanged -= UpdateWorkerInfo;
@@ -171,15 +172,23 @@ public class UIWorkersWorkersMarket : UIWorkers
 
     public void OnHireWorkerButtonClicked()
     {
-        Worker selectedWorker = ButtonWorkerDictionary[WorkersButtonSelector.GetSelectedButton()];
+        SharedWorker selectedWorker = ButtonWorkerDictionary[WorkersButtonSelector.GetSelectedButton()];
         WorkersMarketComponent.RemoveWorker(selectedWorker);
-        SimulationManagerComponent.ControlledCompany.AddWorker(selectedWorker);
+
+        LocalWorker newLocalWorker = selectedWorker as LocalWorker;
+
+        if (null == newLocalWorker)
+        {
+            newLocalWorker = new LocalWorker(selectedWorker);
+        }
+
+        SimulationManagerComponent.ControlledCompany.AddWorker(newLocalWorker);
     }
 
     public void OnFireWorkerButtonClicked()
     {
-        Worker selectedWorker = ButtonWorkerDictionary[WorkersButtonSelector.GetSelectedButton()];
-        SimulationManagerComponent.ControlledCompany.RemoveWorker(selectedWorker);
+        SharedWorker selectedWorker = ButtonWorkerDictionary[WorkersButtonSelector.GetSelectedButton()];
+        SimulationManagerComponent.ControlledCompany.RemoveWorker((LocalWorker)selectedWorker);
         WorkersMarketComponent.AddWorker(selectedWorker);
     }
 }

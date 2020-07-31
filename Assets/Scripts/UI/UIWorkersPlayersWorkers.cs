@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using ITCompanySimulation.Character;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
@@ -28,7 +29,7 @@ public class UIWorkersPlayersWorkers : UIWorkers
     /// <summary>
     /// Maps button in players list view to its coresponding worker
     /// </summary>
-    private Dictionary<Button, Worker> ListViewPlayersWorkersButtonWorkerMap = new Dictionary<Button, Worker>();
+    private Dictionary<Button, SharedWorker> ListViewPlayersWorkersButtonWorkerMap = new Dictionary<Button, SharedWorker>();
     /// <summary>
     /// Maps photon player to its index in players dropdown
     /// </summary>
@@ -45,7 +46,7 @@ public class UIWorkersPlayersWorkers : UIWorkers
     /// Adds buttons to list view with workers info from company of given
     /// players
     /// </summary>
-    private void AddPlayerWorkerButton(Worker playerWorker)
+    private void AddPlayerWorkerButton(SharedWorker playerWorker)
     {
         Button playerWorkerButton = GameObject.Instantiate<Button>(ListViewButtonPrefab);
 
@@ -72,22 +73,30 @@ public class UIWorkersPlayersWorkers : UIWorkers
         }
     }
 
-    private void OnOtherPlayerWorkerAdded(Worker addedWorker, PhotonPlayer player)
+    private void OnOtherPlayerWorkerAdded(SharedWorker worker, PhotonPlayer player)
     {
         if (DropdownPlayersListSelectedPlayer.ID == player.ID)
         {
-            AddPlayerWorkerButton(addedWorker);
+            AddPlayerWorkerButton(worker);
         }
     }
 
-    private void OnOtherPlayerWorkerRemoved(Worker removedWorker, PhotonPlayer player)
+    private void OnOtherPlayerWorkerRemoved(SharedWorker removedWorker, PhotonPlayer player)
     {
         if (DropdownPlayersListSelectedPlayer.ID == player.ID)
         {
-            Button removedWorkerButton = ListViewPlayersWorkersButtonWorkerMap.First(x => x.Value.ID == removedWorker.ID).Key;
-            ListViewPlayersWorkersButtonWorkerMap.Remove(removedWorkerButton);
-            ListViewPlayersWorkers.RemoveControl(removedWorkerButton.gameObject);
-            WorkersButtonSelector.RemoveButton(removedWorkerButton);
+            Button selectedWorkerButton = WorkersButtonSelector.GetSelectedButton();
+            SharedWorker selectedWorker = ListViewPlayersWorkersButtonWorkerMap[selectedWorkerButton];
+
+            List<SharedWorker> otherPlayerWorkers =
+                SimulationManagerComponent.OtherPlayersWorkers[DropdownPlayersListSelectedPlayer];
+
+            selectedWorker.Salary = selectedWorker.HireSalary;
+
+            otherPlayerWorkers.Remove(selectedWorker);
+            WorkersButtonSelector.RemoveButton(selectedWorkerButton);
+            ListViewPlayersWorkers.RemoveControl(selectedWorkerButton.gameObject);
+            ClearWorkerInfo();
         }
     }
 
@@ -105,9 +114,9 @@ public class UIWorkersPlayersWorkers : UIWorkers
 
     private void AddListViewPlayersWorkersButtons(PhotonPlayer otherPlayer)
     {
-        List<Worker> playerWorkers = SimulationManagerComponent.OtherPlayersWorkers[otherPlayer];
+        List<SharedWorker> playerWorkers = SimulationManagerComponent.OtherPlayersWorkers[otherPlayer];
 
-        foreach (Worker playerWorker in playerWorkers)
+        foreach (SharedWorker playerWorker in playerWorkers)
         {
             AddPlayerWorkerButton(playerWorker);
         }
@@ -119,7 +128,7 @@ public class UIWorkersPlayersWorkers : UIWorkers
 
         if (null != selectedButton)
         {
-            Worker selectedWorker = ListViewPlayersWorkersButtonWorkerMap[selectedButton];
+            SharedWorker selectedWorker = ListViewPlayersWorkersButtonWorkerMap[selectedButton];
             UpdateWorkerInfo(selectedWorker);
         }
         else
@@ -134,7 +143,7 @@ public class UIWorkersPlayersWorkers : UIWorkers
 
         if (false == PhotonNetwork.offlineMode)
         {
-            foreach (KeyValuePair<PhotonPlayer, List<Worker>> workersListPair in SimulationManagerComponent.OtherPlayersWorkers)
+            foreach (KeyValuePair<PhotonPlayer, List<SharedWorker>> workersListPair in SimulationManagerComponent.OtherPlayersWorkers)
             {
                 //No need to add local player
                 if (PhotonNetwork.player.ID == workersListPair.Key.ID)
@@ -154,7 +163,7 @@ public class UIWorkersPlayersWorkers : UIWorkers
         DropdownPlayersList.AddOptions(dropdownOptions);
     }
 
-    protected override void UpdateWorkerInfo(Worker selectedWorker)
+    protected override void UpdateWorkerInfo(SharedWorker selectedWorker)
     {
         base.UpdateWorkerInfo(selectedWorker);
 
@@ -166,18 +175,17 @@ public class UIWorkersPlayersWorkers : UIWorkers
     public void OnButtonHireWorkerClick()
     {
         Button selectedWorkerButton = WorkersButtonSelector.GetSelectedButton();
-        Worker selectedWorker = ListViewPlayersWorkersButtonWorkerMap[selectedWorkerButton];
-        List<Worker> otherPlayerWorkers =
-            SimulationManagerComponent.OtherPlayersWorkers[DropdownPlayersListSelectedPlayer];
-
-        selectedWorker.Salary = selectedWorker.HireSalary;
-
-        otherPlayerWorkers.Remove(selectedWorker);
-        WorkersButtonSelector.RemoveButton(selectedWorkerButton);
-        ListViewPlayersWorkers.RemoveControl(selectedWorkerButton.gameObject);
+        SharedWorker selectedWorker = ListViewPlayersWorkersButtonWorkerMap[selectedWorkerButton];
         SimulationManagerComponent.RemoveOtherPlayerControlledCompanyWorker(DropdownPlayersListSelectedPlayer, selectedWorker.ID);
-        ClearWorkerInfo();
-        SimulationManagerComponent.ControlledCompany.AddWorker(selectedWorker);
+
+        LocalWorker localSelectedWorker = selectedWorker as LocalWorker;
+
+        if (null == localSelectedWorker)
+        {
+            localSelectedWorker = new LocalWorker(selectedWorker);
+        }
+
+        SimulationManagerComponent.ControlledCompany.AddWorker(localSelectedWorker);
     }
 
     public override void OnPhotonPlayerDisconnected(PhotonPlayer otherPlayer)

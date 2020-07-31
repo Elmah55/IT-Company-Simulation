@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using ITCompanySimulation.Character;
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -92,7 +93,7 @@ public class UIDefaultView : MonoBehaviour
         return "Day " + days;
     }
 
-    private void OnControlledCompanyWorkerAddedOrRemoved(Worker companyWorker)
+    private void OnControlledCompanyWorkerAddedOrRemoved(SharedWorker companyWorker)
     {
         TextWorkersCount.text = GetWorkersCountText(SimulationManagerComponent.ControlledCompany.Workers.Count);
     }

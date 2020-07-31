@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using ITCompanySimulation.Character;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
@@ -31,8 +32,8 @@ public class UIWorkersCompanyWorkers : MonoBehaviour
     private Color32 DefaultWorkerButtonColor;
     //Used to update list view and button selector
     //when worker is added or removed from company
-    private Dictionary<Worker, Button> WorkerButtonMap = new Dictionary<Worker, Button>();
-    private Worker SelectedWorker;
+    private Dictionary<LocalWorker, Button> WorkerButtonMap = new Dictionary<LocalWorker, Button>();
+    private LocalWorker SelectedWorker;
 
     /*Public consts fields*/
 
@@ -40,7 +41,7 @@ public class UIWorkersCompanyWorkers : MonoBehaviour
 
     /*Private methods*/
 
-    private Button CreateWorkerButton(Worker companyWorker)
+    private Button CreateWorkerButton(LocalWorker companyWorker)
     {
         Button newWorkerButton = GameObject.Instantiate<Button>(ListViewWorkersButtonPrefab);
         Text buttonText = newWorkerButton.GetComponentInChildren<Text>();
@@ -51,7 +52,7 @@ public class UIWorkersCompanyWorkers : MonoBehaviour
         return newWorkerButton;
     }
 
-    private string CreateWorkerButtonText(Worker companyWorker)
+    private string CreateWorkerButtonText(LocalWorker companyWorker)
     {
         return string.Format("{0} {1} Satisfaction: {2}%",
                              companyWorker.Name, 
@@ -63,16 +64,16 @@ public class UIWorkersCompanyWorkers : MonoBehaviour
     {
         //First remove workers that were displayed previously since worker
         //collection might have changed
-        foreach (KeyValuePair<Worker, Button> worker in WorkerButtonMap)
+        foreach (KeyValuePair<LocalWorker, Button> worker in WorkerButtonMap)
         {
             RemoveWorkersListViewButton(worker.Key, false);
         }
 
         WorkerButtonMap.Clear();
 
-        List<Worker> companyWorkers = SimulationManagerComponent.ControlledCompany.Workers;
+        List<LocalWorker> companyWorkers = SimulationManagerComponent.ControlledCompany.Workers;
 
-        foreach (Worker companyWorker in companyWorkers)
+        foreach (LocalWorker companyWorker in companyWorkers)
         {
             CreateWorkersListViewButton(companyWorker);
         }
@@ -81,26 +82,27 @@ public class UIWorkersCompanyWorkers : MonoBehaviour
         OnSalaryRaiseAmountSliderValueChanged(SliderSalaryRaiseAmount.value);
     }
 
-    private void SubscribeToWorkerEvents(Worker companyWorker)
+    private void SubscribeToWorkerEvents(LocalWorker companyWorker)
     {
         companyWorker.AbilityUpdated += OnCompanyWorkerAbilityUpdated;
         companyWorker.SatisfactionChanged += UpdateWorkerInfo;
         companyWorker.DaysInCompanyChanged += UpdateWorkerInfo;
     }
 
-    private void UnsubscribeFromWorkerEvents(Worker companyWorker)
+    private void UnsubscribeFromWorkerEvents(LocalWorker companyWorker)
     {
         companyWorker.AbilityUpdated -= OnCompanyWorkerAbilityUpdated;
         companyWorker.SatisfactionChanged -= UpdateWorkerInfo;
         companyWorker.DaysInCompanyChanged -= UpdateWorkerInfo;
     }
 
-    private void OnCompanyWorkerAbilityUpdated(Worker companyWorker, ProjectTechnology workerAbility, float workerAbilityValue)
+    private void OnCompanyWorkerAbilityUpdated(SharedWorker worker, ProjectTechnology workerAbility, float workerAbilityValue)
     {
+        LocalWorker companyWorker = (LocalWorker)worker;
         UpdateWorkerInfo(companyWorker);
     }
 
-    private void CreateWorkersListViewButton(Worker companyWorker)
+    private void CreateWorkersListViewButton(LocalWorker companyWorker)
     {
         Button workerButton = CreateWorkerButton(companyWorker);
         WorkersButtonsSelector.AddButton(workerButton);
@@ -108,7 +110,7 @@ public class UIWorkersCompanyWorkers : MonoBehaviour
         WorkerButtonMap.Add(companyWorker, workerButton);
     }
 
-    private void RemoveWorkersListViewButton(Worker buttonWorker, bool removeFromMap = true)
+    private void RemoveWorkersListViewButton(LocalWorker buttonWorker, bool removeFromMap = true)
     {
         Button buttonToRemove = WorkerButtonMap[buttonWorker];
         WorkersButtonsSelector.RemoveButton(buttonToRemove);
@@ -120,7 +122,7 @@ public class UIWorkersCompanyWorkers : MonoBehaviour
         }
     }
 
-    private string CreateWorkerInfoString(Worker companyWorker)
+    private string CreateWorkerInfoString(LocalWorker companyWorker)
     {
         string workerInfo = string.Format("Name: {0}\n" +
                                           "Surename: {1}\n" +
@@ -151,7 +153,7 @@ public class UIWorkersCompanyWorkers : MonoBehaviour
                 UnsubscribeFromWorkerEvents(SelectedWorker);
             }
 
-            Worker companyWorker = WorkerButtonMap.First(x => x.Value == obj).Key;
+            LocalWorker companyWorker = WorkerButtonMap.First(x => x.Value == obj).Key;
             SelectedWorker = companyWorker;
             SubscribeToWorkerEvents(SelectedWorker);
             ButtonFireWorker.interactable = true;
@@ -174,21 +176,24 @@ public class UIWorkersCompanyWorkers : MonoBehaviour
         }
     }
 
-    private void OnControlledCompanyWorkerRemoved(Worker companyWorker)
+    private void OnControlledCompanyWorkerRemoved(SharedWorker worker)
     {
+        LocalWorker companyWorker = (LocalWorker)worker;
         RemoveWorkersListViewButton(companyWorker);
         companyWorker.SatisfactionChanged -= OnControlledCompanyWorkerSatisfactionChanged;
     }
 
-    private void OnControlledCompanyWorkerAdded(Worker companyWorker)
+    private void OnControlledCompanyWorkerAdded(SharedWorker worker)
     {
+        LocalWorker companyWorker = (LocalWorker)worker;
         CreateWorkersListViewButton(companyWorker);
         companyWorker.SatisfactionChanged += OnControlledCompanyWorkerSatisfactionChanged;
     }
 
 
-    private void UpdateWorkerInfo(Worker companyWorker)
+    private void UpdateWorkerInfo(SharedWorker worker)
     {
+        LocalWorker companyWorker = (LocalWorker)worker;
         TextWorkerInfo.text = CreateWorkerInfoString(companyWorker);
     }
 
@@ -199,14 +204,15 @@ public class UIWorkersCompanyWorkers : MonoBehaviour
         SimulationManagerComponent.ControlledCompany.WorkerRemoved += OnControlledCompanyWorkerRemoved;
         WorkersButtonsSelector.SelectedButtonChanged += OnWorkersButtonsSelectorSelectedButtonChanged;
 
-        foreach (Worker companyWorker in SimulationManagerComponent.ControlledCompany.Workers)
+        foreach (LocalWorker companyWorker in SimulationManagerComponent.ControlledCompany.Workers)
         {
             companyWorker.SatisfactionChanged += OnControlledCompanyWorkerSatisfactionChanged;
         }
     }
 
-    private void OnControlledCompanyWorkerSatisfactionChanged(Worker companyWorker)
+    private void OnControlledCompanyWorkerSatisfactionChanged(SharedWorker worker)
     {
+        LocalWorker companyWorker = (LocalWorker)worker;
         Button workerButton = WorkerButtonMap[companyWorker];
         Text buttonTextComponent = workerButton.GetComponentInChildren<Text>();
         buttonTextComponent.text = CreateWorkerButtonText(companyWorker);
@@ -241,7 +247,7 @@ public class UIWorkersCompanyWorkers : MonoBehaviour
     public void OnFireWorkerButtonClicked()
     {
         Button selectedButton = WorkersButtonsSelector.GetSelectedButton();
-        Worker workerToRemove = WorkerButtonMap.First(x => x.Value == selectedButton).Key;
+        LocalWorker workerToRemove = WorkerButtonMap.First(x => x.Value == selectedButton).Key;
         SimulationManagerComponent.ControlledCompany.RemoveWorker(workerToRemove);
     }
 
@@ -249,7 +255,7 @@ public class UIWorkersCompanyWorkers : MonoBehaviour
     {
         int salaryRaiseAmount = (int)SliderSalaryRaiseAmount.value;
         Button selectedButton = WorkersButtonsSelector.GetSelectedButton();
-        Worker companyWorker = WorkerButtonMap.First(x => x.Value == selectedButton).Key;
+        LocalWorker companyWorker = WorkerButtonMap.First(x => x.Value == selectedButton).Key;
         companyWorker.SetSalary(companyWorker.Salary + salaryRaiseAmount);
     }
 

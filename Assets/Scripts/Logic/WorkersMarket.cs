@@ -1,4 +1,5 @@
 ﻿using ExitGames.Client.Photon;
+using ITCompanySimulation.Character;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -54,7 +55,7 @@ public class WorkersMarket : Photon.PunBehaviour
     /// <summary>
     /// Workers available on market
     /// </summary>
-    public List<Worker> Workers { get; private set; } = new List<Worker>();
+    public List<SharedWorker> Workers { get; private set; } = new List<SharedWorker>();
     public event WorkerAction WorkerAdded;
     public event WorkerAction WorkerRemoved;
 
@@ -79,7 +80,7 @@ public class WorkersMarket : Photon.PunBehaviour
 
         while (Workers.Count != MaxWorkersOnMarket)
         {
-            Worker newWorker = GenerateSingleWorker();
+            SharedWorker newWorker = GenerateSingleWorker();
             Workers.Add(newWorker);
         }
 
@@ -90,7 +91,7 @@ public class WorkersMarket : Photon.PunBehaviour
 #endif
     }
 
-    private Worker GenerateSingleWorker()
+    private SharedWorker GenerateSingleWorker()
     {
         //Randomly selected name and surename for new worker
         string newWorkerName =
@@ -98,7 +99,7 @@ public class WorkersMarket : Photon.PunBehaviour
         string newWorkerSurename =
             WorkerData.Surenames[UnityEngine.Random.Range(0, WorkerData.Surenames.Count)];
 
-        Worker newMarketWorker = new Worker(newWorkerName, newWorkerSurename);
+        SharedWorker newMarketWorker = new SharedWorker(newWorkerName, newWorkerSurename);
 
         newMarketWorker.Abilites = CreateWorkerAbilities();
         newMarketWorker.ExperienceTime = CalculateWorkerExpierience(newMarketWorker);
@@ -136,7 +137,7 @@ public class WorkersMarket : Photon.PunBehaviour
                 {
                     int abilityIndex = UnityEngine.Random.Range(0, NUMBER_OF_PROJECT_TECHNOLOGIES);
                     ProjectTechnology newAbility = (ProjectTechnology)abilityIndex;
-                    float newAbilityValue = UnityEngine.Random.Range(0.0f, Worker.MAX_ABILITY_VALUE);
+                    float newAbilityValue = UnityEngine.Random.Range(0.0f, LocalWorker.MAX_ABILITY_VALUE);
                     uniqueAbility = (false == workerAbilities.ContainsKey(newAbility));
 
                     if (true == uniqueAbility)
@@ -152,9 +153,9 @@ public class WorkersMarket : Photon.PunBehaviour
         return workerAbilities;
     }
 
-    private int CalculateWorkerSalary(Worker newWorker)
+    private int CalculateWorkerSalary(SharedWorker newWorker)
     {
-        int workerSalary = Worker.BASE_SALARY;
+        int workerSalary = SharedWorker.BASE_SALARY;
         int expierienceBonus = newWorker.ExperienceTime * 6;
         int abilitiesBonus = 0;
 
@@ -169,7 +170,7 @@ public class WorkersMarket : Photon.PunBehaviour
         return workerSalary;
     }
 
-    private int CalculateWorkerExpierience(Worker newWorker)
+    private int CalculateWorkerExpierience(SharedWorker newWorker)
     {
         int workerExpierience = UnityEngine.Random.Range(0, 101);
 
@@ -184,7 +185,10 @@ public class WorkersMarket : Photon.PunBehaviour
     private void Start()
     {
         //Register type for sending workers available on market to other players
-        PhotonPeer.RegisterType(typeof(Worker), 0, Worker.Serialize, Worker.Deserialize);
+        //Needed to register both base and derived class of worker because photon API requires
+        //derived class to be register event when using base class argument in method
+        PhotonPeer.RegisterType(typeof(LocalWorker), NetworkingData.LOCAL_WORKER_BYTE_CODE, SharedWorker.Serialize, SharedWorker.Deserialize);
+        PhotonPeer.RegisterType(typeof(SharedWorker), NetworkingData.SHARED_WORKER_BYTE_CODE, SharedWorker.Serialize, SharedWorker.Deserialize);
 
         GameTimeComponent = GetComponent<GameTime>();
         GameTimeComponent.DayChanged += OnGameTimeDayChanged;
@@ -196,7 +200,7 @@ public class WorkersMarket : Photon.PunBehaviour
             MaxWorkersOnMarket = CalculateMaxWorkersOnMarket();
             GenerateWorkers();
 
-            foreach (Worker singleWorker in Workers)
+            foreach (SharedWorker singleWorker in Workers)
             {
                 this.photonView.RPC("AddWorkerInternal", PhotonTargets.Others, singleWorker);
             }
@@ -211,7 +215,7 @@ public class WorkersMarket : Photon.PunBehaviour
 
             if (randomNuber <= WORKER_ADD_PROBABILITY_DAILY)
             {
-                Worker newWorker = GenerateSingleWorker();
+                SharedWorker newWorker = GenerateSingleWorker();
                 AddWorker(newWorker);
             }
         }
@@ -220,7 +224,7 @@ public class WorkersMarket : Photon.PunBehaviour
     [PunRPC]
     public void AddWorkerInternal(object workerToAdd)
     {
-        Worker workerObject = (Worker)workerToAdd;
+        SharedWorker workerObject = (SharedWorker)workerToAdd;
         this.Workers.Add(workerObject);
         this.WorkerAdded?.Invoke(workerObject);
     }
@@ -228,7 +232,7 @@ public class WorkersMarket : Photon.PunBehaviour
     [PunRPC]
     private void RemoveWorkerInternal(int workerID)
     {
-        Worker workerToRemove = null;
+        SharedWorker workerToRemove = null;
 
         for (int i = 0; i < Workers.Count; i++)
         {
@@ -245,12 +249,12 @@ public class WorkersMarket : Photon.PunBehaviour
 
     /*Public methods*/
 
-    public void RemoveWorker(Worker workerToRemove)
+    public void RemoveWorker(SharedWorker workerToRemove)
     {
         this.photonView.RPC("RemoveWorkerInternal", PhotonTargets.All, workerToRemove.ID);
     }
 
-    public void AddWorker(Worker workerToAdd)
+    public void AddWorker(SharedWorker workerToAdd)
     {
         this.photonView.RPC("AddWorkerInternal", PhotonTargets.All, workerToAdd);
     }
@@ -261,7 +265,7 @@ public class WorkersMarket : Photon.PunBehaviour
 
         if (true == PhotonNetwork.isMasterClient)
         {
-            foreach (Worker singleWorker in Workers)
+            foreach (LocalWorker singleWorker in Workers)
             {
                 this.photonView.RPC("AddWorkerInternal", newPlayer, singleWorker);
             }

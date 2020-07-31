@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ITCompanySimulation.Character;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -42,7 +43,7 @@ public class PlayerCompany : Company
             BalanceChanged?.Invoke(m_Balance);
         }
     }
-    public List<Worker> Workers { get; private set; }
+    public List<LocalWorker> Workers { get; private set; }
     /// <summary>
     /// List of scrum processes for this company. Every project
     /// has its own scrum instance
@@ -60,7 +61,7 @@ public class PlayerCompany : Company
 
     public PlayerCompany(string name, GameObject scriptsGameObject) : base(name)
     {
-        Workers = new List<Worker>();
+        Workers = new List<LocalWorker>();
         ScrumProcesses = new List<Scrum>();
         this.ScriptsGameObject = scriptsGameObject;
     }
@@ -80,7 +81,7 @@ public class PlayerCompany : Company
 #endif
     }
 
-    public void AddWorker(Worker workerToAdd)
+    public void AddWorker(LocalWorker workerToAdd)
     {
         Workers.Add(workerToAdd);
         workerToAdd.WorkingCompany = this;
@@ -94,7 +95,7 @@ public class PlayerCompany : Company
 #endif
     }
 
-    public void RemoveWorker(Worker workerToRemove)
+    public void RemoveWorker(LocalWorker workerToRemove)
     {
         Workers.Remove(workerToRemove);
         workerToRemove.WorkingCompany = null;

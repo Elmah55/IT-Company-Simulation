@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ITCompanySimulation.Character;
+using System;
 using System.Collections;
 using UnityEngine;
 
@@ -92,7 +93,7 @@ public class Scrum : MonoBehaviour
     {
         float projectProgressValue = 0.0f;
 
-        foreach (Worker projectWorker in BindedProject.Workers)
+        foreach (LocalWorker projectWorker in BindedProject.Workers)
         {
             if (true == projectWorker.Available)
             {
@@ -105,7 +106,7 @@ public class Scrum : MonoBehaviour
 
     private void UpdateProjectWorkersAbilites()
     {
-        foreach (Worker projectWorker in BindedProject.Workers)
+        foreach (LocalWorker projectWorker in BindedProject.Workers)
         {
             if (true == projectWorker.Available)
             {
@@ -119,7 +120,7 @@ public class Scrum : MonoBehaviour
 
     private void UpdateProjectWorkersExpierience()
     {
-        foreach (Worker projectWorker in BindedProject.Workers)
+        foreach (LocalWorker projectWorker in BindedProject.Workers)
         {
             if (true == projectWorker.Available)
             {
@@ -167,8 +168,10 @@ public class Scrum : MonoBehaviour
         SimulationManagerComponent.ControlledCompany.WorkerRemoved += OnControlledCompanyWorkerRemoved;
     }
 
-    private void OnControlledCompanyWorkerRemoved(Worker companyWorker)
+    private void OnControlledCompanyWorkerRemoved(SharedWorker worker)
     {
+        LocalWorker companyWorker = (LocalWorker)worker;
+
         if (BindedProject == companyWorker.AssignedProject)
         {
             //TODO: Make leaving project event fire first (before worker leaves company).

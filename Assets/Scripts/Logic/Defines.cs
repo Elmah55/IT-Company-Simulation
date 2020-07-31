@@ -1,4 +1,4 @@
-﻿using System;
+﻿using ITCompanySimulation.Character;
 using System.Collections.Generic;
 
 /// <summary>
@@ -53,16 +53,6 @@ public enum RoomLobbyPlayerState
     NotReady
 }
 
-/// <summary>
-/// Reason of worker not being able to
-/// work
-/// </summary>
-public enum WorkerAbsenceReason
-{
-    Sickness,
-    Holiday
-}
-
 public enum SprintStage
 {
     Planning,
@@ -75,12 +65,6 @@ public enum SimulationFinishReason
     PlayerCompanyReachedTargetBalance,
     PlayerCompanyReachedMinimalBalance,
     OnePlayerInRoom
-}
-
-public enum WorkerAttribute
-{
-    Salary,
-    DaysOfHolidaysLeft
 }
 
 public enum SimulationEventNotificationPriority
@@ -101,6 +85,21 @@ namespace ITCompanySimulation.Character
         StandW,
         StandE,
         StandN
+    }
+
+    public enum WorkerAttribute
+    {
+        Salary
+    }
+
+    /// <summary>
+    /// Reason of worker not being able to
+    /// work
+    /// </summary>
+    public enum WorkerAbsenceReason
+    {
+        Sickness,
+        Holiday
     }
 }
 
@@ -168,15 +167,16 @@ public static class NetworkingData
     /// <summary>
     /// Bytes codes used for sending custom type data between clients
     /// </summary>
-    public const byte WORKER_BYTE_CODE = 0;
-    public const byte PROJECT_BYTE_CODE = 1;
+    public const byte SHARED_WORKER_BYTE_CODE = 0;
+    public const byte LOCAL_WORKER_BYTE_CODE = 1;
+    public const byte PROJECT_BYTE_CODE = 2;
 }
 
 /*Delegates*/
 public delegate void ProjectAction(Project proj);
 public delegate void LoanAction(BankLoan load);
-public delegate void WorkerAction(Worker companyWorker);
-public delegate void WorkerAbilityAction(Worker companyWorker, ProjectTechnology workerAbility, float workerAbilityValue);
-public delegate void MultiplayerWorkerAction(Worker playerWorker, PhotonPlayer player);
+public delegate void WorkerAction(SharedWorker companyWorker);
+public delegate void WorkerAbilityAction(SharedWorker companyWorker, ProjectTechnology workerAbility, float workerAbilityValue);
+public delegate void MultiplayerWorkerAction(SharedWorker playerWorker, PhotonPlayer player);
 public delegate void ScrumAtion(Scrum scrumObj);
 public delegate void PhotonPlayerAction(PhotonPlayer player);

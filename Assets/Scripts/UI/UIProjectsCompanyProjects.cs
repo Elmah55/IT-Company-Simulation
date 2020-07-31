@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using TMPro;
+using ITCompanySimulation.Character;
 
 public class UIProjectsCompanyProjects : MonoBehaviour
 {
@@ -15,13 +16,13 @@ public class UIProjectsCompanyProjects : MonoBehaviour
     /// <summary>
     /// List of workers buttons with each button mapped to its worker
     /// </summary>
-    private Dictionary<Button, Worker> ButtonWorkerMap = new Dictionary<Button, Worker>();
+    private Dictionary<Button, LocalWorker> ButtonWorkerMap = new Dictionary<Button, LocalWorker>();
     /// <summary>
     /// This will map ID of project to index in projects dropdown
     /// </summary>
     private Dictionary<int, int> ProjectIDDropdownIndexMap = new Dictionary<int, int>();
-    private Worker SelectedAvailableWorker;
-    private Worker SelectedAssignedWorker;
+    private LocalWorker SelectedAvailableWorker;
+    private LocalWorker SelectedAssignedWorker;
     private IButtonSelector AvailableWorkersButtonSelector = new ButtonSelector();
     private IButtonSelector AssignedWorkersButtonSelector = new ButtonSelector();
     [SerializeField]
@@ -75,7 +76,7 @@ public class UIProjectsCompanyProjects : MonoBehaviour
     /// Creates button that will be added to list view
     /// with workers
     /// </summary>
-    private Button CreateWorkerButton(Worker workerData)
+    private Button CreateWorkerButton(LocalWorker workerData)
     {
         Button createdButton = GameObject.Instantiate<Button>(ListViewButtonPrefab);
 
@@ -110,7 +111,7 @@ public class UIProjectsCompanyProjects : MonoBehaviour
 
     private void AddAvailableWorkersListViewButtons()
     {
-        foreach (Worker companyWorker in SimulationManagerComponent.ControlledCompany.Workers)
+        foreach (LocalWorker companyWorker in SimulationManagerComponent.ControlledCompany.Workers)
         {
             //Add only workers that dont have assigned any project
             //Available worker is considered worker without project assigned
@@ -121,16 +122,16 @@ public class UIProjectsCompanyProjects : MonoBehaviour
         }
     }
 
-    private void RemoveWorkerListViewButton(Worker companyWorker)
+    private void RemoveWorkerListViewButton(SharedWorker companyWorker)
     {
         //Check if button was not removed when player left company.
         //First event will be called when player leaves company and
         //then when he leaves company he leaves projects 1st so another
         //event will be fired
-        KeyValuePair<Button, Worker> buttonWorkerPair =
+        KeyValuePair<Button, LocalWorker> buttonWorkerPair =
             ButtonWorkerMap.FirstOrDefault(x => x.Value == companyWorker);
 
-        if (false == buttonWorkerPair.Equals(default(KeyValuePair<Button, Worker>)))
+        if (false == buttonWorkerPair.Equals(default(KeyValuePair<Button, LocalWorker>)))
         {
             ButtonWorkerMap.Remove(buttonWorkerPair.Key);
             RemoveWorkerListViewButton(buttonWorkerPair.Key);
@@ -159,7 +160,7 @@ public class UIProjectsCompanyProjects : MonoBehaviour
     /// to available workers list view since worker that was just added to company
     /// will not have any project assigned
     /// </summary>
-    private void AddWorkerListViewButton(Worker companyWorker)
+    private void AddWorkerListViewButton(LocalWorker companyWorker)
     {
         Button createdButton = CreateWorkerButton(companyWorker);
 
@@ -168,8 +169,9 @@ public class UIProjectsCompanyProjects : MonoBehaviour
         AvailableWorkersButtonSelector.AddButton(createdButton);
     }
 
-    private void OnCompanyWorkerAdded(Worker addedWorker)
+    private void OnCompanyWorkerAdded(SharedWorker worker)
     {
+        LocalWorker addedWorker = (LocalWorker)worker;
         //Worker that just has been added to company doesn't
         //have assigned project so its available worker
         AddWorkerListViewButton(addedWorker);
@@ -182,7 +184,7 @@ public class UIProjectsCompanyProjects : MonoBehaviour
         //for other project
         AssignedWorkersControlList.RemoveAllControls();
 
-        foreach (Worker projectWorker in SelectedProjectScrum.BindedProject.Workers)
+        foreach (LocalWorker projectWorker in SelectedProjectScrum.BindedProject.Workers)
         {
             Button createdButton = CreateWorkerButton(projectWorker);
 
@@ -361,8 +363,9 @@ public class UIProjectsCompanyProjects : MonoBehaviour
         ProjectsListDropdown.options[projectDropdownIndex].text = GetProjectListDropdownOptionText(proj);
     }
 
-    private void OnSelectedProjectWorkerRemoved(Worker companyWorker)
+    private void OnSelectedProjectWorkerRemoved(SharedWorker worker)
     {
+        LocalWorker companyWorker = (LocalWorker)worker;
         Button selectedWorkerListButton = AssignedWorkersButtonSelector.GetSelectedButton();
 
         //Check if worker left project because he left company
@@ -383,7 +386,7 @@ public class UIProjectsCompanyProjects : MonoBehaviour
         SetProjectButtons();
     }
 
-    private void OnSelectedProjectWorkerAdded(Worker companyWorker)
+    private void OnSelectedProjectWorkerAdded(SharedWorker companyWorker)
     {
         Button selectedWorkerListButton = AvailableWorkersButtonSelector.GetSelectedButton();
         MoveWorkersListButton(AvailableWorkersControlList,
@@ -419,7 +422,7 @@ public class UIProjectsCompanyProjects : MonoBehaviour
 
     private void SetWorkerButtonTooltipText(Button buttonUnderPointer)
     {
-        Worker buttonWorker = ButtonWorkerMap.First(x => x.Key.GetInstanceID() == buttonUnderPointer.GetInstanceID()).Value;
+        LocalWorker buttonWorker = ButtonWorkerMap.First(x => x.Key.GetInstanceID() == buttonUnderPointer.GetInstanceID()).Value;
 
         string tooltipString = "Abilities\n";
         foreach (KeyValuePair<ProjectTechnology, float> workerAbility in buttonWorker.Abilites)

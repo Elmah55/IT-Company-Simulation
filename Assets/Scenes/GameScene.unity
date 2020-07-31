@@ -8152,7 +8152,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 48033cb840be67a4392f198500bc15ac, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  NumberOfWorkersGeneratedInOfflineMode: 730
+  NumberOfWorkersGeneratedInOfflineMode: 2
 --- !u!114 &746702002
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -8177,7 +8177,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bbd0954bdfbefb143abb18a9973e9a06, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  NumberOfProjectsGeneratedInOfflineMode: 872
+  NumberOfProjectsGeneratedInOfflineMode: 5
 --- !u!114 &746702004
 MonoBehaviour:
   m_ObjectHideFlags: 0
