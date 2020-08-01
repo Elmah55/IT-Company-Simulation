@@ -57,8 +57,14 @@ public class UIDefaultView : MonoBehaviour
         SimulationManagerComponent.ControlledCompany.WorkerAdded += OnControlledCompanyWorkerAddedOrRemoved;
         SimulationManagerComponent.ControlledCompany.WorkerRemoved += OnControlledCompanyWorkerAddedOrRemoved;
         SimulationManagerComponent.NotificatorComponent.NotificationReceived += OnNotificationReceived;
+        SimulationManagerComponent.SettingsUpdated += OnSimulationSettingsUpdated;
         TextCompanyBalance.text = GetCompanyBalanceText(SimulationManagerComponent.ControlledCompany.Balance);
         TextWorkersCount.text = GetWorkersCountText(SimulationManagerComponent.ControlledCompany.Workers.Count);
+    }
+
+    private void OnSimulationSettingsUpdated(SimulationSettings obj)
+    {
+        TextCompanyBalance.text = GetCompanyBalanceText(SimulationManagerComponent.ControlledCompany.Balance);
     }
 
     private void OnNotificationReceived(SimulationEventNotification notification)
@@ -78,7 +84,7 @@ public class UIDefaultView : MonoBehaviour
     {
         return string.Format("Money: {0} $ ({1} $) ",
                              companyBalance,
-                             SimulationManagerComponent.GameManagerComponent.SettingsOfSimulation.TargetBalance);
+                             SimulationManagerComponent.Settings.TargetBalance);
     }
 
     private string GetWorkersCountText(int workersCount)

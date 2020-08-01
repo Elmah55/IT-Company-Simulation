@@ -63,7 +63,7 @@ public class MainGameManager : Photon.PunBehaviour
     /// room and default room and simulation settings will be set
     /// </summary>
     public bool UseRoom;
-    public SimulationSettings SettingsOfSimulation { get; private set; } = new SimulationSettings();
+    public SimulationSettings SettingsOfSimulation { get; set; } = new SimulationSettings();
 
     /*Private methods*/
 

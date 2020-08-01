@@ -18,7 +18,6 @@ public class MainSimulationManager : Photon.PunBehaviour
     private PlayerInfo PlayerInfoComponent;
     private GameTime GameTimeComponent;
 
-
     /*Public consts fields*/
 
     /*Public fields*/
@@ -31,6 +30,7 @@ public class MainSimulationManager : Photon.PunBehaviour
     public MainGameManager GameManagerComponent { get; private set; }
     public PlayerCompany ControlledCompany { get; private set; }
     public SimulationEventNotificator NotificatorComponent { get; private set; }
+    public SimulationSettings Settings { get; private set; }
     /// <summary>
     /// Invoked when any of player has reached the target balance
     /// and won game
@@ -54,6 +54,7 @@ public class MainSimulationManager : Photon.PunBehaviour
     /// <summary>
     /// This will map ID of photon player to list of player that his company has.
     /// </summary>
+    public event Action<SimulationSettings> SettingsUpdated;
     public Dictionary<PhotonPlayer, List<SharedWorker>> OtherPlayersWorkers { get; private set; } = new Dictionary<PhotonPlayer, List<SharedWorker>>();
     /// <summary>
     /// True when any of player has won the game
@@ -80,6 +81,18 @@ public class MainSimulationManager : Photon.PunBehaviour
             }
 
             OtherPlayersWorkers.Add(player, new List<SharedWorker>());
+        }
+    }
+
+    private void SynchronizeSimulationSettings()
+    {
+        if (true == PhotonNetwork.isMasterClient)
+        {
+            this.photonView.RPC("SetSimulationSettingsRPC",
+                                PhotonTargets.Others, 
+                                Settings.MinimalBalance, 
+                                Settings.InitialBalance, 
+                                Settings.TargetBalance);
         }
     }
 
@@ -226,6 +239,7 @@ public class MainSimulationManager : Photon.PunBehaviour
 #endif
     }
 
+    [PunRPC]
     private void OnOtherPlayerControlledCompanyMinimalBalanceReachedRPC(int photonPlayerID)
     {
         KeyValuePair<PhotonPlayer, List<SharedWorker>> workerPair = OtherPlayersWorkers.First(x => x.Key.ID == photonPlayerID);
@@ -261,6 +275,15 @@ public class MainSimulationManager : Photon.PunBehaviour
         this.WinnerPhotonPlayerID = winnerPhotonPlayerID;
         this.FinishReason = (SimulationFinishReason)finishReason;
         SimulationFinished?.Invoke(winnerPhotonPlayerID, (SimulationFinishReason)finishReason);
+    }
+
+    [PunRPC]
+    private void SetSimulationSettingsRPC(int minimalBalance,int initialBalance, int targetBalance)
+    {
+        Settings = new SimulationSettings(initialBalance, targetBalance, minimalBalance);
+        GameManagerComponent.SettingsOfSimulation = Settings;
+        ControlledCompany.Balance = Settings.InitialBalance;
+        SettingsUpdated?.Invoke(Settings);
     }
 
     /*Public methods*/
@@ -299,8 +322,10 @@ public class MainSimulationManager : Photon.PunBehaviour
         PlayerInfoComponent = gameManagerObject.GetComponent<PlayerInfo>();
         GameTimeComponent = GetComponent<GameTime>();
         NotificatorComponent = new SimulationEventNotificator(GameTimeComponent);
+        Settings = GameManagerComponent.SettingsOfSimulation;   
 
         InitPlayersWorkers();
+        SynchronizeSimulationSettings();
         //TEST
         CreateCompany();
     }

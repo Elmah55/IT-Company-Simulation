@@ -84,6 +84,8 @@ public class GameTime : Photon.PunBehaviour
     private void StartTime(int day, int month, int year)
     {
         CurrentTime = new DateTime(year, month, day);
+        //Inform all subscribers right after receiving new date from master client
+        DayChanged?.Invoke();
         StartCoroutine(UpdateGameTime());
     }
 
