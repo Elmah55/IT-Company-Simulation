@@ -8056,6 +8056,7 @@ GameObject:
   - component: {fileID: 746702003}
   - component: {fileID: 746702004}
   - component: {fileID: 746701999}
+  - component: {fileID: 746702005}
   m_Layer: 0
   m_Name: Scripts
   m_TagString: Untagged
@@ -8152,7 +8153,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 48033cb840be67a4392f198500bc15ac, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  NumberOfWorkersGeneratedInOfflineMode: 2
+  NumberOfWorkersGeneratedInOfflineMode: 91
 --- !u!114 &746702002
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -8177,7 +8178,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bbd0954bdfbefb143abb18a9973e9a06, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  NumberOfProjectsGeneratedInOfflineMode: 5
+  NumberOfProjectsGeneratedInOfflineMode: 94
 --- !u!114 &746702004
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -8190,6 +8191,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a9f4ab4a6cd6c2f4996645722d210f73, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &746702005
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 746701995}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 04da2893f82575a429cbd9d1a590bcd7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  CharacterPrefab: {fileID: 7488450129138211252, guid: 73269513e30e29a48af6dada8ce121fb,
+    type: 3}
 --- !u!1 &755818045
 GameObject:
   m_ObjectHideFlags: 0
