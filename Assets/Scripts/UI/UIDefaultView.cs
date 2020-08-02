@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
-using UnityEngine.UI;
 
 /// <summary>
 /// This class handles UI for default view. This is the main view and is
@@ -18,20 +17,24 @@ public class UIDefaultView : MonoBehaviour
     /// Displays current date in game
     /// </summary>
     [SerializeField]
-    private Text TextDate;
+    private TextMeshProUGUI TextDate;
     /// <summary>
     /// Displays how many days have passed since start of simulation
     /// </summary>
     [SerializeField]
-    Text TextDaysSinceStart;
+    private TextMeshProUGUI TextDaysSinceStart;
     /// <summary>
     /// Displays number of workers in company controlled
     /// by player
     /// </summary>
     [SerializeField]
-    private Text TextWorkersCount;
+    private TextMeshProUGUI TextWorkersCount;
     [SerializeField]
-    private Text TextCompanyBalance;
+    private TextMeshProUGUI TextCompanyBalanceCurrent;
+    [SerializeField]
+    private TextMeshProUGUI TextCompanyBalanceMinimal;
+    [SerializeField]
+    private TextMeshProUGUI TextCompanyBalanceTarget;
     [SerializeField]
     private GameTime GameTimeComponent;
     [SerializeField]
@@ -58,13 +61,20 @@ public class UIDefaultView : MonoBehaviour
         SimulationManagerComponent.ControlledCompany.WorkerRemoved += OnControlledCompanyWorkerAddedOrRemoved;
         SimulationManagerComponent.NotificatorComponent.NotificationReceived += OnNotificationReceived;
         SimulationManagerComponent.SettingsUpdated += OnSimulationSettingsUpdated;
-        TextCompanyBalance.text = GetCompanyBalanceText(SimulationManagerComponent.ControlledCompany.Balance);
+        SetBalanceTexts();
         TextWorkersCount.text = GetWorkersCountText(SimulationManagerComponent.ControlledCompany.Workers.Count);
     }
 
     private void OnSimulationSettingsUpdated(SimulationSettings obj)
     {
-        TextCompanyBalance.text = GetCompanyBalanceText(SimulationManagerComponent.ControlledCompany.Balance);
+        SetBalanceTexts();
+    }
+
+    private void SetBalanceTexts()
+    {
+        TextCompanyBalanceCurrent.text = GetCompanyBalanceText(SimulationManagerComponent.ControlledCompany.Balance);
+        TextCompanyBalanceMinimal.text = GetMinimalBalanceText(SimulationManagerComponent.Settings.MinimalBalance);
+        TextCompanyBalanceTarget.text = GetTargetBalanceText(SimulationManagerComponent.Settings.TargetBalance);
     }
 
     private void OnNotificationReceived(SimulationEventNotification notification)
@@ -82,9 +92,20 @@ public class UIDefaultView : MonoBehaviour
 
     private string GetCompanyBalanceText(int companyBalance)
     {
-        return string.Format("Money: {0} $ ({1} $) ",
-                             companyBalance,
-                             SimulationManagerComponent.Settings.TargetBalance);
+        return string.Format("Balance: {0} $",
+                             companyBalance);
+    }
+
+    private string GetTargetBalanceText(int target)
+    {
+        return string.Format("Target: {0} $",
+                             target);
+    }
+
+    private string GetMinimalBalanceText(int minimal)
+    {
+        return string.Format("Minimal: {0} $",
+                             minimal);
     }
 
     private string GetWorkersCountText(int workersCount)
@@ -106,7 +127,7 @@ public class UIDefaultView : MonoBehaviour
 
     private void OnControlledCompanyBalanceChanged(int newBalance)
     {
-        TextCompanyBalance.text = GetCompanyBalanceText(newBalance);
+        TextCompanyBalanceCurrent.text = GetCompanyBalanceText(newBalance);
     }
 
     private void OnGameTimeDayChanged()
