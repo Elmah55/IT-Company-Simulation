@@ -80,6 +80,7 @@ namespace ITCompanySimulation.Character
             {
                 GameObject newCharacter = GameObject.Instantiate(CharacterPrefab, spawnPos, Quaternion.identity);
                 companyWorker.PhysicalCharacter = newCharacter;
+                SpawnedCharacters.Add(companyWorker);
             }
         }
 
