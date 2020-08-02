@@ -38,7 +38,7 @@ namespace ITCompanySimulation.Character
         ///                                    
         /// TODO: Calculate these vector based on tilemap tile's postion (vector between 2 tiles positon)
         /// </summary>
-        private static Dictionary<CharacterMovement, Vector2> DirectionToVector2 = new Dictionary<CharacterMovement, Vector2>()
+        private static Dictionary<CharacterMovement, Vector2> DirectionToVector = new Dictionary<CharacterMovement, Vector2>()
         {
             {CharacterMovement.RunN,(Vector2.up+Vector2.left).normalized},
             {CharacterMovement.RunS,(Vector2.down+Vector2.right).normalized},
@@ -104,9 +104,41 @@ namespace ITCompanySimulation.Character
 
         /*Private methods*/
 
-        private void OnCollisionEnter(Collision collision)
+        private void OnCollisionEnter2D(Collision2D collision)
         {
-            //TODO: Add avoiding obstacles
+            //TODO: Improve avoiding obstacles. Right now character
+            //sometimes get stuck or walks into the obstacle
+
+            //This variable will hold longest distance to collider hit by ray.
+            //Raycast will be executed in every direction except the one that
+            //character is facing currently. When characters hits collider, 
+            //direction with longest possible movement without colliding will be
+            //found and character will start moving that direction
+            float longestDistance = float.MinValue;
+            CharacterMovement bestDirection = CharacterMovement.RunE;
+
+            for (int i = 0; i < 4; i++)
+            {
+                CharacterMovement direction = (CharacterMovement)i;
+
+                if (CharacterLastDirection == direction)
+                {
+                    continue;
+                }
+
+                ContactPoint2D contact = collision.GetContact(0);
+                Vector2 rayDirection = DirectionToVector[direction];
+
+                RaycastHit2D hit = Physics2D.Raycast(contact.point, rayDirection);
+
+                if (hit.distance >= longestDistance)
+                {
+                    longestDistance = hit.distance;
+                    bestDirection = direction;
+                }
+            }
+
+            ChangeDirection(bestDirection);
         }
 
         private void FixedUpdate()
@@ -137,29 +169,50 @@ namespace ITCompanySimulation.Character
             //Its time to stand for a while
             if ((Time.time - LastNotMovingStop) >= StartNotMovingTime)
             {
-                Moving = false;
-                NotMovingTime = Random.Range(4f, 7f);
-                LastNotMovingStart = Time.time;
-                //+4 is offset to get standing movement of given direction i.e (RunW + 4) -> StandW
-                CharacterMovement standingDirection = (CharacterMovement)((int)CharacterLastDirection + 4);
-                CharRenderer.SetCharaterDirection(standingDirection);
+                StopMoving();
             }
 
             //Time to change direction
             if ((Time.time - LastChangeOfDirectionTime) >= ChangeOfDirectionTime)
             {
-                ChangeOfDirectionTime = Random.Range(3f, 5f);
-                int randomDirectionIndex = Random.Range(0, 4);
-                CharacterMovement randomDirection = (CharacterMovement)randomDirectionIndex;
-                CharacterLastDirection = randomDirection;
-                LastChangeOfDirectionTime = Time.time;
+                ChangeDirectionRandom();
             }
 
             CurrentPosition = CharRigidbody.position;
-            Vector2 movementVec = DirectionToVector2[CharacterLastDirection];
+            Vector2 movementVec = DirectionToVector[CharacterLastDirection];
             CharacterLastVector = CurrentPosition + movementVec * MovementSpeed * Time.fixedDeltaTime;
             CharRenderer.SetCharaterDirection(CharacterLastDirection);
             CharRigidbody.MovePosition(CharacterLastVector);
+        }
+
+        /// <summary>
+        /// Changes character's to specified direction
+        /// </summary>
+        private void ChangeDirection(CharacterMovement dir)
+        {
+            ChangeOfDirectionTime = Random.Range(3f, 5f);
+            CharacterLastDirection = dir;
+            LastChangeOfDirectionTime = Time.time;
+        }
+
+        /// <summary>
+        /// Changes character's direction to random direction
+        /// </summary>
+        private void ChangeDirectionRandom()
+        {
+            int randomDirectionIndex = Random.Range(0, 4);
+            CharacterMovement randomDirection = (CharacterMovement)randomDirectionIndex;
+            ChangeDirection(randomDirection);
+        }
+
+        private void StopMoving()
+        {
+            Moving = false;
+            NotMovingTime = Random.Range(4f, 7f);
+            LastNotMovingStart = Time.time;
+            //+4 is offset to get standing movement of given direction i.e (RunW + 4) -> StandW
+            CharacterMovement standingDirection = (CharacterMovement)((int)CharacterLastDirection + 4);
+            CharRenderer.SetCharaterDirection(standingDirection);
         }
 
         private void Start()

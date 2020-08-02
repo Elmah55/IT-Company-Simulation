@@ -67,7 +67,7 @@ namespace ITCompanySimulation.Character
                 {
 #if DEVELOPMENT_BUILD || UNITY_EDITOR
                     string debugInfo =
-                        string.Format("[{0}] Failed to spawn character in game world after {1} retires",
+                        string.Format("[{0}] Failed to spawn character in game world after {1} retries",
                                       this.GetType().Name,
                                       MAX_SPAWN_RETRIES);
                     Debug.Log(debugInfo);
