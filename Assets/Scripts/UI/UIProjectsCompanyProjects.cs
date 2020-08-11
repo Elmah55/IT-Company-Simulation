@@ -249,9 +249,12 @@ namespace ITCompanySimulation.UI
 
         private void OnGameTimeComponentDayChanged()
         {
-            foreach (KeyValuePair<LocalWorker,ListViewElement> item in WorkerListViewMap)
+            if (null != WorkerListViewMap)
             {
-                item.Value.Text.text = GetWorkerListViewElementText(item.Key);
+                foreach (KeyValuePair<LocalWorker, ListViewElement> item in WorkerListViewMap)
+                {
+                    item.Value.Text.text = GetWorkerListViewElementText(item.Key);
+                }
             }
         }
 
