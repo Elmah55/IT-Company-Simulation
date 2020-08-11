@@ -124,9 +124,10 @@ namespace ITCompanySimulation.Developing
         {
             foreach (LocalWorker projectWorker in BindedProject.Workers)
             {
-                if (true == projectWorker.Available)
+                if (true == projectWorker.Available
+                    && true == BindedProject.Active)
                 {
-                    projectWorker.ExperienceTime++;
+                    ++projectWorker.ExperienceTime;
                 }
             }
         }
@@ -280,5 +281,5 @@ namespace ITCompanySimulation.Developing
 
             return daysToCompletionGameTime;
         }
-    } 
+    }
 }
