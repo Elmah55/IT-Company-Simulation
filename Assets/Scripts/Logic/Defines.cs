@@ -1,5 +1,6 @@
 ﻿using ITCompanySimulation.Character;
 using System.Collections.Generic;
+using UnityEngine;
 
 /// <summary>
 /// This file contains definitons of enum and types used
@@ -173,10 +174,20 @@ public static class NetworkingData
 }
 
 /*Delegates*/
-public delegate void ProjectAction(Project proj);
+
+namespace ITCompanySimulation.Developing
+{
+    public delegate void ProjectAction(Project proj);
+    public delegate void ScrumAtion(Scrum scrumObj);
+}
+
+namespace ITCompanySimulation.UI
+{
+    public delegate void ParentChangeAction(GameObject obj, GameObject newParent);
+}
+
 public delegate void LoanAction(BankLoan load);
 public delegate void WorkerAction(SharedWorker companyWorker);
 public delegate void WorkerAbilityAction(SharedWorker companyWorker, ProjectTechnology workerAbility, float workerAbilityValue);
 public delegate void MultiplayerWorkerAction(SharedWorker playerWorker, PhotonPlayer player);
-public delegate void ScrumAtion(Scrum scrumObj);
 public delegate void PhotonPlayerAction(PhotonPlayer player);

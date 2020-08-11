@@ -5926,7 +5926,7 @@ PrefabInstance:
     - target: {fileID: 8872036503107201713, guid: a55daa6e907c9524db0bf2a8a219ae5e,
         type: 3}
       propertyPath: SimulationTimeScale
-      value: 1
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 8872036503107201713, guid: a55daa6e907c9524db0bf2a8a219ae5e,
         type: 3}

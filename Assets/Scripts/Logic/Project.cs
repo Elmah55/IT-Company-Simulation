@@ -1,4 +1,5 @@
 ﻿using ITCompanySimulation.Character;
+using ITCompanySimulation.Developing;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -45,7 +46,6 @@ public class Project
             if (m_Progress != value)
             {
                 m_Progress = value;
-                ProgressUpdated?.Invoke(this);
 
                 if (m_Progress >= 100.0f)
                 {
@@ -53,6 +53,8 @@ public class Project
                     Active = false;
                     Completed?.Invoke(this);
                 }
+
+                ProgressUpdated?.Invoke(this);
             }
         }
     }
@@ -200,6 +202,13 @@ public class Project
             StartedOnce = true;
             this.Active = true;
             this.Started?.Invoke(this);
+
+#if DEVELOPMENT_BUILD || UNITY_EDITOR
+            string debugInfo = string.Format(
+                "Project (ID: {0}) started",
+                this.ID);
+            Debug.Log(debugInfo);
+#endif
         }
     }
 
@@ -209,6 +218,13 @@ public class Project
         {
             this.Active = false;
             this.Stopped?.Invoke(this);
+
+#if DEVELOPMENT_BUILD || UNITY_EDITOR
+            string debugInfo = string.Format(
+                "Project (ID: {0}) stopped",
+                this.ID);
+            Debug.Log(debugInfo);
+#endif
         }
     }
 

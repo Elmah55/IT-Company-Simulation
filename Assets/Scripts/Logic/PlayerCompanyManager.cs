@@ -1,4 +1,5 @@
 ﻿using ITCompanySimulation.Character;
+using ITCompanySimulation.Developing;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -219,9 +220,9 @@ public class PlayerCompanyManager : MonoBehaviour
         }
     }
 
-    private void OnCompanyProjectAdded(Project newProject)
+    private void OnCompanyProjectAdded(Scrum scrumObj)
     {
-        newProject.Completed += OnCompanyProjectCompleted;
+        scrumObj.BindedProject.Completed += OnCompanyProjectCompleted;
     }
 
     private void OnCompanyProjectCompleted(Project newProject)

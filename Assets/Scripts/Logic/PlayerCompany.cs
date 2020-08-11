@@ -1,8 +1,8 @@
 ﻿using ITCompanySimulation.Character;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using ITCompanySimulation.Developing;
 
 /// <summary>
 /// This class represents the IT company that player
@@ -52,7 +52,7 @@ public class PlayerCompany : Company
     public List<Project> CompletedProjects { get; private set; }
     public event WorkerAction WorkerAdded;
     public event WorkerAction WorkerRemoved;
-    public event ProjectAction ProjectAdded;
+    public event ScrumAtion ProjectAdded;
     public event Action<int> BalanceChanged;
 
     /*Private methods*/
@@ -72,7 +72,7 @@ public class PlayerCompany : Company
         Scrum projectScrum = (Scrum)ScriptsGameObject.AddComponent(typeof(Scrum));
         projectScrum.BindedProject = projectToAdd;
         ScrumProcesses.Add(projectScrum);
-        ProjectAdded?.Invoke(projectToAdd);
+        ProjectAdded?.Invoke(projectScrum);
 
 #if DEVELOPMENT_BUILD || UNITY_EDITOR
         string debugInfo = string.Format("Project added to company\nName {0}\nID {1}\nComplete bonus {2}",

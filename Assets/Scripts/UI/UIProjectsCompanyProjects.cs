@@ -1,519 +1,459 @@
-﻿using System.Linq;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
-using UnityEngine.EventSystems;
-using TMPro;
 using ITCompanySimulation.Character;
+using UnityEngine.UI;
+using TMPro;
+using System.Linq;
+using ITCompanySimulation.Developing;
+using System.Text;
 
-public class UIProjectsCompanyProjects : MonoBehaviour
+namespace ITCompanySimulation.UI
 {
-    /*Private consts fields*/
-
-    /*Private fields*/
-
-    private Scrum SelectedProjectScrum;
-    /// <summary>
-    /// List of workers buttons with each button mapped to its worker
-    /// </summary>
-    private Dictionary<Button, LocalWorker> ButtonWorkerMap = new Dictionary<Button, LocalWorker>();
-    /// <summary>
-    /// This will map ID of project to index in projects dropdown
-    /// </summary>
-    private Dictionary<int, int> ProjectIDDropdownIndexMap = new Dictionary<int, int>();
-    private LocalWorker SelectedAvailableWorker;
-    private LocalWorker SelectedAssignedWorker;
-    private IButtonSelector AvailableWorkersButtonSelector = new ButtonSelector();
-    private IButtonSelector AssignedWorkersButtonSelector = new ButtonSelector();
-    [SerializeField]
-    private MainSimulationManager SimulationManagerComponent;
-    /// <summary>
-    /// List of all projects in company will be placed here
-    /// </summary>
-    [SerializeField]
-    private Dropdown ProjectsListDropdown;
-    [SerializeField]
-    private InputField InputFieldProjectInfoDaysSinceStartText;
-    [SerializeField]
-    private InputField InputFieldProjectInfoUsedTechnologies;
-    [SerializeField]
-    private InputField InputFieldProjectInfoEstimatedCompletionTime;
-    [SerializeField]
-    private InputField InputFieldScrumInfoSprintStage;
-    [SerializeField]
-    private InputField InputFieldScrumInfoSprintNumber;
-    [SerializeField]
-    private ControlListView AvailableWorkersControlList;
-    [SerializeField]
-    private ControlListView AssignedWorkersControlList;
-    [SerializeField]
-    private Button AssignWorkerButton;
-    [SerializeField]
-    private Button UnassignWorkerButton;
-    [SerializeField]
-    private Button StartProjectButton;
-    [SerializeField]
-    private Button StopProjectButton;
-    [SerializeField]
-    private Button ListViewButtonPrefab;
-    [SerializeField]
-    private Slider ProjectProgressBar;
-    [SerializeField]
-    private TextMeshProUGUI TooltipText;
-    /// <summary>
-    /// Used to map mouse pointer position to UI coordinates
-    /// </summary>
-    [SerializeField]
-    RectTransform ParentRectTransform;
-
-    /*Public consts fields*/
-
-    /*Public fields*/
-
-    /*Private methods*/
-
-    /// <summary>
-    /// Creates button that will be added to list view
-    /// with workers
-    /// </summary>
-    private Button CreateWorkerButton(LocalWorker workerData)
+    public class UIProjectsCompanyProjects : MonoBehaviour
     {
-        Button createdButton = GameObject.Instantiate<Button>(ListViewButtonPrefab);
+        /*Private consts fields*/
 
-        Text buttonTextComponent = createdButton.GetComponentInChildren<Text>();
-        buttonTextComponent.text = string.Format("{0} {1}", workerData.Name, workerData.Surename);
+        /*Private fields*/
 
-        //Set up tooltip component
-        EventTrigger workerButtonEventTrigger = createdButton.gameObject.AddComponent<EventTrigger>();
+        [SerializeField]
+        private MainSimulationManager SimulationManagerComponent;
+        [SerializeField]
+        private GameTime GameTimeComponent;
+        [SerializeField]
+        private ListViewElement ListViewWorkerElementPrefab;
+        [SerializeField]
+        private ListViewElement ListViewProjectElementPrefab;
+        /// <summary>
+        /// Colors that will be applied to button component of list view element.
+        /// </summary>
+        [SerializeField]
+        private ColorBlock ListViewElementSelectedColors;
+        [SerializeField]
+        [Tooltip("Color of project's list view element after being completed")]
+        private Color CompletedProjectListViewElementColors;
+        [SerializeField]
+        private ControlListView ListViewCompanyProjects;
+        [SerializeField]
+        private ControlListViewDrop ListViewAvailableWorkers;
+        [SerializeField]
+        private ControlListViewDrop ListViewAssignedWorkers;
+        [SerializeField]
+        private TextMeshProUGUI TextProjectName;
+        [SerializeField]
+        private TextMeshProUGUI TextProjectTechnologies;
+        [SerializeField]
+        private TextMeshProUGUI TextProjectEstimatedCompletionTime;
+        [SerializeField]
+        private TextMeshProUGUI TextProjectCompletionBonus;
+        [SerializeField]
+        private TextMeshProUGUI TextListViewCompanyProjects;
+        [SerializeField]
+        private TextMeshProUGUI TextListViewAvailableWorkers;
+        [SerializeField]
+        private TextMeshProUGUI TextListViewAssignedWorkers;
+        [SerializeField]
+        private Button ButtonStartProject;
+        [SerializeField]
+        private Button ButtonStopProject;
+        private RectTransform TransformComponent;
+        /// <summary>
+        /// Maps worker object to list view element that represents it
+        /// </summary>
+        private Dictionary<LocalWorker, ListViewElement> WorkerListViewMap;
+        /// <summary>
+        /// Maps worker object to list view element that represents it
+        /// </summary>
+        private Dictionary<Scrum, ListViewElement> ScrumListViewMap;
+        private IButtonSelector ButtonSelectorProjects;
+        /// <summary>
+        /// Scrum object of project that is currently selected
+        /// </summary>
+        private Scrum SelectedScrum;
+        private static StringBuilder StrBuilder = new StringBuilder();
 
-        EventTrigger.Entry newTrigger = new EventTrigger.Entry();
-        newTrigger.eventID = EventTriggerType.PointerEnter;
-        newTrigger.callback.AddListener((BaseEventData evtData) =>
+        /*Public consts fields*/
+
+        /*Public fields*/
+
+        /*Private methods*/
+
+        private void Start()
         {
-            PointerEventData ptrEvtData = (PointerEventData)evtData;
-            Button buttonUnderPointer =
-            ptrEvtData.pointerCurrentRaycast.gameObject.transform.parent.gameObject.GetComponent<Button>();
-            SetWorkerButtonTooltipText(buttonUnderPointer);
-            TooltipText.transform.parent.gameObject.SetActive(true);
-        });
-        workerButtonEventTrigger.triggers.Add(newTrigger);
+            ButtonSelectorProjects = new ButtonSelector(ListViewElementSelectedColors);
+            TransformComponent = GetComponent<RectTransform>();
 
-        newTrigger = new EventTrigger.Entry();
-        newTrigger.eventID = EventTriggerType.PointerExit;
-        newTrigger.callback.AddListener((BaseEventData evtData) =>
-        {
-            TooltipText.transform.parent.gameObject.SetActive(false);
-        });
-        workerButtonEventTrigger.triggers.Add(newTrigger);
-
-        return createdButton;
-    }
-
-    private void AddAvailableWorkersListViewButtons()
-    {
-        foreach (LocalWorker companyWorker in SimulationManagerComponent.ControlledCompany.Workers)
-        {
-            //Add only workers that dont have assigned any project
-            //Available worker is considered worker without project assigned
-            if (null == companyWorker.AssignedProject)
+            //Add workers that were in company before of start of this script
+            foreach (SharedWorker worker in SimulationManagerComponent.ControlledCompany.Workers)
             {
-                AddWorkerListViewButton(companyWorker);
-            }
-        }
-    }
-
-    private void RemoveWorkerListViewButton(SharedWorker companyWorker)
-    {
-        //Check if button was not removed when player left company.
-        //First event will be called when player leaves company and
-        //then when he leaves company he leaves projects 1st so another
-        //event will be fired
-        KeyValuePair<Button, LocalWorker> buttonWorkerPair =
-            ButtonWorkerMap.FirstOrDefault(x => x.Value == companyWorker);
-
-        if (false == buttonWorkerPair.Equals(default(KeyValuePair<Button, LocalWorker>)))
-        {
-            ButtonWorkerMap.Remove(buttonWorkerPair.Key);
-            RemoveWorkerListViewButton(buttonWorkerPair.Key);
-        }
-    }
-
-    private void RemoveWorkerListViewButton(Button workerButton)
-    {
-        if (null != workerButton)
-        {
-            if (true == AvailableWorkersControlList.Controls.Contains(workerButton.gameObject))
-            {
-                AvailableWorkersButtonSelector.RemoveButton(workerButton);
-                AvailableWorkersControlList.RemoveControl(workerButton.gameObject);
-            }
-            else if (true == AssignedWorkersControlList.Controls.Contains(workerButton.gameObject))
-            {
-                AssignedWorkersButtonSelector.RemoveButton(workerButton);
-                AssignedWorkersControlList.RemoveControl(workerButton.gameObject);
-            }
-        }
-    }
-
-    /// <summary>
-    /// Add worker's button to available workers list view. It will be always added
-    /// to available workers list view since worker that was just added to company
-    /// will not have any project assigned
-    /// </summary>
-    private void AddWorkerListViewButton(LocalWorker companyWorker)
-    {
-        Button createdButton = CreateWorkerButton(companyWorker);
-
-        AvailableWorkersControlList.AddControl(createdButton.gameObject);
-        ButtonWorkerMap.Add(createdButton, companyWorker);
-        AvailableWorkersButtonSelector.AddButton(createdButton);
-    }
-
-    private void OnCompanyWorkerAdded(SharedWorker worker)
-    {
-        LocalWorker addedWorker = (LocalWorker)worker;
-        //Worker that just has been added to company doesn't
-        //have assigned project so its available worker
-        AddWorkerListViewButton(addedWorker);
-
-    }
-
-    private void AddAssignedWorkersListViewButtons()
-    {
-        //Clear controls in case there were some added
-        //for other project
-        AssignedWorkersControlList.RemoveAllControls();
-
-        foreach (LocalWorker projectWorker in SelectedProjectScrum.BindedProject.Workers)
-        {
-            Button createdButton = CreateWorkerButton(projectWorker);
-
-            AssignedWorkersControlList.AddControl(createdButton.gameObject);
-            ButtonWorkerMap.Add(createdButton, projectWorker);
-            AssignedWorkersButtonSelector.AddButton(createdButton);
-        }
-    }
-
-    /// <summary>
-    /// Adds all projects in company to dropdown control
-    /// </summary>
-    private void AddProjectsToDropdown()
-    {
-        if (SimulationManagerComponent.ControlledCompany.ScrumProcesses.Count > 0)
-        {
-            ProjectsListDropdown.options.Clear();
-
-            foreach (Scrum scrumProcess in SimulationManagerComponent.ControlledCompany.ScrumProcesses)
-            {
-                Project companyProject = scrumProcess.BindedProject;
-                AddSingleProjectToDropdown(companyProject);
+                OnControlledCompanyWorkerAdded(worker);
             }
 
-            SelectedProjectScrum = SimulationManagerComponent.ControlledCompany.ScrumProcesses[ProjectsListDropdown.value];
+            //Add projects that were in company before of start of this script
+            foreach (Scrum scm in SimulationManagerComponent.ControlledCompany.ScrumProcesses)
+            {
+                OnControlledCompanyProjectAdded(scm);
+            }
+
+            SimulationManagerComponent.ControlledCompany.WorkerAdded += OnControlledCompanyWorkerAdded;
+            SimulationManagerComponent.ControlledCompany.WorkerRemoved += OnControlledCompanyWorkerRemoved;
+            SimulationManagerComponent.ControlledCompany.ProjectAdded += OnControlledCompanyProjectAdded;
+            ButtonSelectorProjects.SelectedButtonChanged += OnProjectListViewSelectedElementChanged;
+            ListViewAssignedWorkers.ControlAdded += OnListViewAssignedWorkersControlAdded;
+            ListViewAssignedWorkers.ControlRemoved += OnListViewAssignedWorkersControlRemoved;
+            GameTimeComponent.DayChanged += OnGameTimeComponentDayChanged;
+
+            SetProjectInfo();
+            SetProjectButtons();
+            SetListViewAvailableWorkersText();
+            SetListViewCompanyProjectsText();
+            ListViewAssignedWorkers.transform.parent.gameObject.SetActive(false);
         }
-    }
 
-    private void AddSingleProjectToDropdown(Project proj)
-    {
-        string projectOptionText = GetProjectListDropdownOptionText(proj);
-        proj.Completed += OnProjectCompleted;
-        Dropdown.OptionData projectOption = new Dropdown.OptionData(proj.Name);
-        ProjectsListDropdown.options.Add(projectOption);
-        ProjectIDDropdownIndexMap.Add(proj.ID, ProjectsListDropdown.options.Count - 1);
-    }
-
-    private string GetProjectListDropdownOptionText(Project proj)
-    {
-        string projectOptionText = string.Format("{0} {1}",
-                                         proj.Name,
-                                         proj.IsCompleted ? "(Completed)" : string.Empty);
-
-        return projectOptionText;
-    }
-
-    private void OnAvailableWorkersListSelectedButtonChanged(Button clickedButton)
-    {
-        if (null != SelectedProjectScrum && null != clickedButton)
+        private void OnProjectProgressUpdated(Project proj)
         {
-            SelectedAvailableWorker = ButtonWorkerMap[clickedButton];
-            AssignWorkerButton.interactable = true;
+            ListViewElement e = ScrumListViewMap.First(x => x.Key.BindedProject == proj).Value;
+            e.Text.text = GetProjectListViewElementText(proj);
+
+            if (null != SelectedScrum
+                && SelectedScrum.BindedProject == proj)
+            {
+                TextProjectEstimatedCompletionTime.text = string.Format("Estimated completion time: {0} days",
+                                                             SelectedScrum.GetProjectEstimatedCompletionTime());
+            }
         }
-        else
+
+        private void OnProjectCompleted(Project proj)
         {
-            AssignWorkerButton.interactable = false;
+            ListViewElement e = ScrumListViewMap.First(
+                x => x.Key.BindedProject == proj).Value;
+            e.BackgroundImage.color = CompletedProjectListViewElementColors;
+            SetProjectButtons();
         }
-    }
 
-    private void OnAssignedWorkersListSelectedButtonChanged(Button clickedButton)
-    {
-        if (null != SelectedProjectScrum && null != clickedButton)
+        #region Events callbacks
+
+        //On control removed from list view check will be peformed to check
+        //if control was removed because worker was removed from project.
+        //If player moved worker's control to other list if condition will be true.
+        //If worker got removed for other reason (i.e level of satisfaction fell
+        //below threshold) if condition will be false
+
+        private void OnListViewAssignedWorkersControlRemoved(GameObject ctrl)
         {
-            SelectedAssignedWorker = ButtonWorkerMap[clickedButton];
-            UnassignWorkerButton.interactable = true;
+            LocalWorker worker = WorkerListViewMap.First(
+                x => x.Value.gameObject == ctrl).Key;
+
+            if (true == SelectedScrum.BindedProject.Workers.Contains(worker))
+            {
+                SelectedScrum.BindedProject.RemoveWorker(worker);
+            }
         }
-        else
+
+        private void OnListViewAssignedWorkersControlAdded(GameObject ctrl)
         {
-            UnassignWorkerButton.interactable = false;
+            LocalWorker worker = WorkerListViewMap.First(
+                x => x.Value.gameObject == ctrl).Key;
+            SelectedScrum.BindedProject.AddWorker(worker);
         }
 
-    }
-
-    private void SetProjectButtons()
-    {
-        StartProjectButton.interactable = false == SelectedProjectScrum.BindedProject.Active
-            && false == SelectedProjectScrum.BindedProject.IsCompleted
-            && 0 != SelectedProjectScrum.BindedProject.Workers.Count;
-        StopProjectButton.interactable = SelectedProjectScrum.BindedProject.Active;
-    }
-
-    private void SetProjectProgressBar()
-    {
-        OnSelectedProjectProgressChanged(SelectedProjectScrum.BindedProject);
-        SelectedProjectScrum.BindedProject.ProgressUpdated += OnSelectedProjectProgressChanged;
-    }
-
-    private void SetProjectInfo()
-    {
-        OnSelectedProjectDaysSinceStartChanged(SelectedProjectScrum.BindedProject);
-        SelectedProjectScrum.BindedProject.DaysSinceStartUpdated += OnSelectedProjectDaysSinceStartChanged;
-        InputFieldProjectInfoUsedTechnologies.text = string.Empty;
-
-        foreach (ProjectTechnology technology in SelectedProjectScrum.BindedProject.UsedTechnologies)
+        private void OnControlledCompanyWorkerRemoved(SharedWorker companyWorker)
         {
-            string technologyName = (EnumToString.ProjectTechnologiesStrings[technology]) + " ";
-            InputFieldProjectInfoUsedTechnologies.text += technologyName;
+            RemoveWorkerListViewElement(companyWorker);
+            SetListViewAvailableWorkersText();
         }
 
-        SetProjectEstimatedCompletionTime();
-    }
-
-    /// <summary>
-    /// Set project info that has changed when workers in project
-    /// are modified
-    /// </summary>
-    private void SetProjectInfoWorkersChanged()
-    {
-        SetProjectEstimatedCompletionTime();
-    }
-
-    private void SetProjectEstimatedCompletionTime()
-    {
-        int estimatedCompletionTime = SelectedProjectScrum.GetProjectEstimatedCompletionTime();
-        InputFieldProjectInfoEstimatedCompletionTime.text =
-            (-1 == estimatedCompletionTime) ? string.Empty : estimatedCompletionTime.ToString() + " days";
-    }
-
-    private void SetScrumInfo()
-    {
-        SelectedProjectScrum.SprintNumberChanged += OnSelectedProjectScrumSprintNumberChanged;
-        SelectedProjectScrum.SprintStageChanged += OnSelectedProjectScrumSprintStageChanged;
-
-        InputFieldScrumInfoSprintNumber.text = SelectedProjectScrum.SprintNumber.ToString();
-        InputFieldScrumInfoSprintStage.text = SelectedProjectScrum.CurrentSprintStage.ToString();
-    }
-
-    private void Initialize()
-    {
-        SimulationManagerComponent.ControlledCompany.ProjectAdded += AddSingleProjectToDropdown;
-        SimulationManagerComponent.ControlledCompany.WorkerAdded += OnCompanyWorkerAdded;
-        SimulationManagerComponent.ControlledCompany.WorkerRemoved += RemoveWorkerListViewButton;
-        AssignedWorkersButtonSelector.SelectedButtonChanged += OnAssignedWorkersListSelectedButtonChanged;
-        AvailableWorkersButtonSelector.SelectedButtonChanged += OnAvailableWorkersListSelectedButtonChanged;
-
-        AddAvailableWorkersListViewButtons();
-        AddProjectsToDropdown();
-
-        if (ProjectsListDropdown.options.Count > 0)
+        private void OnControlledCompanyWorkerAdded(SharedWorker companyWorker)
         {
-            OnProjectsListDropdownValueChanged(ProjectsListDropdown.value);
+            AddWorkerListViewElement(companyWorker);
+            SetListViewAvailableWorkersText();
         }
-    }
 
-    /// <summary>
-    /// Moves workers list button between assigned and unassigned workers list
-    /// </summary>
-    private void MoveWorkersListButton(ControlListView listViewFrom, ControlListView listViewTo,
-                            IButtonSelector buttonSelectorFrom, IButtonSelector buttonSelectorTo,
-                            Button workersListButton)
-    {
-        listViewFrom.RemoveControl(workersListButton.gameObject, false);
-        listViewTo.AddControl(workersListButton.gameObject);
-
-        buttonSelectorFrom.RemoveButton(workersListButton);
-        buttonSelectorTo.AddButton(workersListButton);
-    }
-
-    private void OnSelectedProjectProgressChanged(Project proj)
-    {
-        ProjectProgressBar.value = proj.Progress;
-        SetProjectInfoWorkersChanged();
-    }
-
-    private void OnSelectedProjectDaysSinceStartChanged(Project proj)
-    {
-        InputFieldProjectInfoDaysSinceStartText.text = proj.DaysSinceStart.ToString();
-    }
-
-    private void OnProjectCompleted(Project proj)
-    {
-        StartProjectButton.interactable = false;
-        StopProjectButton.interactable = false;
-
-        int projectDropdownIndex = ProjectIDDropdownIndexMap[proj.ID];
-        ProjectsListDropdown.options[projectDropdownIndex].text = GetProjectListDropdownOptionText(proj);
-    }
-
-    private void OnSelectedProjectWorkerRemoved(SharedWorker worker)
-    {
-        LocalWorker companyWorker = (LocalWorker)worker;
-        Button selectedWorkerListButton = AssignedWorkersButtonSelector.GetSelectedButton();
-
-        //Check if worker left project because he left company
-        if (null != companyWorker.WorkingCompany)
+        private void OnControlledCompanyProjectAdded(Scrum scrumObj)
         {
-            MoveWorkersListButton(AssignedWorkersControlList,
-                                  AvailableWorkersControlList,
-                                  AssignedWorkersButtonSelector,
-                                  AvailableWorkersButtonSelector,
-                                  selectedWorkerListButton);
+            AddProjectListViewElement(scrumObj);
+            scrumObj.BindedProject.ProgressUpdated += OnProjectProgressUpdated;
+            scrumObj.BindedProject.Completed += OnProjectCompleted;
+            SetListViewCompanyProjectsText();
         }
-        else
+
+        private void OnProjectListViewSelectedElementChanged(Button btn)
         {
-            RemoveWorkerListViewButton(companyWorker);
+            if (null != SelectedScrum)
+            {
+                UnsubscribeProjectEvents();
+
+                foreach (LocalWorker worker in SelectedScrum.BindedProject.Workers)
+                {
+                    ListViewElement e = WorkerListViewMap[worker];
+                    e.gameObject.SetActive(false);
+                }
+            }
+
+            if (null != btn)
+            {
+                KeyValuePair<Scrum, ListViewElement> pair = ScrumListViewMap.First(
+                    x => x.Value.gameObject == btn.gameObject);
+                SelectedScrum = pair.Key;
+
+                SetProjectInfo();
+                SetProjectButtons();
+                SubscribeProjectEvents();
+                SetListViewAssignedWorkersText();
+                ListViewAssignedWorkers.transform.parent.gameObject.SetActive(true);
+
+                foreach (LocalWorker worker in SelectedScrum.BindedProject.Workers)
+                {
+                    ListViewElement e = WorkerListViewMap[worker];
+                    e.gameObject.SetActive(true);
+                }
+            }
+            else
+            {
+                SelectedScrum = null;
+                SetProjectInfo();
+                SetProjectButtons();
+                ListViewAssignedWorkers.transform.parent.gameObject.SetActive(false);
+            }
         }
 
-        SetProjectInfoWorkersChanged();
-        SetProjectButtons();
-    }
-
-    private void OnSelectedProjectWorkerAdded(SharedWorker companyWorker)
-    {
-        Button selectedWorkerListButton = AvailableWorkersButtonSelector.GetSelectedButton();
-        MoveWorkersListButton(AvailableWorkersControlList,
-                              AssignedWorkersControlList,
-                              AvailableWorkersButtonSelector,
-                              AssignedWorkersButtonSelector,
-                              selectedWorkerListButton);
-        SetProjectInfoWorkersChanged();
-        SetProjectButtons();
-    }
-
-    private void OnSelectedProjectStopped(Project proj)
-    {
-        StartProjectButton.interactable = true;
-        StopProjectButton.interactable = false;
-    }
-
-    private void OnSelectedProjectStarted(Project proj)
-    {
-        StartProjectButton.interactable = false;
-        StopProjectButton.interactable = true;
-    }
-
-    private void OnSelectedProjectScrumSprintStageChanged(Scrum scrumObj)
-    {
-        InputFieldScrumInfoSprintStage.text = scrumObj.CurrentSprintStage.ToString();
-    }
-
-    private void OnSelectedProjectScrumSprintNumberChanged(Scrum scrumObj)
-    {
-        InputFieldScrumInfoSprintNumber.text = scrumObj.SprintNumber.ToString();
-    }
-
-    private void SetWorkerButtonTooltipText(Button buttonUnderPointer)
-    {
-        LocalWorker buttonWorker = ButtonWorkerMap.First(x => x.Key.GetInstanceID() == buttonUnderPointer.GetInstanceID()).Value;
-
-        string tooltipString = "Abilities\n";
-        foreach (KeyValuePair<ProjectTechnology, float> workerAbility in buttonWorker.Abilites)
+        private void OnSelectedProjectWorkerAdded(SharedWorker companyWorker)
         {
-            tooltipString += string.Format("{0} {1}\n",
-                                         EnumToString.ProjectTechnologiesStrings[workerAbility.Key],
-                                         workerAbility.Value.ToString("0.00"));
+            SetProjectButtons();
+            SetListViewAssignedWorkersText();
+            SetListViewAvailableWorkersText();
         }
 
-        TooltipText.SetText(tooltipString);
-    }
-
-    private void Start()
-    {
-        Initialize();
-    }
-
-    private void OnEnable()
-    {
-        if (null == SelectedProjectScrum && ProjectsListDropdown.options.Count > 0)
+        private void OnSelectedProjectWorkerRemoved(SharedWorker companyWorker)
         {
-            OnProjectsListDropdownValueChanged(ProjectsListDropdown.value);
-            OnAvailableWorkersListSelectedButtonChanged(AvailableWorkersButtonSelector.GetSelectedButton());
-            OnAssignedWorkersListSelectedButtonChanged(AssignedWorkersButtonSelector.GetSelectedButton());
-        }
-    }
+            ListViewElement e = WorkerListViewMap[(LocalWorker)companyWorker];
 
-    private void Update()
-    {
-        if (true == TooltipText.transform.parent.gameObject.GetActive())
+            if (ListViewAssignedWorkers.Controls.Contains(e.gameObject))
+            {
+                ListViewAssignedWorkers.RemoveControl(e.gameObject);
+            }
+
+            SetProjectButtons();
+            SetListViewAssignedWorkersText();
+            SetListViewAvailableWorkersText();
+        }
+
+        private void OnSelectedProjectStopped(Project proj)
         {
-            RectTransform tooltipTransform = transform.parent.parent.gameObject.GetComponent<RectTransform>();
-            Vector3 mousePos = Input.mousePosition;
-            Vector2 tooltipPostion = new Vector2(mousePos.x + 20f, mousePos.y);
-            Vector2 finalPostion;
-            RectTransformUtility.ScreenPointToLocalPointInRectangle(ParentRectTransform, tooltipPostion, null, out finalPostion);
-
-            TooltipText.gameObject.transform.parent.transform.localPosition = finalPostion;
+            SetProjectButtons();
         }
-    }
 
-    /*Public methods*/
-
-    public void OnAssignWorkerButtonClick()
-    {
-        SelectedProjectScrum.BindedProject.AddWorker(SelectedAvailableWorker);
-        SelectedAvailableWorker = null;
-    }
-
-    public void OnUnassignWorkerButtonClick()
-    {
-        SelectedProjectScrum.BindedProject.RemoveWorker(SelectedAssignedWorker);
-        SelectedAssignedWorker = null;
-    }
-
-    public void OnProjectsListDropdownValueChanged(int index)
-    {
-        if (null != SelectedProjectScrum)
+        private void OnSelectedProjectStarted(Project proj)
         {
-            //Unsubscribe events from previously selected project
-            SelectedProjectScrum.BindedProject.ProgressUpdated -= OnSelectedProjectProgressChanged;
-            SelectedProjectScrum.BindedProject.DaysSinceStartUpdated -= OnSelectedProjectDaysSinceStartChanged;
-            SelectedProjectScrum.BindedProject.WorkerAdded -= OnSelectedProjectWorkerAdded;
-            SelectedProjectScrum.BindedProject.WorkerRemoved -= OnSelectedProjectWorkerRemoved;
-            SelectedProjectScrum.BindedProject.Stopped -= OnSelectedProjectStopped;
-            SelectedProjectScrum.BindedProject.Started -= OnSelectedProjectStarted;
-            SelectedProjectScrum.SprintNumberChanged -= OnSelectedProjectScrumSprintNumberChanged;
-            SelectedProjectScrum.SprintStageChanged -= OnSelectedProjectScrumSprintStageChanged;
+            SetProjectButtons();
         }
 
-        SelectedProjectScrum = SimulationManagerComponent.ControlledCompany.ScrumProcesses[ProjectsListDropdown.value];
+        private void OnGameTimeComponentDayChanged()
+        {
+            foreach (KeyValuePair<LocalWorker,ListViewElement> item in WorkerListViewMap)
+            {
+                item.Value.Text.text = GetWorkerListViewElementText(item.Key);
+            }
+        }
 
-        SelectedProjectScrum.BindedProject.WorkerAdded += OnSelectedProjectWorkerAdded;
-        SelectedProjectScrum.BindedProject.WorkerRemoved += OnSelectedProjectWorkerRemoved;
-        SelectedProjectScrum.BindedProject.Started += OnSelectedProjectStarted;
-        SelectedProjectScrum.BindedProject.Stopped += OnSelectedProjectStopped;
+        #endregion
 
-        AddAssignedWorkersListViewButtons();
-        SetProjectButtons();
-        SetProjectProgressBar();
-        SetProjectInfo();
-        SetScrumInfo();
-    }
+        private void SetProjectButtons()
+        {
+            ButtonStartProject.interactable = (null != SelectedScrum
+                && false == SelectedScrum.BindedProject.Active
+                && false == SelectedScrum.BindedProject.IsCompleted)
+                && SelectedScrum.BindedProject.Workers.Count > 0;
 
-    public void StartSelectedProject()
-    {
-        SelectedProjectScrum.StartProject();
-    }
+            ButtonStopProject.interactable = (null != SelectedScrum
+                && true == SelectedScrum.BindedProject.Active);
+        }
 
-    public void StopSelectedProject()
-    {
-        SelectedProjectScrum.StopProject();
+        private void SetProjectInfo()
+        {
+            if (null != SelectedScrum)
+            {
+                TextProjectName.text =
+            string.Format("Name: {0}", SelectedScrum.BindedProject.Name);
+                TextProjectCompletionBonus.text =
+                    string.Format("Completion bonus: {0} $", SelectedScrum.BindedProject.CompleteBonus);
+
+                for (int i = 0; i < SelectedScrum.BindedProject.UsedTechnologies.Count; i++)
+                {
+                    ProjectTechnology pt = SelectedScrum.BindedProject.UsedTechnologies[i];
+                    StrBuilder.Append(EnumToString.ProjectTechnologiesStrings[pt]);
+
+                    if (i != SelectedScrum.BindedProject.UsedTechnologies.Count - 1)
+                    {
+                        StrBuilder.Append(" / ");
+                    }
+                }
+
+                TextProjectTechnologies.text =
+                    string.Format("Used technologies: {0}", StrBuilder.ToString());
+                StrBuilder.Clear();
+
+                int estimatedCompletion = SelectedScrum.GetProjectEstimatedCompletionTime();
+                string estimatedCompletionStr;
+
+                if (-1 == estimatedCompletion)
+                {
+                    estimatedCompletionStr = "Estimated completion time:";
+                }
+                else
+                {
+                    estimatedCompletionStr = string.Format("Estimated completion time: {0} days",
+                                                           estimatedCompletion);
+                }
+
+                TextProjectEstimatedCompletionTime.text = estimatedCompletionStr;
+            }
+            else
+            {
+                TextProjectName.text = "Name:";
+                TextProjectCompletionBonus.text = "Completion bonus:";
+                TextProjectTechnologies.text = "Used technologies:";
+                TextProjectEstimatedCompletionTime.text = "Estimated completion time:";
+            }
+        }
+
+        private void RemoveWorkerListViewElement(SharedWorker companyWorker)
+        {
+            LocalWorker worker = (LocalWorker)companyWorker;
+            ListViewElement listViewElement = WorkerListViewMap[worker];
+            ControlListViewDrop workerListView = (null == worker.AssignedProject) ? ListViewAvailableWorkers : ListViewAssignedWorkers;
+            workerListView.RemoveControl(listViewElement.gameObject);
+            WorkerListViewMap.Remove(worker);
+        }
+
+        private void AddWorkerListViewElement(SharedWorker companyWorker)
+        {
+            LocalWorker worker = (LocalWorker)companyWorker;
+            ListViewElement newElement = GameObject.Instantiate<ListViewElement>(ListViewWorkerElementPrefab);
+            newElement.GetComponent<UIElementDrag>().DragParentTransform = TransformComponent;
+            string elementText = GetWorkerListViewElementText(worker);
+            newElement.GetComponentInChildren<TextMeshProUGUI>().text = elementText;
+
+            if (null == WorkerListViewMap)
+            {
+                WorkerListViewMap = new Dictionary<LocalWorker, ListViewElement>();
+            }
+
+            WorkerListViewMap.Add(worker, newElement);
+
+            if (null == worker.AssignedProject)
+            {
+                ListViewAvailableWorkers.AddControl(newElement.gameObject);
+            }
+            else
+            {
+                ListViewAssignedWorkers.AddControl(newElement.gameObject);
+            }
+        }
+
+        private string GetWorkerListViewElementText(LocalWorker worker)
+        {
+            string elementText;
+            string absenceString = string.Empty;
+
+            if (false == worker.Available)
+            {
+                switch (worker.AbsenceReason)
+                {
+                    case WorkerAbsenceReason.Sickness:
+                        absenceString = "Sick";
+                        break;
+                    case WorkerAbsenceReason.Holiday:
+                        absenceString = "On holidays";
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            elementText = string.Format("{0} {1}\n{2} days of expierience\n{3}",
+                                                 worker.Name,
+                                                 worker.Surename,
+                                                 worker.ExperienceTime,
+                                                 absenceString);
+            return elementText;
+        }
+
+        private void AddProjectListViewElement(Scrum scrumObj)
+        {
+            ListViewElement newElement = GameObject.Instantiate<ListViewElement>(ListViewProjectElementPrefab);
+            newElement.Text.text = GetProjectListViewElementText(scrumObj.BindedProject);
+
+            if (null == ScrumListViewMap)
+            {
+                ScrumListViewMap = new Dictionary<Scrum, ListViewElement>();
+            }
+
+            ScrumListViewMap.Add(scrumObj, newElement);
+            ListViewCompanyProjects.AddControl(newElement.gameObject);
+
+            Button elementButton = newElement.GetComponent<Button>();
+            ButtonSelectorProjects.AddButton(elementButton);
+        }
+
+        private string GetProjectListViewElementText(Project proj)
+        {
+            return string.Format("{0}\nCompletion bonus: {1} $\nProgress: {2} %",
+                                 proj.Name,
+                                 proj.CompleteBonus,
+                                 proj.Progress.ToString("0.00"));
+        }
+
+        private void SubscribeProjectEvents()
+        {
+            SelectedScrum.BindedProject.WorkerRemoved += OnSelectedProjectWorkerRemoved;
+            SelectedScrum.BindedProject.WorkerAdded += OnSelectedProjectWorkerAdded;
+            SelectedScrum.BindedProject.Stopped += OnSelectedProjectStopped;
+            SelectedScrum.BindedProject.Started += OnSelectedProjectStarted;
+        }
+
+        private void UnsubscribeProjectEvents()
+        {
+            SelectedScrum.BindedProject.WorkerRemoved -= OnSelectedProjectWorkerRemoved;
+            SelectedScrum.BindedProject.WorkerAdded -= OnSelectedProjectWorkerAdded;
+            SelectedScrum.BindedProject.Stopped -= OnSelectedProjectStopped;
+            SelectedScrum.BindedProject.Started -= OnSelectedProjectStarted;
+        }
+
+        private void SetListViewAssignedWorkersText()
+        {
+            TextListViewAssignedWorkers.text = string.Format(
+                "Assigned workers ({0})",
+                SelectedScrum.BindedProject.Workers.Count);
+        }
+
+        private void SetListViewCompanyProjectsText()
+        {
+            TextListViewCompanyProjects.text = string.Format(
+                "Company projects ({0})",
+                SimulationManagerComponent.ControlledCompany.ScrumProcesses.Count);
+        }
+
+        private void SetListViewAvailableWorkersText()
+        {
+            int availableWorkersCount =
+                SimulationManagerComponent.ControlledCompany.Workers.Count(
+                x => x.AssignedProject == null);
+
+            TextListViewAvailableWorkers.text = string.Format(
+                "Available workers ({0})",
+                availableWorkersCount);
+        }
+
+        /*Public methods*/
+
+        public void OnButtonStartProjectClicked()
+        {
+            SelectedScrum.StartProject();
+        }
+
+        public void OnButtonStopProjectClicked()
+        {
+            SelectedScrum.StartProject();
+        }
     }
 }
