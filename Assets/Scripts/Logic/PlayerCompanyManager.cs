@@ -225,7 +225,7 @@ public class PlayerCompanyManager : MonoBehaviour
         scrumObj.BindedProject.Completed += OnCompanyProjectCompleted;
     }
 
-    private void OnCompanyProjectCompleted(Project newProject)
+    private void OnCompanyProjectCompleted(LocalProject newProject)
     {
         SimulationManagerComponent.ControlledCompany.Balance +=
             newProject.CompleteBonus;

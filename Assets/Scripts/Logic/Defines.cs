@@ -177,7 +177,8 @@ public static class NetworkingData
 
 namespace ITCompanySimulation.Developing
 {
-    public delegate void ProjectAction(Project proj);
+    public delegate void SharedProjectAction(SharedProject proj);
+    public delegate void LocalProjectAction(LocalProject proj);
     public delegate void ScrumAtion(Scrum scrumObj);
 }
 

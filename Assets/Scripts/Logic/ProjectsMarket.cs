@@ -63,9 +63,9 @@ public class ProjectsMarket : Photon.PunBehaviour
 
     /*Public fields*/
 
-    public event ProjectAction ProjectRemoved;
-    public event ProjectAction ProjectAdded;
-    public List<Project> Projects { get; private set; } = new List<Project>();
+    public event SharedProjectAction ProjectRemoved;
+    public event SharedProjectAction ProjectAdded;
+    public List<SharedProject> Projects { get; private set; } = new List<SharedProject>();
 
     /*Private methods*/
 
@@ -77,7 +77,7 @@ public class ProjectsMarket : Photon.PunBehaviour
 
             if (randomNumber <= PROJECT_ADD_PROBABILITY_DAILY)
             {
-                Project newProject = GenerateSingleProject();
+                LocalProject newProject = GenerateSingleProject();
                 this.photonView.RPC("AddProject", PhotonTargets.All, newProject);
             }
         }
@@ -91,14 +91,14 @@ public class ProjectsMarket : Photon.PunBehaviour
         return maxProjectsOnMarket;
     }
 
-    private Project GenerateSingleProject()
+    private LocalProject GenerateSingleProject()
     {
-        Project newProject;
+        LocalProject newProject;
         int projectNameIndex = UnityEngine.Random.Range(0, ProjectData.Names.Count);
         string projectName =
             ProjectData.Names[projectNameIndex];
 
-        newProject = new Project(projectName);
+        newProject = new LocalProject(projectName);
         newProject.UsedTechnologies = GenerateProjectTechnologies();
         newProject.CompleteBonus = CalculateProjectCompleteBonus(newProject);
         newProject.ID = ProjectID++;
@@ -112,7 +112,7 @@ public class ProjectsMarket : Photon.PunBehaviour
         return newProject;
     }
 
-    private int CalculateProjectCompleteBonus(Project newProject)
+    private int CalculateProjectCompleteBonus(LocalProject newProject)
     {
         int projectCompleteBonus = PROJECT_BONUS_BASE;
 
@@ -138,7 +138,7 @@ public class ProjectsMarket : Photon.PunBehaviour
 
         while (MaxProjectsOnMarket != Projects.Count)
         {
-            Project newProject = GenerateSingleProject();
+            LocalProject newProject = GenerateSingleProject();
             this.photonView.RPC("AddProject", PhotonTargets.All, newProject);
         }
 
@@ -169,7 +169,7 @@ public class ProjectsMarket : Photon.PunBehaviour
     }
 
     [PunRPC]
-    private void AddProject(Project projectToAdd)
+    private void AddProject(LocalProject projectToAdd)
     {
         Projects.Add(projectToAdd);
         ProjectAdded?.Invoke(projectToAdd);
@@ -178,7 +178,7 @@ public class ProjectsMarket : Photon.PunBehaviour
     [PunRPC]
     private void RemoveProjectInternal(int projectToRemoveID)
     {
-        Project removedProject = null;
+        SharedProject removedProject = null;
 
         for (int i = 0; i < Projects.Count; i++)
         {
@@ -196,7 +196,7 @@ public class ProjectsMarket : Photon.PunBehaviour
     private void Start()
     {
         //Register type for sending projects available on market to other players
-        PhotonPeer.RegisterType(typeof(Project), NetworkingData.PROJECT_BYTE_CODE, Project.Serialize, Project.Deserialize);
+        PhotonPeer.RegisterType(typeof(SharedProject), NetworkingData.PROJECT_BYTE_CODE, SharedProject.Serialize, SharedProject.Deserialize);
 
         //Master client will generate all the workers on market
         //then send it to other clients
@@ -211,7 +211,7 @@ public class ProjectsMarket : Photon.PunBehaviour
 
     /*Public methods*/
 
-    public void RemoveProject(Project projectToRemove)
+    public void RemoveProject(LocalProject projectToRemove)
     {
         this.photonView.RPC("RemoveProjectInternal", PhotonTargets.All, projectToRemove.ID);
     }

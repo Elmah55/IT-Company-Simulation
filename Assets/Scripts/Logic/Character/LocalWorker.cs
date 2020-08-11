@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ITCompanySimulation.Developing;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
@@ -70,7 +71,7 @@ namespace ITCompanySimulation.Character
                 return score;
             }
         }
-        public Project AssignedProject { get; set; }
+        public LocalProject AssignedProject { get; set; }
         /// <summary>
         /// Amount of salary increase or decrease last time it was changed
         /// </summary>

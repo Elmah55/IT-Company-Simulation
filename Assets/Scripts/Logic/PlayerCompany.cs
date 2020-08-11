@@ -49,7 +49,7 @@ public class PlayerCompany : Company
     /// has its own scrum instance
     /// </summary>
     public List<Scrum> ScrumProcesses { get; private set; }
-    public List<Project> CompletedProjects { get; private set; }
+    public List<LocalProject> CompletedProjects { get; private set; }
     public event WorkerAction WorkerAdded;
     public event WorkerAction WorkerRemoved;
     public event ScrumAtion ProjectAdded;
@@ -66,7 +66,7 @@ public class PlayerCompany : Company
         this.ScriptsGameObject = scriptsGameObject;
     }
 
-    public void AddProject(Project projectToAdd)
+    public void AddProject(LocalProject projectToAdd)
     {
         //Scrum instance for project that will be added
         Scrum projectScrum = (Scrum)ScriptsGameObject.AddComponent(typeof(Scrum));

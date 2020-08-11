@@ -109,7 +109,7 @@ namespace ITCompanySimulation.UI
             ListViewAssignedWorkers.transform.parent.gameObject.SetActive(false);
         }
 
-        private void OnProjectProgressUpdated(Project proj)
+        private void OnProjectProgressUpdated(LocalProject proj)
         {
             ListViewElement e = ScrumListViewMap.First(x => x.Key.BindedProject == proj).Value;
             e.Text.text = GetProjectListViewElementText(proj);
@@ -122,7 +122,7 @@ namespace ITCompanySimulation.UI
             }
         }
 
-        private void OnProjectCompleted(Project proj)
+        private void OnProjectCompleted(LocalProject proj)
         {
             ListViewElement e = ScrumListViewMap.First(
                 x => x.Key.BindedProject == proj).Value;
@@ -237,12 +237,12 @@ namespace ITCompanySimulation.UI
             SetListViewAvailableWorkersText();
         }
 
-        private void OnSelectedProjectStopped(Project proj)
+        private void OnSelectedProjectStopped(LocalProject proj)
         {
             SetProjectButtons();
         }
 
-        private void OnSelectedProjectStarted(Project proj)
+        private void OnSelectedProjectStarted(LocalProject proj)
         {
             SetProjectButtons();
         }
@@ -395,7 +395,7 @@ namespace ITCompanySimulation.UI
             ButtonSelectorProjects.AddButton(elementButton);
         }
 
-        private string GetProjectListViewElementText(Project proj)
+        private string GetProjectListViewElementText(LocalProject proj)
         {
             return string.Format("{0}\nCompletion bonus: {1} $\nProgress: {2} %",
                                  proj.Name,

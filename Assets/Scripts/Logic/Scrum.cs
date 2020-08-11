@@ -45,7 +45,7 @@ namespace ITCompanySimulation.Developing
         /// <summary>
         /// Project binded to this instance of scrum
         /// </summary>
-        public Project BindedProject { get; set; }
+        public LocalProject BindedProject { get; set; }
         /// <summary>
         /// Number of sprint sprint is currently in progress
         /// </summary>
@@ -148,7 +148,7 @@ namespace ITCompanySimulation.Developing
             }
         }
 
-        private void OnProjectFinished(Project finishedProject)
+        private void OnProjectFinished(LocalProject finishedProject)
         {
             StopCoroutine(ProjectUpdateCoroutine);
             string playerNotification = string.Format("Project {0} finished. Your company has earned {1} $",
