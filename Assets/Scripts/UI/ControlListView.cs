@@ -1,5 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using ITCompanySimulation.UI;
+using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
+using UnityEngine.EventSystems;
+
 
 /// <summary>
 /// This is class for handling list view of UI controls.
@@ -12,13 +16,6 @@ public class ControlListView : MonoBehaviour
 
     /*Private fields*/
 
-    /// <summary>
-    /// Reference to object that will manage layout of objects in list view.
-    /// This should be set in unity's inspector
-    /// </summary>
-    [SerializeField]
-    public GameObject Layout;
-
     /*Public consts fields*/
 
     /*Public fields*/
@@ -27,15 +24,24 @@ public class ControlListView : MonoBehaviour
     /// List of controls that this list view holds
     /// </summary>
     public List<GameObject> Controls { get; private set; } = new List<GameObject>();
+    /// <summary>
+    /// Reference to object that will manage layout of objects in list view.
+    /// This should be set in unity's inspector. All objects in this list will be
+    /// attached as this object's children
+    /// </summary>
+    public GameObject Layout;
+    public event UnityAction<GameObject> ControlAdded;
+    public event UnityAction<GameObject> ControlRemoved;
 
     /*Private methods*/
 
     /*Public methods*/
 
-    public void AddControl(GameObject control)
+    public virtual void AddControl(GameObject control)
     {
         control.transform.SetParent(Layout.transform, false);
         Controls.Add(control);
+        ControlAdded?.Invoke(control);
     }
 
     /// <summary>
@@ -50,6 +56,7 @@ public class ControlListView : MonoBehaviour
         }
 
         Controls.Remove(control);
+        ControlRemoved?.Invoke(control);
     }
 
     /// <summary>
@@ -73,6 +80,9 @@ public class ControlListView : MonoBehaviour
             }
         }
 
-        Controls.Clear();
+        for (int i = Controls.Count - 1; i >= 0; i--)
+        {
+            RemoveControlAt(i);
+        }
     }
 }

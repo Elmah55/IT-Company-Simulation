@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.EventSystems;
 
 namespace ITCompanySimulation.UI
@@ -34,6 +35,7 @@ namespace ITCompanySimulation.UI
         /// when dragging
         /// </summary>
         public RectTransform DragParentTransform { get; set; }
+        public event ParentChangeAction ParentChanged;
 
         /*Private methods*/
 
@@ -42,7 +44,6 @@ namespace ITCompanySimulation.UI
             TransformComponent = GetComponent<RectTransform>();
             PreviousParentTransform =
                 TransformComponent.transform.parent.gameObject.GetComponent<RectTransform>();
-            Debug.Log(PreviousParentTransform.gameObject.name);
         }
 
         /*Public methods*/
@@ -73,6 +74,7 @@ namespace ITCompanySimulation.UI
             {
                 PreviousParentTransform = TransformComponent.parent.gameObject.GetComponent<RectTransform>();
                 TransformComponent.SetParent(PreviousParentTransform);
+                ParentChanged?.Invoke(this.gameObject, PreviousParentTransform.gameObject);
             }
             else
             {
