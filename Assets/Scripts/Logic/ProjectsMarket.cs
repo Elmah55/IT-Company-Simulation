@@ -211,7 +211,7 @@ public class ProjectsMarket : Photon.PunBehaviour
 
     /*Public methods*/
 
-    public void RemoveProject(LocalProject projectToRemove)
+    public void RemoveProject(SharedProject projectToRemove)
     {
         this.photonView.RPC("RemoveProjectInternal", PhotonTargets.All, projectToRemove.ID);
     }

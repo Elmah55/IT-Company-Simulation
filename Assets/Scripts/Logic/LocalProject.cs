@@ -107,7 +107,7 @@ namespace ITCompanySimulation.Developing
             Workers = new List<LocalWorker>();
         }
 
-        public LocalProject(SharedProject proj):base(proj.Name)
+        public LocalProject(SharedProject proj) : this(proj.Name)
         {
             this.ID = proj.ID;
             this.CompleteBonus = proj.CompleteBonus;

@@ -5,11 +5,10 @@ using UnityEngine.UI;
 using TMPro;
 using System.Linq;
 using ITCompanySimulation.Developing;
-using System.Text;
 
 namespace ITCompanySimulation.UI
 {
-    public class UIProjectsCompanyProjects : MonoBehaviour
+    public class UIProjectsCompanyProjects : UIProjects
     {
         /*Private consts fields*/
 
@@ -24,7 +23,7 @@ namespace ITCompanySimulation.UI
         [SerializeField]
         private ListViewElement ListViewProjectElementPrefab;
         /// <summary>
-        /// Colors that will be applied to button component of list view element.
+        /// Colors that will be applied to selected button component of list view element.
         /// </summary>
         [SerializeField]
         private ColorBlock ListViewElementSelectedColors;
@@ -61,7 +60,7 @@ namespace ITCompanySimulation.UI
         /// </summary>
         private Dictionary<LocalWorker, ListViewElement> WorkerListViewMap;
         /// <summary>
-        /// Maps worker object to list view element that represents it
+        /// Maps scrum object to list view element that represents it
         /// </summary>
         private Dictionary<Scrum, ListViewElement> ScrumListViewMap;
         private IButtonSelector ButtonSelectorProjects;
@@ -69,7 +68,6 @@ namespace ITCompanySimulation.UI
         /// Scrum object of project that is currently selected
         /// </summary>
         private Scrum SelectedScrum;
-        private static StringBuilder StrBuilder = new StringBuilder();
 
         /*Public consts fields*/
 
@@ -164,13 +162,33 @@ namespace ITCompanySimulation.UI
 
         private void OnControlledCompanyWorkerAdded(SharedWorker companyWorker)
         {
-            AddWorkerListViewElement(companyWorker);
+            LocalWorker worker = (LocalWorker)companyWorker;
+            ListViewElement newElement = CreateWorkerListViewElement(companyWorker);
+
+            if (null == WorkerListViewMap)
+            {
+                WorkerListViewMap = new Dictionary<LocalWorker, ListViewElement>();
+            }
+
+            WorkerListViewMap.Add(worker, newElement);
+            ListViewAvailableWorkers.AddControl(newElement.gameObject);
+
             SetListViewAvailableWorkersText();
         }
 
         private void OnControlledCompanyProjectAdded(Scrum scrumObj)
         {
-            AddProjectListViewElement(scrumObj);
+            ListViewElement newElement = CreateProjectListViewElement(scrumObj.BindedProject, ListViewProjectElementPrefab);
+            ButtonSelectorProjects.AddButton(newElement.GetComponent<Button>());
+
+            if (null == ScrumListViewMap)
+            {
+                ScrumListViewMap = new Dictionary<Scrum, ListViewElement>();
+            }
+
+            ScrumListViewMap.Add(scrumObj, newElement);
+            ListViewCompanyProjects.AddControl(newElement.gameObject);
+
             scrumObj.BindedProject.ProgressUpdated += OnProjectProgressUpdated;
             scrumObj.BindedProject.Completed += OnProjectCompleted;
             SetListViewCompanyProjectsText();
@@ -280,20 +298,8 @@ namespace ITCompanySimulation.UI
                 TextProjectCompletionBonus.text =
                     string.Format("Completion bonus: {0} $", SelectedScrum.BindedProject.CompleteBonus);
 
-                for (int i = 0; i < SelectedScrum.BindedProject.UsedTechnologies.Count; i++)
-                {
-                    ProjectTechnology pt = SelectedScrum.BindedProject.UsedTechnologies[i];
-                    StrBuilder.Append(EnumToString.ProjectTechnologiesStrings[pt]);
-
-                    if (i != SelectedScrum.BindedProject.UsedTechnologies.Count - 1)
-                    {
-                        StrBuilder.Append(" / ");
-                    }
-                }
-
                 TextProjectTechnologies.text =
-                    string.Format("Used technologies: {0}", StrBuilder.ToString());
-                StrBuilder.Clear();
+                    string.Format("Used technologies: {0}", GetProjectTechnologiesString(SelectedScrum.BindedProject));
 
                 int estimatedCompletion = SelectedScrum.GetProjectEstimatedCompletionTime();
                 string estimatedCompletionStr;
@@ -328,7 +334,7 @@ namespace ITCompanySimulation.UI
             WorkerListViewMap.Remove(worker);
         }
 
-        private void AddWorkerListViewElement(SharedWorker companyWorker)
+        private ListViewElement CreateWorkerListViewElement(SharedWorker companyWorker)
         {
             LocalWorker worker = (LocalWorker)companyWorker;
             ListViewElement newElement = GameObject.Instantiate<ListViewElement>(ListViewWorkerElementPrefab);
@@ -336,21 +342,7 @@ namespace ITCompanySimulation.UI
             string elementText = GetWorkerListViewElementText(worker);
             newElement.GetComponentInChildren<TextMeshProUGUI>().text = elementText;
 
-            if (null == WorkerListViewMap)
-            {
-                WorkerListViewMap = new Dictionary<LocalWorker, ListViewElement>();
-            }
-
-            WorkerListViewMap.Add(worker, newElement);
-
-            if (null == worker.AssignedProject)
-            {
-                ListViewAvailableWorkers.AddControl(newElement.gameObject);
-            }
-            else
-            {
-                ListViewAssignedWorkers.AddControl(newElement.gameObject);
-            }
+            return newElement;
         }
 
         private string GetWorkerListViewElementText(LocalWorker worker)
@@ -379,31 +371,6 @@ namespace ITCompanySimulation.UI
                                                  worker.ExperienceTime,
                                                  absenceString);
             return elementText;
-        }
-
-        private void AddProjectListViewElement(Scrum scrumObj)
-        {
-            ListViewElement newElement = GameObject.Instantiate<ListViewElement>(ListViewProjectElementPrefab);
-            newElement.Text.text = GetProjectListViewElementText(scrumObj.BindedProject);
-
-            if (null == ScrumListViewMap)
-            {
-                ScrumListViewMap = new Dictionary<Scrum, ListViewElement>();
-            }
-
-            ScrumListViewMap.Add(scrumObj, newElement);
-            ListViewCompanyProjects.AddControl(newElement.gameObject);
-
-            Button elementButton = newElement.GetComponent<Button>();
-            ButtonSelectorProjects.AddButton(elementButton);
-        }
-
-        private string GetProjectListViewElementText(LocalProject proj)
-        {
-            return string.Format("{0}\nCompletion bonus: {1} $\nProgress: {2} %",
-                                 proj.Name,
-                                 proj.CompleteBonus,
-                                 proj.Progress.ToString("0.00"));
         }
 
         private void SubscribeProjectEvents()
