@@ -3,192 +3,303 @@ using UnityEngine;
 using UnityEngine.UI;
 using System.Linq;
 using ITCompanySimulation.Character;
+using TMPro;
+using System.Text;
 
-public class UIWorkersWorkersMarket : UIWorkers
+namespace ITCompanySimulation.UI
 {
-    /*Private consts fields*/
-
-    /*Private fields*/
-
-    /// <summary>
-    /// Used to map button in workers list to appriopriate worker
-    /// </summary>
-    private Dictionary<Button, SharedWorker> ButtonWorkerDictionary = new Dictionary<Button, SharedWorker>();
-    [SerializeField]
-    private ControlListView ListViewMarketWorkers;
-    [SerializeField]
-    private ControlListView ListViewCompanyWorkers;
-    [SerializeField]
-    private MainSimulationManager SimulationManagerComponent;
-    [SerializeField]
-    private WorkersMarket WorkersMarketComponent;
-    [SerializeField]
-    private Button ButtonHireWorker;
-    [SerializeField]
-    private Button ButtonFireWorker;
-    private IButtonSelector WorkersButtonSelector = new ButtonSelector();
-    private SharedWorker SelectedWorker;
-
-    /*Public consts fields*/
-
-    /*Public fields*/
-
-    /*Private methods*/
-
-    private void InitializeWorkersListView(ControlListView listView, List<SharedWorker> workers)
+    public class UIWorkersWorkersMarket : MonoBehaviour
     {
-        foreach (SharedWorker singleWorker in workers)
+        /*Private consts fields*/
+
+        /*Private fields*/
+
+        /// <summary>
+        /// Used to map button in workers list to appriopriate worker
+        /// </summary>
+        private Dictionary<SharedWorker, ListViewElement> WorkerListViewMap;
+        [SerializeField]
+        private ControlListView ListViewMarketWorkers;
+        [SerializeField]
+        private ControlListView ListViewCompanyWorkers;
+        [SerializeField]
+        private MainSimulationManager SimulationManagerComponent;
+        [SerializeField]
+        private WorkersMarket WorkersMarketComponent;
+        [SerializeField]
+        private GameTime GameTimeComponent;
+        [SerializeField]
+        private Button ButtonHireWorker;
+        [SerializeField]
+        private Button ButtonFireWorker;
+        [SerializeField]
+        private ListViewElement WorkerListViewElementPrefab;
+        [SerializeField]
+        private TextMeshProUGUI TextName;
+        [SerializeField]
+        private TextMeshProUGUI TextExpierience;
+        [SerializeField]
+        private TextMeshProUGUI TextAbilities;
+        [SerializeField]
+        private TextMeshProUGUI TextMarketWorkersListView;
+        [SerializeField]
+        private TextMeshProUGUI TextCompanyWorkerListView;
+        [SerializeField]
+        private TextMeshProUGUI TextSalary;
+        private IButtonSelector WorkersButtonSelector = new ButtonSelector();
+        private SharedWorker SelectedWorker;
+        private static StringBuilder StrBuilder = new StringBuilder();
+
+        /*Public consts fields*/
+
+        /*Public fields*/
+
+        /*Private methods*/
+
+        private void InitializeWorkersListView(ControlListView listView, List<SharedWorker> workers)
         {
-            Button newListViewButton = CreateWorkerButton(singleWorker);
-
-            listView.AddControl(newListViewButton.gameObject);
-            ButtonWorkerDictionary.Add(newListViewButton, singleWorker);
-            WorkersButtonSelector.AddButton(newListViewButton);
-        }
-    }
-
-    private Button CreateWorkerButton(SharedWorker workerObject)
-    {
-        Button newWorkerButton = GameObject.Instantiate<Button>(ListViewButtonPrefab);
-
-        Text buttonTextComponent = newWorkerButton.GetComponentInChildren<Text>();
-        string buttonText = string.Format("{0} {1} / {2} days / {3} $",
-            workerObject.Name, workerObject.Surename, workerObject.ExperienceTime, workerObject.Salary);
-        buttonTextComponent.text = buttonText;
-
-        return newWorkerButton;
-    }
-
-    private void OnSelectedWorkerButtonChanged(Button workerButton)
-    {
-        if (null != workerButton)
-        {
-            SharedWorker selectedWorker = ButtonWorkerDictionary[WorkersButtonSelector.GetSelectedButton()];
-
-            InputFieldDaysInCompany.gameObject.SetActive(selectedWorker is LocalWorker);
-
-            UpdateActionButtonsState(selectedWorker);
-            UpdateWorkerInfo(selectedWorker);
-        }
-        else
-        {
-            ClearWorkerInfo();
-            UpdateActionButtonsState(null);
-        }
-    }
-
-    /// <summary>
-    /// This method will enable or disable buttons used
-    /// for hiring of firing workers based on which worker
-    /// is selected (market worker or company worker)
-    /// </summary>
-    private void UpdateActionButtonsState(SharedWorker selectedWorker)
-    {
-        if (null != selectedWorker)
-        {
-            //Does not have company assigned so its market worker
-            if (false == (selectedWorker is LocalWorker))
+            foreach (SharedWorker singleWorker in workers)
             {
-                ButtonFireWorker.interactable = false;
-                ButtonHireWorker.interactable = true;
+                AddWorkerListViewElement(singleWorker, listView);
+            }
+        }
+
+        private ListViewElement CreateWorkerListViewElement(SharedWorker worker, ListViewElement prefab)
+        {
+            ListViewElement el = GameObject.Instantiate<ListViewElement>(prefab);
+
+            el.Text.text = GetWorkerListViewElementText(worker);
+
+            return el;
+        }
+
+        private string GetWorkerListViewElementText(SharedWorker worker)
+        {
+            return string.Format("{0} {1}\n{2} days of expierience\n{3} $ / Month",
+                worker.Name, worker.Surename, worker.ExperienceTime, worker.Salary);
+        }
+
+        private void SetWorkerInfoText(SharedWorker selectedWorker)
+        {
+            if (null != selectedWorker)
+            {
+                TextName.gameObject.SetActive(true);
+                TextSalary.gameObject.SetActive(true);
+                TextAbilities.gameObject.SetActive(true);
+                TextExpierience.gameObject.SetActive(true);
+
+                TextName.text = string.Format("Name: {0} {1}",
+                    selectedWorker.Name, selectedWorker.Surename);
+
+                SetWorkerSalaryText(selectedWorker);
+
+                TextExpierience.text = string.Format("Expierience: {0} days",
+                    selectedWorker.ExperienceTime);
+
+                StrBuilder.Clear();
+                StrBuilder.Append("Abilities:\n");
+
+                for (int i = 0; i < selectedWorker.Abilites.Count; i++)
+                {
+                    KeyValuePair<ProjectTechnology, float> ability = selectedWorker.Abilites.ElementAt(i);
+
+                    StrBuilder.AppendFormat("{0} {1}\n",
+                        EnumToString.ProjectTechnologiesStrings[ability.Key],
+                        ability.Value.ToString("0.00"));
+                }
+
+                TextAbilities.text = StrBuilder.ToString();
+                RectTransform textTransform = TextAbilities.rectTransform;
+                textTransform.sizeDelta = new Vector2(textTransform.sizeDelta.x, TextAbilities.preferredHeight);
             }
             else
             {
-                ButtonFireWorker.interactable = true;
-                ButtonHireWorker.interactable = false;
+                TextName.gameObject.SetActive(false);
+                TextSalary.gameObject.SetActive(false);
+                TextAbilities.gameObject.SetActive(false);
+                TextExpierience.gameObject.SetActive(false);
             }
+        }
 
-            if (PlayerCompany.MAX_WORKERS_PER_COMPANY == SimulationManagerComponent.ControlledCompany.Workers.Count)
+        private void SetWorkerSalaryText(SharedWorker selectedWorker)
+        {
+            TextSalary.text = string.Format("Salary: {0} $",
+                selectedWorker.Salary);
+        }
+
+        /// <summary>
+        /// This method will enable or disable buttons used
+        /// for hiring of firing workers based on which worker
+        /// is selected (market worker or company worker)
+        /// </summary>
+        private void SetActionButtonsState(SharedWorker selectedWorker)
+        {
+            if (null != selectedWorker)
             {
+                //Does not have company assigned so its market worker
+                if (false == (selectedWorker is LocalWorker))
+                {
+                    ButtonFireWorker.interactable = false;
+                    ButtonHireWorker.interactable = true;
+                }
+                else
+                {
+                    ButtonFireWorker.interactable = true;
+                    ButtonHireWorker.interactable = false;
+                }
+
+                if (PlayerCompany.MAX_WORKERS_PER_COMPANY == SimulationManagerComponent.ControlledCompany.Workers.Count)
+                {
+                    ButtonHireWorker.interactable = false;
+                }
+            }
+            else
+            {
+                ButtonFireWorker.interactable = false;
                 ButtonHireWorker.interactable = false;
             }
         }
-        else
+
+        #region Events callbacks
+
+        private void OnWorkerSalaryChanged(SharedWorker companyWorker)
         {
-            ButtonFireWorker.interactable = false;
-            ButtonHireWorker.interactable = false;
-        }
-    }
-
-    private void OnMarketWorkerAdded(SharedWorker addedWorker)
-    {
-        Button newWorkerButton = CreateWorkerButton(addedWorker);
-        ListViewMarketWorkers.AddControl(newWorkerButton.gameObject);
-        ButtonWorkerDictionary.Add(newWorkerButton, addedWorker);
-        WorkersButtonSelector.AddButton(newWorkerButton);
-    }
-
-    private void OnMarketWorkerRemoved(SharedWorker removedWorker)
-    {
-        Button workerButton = ButtonWorkerDictionary.First(x => x.Value == removedWorker).Key;
-        ListViewMarketWorkers.RemoveControl(workerButton.gameObject);
-        ButtonWorkerDictionary.Remove(workerButton);
-        WorkersButtonSelector.RemoveButton(workerButton);
-    }
-
-    private void OnCompanyWorkerAdded(SharedWorker addedWorker)
-    {
-        Button newWorkerButton = CreateWorkerButton(addedWorker);
-        ListViewCompanyWorkers.AddControl(newWorkerButton.gameObject);
-        ButtonWorkerDictionary.Add(newWorkerButton, addedWorker);
-        WorkersButtonSelector.AddButton(newWorkerButton);
-    }
-
-    private void OnCompanyWorkerRemoved(SharedWorker removedWorker)
-    {
-        Button workerButton = ButtonWorkerDictionary.First(x => x.Value == removedWorker).Key;
-        ListViewCompanyWorkers.RemoveControl(workerButton.gameObject);
-        ButtonWorkerDictionary.Remove(workerButton);
-        WorkersButtonSelector.RemoveButton(workerButton);
-    }
-
-    private void Start()
-    {
-        InitializeWorkersListView(ListViewMarketWorkers, WorkersMarketComponent.Workers);
-        InitializeWorkersListView(ListViewCompanyWorkers, SimulationManagerComponent.ControlledCompany.Workers.Cast<SharedWorker>().ToList());
-
-        SimulationManagerComponent.ControlledCompany.WorkerAdded += OnCompanyWorkerAdded;
-        SimulationManagerComponent.ControlledCompany.WorkerRemoved += OnCompanyWorkerRemoved;
-
-        WorkersMarketComponent.WorkerAdded += OnMarketWorkerAdded;
-        WorkersMarketComponent.WorkerRemoved += OnMarketWorkerRemoved;
-
-        WorkersButtonSelector.SelectedButtonChanged += OnSelectedWorkerButtonChanged;
-    }
-
-    private void SubscribeToWorkerEvents(LocalWorker selectedWorker)
-    {
-        selectedWorker.SalaryChanged += UpdateWorkerInfo;
-        selectedWorker.DaysInCompanyChanged += UpdateWorkerInfo;
-    }
-
-    private void UnsubscribeFromWorkerEvent(LocalWorker deselectedWorker)
-    {
-        deselectedWorker.SalaryChanged -= UpdateWorkerInfo;
-        deselectedWorker.DaysInCompanyChanged -= UpdateWorkerInfo;
-    }
-
-    /*Public methods*/
-
-    public void OnHireWorkerButtonClicked()
-    {
-        SharedWorker selectedWorker = ButtonWorkerDictionary[WorkersButtonSelector.GetSelectedButton()];
-        WorkersMarketComponent.RemoveWorker(selectedWorker);
-
-        LocalWorker newLocalWorker = selectedWorker as LocalWorker;
-
-        if (null == newLocalWorker)
-        {
-            newLocalWorker = new LocalWorker(selectedWorker);
+            ListViewElement el = WorkerListViewMap[companyWorker];
+            el.Text.text = GetWorkerListViewElementText(companyWorker);
         }
 
-        SimulationManagerComponent.ControlledCompany.AddWorker(newLocalWorker);
-    }
+        private void OnMarketWorkerAdded(SharedWorker addedWorker)
+        {
+            AddWorkerListViewElement(addedWorker, ListViewMarketWorkers);
+            SetMarketWorkersListViewText();
+        }
 
-    public void OnFireWorkerButtonClicked()
-    {
-        SharedWorker selectedWorker = ButtonWorkerDictionary[WorkersButtonSelector.GetSelectedButton()];
-        SimulationManagerComponent.ControlledCompany.RemoveWorker((LocalWorker)selectedWorker);
-        WorkersMarketComponent.AddWorker(selectedWorker);
+        private void OnMarketWorkerRemoved(SharedWorker removedWorker)
+        {
+            RemoveWorkerListViewElement(removedWorker, ListViewMarketWorkers);
+            SetMarketWorkersListViewText();
+        }
+
+        private void OnCompanyWorkerAdded(SharedWorker addedWorker)
+        {
+            AddWorkerListViewElement(addedWorker, ListViewCompanyWorkers);
+            SetCompanyWorkersListViewText();
+        }
+
+        private void OnCompanyWorkerRemoved(SharedWorker removedWorker)
+        {
+            RemoveWorkerListViewElement(removedWorker, ListViewCompanyWorkers);
+            SetCompanyWorkersListViewText();
+        }
+
+        private void OnSelectedWorkerButtonChanged(Button workerButton)
+        {
+            if (null != workerButton)
+            {
+                ListViewElement selectedElement = workerButton.gameObject.GetComponent<ListViewElement>();
+                SelectedWorker = WorkerListViewMap.First(x => x.Value == selectedElement).Key;
+
+                SetActionButtonsState(SelectedWorker);
+                SetWorkerInfoText(SelectedWorker);
+            }
+            else
+            {
+                SetActionButtonsState(null);
+            }
+        }
+
+        private void OnGameTimeDayChanged()
+        {
+            if (true == gameObject.activeSelf)
+            {
+                foreach (KeyValuePair<SharedWorker,ListViewElement> pair in WorkerListViewMap)
+                {
+                    pair.Value.Text.text = GetWorkerListViewElementText(pair.Key);
+                }
+            }
+        }
+
+        #endregion
+
+        private void SetMarketWorkersListViewText()
+        {
+            TextMarketWorkersListView.text = string.Format("Market workers ({0})",
+                WorkersMarketComponent.Workers.Count);
+        }
+
+        private void SetCompanyWorkersListViewText()
+        {
+            TextCompanyWorkerListView.text = string.Format("Company workers ({0} / {1})",
+                SimulationManagerComponent.ControlledCompany.Workers.Count,
+                PlayerCompany.MAX_WORKERS_PER_COMPANY);
+        }
+
+        private void AddWorkerListViewElement(SharedWorker worker, ControlListView listView)
+        {
+            ListViewElement element = CreateWorkerListViewElement(worker, WorkerListViewElementPrefab);
+            Button buttonComponent = element.GetComponent<Button>();
+
+            if (null == WorkerListViewMap)
+            {
+                WorkerListViewMap = new Dictionary<SharedWorker, ListViewElement>();
+            }
+
+            listView.AddControl(element.gameObject);
+            WorkerListViewMap.Add(worker, element);
+            WorkersButtonSelector.AddButton(buttonComponent);
+            worker.SalaryChanged += OnWorkerSalaryChanged;
+        }
+
+        private void RemoveWorkerListViewElement(SharedWorker worker, ControlListView listView)
+        {
+            ListViewElement element = WorkerListViewMap.First(x => x.Key == worker).Value;
+            Button buttonComponent = element.GetComponent<Button>();
+
+            listView.RemoveControl(element.gameObject);
+            WorkerListViewMap.Remove(worker);
+            WorkersButtonSelector.RemoveButton(buttonComponent);
+            worker.SalaryChanged -= OnWorkerSalaryChanged;
+        }
+
+        private void Start()
+        {
+            InitializeWorkersListView(ListViewMarketWorkers, WorkersMarketComponent.Workers);
+            InitializeWorkersListView(ListViewCompanyWorkers, SimulationManagerComponent.ControlledCompany.Workers.Cast<SharedWorker>().ToList());
+
+            SimulationManagerComponent.ControlledCompany.WorkerAdded += OnCompanyWorkerAdded;
+            SimulationManagerComponent.ControlledCompany.WorkerRemoved += OnCompanyWorkerRemoved;
+
+            WorkersMarketComponent.WorkerAdded += OnMarketWorkerAdded;
+            WorkersMarketComponent.WorkerRemoved += OnMarketWorkerRemoved;
+
+            WorkersButtonSelector.SelectedButtonChanged += OnSelectedWorkerButtonChanged;
+
+            GameTimeComponent.DayChanged += OnGameTimeDayChanged;
+
+            SetWorkerInfoText(SelectedWorker);
+            SetActionButtonsState(SelectedWorker);
+        }
+
+        /*Public methods*/
+
+        public void OnHireWorkerButtonClicked()
+        {
+            WorkersMarketComponent.RemoveWorker(SelectedWorker);
+
+            LocalWorker newLocalWorker = SelectedWorker as LocalWorker;
+
+            if (null == newLocalWorker)
+            {
+                newLocalWorker = new LocalWorker(SelectedWorker);
+            }
+
+            SimulationManagerComponent.ControlledCompany.AddWorker(newLocalWorker);
+        }
+
+        public void OnFireWorkerButtonClicked()
+        {
+            SimulationManagerComponent.ControlledCompany.RemoveWorker((LocalWorker)SelectedWorker);
+            WorkersMarketComponent.AddWorker(SelectedWorker);
+        }
     }
 }
