@@ -77,7 +77,7 @@ public class ProjectsMarket : Photon.PunBehaviour
 
             if (randomNumber <= PROJECT_ADD_PROBABILITY_DAILY)
             {
-                LocalProject newProject = GenerateSingleProject();
+                SharedProject newProject = GenerateSingleProject();
                 this.photonView.RPC("AddProject", PhotonTargets.All, newProject);
             }
         }
@@ -91,14 +91,14 @@ public class ProjectsMarket : Photon.PunBehaviour
         return maxProjectsOnMarket;
     }
 
-    private LocalProject GenerateSingleProject()
+    private SharedProject GenerateSingleProject()
     {
-        LocalProject newProject;
+        SharedProject newProject;
         int projectNameIndex = UnityEngine.Random.Range(0, ProjectData.Names.Count);
         string projectName =
             ProjectData.Names[projectNameIndex];
 
-        newProject = new LocalProject(projectName);
+        newProject = new SharedProject(projectName);
         newProject.UsedTechnologies = GenerateProjectTechnologies();
         newProject.CompleteBonus = CalculateProjectCompleteBonus(newProject);
         newProject.ID = ProjectID++;
@@ -112,7 +112,7 @@ public class ProjectsMarket : Photon.PunBehaviour
         return newProject;
     }
 
-    private int CalculateProjectCompleteBonus(LocalProject newProject)
+    private int CalculateProjectCompleteBonus(SharedProject newProject)
     {
         int projectCompleteBonus = PROJECT_BONUS_BASE;
 
@@ -138,7 +138,7 @@ public class ProjectsMarket : Photon.PunBehaviour
 
         while (MaxProjectsOnMarket != Projects.Count)
         {
-            LocalProject newProject = GenerateSingleProject();
+            SharedProject newProject = GenerateSingleProject();
             this.photonView.RPC("AddProject", PhotonTargets.All, newProject);
         }
 
@@ -169,7 +169,7 @@ public class ProjectsMarket : Photon.PunBehaviour
     }
 
     [PunRPC]
-    private void AddProject(LocalProject projectToAdd)
+    private void AddProject(SharedProject projectToAdd)
     {
         Projects.Add(projectToAdd);
         ProjectAdded?.Invoke(projectToAdd);
