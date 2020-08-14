@@ -4,8 +4,6 @@ using UnityEngine.UI;
 using System.Linq;
 using ITCompanySimulation.Character;
 using TMPro;
-using System.Text;
-using UnityEngine.EventSystems;
 
 namespace ITCompanySimulation.UI
 {
@@ -51,7 +49,6 @@ namespace ITCompanySimulation.UI
         private Tooltip TooltipComponent;
         private IButtonSelector WorkersButtonSelector = new ButtonSelector();
         private SharedWorker SelectedWorker;
-        private static StringBuilder StrBuilder = new StringBuilder();
 
         /*Public consts fields*/
 
@@ -65,38 +62,6 @@ namespace ITCompanySimulation.UI
             {
                 AddWorkerListViewElement(singleWorker, listView);
             }
-        }
-
-        private ListViewElement CreateWorkerListViewElement(SharedWorker worker, ListViewElement prefab)
-        {
-            ListViewElement el = GameObject.Instantiate<ListViewElement>(prefab);
-
-            el.Text.text = GetWorkerListViewElementText(worker);
-
-            return el;
-        }
-
-        private string GetWorkerListViewElementText(SharedWorker worker)
-        {
-            return string.Format("{0} {1}\n{2} days of expierience\n{3} $ / Month",
-                worker.Name, worker.Surename, worker.ExperienceTime, worker.Salary);
-        }
-
-        private string GetWorkerAbilitiesText(SharedWorker worker)
-        {
-            StrBuilder.Clear();
-            StrBuilder.Append("Abilities:\n");
-
-            for (int i = 0; i < worker.Abilites.Count; i++)
-            {
-                KeyValuePair<ProjectTechnology, float> ability = worker.Abilites.ElementAt(i);
-
-                StrBuilder.AppendFormat("{0} {1}\n",
-                    EnumToString.ProjectTechnologiesStrings[ability.Key],
-                    ability.Value.ToString("0.00"));
-            }
-
-            return StrBuilder.ToString();
         }
 
         private void SetWorkerInfoText(SharedWorker selectedWorker)
@@ -117,7 +82,7 @@ namespace ITCompanySimulation.UI
                     selectedWorker.ExperienceTime);
 
 
-                TextAbilities.text = GetWorkerAbilitiesText(selectedWorker);
+                TextAbilities.text = UIWorkers.GetWorkerAbilitiesText(selectedWorker);
                 RectTransform textTransform = TextAbilities.rectTransform;
                 textTransform.sizeDelta = new Vector2(textTransform.sizeDelta.x, TextAbilities.preferredHeight);
             }
@@ -174,7 +139,7 @@ namespace ITCompanySimulation.UI
         private void OnWorkerSalaryChanged(SharedWorker companyWorker)
         {
             ListViewElement el = WorkerListViewMap[companyWorker];
-            el.Text.text = GetWorkerListViewElementText(companyWorker);
+            el.Text.text = UIWorkers.GetWorkerListViewElementText(companyWorker);
         }
 
         private void OnMarketWorkerAdded(SharedWorker addedWorker)
@@ -223,7 +188,7 @@ namespace ITCompanySimulation.UI
             {
                 foreach (KeyValuePair<SharedWorker, ListViewElement> pair in WorkerListViewMap)
                 {
-                    pair.Value.Text.text = GetWorkerListViewElementText(pair.Key);
+                    pair.Value.Text.text = UIWorkers.GetWorkerListViewElementText(pair.Key);
                 }
             }
         }
@@ -245,20 +210,7 @@ namespace ITCompanySimulation.UI
 
         private void AddWorkerListViewElement(SharedWorker worker, ControlListView listView)
         {
-            ListViewElement element = CreateWorkerListViewElement(worker, WorkerListViewElementPrefab);
-
-            MousePointerEvents mousePtrEvt = element.gameObject.AddComponent<MousePointerEvents>();
-
-            mousePtrEvt.PointerEntered += () =>
-              {
-                  TooltipComponent.gameObject.SetActive(true);
-                  TooltipComponent.Text = GetWorkerAbilitiesText(worker);
-              };
-
-            mousePtrEvt.PointerExited += () =>
-              {
-                  TooltipComponent.gameObject.SetActive(false);
-              };
+            ListViewElement element = UIWorkers.CreateWorkerListViewElement(worker, WorkerListViewElementPrefab, TooltipComponent);
 
             Button buttonComponent = element.GetComponent<Button>();
 

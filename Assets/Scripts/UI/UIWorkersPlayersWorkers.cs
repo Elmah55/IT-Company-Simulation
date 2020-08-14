@@ -1,205 +1,301 @@
 ﻿using ITCompanySimulation.Character;
 using System.Collections.Generic;
 using System.Linq;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-/// <summary>
-/// This class handles display of UI with workers of other
-/// players in simulation
-/// </summary>
-public class UIWorkersPlayersWorkers : UIWorkers
+namespace ITCompanySimulation.UI
 {
-    /*Private consts fields*/
-
-    /*Private fields*/
-
-    [SerializeField]
-    private MainSimulationManager SimulationManagerComponent;
-    [SerializeField]
-    private ControlListView ListViewPlayersWorkers;
-    [SerializeField]
-    private Button ButtonHireWorker;
     /// <summary>
-    /// Dropdown that holds list of other players in room
+    /// This class handles display of UI with workers of other
+    /// players in simulation
     /// </summary>
-    [SerializeField]
-    private Dropdown DropdownPlayersList;
-    private PhotonPlayer DropdownPlayersListSelectedPlayer;
-    /// <summary>
-    /// Maps button in players list view to its coresponding worker
-    /// </summary>
-    private Dictionary<Button, SharedWorker> ListViewPlayersWorkersButtonWorkerMap = new Dictionary<Button, SharedWorker>();
-    /// <summary>
-    /// Maps photon player to its index in players dropdown
-    /// </summary>
-    private Dictionary<PhotonPlayer, int> PhotonPlayerDropdownMap = new Dictionary<PhotonPlayer, int>();
-    private IButtonSelector WorkersButtonSelector = new ButtonSelector();
-
-    /*Public consts fields*/
-
-    /*Public fields*/
-
-    /*Private methods*/
-
-    /// <summary>
-    /// Adds buttons to list view with workers info from company of given
-    /// players
-    /// </summary>
-    private void AddPlayerWorkerButton(SharedWorker playerWorker)
+    public class UIWorkersPlayersWorkers : Photon.PunBehaviour
     {
-        Button playerWorkerButton = GameObject.Instantiate<Button>(ListViewButtonPrefab);
+        /*Private consts fields*/
 
-        Text buttonTextComponent = playerWorkerButton.GetComponentInChildren<Text>();
-        string buttonText = string.Format("{0} {1} / {2} days / {3} $",
-                                          playerWorker.Name,
-                                          playerWorker.Surename,
-                                          playerWorker.ExperienceTime,
-                                          playerWorker.HireSalary);
-        buttonTextComponent.text = buttonText;
+        /*Private fields*/
 
-        ListViewPlayersWorkersButtonWorkerMap.Add(playerWorkerButton, playerWorker);
-        ListViewPlayersWorkers.AddControl(playerWorkerButton.gameObject);
-        WorkersButtonSelector.AddButton(playerWorkerButton);
-    }
+        [SerializeField]
+        private MainSimulationManager SimulationManagerComponent;
+        [SerializeField]
+        private ControlListView ListViewOtherPlayersWorkers;
+        [SerializeField]
+        private ControlListView ListViewCompanyWorkers;
+        [SerializeField]
+        private ListViewElement WorkerListViewElementPrefab;
+        [SerializeField]
+        private Button ButtonHireWorker;
+        [SerializeField]
+        private TextMeshProUGUI TextName;
+        [SerializeField]
+        private TextMeshProUGUI TextExpierience;
+        [SerializeField]
+        private TextMeshProUGUI TextAbilities;
+        [SerializeField]
+        private TextMeshProUGUI TextSalary;
+        /// <summary>
+        /// Dropdown that holds list of other players in room
+        /// </summary>
+        [SerializeField]
+        private TMP_Dropdown DropdownPlayersList;
+        [SerializeField]
+        private Tooltip TooltipComponent;
+        private PhotonPlayer SelectedPlayer;
+        private SharedWorker SelectedWorker;
+        /// <summary>
+        /// Maps button in players list view to its coresponding worker
+        /// </summary>
+        private Dictionary<SharedWorker, ListViewElement> WorkerListViewMap;
+        /// <summary>
+        /// Maps photon player to its index in players dropdown
+        /// </summary>
+        private Dictionary<PhotonPlayer, int> PhotonPlayerDropdownMap = new Dictionary<PhotonPlayer, int>();
+        private IButtonSelector WorkersButtonSelector = new ButtonSelector();
 
-    private void OnDropdownPlayersListValueChanged(int index)
-    {
-        if (1 != PhotonNetwork.room.PlayerCount)
+        /*Public consts fields*/
+
+        /*Public fields*/
+
+        /*Private methods*/
+
+        #region Event callbacks
+
+        private void OnDropdownPlayersListValueChanged(int index)
         {
-            DropdownPlayersListSelectedPlayer = PhotonNetwork.playerList[index];
-            ListViewPlayersWorkers.RemoveAllControls();
-            AddListViewPlayersWorkersButtons(DropdownPlayersListSelectedPlayer);
-        }
-    }
-
-    private void OnOtherPlayerWorkerAdded(SharedWorker worker, PhotonPlayer player)
-    {
-        if (DropdownPlayersListSelectedPlayer.ID == player.ID)
-        {
-            AddPlayerWorkerButton(worker);
-        }
-    }
-
-    private void OnOtherPlayerWorkerRemoved(SharedWorker removedWorker, PhotonPlayer player)
-    {
-        if (DropdownPlayersListSelectedPlayer.ID == player.ID)
-        {
-            Button selectedWorkerButton = WorkersButtonSelector.GetSelectedButton();
-            SharedWorker selectedWorker = ListViewPlayersWorkersButtonWorkerMap[selectedWorkerButton];
-
-            List<SharedWorker> otherPlayerWorkers =
-                SimulationManagerComponent.OtherPlayersWorkers[DropdownPlayersListSelectedPlayer];
-
-            selectedWorker.Salary = selectedWorker.HireSalary;
-
-            otherPlayerWorkers.Remove(selectedWorker);
-            WorkersButtonSelector.RemoveButton(selectedWorkerButton);
-            ListViewPlayersWorkers.RemoveControl(selectedWorkerButton.gameObject);
-            ClearWorkerInfo();
-        }
-    }
-
-    private void Start()
-    {
-        SimulationManagerComponent.OtherPlayerWorkerAdded += OnOtherPlayerWorkerAdded;
-        SimulationManagerComponent.OtherPlayerWorkerRemoved += OnOtherPlayerWorkerRemoved;
-        DropdownPlayersList.onValueChanged.AddListener(OnDropdownPlayersListValueChanged);
-        WorkersButtonSelector.SelectedButtonChanged += OnListViewPlayersWorkersButtonClicked;
-        InitDropdownPlayersList();
-        //Initialize player's workers list at script start
-        DropdownPlayersListSelectedPlayer = PhotonNetwork.playerList[DropdownPlayersList.value];
-        OnDropdownPlayersListValueChanged(DropdownPlayersList.value);
-    }
-
-    private void AddListViewPlayersWorkersButtons(PhotonPlayer otherPlayer)
-    {
-        List<SharedWorker> playerWorkers = SimulationManagerComponent.OtherPlayersWorkers[otherPlayer];
-
-        foreach (SharedWorker playerWorker in playerWorkers)
-        {
-            AddPlayerWorkerButton(playerWorker);
-        }
-    }
-
-    private void OnListViewPlayersWorkersButtonClicked(Button selectedButton)
-    {
-        ButtonHireWorker.interactable = (selectedButton != null);
-
-        if (null != selectedButton)
-        {
-            SharedWorker selectedWorker = ListViewPlayersWorkersButtonWorkerMap[selectedButton];
-            UpdateWorkerInfo(selectedWorker);
-        }
-        else
-        {
-            base.ClearWorkerInfo();
-        }
-    }
-
-    private void InitDropdownPlayersList()
-    {
-        List<string> dropdownOptions = new List<string>();
-
-        if (false == PhotonNetwork.offlineMode)
-        {
-            foreach (KeyValuePair<PhotonPlayer, List<SharedWorker>> workersListPair in SimulationManagerComponent.OtherPlayersWorkers)
+            if (1 != PhotonNetwork.room.PlayerCount)
             {
-                //No need to add local player
-                if (PhotonNetwork.player.ID == workersListPair.Key.ID)
+                List<SharedWorker> playerWorkers;
+
+                if (null != SelectedPlayer)
                 {
-                    continue;
+                    playerWorkers = SimulationManagerComponent.OtherPlayersWorkers[SelectedPlayer];
+                    foreach (SharedWorker worker in playerWorkers)
+                    {
+                        RemoveWorkerListViewElement(worker, ListViewOtherPlayersWorkers);
+                    }
                 }
 
-                string dropdownOptionText = string.Format("({0}) {1}",
-                                                          workersListPair.Key.ID,
-                                                          workersListPair.Key.NickName);
+                SelectedPlayer = PhotonNetwork.playerList[index];
+                playerWorkers = SimulationManagerComponent.OtherPlayersWorkers[SelectedPlayer];
 
-                PhotonPlayerDropdownMap.Add(workersListPair.Key, dropdownOptions.Count);
-                dropdownOptions.Add(dropdownOptionText);
+                foreach (SharedWorker worker in playerWorkers)
+                {
+                    AddWorkerListViewElement(worker, ListViewOtherPlayersWorkers);
+                }
             }
         }
 
-        DropdownPlayersList.AddOptions(dropdownOptions);
-    }
-
-    protected override void UpdateWorkerInfo(SharedWorker selectedWorker)
-    {
-        base.UpdateWorkerInfo(selectedWorker);
-
-        InputFieldSalary.text = string.Format("{0} $", selectedWorker.HireSalary);
-    }
-
-    /*Public methods*/
-
-    public void OnButtonHireWorkerClick()
-    {
-        Button selectedWorkerButton = WorkersButtonSelector.GetSelectedButton();
-        SharedWorker selectedWorker = ListViewPlayersWorkersButtonWorkerMap[selectedWorkerButton];
-        SimulationManagerComponent.RemoveOtherPlayerControlledCompanyWorker(DropdownPlayersListSelectedPlayer, selectedWorker.ID);
-
-        LocalWorker localSelectedWorker = selectedWorker as LocalWorker;
-
-        if (null == localSelectedWorker)
+        private void OnOtherPlayerWorkerAdded(SharedWorker worker, PhotonPlayer player)
         {
-            localSelectedWorker = new LocalWorker(selectedWorker);
+            if (SelectedPlayer.ID == player.ID)
+            {
+                AddWorkerListViewElement(worker, ListViewOtherPlayersWorkers);
+            }
         }
 
-        SimulationManagerComponent.ControlledCompany.AddWorker(localSelectedWorker);
-    }
-
-    public override void OnPhotonPlayerDisconnected(PhotonPlayer otherPlayer)
-    {
-        base.OnPhotonPlayerDisconnected(otherPlayer);
-
-        int playerDropdownIndex = PhotonPlayerDropdownMap[otherPlayer];
-        PhotonPlayerDropdownMap.Remove(otherPlayer);
-        DropdownPlayersList.options.RemoveAt(playerDropdownIndex);
-
-        if (DropdownPlayersListSelectedPlayer.ID == otherPlayer.ID)
+        private void OnOtherPlayerWorkerRemoved(SharedWorker removedWorker, PhotonPlayer player)
         {
-            ListViewPlayersWorkers.RemoveAllControls();
-            WorkersButtonSelector.RemoveAllButtons();
+            if (SelectedPlayer.ID == player.ID)
+            {
+                Button selectedWorkerButton = WorkersButtonSelector.GetSelectedButton();
+
+                WorkerListViewMap.Remove(removedWorker);
+                WorkersButtonSelector.RemoveButton(selectedWorkerButton);
+                ListViewOtherPlayersWorkers.RemoveControl(selectedWorkerButton.gameObject);
+            }
+        }
+
+        private void OnWorkersSelectedButtonChanged(Button selectedButton)
+        {
+            ButtonHireWorker.interactable = (selectedButton != null);
+
+            if (null != SelectedWorker)
+            {
+                UnsubscribeFromWorkerEvents();
+            }
+
+            if (null != selectedButton)
+            {
+                ListViewElement element = selectedButton.GetComponent<ListViewElement>();
+                SelectedWorker = WorkerListViewMap.First(x => x.Value == element).Key;
+                SetWorkerInfoText(SelectedWorker);
+                SubscribeToWorkerEvents();
+            }
+            else
+            {
+                SetWorkerInfoText(null);
+            }
+        }
+
+        private void OnControlledCompanyWorkerRemoved(SharedWorker companyWorker)
+        {
+            RemoveWorkerListViewElement(companyWorker, ListViewCompanyWorkers);
+        }
+
+        private void OnControlledCompanyWorkerAdded(SharedWorker companyWorker)
+        {
+            AddWorkerListViewElement(companyWorker, ListViewCompanyWorkers);
+        }
+
+        private void OnSelectedWorkerSalaryChanged(SharedWorker companyWorker)
+        {
+            SetWorkerSalaryText(companyWorker);
+        }
+
+        #endregion
+
+        private void SubscribeToWorkerEvents()
+        {
+            SelectedWorker.SalaryChanged += OnSelectedWorkerSalaryChanged;
+        }
+
+        private void UnsubscribeFromWorkerEvents()
+        {
+            SelectedWorker.SalaryChanged -= OnSelectedWorkerSalaryChanged;
+        }
+
+        private void AddWorkerListViewElement(SharedWorker playerWorker, ControlListView listView)
+        {
+            ListViewElement element =
+                UIWorkers.CreateWorkerListViewElement(playerWorker, WorkerListViewElementPrefab, TooltipComponent);
+
+
+            Button buttonComponent = element.GetComponent<Button>();
+
+            if (null == WorkerListViewMap)
+            {
+                WorkerListViewMap = new Dictionary<SharedWorker, ListViewElement>();
+            }
+
+            WorkerListViewMap.Add(playerWorker, element);
+            listView.AddControl(element.gameObject);
+            WorkersButtonSelector.AddButton(buttonComponent);
+        }
+
+        private void RemoveWorkerListViewElement(SharedWorker playerWorker, ControlListView listView)
+        {
+            ListViewElement element = WorkerListViewMap[playerWorker];
+            Button buttonComponent = element.GetComponent<Button>();
+
+            WorkerListViewMap.Remove(playerWorker);
+            listView.RemoveControl(element.gameObject);
+            WorkersButtonSelector.RemoveButton(buttonComponent);
+        }
+
+        private void Start()
+        {
+            SimulationManagerComponent.ControlledCompany.WorkerAdded += OnControlledCompanyWorkerAdded;
+            SimulationManagerComponent.ControlledCompany.WorkerRemoved += OnControlledCompanyWorkerRemoved;
+            SimulationManagerComponent.OtherPlayerWorkerAdded += OnOtherPlayerWorkerAdded;
+            SimulationManagerComponent.OtherPlayerWorkerRemoved += OnOtherPlayerWorkerRemoved;
+            DropdownPlayersList.onValueChanged.AddListener(OnDropdownPlayersListValueChanged);
+            WorkersButtonSelector.SelectedButtonChanged += OnWorkersSelectedButtonChanged;
+            InitDropdownPlayersList();
+            //Initialize player's workers list at script start
+            OnDropdownPlayersListValueChanged(DropdownPlayersList.value);
+        }
+
+        private void AddListViewPlayersWorkersElements(PhotonPlayer otherPlayer)
+        {
+            List<SharedWorker> playerWorkers = SimulationManagerComponent.OtherPlayersWorkers[otherPlayer];
+
+            foreach (SharedWorker playerWorker in playerWorkers)
+            {
+                AddWorkerListViewElement(playerWorker, ListViewOtherPlayersWorkers);
+            }
+        }
+
+        private void InitDropdownPlayersList()
+        {
+            List<string> dropdownOptions = new List<string>();
+
+            if (false == PhotonNetwork.offlineMode)
+            {
+                foreach (KeyValuePair<PhotonPlayer, List<SharedWorker>> workersListPair in SimulationManagerComponent.OtherPlayersWorkers)
+                {
+                    string dropdownOptionText = string.Format("({0}) {1}",
+                                                              workersListPair.Key.ID,
+                                                              workersListPair.Key.NickName);
+
+                    PhotonPlayerDropdownMap.Add(workersListPair.Key, dropdownOptions.Count);
+                    dropdownOptions.Add(dropdownOptionText);
+                }
+            }
+
+            DropdownPlayersList.AddOptions(dropdownOptions);
+        }
+
+        private void SetWorkerInfoText(SharedWorker selectedWorker)
+        {
+            if (null != selectedWorker)
+            {
+                TextName.gameObject.SetActive(true);
+                TextSalary.gameObject.SetActive(true);
+                TextAbilities.gameObject.SetActive(true);
+                TextExpierience.gameObject.SetActive(true);
+
+                TextName.text = string.Format("Name: {0} {1}",
+                    selectedWorker.Name, selectedWorker.Surename);
+
+                SetWorkerSalaryText(selectedWorker);
+
+                TextExpierience.text = string.Format("Expierience: {0} days",
+                    selectedWorker.ExperienceTime);
+
+
+                TextAbilities.text = UIWorkers.GetWorkerAbilitiesText(selectedWorker);
+                RectTransform textTransform = TextAbilities.rectTransform;
+                textTransform.sizeDelta = new Vector2(textTransform.sizeDelta.x, TextAbilities.preferredHeight);
+            }
+            else
+            {
+                TextName.gameObject.SetActive(false);
+                TextSalary.gameObject.SetActive(false);
+                TextAbilities.gameObject.SetActive(false);
+                TextExpierience.gameObject.SetActive(false);
+            }
+        }
+
+        private void SetWorkerSalaryText(SharedWorker worker)
+        {
+            TextSalary.text = string.Format("Salary: {0} $",
+                worker.Salary);
+        }
+
+        /*Public methods*/
+
+        public void OnButtonHireWorkerClick()
+        {
+            Button selectedWorkerButton = WorkersButtonSelector.GetSelectedButton();
+            ListViewElement element = selectedWorkerButton.GetComponent<ListViewElement>();
+            SharedWorker selectedWorker = WorkerListViewMap.First(x => x.Value == element).Key;
+            SimulationManagerComponent.RemoveOtherPlayerControlledCompanyWorker(SelectedPlayer, selectedWorker.ID);
+
+            LocalWorker localSelectedWorker = selectedWorker as LocalWorker;
+
+            if (null == localSelectedWorker)
+            {
+                localSelectedWorker = new LocalWorker(selectedWorker);
+            }
+
+            SimulationManagerComponent.ControlledCompany.AddWorker(localSelectedWorker);
+        }
+
+        public override void OnPhotonPlayerDisconnected(PhotonPlayer otherPlayer)
+        {
+            base.OnPhotonPlayerDisconnected(otherPlayer);
+
+            int playerDropdownIndex = PhotonPlayerDropdownMap[otherPlayer];
+            PhotonPlayerDropdownMap.Remove(otherPlayer);
+            DropdownPlayersList.options.RemoveAt(playerDropdownIndex);
+
+            if (SelectedPlayer.ID == otherPlayer.ID)
+            {
+                ListViewOtherPlayersWorkers.RemoveAllControls();
+                WorkersButtonSelector.RemoveAllButtons();
+            }
         }
     }
 }

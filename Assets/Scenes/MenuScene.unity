@@ -9738,6 +9738,21 @@ PrefabInstance:
       propertyPath: m_Name
       value: GameManager
       objectReference: {fileID: 0}
+    - target: {fileID: 382524634025743179, guid: f8df458a5e3f90747984a55db0ae704a,
+        type: 3}
+      propertyPath: SimulationTimeScale
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 382524634025743179, guid: f8df458a5e3f90747984a55db0ae704a,
+        type: 3}
+      propertyPath: OfflineMode
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 382524634025743179, guid: f8df458a5e3f90747984a55db0ae704a,
+        type: 3}
+      propertyPath: UseRoom
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 382524634025743177, guid: f8df458a5e3f90747984a55db0ae704a,
         type: 3}
       propertyPath: m_LocalPosition.x
