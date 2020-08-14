@@ -5,6 +5,7 @@ using System.Linq;
 using ITCompanySimulation.Character;
 using TMPro;
 using System.Text;
+using UnityEngine.EventSystems;
 
 namespace ITCompanySimulation.UI
 {
@@ -46,6 +47,8 @@ namespace ITCompanySimulation.UI
         private TextMeshProUGUI TextCompanyWorkerListView;
         [SerializeField]
         private TextMeshProUGUI TextSalary;
+        [SerializeField]
+        private Tooltip TooltipComponent;
         private IButtonSelector WorkersButtonSelector = new ButtonSelector();
         private SharedWorker SelectedWorker;
         private static StringBuilder StrBuilder = new StringBuilder();
@@ -79,6 +82,23 @@ namespace ITCompanySimulation.UI
                 worker.Name, worker.Surename, worker.ExperienceTime, worker.Salary);
         }
 
+        private string GetWorkerAbilitiesText(SharedWorker worker)
+        {
+            StrBuilder.Clear();
+            StrBuilder.Append("Abilities:\n");
+
+            for (int i = 0; i < worker.Abilites.Count; i++)
+            {
+                KeyValuePair<ProjectTechnology, float> ability = worker.Abilites.ElementAt(i);
+
+                StrBuilder.AppendFormat("{0} {1}\n",
+                    EnumToString.ProjectTechnologiesStrings[ability.Key],
+                    ability.Value.ToString("0.00"));
+            }
+
+            return StrBuilder.ToString();
+        }
+
         private void SetWorkerInfoText(SharedWorker selectedWorker)
         {
             if (null != selectedWorker)
@@ -96,19 +116,8 @@ namespace ITCompanySimulation.UI
                 TextExpierience.text = string.Format("Expierience: {0} days",
                     selectedWorker.ExperienceTime);
 
-                StrBuilder.Clear();
-                StrBuilder.Append("Abilities:\n");
 
-                for (int i = 0; i < selectedWorker.Abilites.Count; i++)
-                {
-                    KeyValuePair<ProjectTechnology, float> ability = selectedWorker.Abilites.ElementAt(i);
-
-                    StrBuilder.AppendFormat("{0} {1}\n",
-                        EnumToString.ProjectTechnologiesStrings[ability.Key],
-                        ability.Value.ToString("0.00"));
-                }
-
-                TextAbilities.text = StrBuilder.ToString();
+                TextAbilities.text = GetWorkerAbilitiesText(selectedWorker);
                 RectTransform textTransform = TextAbilities.rectTransform;
                 textTransform.sizeDelta = new Vector2(textTransform.sizeDelta.x, TextAbilities.preferredHeight);
             }
@@ -212,7 +221,7 @@ namespace ITCompanySimulation.UI
         {
             if (true == gameObject.activeSelf)
             {
-                foreach (KeyValuePair<SharedWorker,ListViewElement> pair in WorkerListViewMap)
+                foreach (KeyValuePair<SharedWorker, ListViewElement> pair in WorkerListViewMap)
                 {
                     pair.Value.Text.text = GetWorkerListViewElementText(pair.Key);
                 }
@@ -237,6 +246,20 @@ namespace ITCompanySimulation.UI
         private void AddWorkerListViewElement(SharedWorker worker, ControlListView listView)
         {
             ListViewElement element = CreateWorkerListViewElement(worker, WorkerListViewElementPrefab);
+
+            MousePointerEvents mousePtrEvt = element.gameObject.AddComponent<MousePointerEvents>();
+
+            mousePtrEvt.PointerEntered += () =>
+              {
+                  TooltipComponent.gameObject.SetActive(true);
+                  TooltipComponent.Text = GetWorkerAbilitiesText(worker);
+              };
+
+            mousePtrEvt.PointerExited += () =>
+              {
+                  TooltipComponent.gameObject.SetActive(false);
+              };
+
             Button buttonComponent = element.GetComponent<Button>();
 
             if (null == WorkerListViewMap)
