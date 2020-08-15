@@ -187,7 +187,11 @@ namespace ITCompanySimulation.UI
     public delegate void ParentChangeAction(GameObject obj, GameObject newParent);
 }
 
-public delegate void LoanAction(BankLoan load);
+namespace ITCompanySimulation.Economy
+{
+    public delegate void LoanAction(BankLoan load);
+}
+
 public delegate void WorkerAction(SharedWorker companyWorker);
 public delegate void WorkerAbilityAction(SharedWorker companyWorker, ProjectTechnology workerAbility, float workerAbilityValue);
 public delegate void MultiplayerWorkerAction(SharedWorker playerWorker, PhotonPlayer player);
