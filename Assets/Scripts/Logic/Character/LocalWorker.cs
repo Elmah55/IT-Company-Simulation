@@ -1,9 +1,4 @@
 ﻿using ITCompanySimulation.Developing;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Runtime.Serialization.Formatters.Binary;
-using System.Text;
 
 namespace ITCompanySimulation.Character
 {
@@ -175,8 +170,25 @@ namespace ITCompanySimulation.Character
                 if (value != m_DaysOfHolidaysLeft)
                 {
                     m_DaysOfHolidaysLeft = value;
-                    DaysInCompanyChanged?.Invoke(this);
+                    DaysOfHolidaysLeftChanged?.Invoke(this);
                 }
+            }
+        }
+        public override int Salary
+        {
+            get
+            {
+                return base.Salary;
+            }
+
+            set
+            {
+                if (value > base.Salary)
+                {
+                    LastSalaryChange = value - base.Salary;
+                }
+
+                base.Salary = value;
             }
         }
         public event WorkerAction AbsenceStarted;
@@ -191,10 +203,7 @@ namespace ITCompanySimulation.Character
 
         public void SetSalary(int amount)
         {
-            if (amount > this.Salary)
-            {
-                this.LastSalaryChange = amount - this.Salary;
-            }
+
 
             this.Salary = amount;
         }

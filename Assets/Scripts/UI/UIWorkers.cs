@@ -36,7 +36,7 @@ namespace ITCompanySimulation.UI
                 mousePtrEvt.PointerEntered += () =>
                 {
                     tooltipComponent.gameObject.SetActive(true);
-                    tooltipComponent.Text = GetWorkerAbilitiesText(worker);
+                    tooltipComponent.Text = GetWorkerAbilitiesString(worker);
                 };
 
                 mousePtrEvt.PointerExited += () =>
@@ -52,11 +52,11 @@ namespace ITCompanySimulation.UI
 
         public static string GetWorkerListViewElementText(SharedWorker worker)
         {
-            return string.Format("{0} {1}\n{2} days of expierience\n{3} $ / Month",
+            return string.Format("{0} {1}\n{2} days of expierience\nSalary {3} $ / Month",
                 worker.Name, worker.Surename, worker.ExperienceTime, worker.Salary);
         }
 
-        public static string GetWorkerAbilitiesText(SharedWorker worker)
+        public static string GetWorkerAbilitiesString(SharedWorker worker)
         {
             StrBuilder.Clear();
             StrBuilder.Append("Abilities:\n");
@@ -71,6 +71,47 @@ namespace ITCompanySimulation.UI
             }
 
             return StrBuilder.ToString();
+        }
+
+        public static string GetWorkerNameString(SharedWorker worker)
+        {
+            return string.Format("Name: {0} {1}",
+                worker.Name, worker.Surename);
+        }
+
+        public static string GetWorkerExpierienceString(SharedWorker worker)
+        {
+            return string.Format("Expierience: {0} days",
+                worker.ExperienceTime);
+        }
+
+        public static string GetWorkerSalaryString(SharedWorker worker)
+        {
+            return string.Format("Salary: {0} $",
+                worker.Salary);
+        }
+
+        public static string GetWorkerSatisfactionString(LocalWorker worker)
+        {
+            return string.Format("Satisfaction: {0} %",
+                 worker.Satiscation.ToString("0.00"));
+        }
+
+        public static string GetWorkerDaysInCompanyString(LocalWorker worker)
+        {
+            return string.Format("Days in company: {0} days",
+                worker.DaysInCompany);
+        }
+
+        /// <summary>
+        /// Returns list view element representing worker
+        /// </summary>
+        public static ListViewElement WorkerToListViewElement(SharedWorker worker, ControlListView listView)
+        {
+            ListViewElement element = listView.Controls.Find(
+                x => x.GetComponent<ListViewElement>().Worker == worker).GetComponent<ListViewElement>();
+
+            return element;
         }
     }
 }

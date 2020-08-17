@@ -1,4 +1,5 @@
-﻿using TMPro;
+﻿using ITCompanySimulation.Character;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -61,6 +62,7 @@ namespace ITCompanySimulation.UI
                 m_Text = value;
             }
         }
+        public SharedWorker Worker { get; set; }
 
         //Tried to place here field for generic object that
         //this element is representing but unity does

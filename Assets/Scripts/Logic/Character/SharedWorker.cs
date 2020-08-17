@@ -13,6 +13,7 @@ namespace ITCompanySimulation.Character
         /*Private fields*/
 
         private int m_Salary;
+        private int m_ExpierienceTime;
 
         /*Public consts fields*/
 
@@ -28,8 +29,23 @@ namespace ITCompanySimulation.Character
         /// Shows how much of time of experience working in project worker has.
         /// This values is days in game time
         /// </summary>
-        public int ExperienceTime { get; set; }
-        public int Salary
+        public int ExperienceTime
+        {
+            get
+            {
+                return m_ExpierienceTime;
+            }
+
+            set
+            {
+                if (value!=m_ExpierienceTime)
+                {
+                    m_ExpierienceTime = value;
+                    ExpierienceTimeChanged?.Invoke(this);
+                }
+            }
+        }
+        public virtual int Salary
         {
             get
             {
@@ -63,6 +79,7 @@ namespace ITCompanySimulation.Character
         /// </summary>
         public Dictionary<ProjectTechnology, float> Abilites { get; set; }
         public event WorkerAction SalaryChanged;
+        public event WorkerAction ExpierienceTimeChanged;
         public event WorkerAbilityAction AbilityUpdated;
 
         /*Private methods*/

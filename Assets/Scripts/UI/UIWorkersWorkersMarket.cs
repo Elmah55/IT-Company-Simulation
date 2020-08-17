@@ -82,7 +82,7 @@ namespace ITCompanySimulation.UI
                     selectedWorker.ExperienceTime);
 
 
-                TextAbilities.text = UIWorkers.GetWorkerAbilitiesText(selectedWorker);
+                TextAbilities.text = UIWorkers.GetWorkerAbilitiesString(selectedWorker);
                 RectTransform textTransform = TextAbilities.rectTransform;
                 textTransform.sizeDelta = new Vector2(textTransform.sizeDelta.x, TextAbilities.preferredHeight);
             }
