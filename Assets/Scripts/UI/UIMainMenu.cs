@@ -1,6 +1,7 @@
 ﻿using UnityEditor;
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 
 public class UIMainMenu : Photon.PunBehaviour
 {
@@ -14,8 +15,7 @@ public class UIMainMenu : Photon.PunBehaviour
     private MainGameManager GameManagerComponent;
     [SerializeField]
     private Button ButtonStartGame;
-    [SerializeField]
-    private Text TextButtonStartGame;
+    private TextMeshProUGUI TextButtonStartGame;
     [SerializeField]
     private GameObject UIObjectMainMenuPanel;
     [SerializeField]
@@ -30,6 +30,11 @@ public class UIMainMenu : Photon.PunBehaviour
 
     private void OnEnable()
     {
+        if (null == TextButtonStartGame)
+        {
+            TextButtonStartGame = ButtonStartGame.GetComponentInChildren<TextMeshProUGUI>();
+        }
+
         //Other view can be enabled and this script can be not
         //active before connetion is made so to avoid button 
         //showing wrong status it should be set again OnEnable
