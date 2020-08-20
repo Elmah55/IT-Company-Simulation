@@ -3677,7 +3677,6 @@ GameObject:
   - component: {fileID: 298520144}
   - component: {fileID: 298520143}
   - component: {fileID: 298520142}
-  - component: {fileID: 298520141}
   - component: {fileID: 298520140}
   m_Layer: 5
   m_Name: ButtonWorkers
@@ -3719,19 +3718,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ResizePercentage: 20
---- !u!114 &298520141
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 298520138}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d0b148fe25e99eb48b9724523833bab1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_Delegates: []
 --- !u!114 &298520142
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4192,7 +4178,6 @@ GameObject:
   - component: {fileID: 317125908}
   - component: {fileID: 317125907}
   - component: {fileID: 317125906}
-  - component: {fileID: 317125905}
   - component: {fileID: 317125903}
   m_Layer: 5
   m_Name: ButtonProjects
@@ -4234,19 +4219,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ResizePercentage: 20
---- !u!114 &317125905
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 317125901}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d0b148fe25e99eb48b9724523833bab1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_Delegates: []
 --- !u!114 &317125906
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4364,7 +4336,6 @@ GameObject:
   - component: {fileID: 318421709}
   - component: {fileID: 318421708}
   - component: {fileID: 318421707}
-  - component: {fileID: 318421706}
   - component: {fileID: 318421705}
   m_Layer: 5
   m_Name: ButtonBank
@@ -4406,19 +4377,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ResizePercentage: 20
---- !u!114 &318421706
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 318421703}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d0b148fe25e99eb48b9724523833bab1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_Delegates: []
 --- !u!114 &318421707
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6529,7 +6487,6 @@ GameObject:
   - component: {fileID: 520557503}
   - component: {fileID: 520557502}
   - component: {fileID: 520557501}
-  - component: {fileID: 520557500}
   - component: {fileID: 520557499}
   m_Layer: 5
   m_Name: ButtonMenu
@@ -6571,19 +6528,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ResizePercentage: 20
---- !u!114 &520557500
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 520557497}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d0b148fe25e99eb48b9724523833bab1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_Delegates: []
 --- !u!114 &520557501
 MonoBehaviour:
   m_ObjectHideFlags: 0
