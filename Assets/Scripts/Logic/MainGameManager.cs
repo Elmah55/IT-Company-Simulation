@@ -146,12 +146,6 @@ public class MainGameManager : Photon.PunBehaviour
             PhotonNetwork.JoinOrCreateRoom("Default", options, PhotonNetwork.lobby);
         }
 
-        if (null == PhotonNetwork.room)
-        {
-            throw new InvalidOperationException(
-                "Game can be started only when client is in room");
-        }
-
         //Master client will wait for other clients until they are ready to receive data
         //then start game
         if (true == PhotonNetwork.isMasterClient)
@@ -194,6 +188,12 @@ public class MainGameManager : Photon.PunBehaviour
     public override void OnJoinedRoom()
     {
         base.OnJoinedRoom();
+
+        //Game will be started in online mode but only with one player in room
+        if (false == UseRoom)
+        {
+            StartGameInternal();
+        }
 
 #if DEVELOPMENT_BUILD || UNITY_EDITOR
         string msg = string.Format("Joined room\n" +

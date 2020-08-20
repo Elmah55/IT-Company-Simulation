@@ -100,6 +100,7 @@ public class UIMainMenu : Photon.PunBehaviour
             else
             {
                 GameManagerComponent.StartGame();
+                ButtonStartGame.interactable = false;
             }
         });
         ButtonStartGame.interactable = true;
