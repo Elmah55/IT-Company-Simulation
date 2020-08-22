@@ -15,7 +15,7 @@ namespace ITCompanySimulation.UI
         [SerializeField]
         private IButtonSelector WorkersButtonsSelector = new ButtonSelector();
         [SerializeField]
-        private ListViewElement WorkerListViewElementPrefab;
+        private ListViewElementWorker WorkerListViewElementPrefab;
         [SerializeField]
         private ControlListView ListViewWorkers;
         [SerializeField]
@@ -77,9 +77,9 @@ namespace ITCompanySimulation.UI
                 worker.Name, worker.Surename, worker.Satiscation.ToString("0.00"), worker.Salary);
         }
 
-        private ListViewElement CreateWorkerListViewElement(LocalWorker companyWorker)
+        private ListViewElementWorker CreateWorkerListViewElement(LocalWorker companyWorker)
         {
-            ListViewElement element =
+            ListViewElementWorker element =
                 UIWorkers.CreateWorkerListViewElement(companyWorker, WorkerListViewElementPrefab, TooltipComponent);
             element.Worker = companyWorker;
             element.Text.text = GetWorkerListViewElementText(companyWorker);
@@ -134,7 +134,7 @@ namespace ITCompanySimulation.UI
 
         private void RemoveWorkerListViewElement(LocalWorker worker, ControlListView listView)
         {
-            ListViewElement element = UIWorkers.WorkerToListViewElement(worker, listView);
+            ListViewElementWorker element = UIWorkers.WorkerToListViewElement(worker, listView);
             Button buttonComponent = element.GetComponent<Button>();
             WorkersButtonsSelector.RemoveButton(buttonComponent);
             ListViewWorkers.RemoveControl(element.gameObject);
@@ -191,7 +191,7 @@ namespace ITCompanySimulation.UI
 
         private void OnWorkerSatisfactionChanged(SharedWorker companyWorker)
         {
-            ListViewElement element = UIWorkers.WorkerToListViewElement(companyWorker, ListViewWorkers);
+            ListViewElementWorker element = UIWorkers.WorkerToListViewElement(companyWorker, ListViewWorkers);
             element.Text.text = GetWorkerListViewElementText((LocalWorker)companyWorker);
         }
 
@@ -204,7 +204,7 @@ namespace ITCompanySimulation.UI
 
             if (null != btn)
             {
-                ListViewElement element = btn.GetComponent<ListViewElement>();
+                ListViewElementWorker element = btn.GetComponent<ListViewElementWorker>();
                 SelectedWorker = (LocalWorker)element.Worker;
                 SubscribeToWorkerEvents(SelectedWorker);
                 ButtonFireWorker.interactable = true;
@@ -267,7 +267,7 @@ namespace ITCompanySimulation.UI
         public void OnButtonFireWorkerClicked()
         {
             Button selectedButton = WorkersButtonsSelector.GetSelectedButton();
-            ListViewElement element = selectedButton.GetComponent<ListViewElement>();
+            ListViewElementWorker element = selectedButton.GetComponent<ListViewElementWorker>();
             LocalWorker workerToRemove = (LocalWorker)element.Worker;
             SimulationManagerComponent.ControlledCompany.RemoveWorker(workerToRemove);
         }
@@ -276,7 +276,7 @@ namespace ITCompanySimulation.UI
         {
             int salaryRaiseAmount = (int)SliderSalaryRaiseAmount.value;
             Button selectedButton = WorkersButtonsSelector.GetSelectedButton();
-            ListViewElement element = selectedButton.GetComponent<ListViewElement>();
+            ListViewElementWorker element = selectedButton.GetComponent<ListViewElementWorker>();
             LocalWorker companyWorker = (LocalWorker)element.Worker;
             companyWorker.SetSalary(companyWorker.Salary + salaryRaiseAmount);
         }

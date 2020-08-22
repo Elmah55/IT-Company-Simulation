@@ -38,9 +38,9 @@ namespace ITCompanySimulation.UI
             return StrBuilder.ToString();
         }
 
-        protected ListViewElement CreateProjectListViewElement(LocalProject proj, ListViewElement prefab)
+        protected ListViewElementWorker CreateProjectListViewElement(LocalProject proj, ListViewElementWorker prefab)
         {
-            ListViewElement newElement = GameObject.Instantiate<ListViewElement>(prefab);
+            ListViewElementWorker newElement = GameObject.Instantiate<ListViewElementWorker>(prefab);
             newElement.Text.text = GetProjectListViewElementText(proj);
 
             return newElement;

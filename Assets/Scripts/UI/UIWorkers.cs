@@ -25,9 +25,9 @@ namespace ITCompanySimulation.UI
 
         /*Public methods*/
 
-        public static ListViewElement CreateWorkerListViewElement(SharedWorker worker, ListViewElement prefab, Tooltip tooltipComponent = null)
+        public static ListViewElementWorker CreateWorkerListViewElement(SharedWorker worker, ListViewElementWorker prefab, Tooltip tooltipComponent = null)
         {
-            ListViewElement el = GameObject.Instantiate<ListViewElement>(prefab);
+            ListViewElementWorker el = GameObject.Instantiate<ListViewElementWorker>(prefab);
 
             if (null != tooltipComponent)
             {
@@ -106,10 +106,10 @@ namespace ITCompanySimulation.UI
         /// <summary>
         /// Returns list view element representing worker
         /// </summary>
-        public static ListViewElement WorkerToListViewElement(SharedWorker worker, ControlListView listView)
+        public static ListViewElementWorker WorkerToListViewElement(SharedWorker worker, ControlListView listView)
         {
-            ListViewElement element = listView.Controls.Find(
-                x => x.GetComponent<ListViewElement>().Worker == worker).GetComponent<ListViewElement>();
+            ListViewElementWorker element = listView.Controls.Find(
+                x => x.GetComponent<ListViewElementWorker>().Worker == worker).GetComponent<ListViewElementWorker>();
 
             return element;
         }

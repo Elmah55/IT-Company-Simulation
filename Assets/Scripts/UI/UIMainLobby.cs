@@ -1,6 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using ITCompanySimulation.UI;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 
 /// <summary>
 /// Class handling UI of main multiplayer lobby
@@ -11,26 +13,25 @@ public class UIMainLobby : Photon.PunBehaviour
 
     /*Private fields*/
 
-    /// <summary>
-    /// Maps room info to coresponding button in lobby rooms list view
-    /// </summary>
-    private Dictionary<Button, RoomInfo> ButtonRoomInfoMap = new Dictionary<Button, RoomInfo>();
     [SerializeField]
     private GameObject PanelRoomLobby;
     private IButtonSelector RoomButtonSelector = new ButtonSelector();
     /// <summary>
-    /// This list view will hold buttons for
-    /// joining rooms in multiplayer lobby
+    /// This list view will hold list of rooms on the server
     /// </summary>
     [SerializeField]
-    public ControlListView LobbyRoomsButtonListView;
+    private ControlListView ListViewRooms;
+    [SerializeField]
+    private TextMeshProUGUI TextRoomList;
     /// <summary>
     /// Prefab to be used in rooms list view
     /// </summary>
     [SerializeField]
-    public Button LobbyRoomButtonPrefab;
+    private ListViewElementRoom ListViewElementPrefab;
     [SerializeField]
-    public Button ButtonJoinRoom;
+    private Button ButtonJoinRoom;
+    private Queue<ListViewElementRoom> ListViewElementPool;
+    private RoomInfo SelectedRoom;
 
     /*Public consts fields*/
 
@@ -42,39 +43,47 @@ public class UIMainLobby : Photon.PunBehaviour
     {
         if (null != selectedButton)
         {
-            RoomInfo selectedRoom = ButtonRoomInfoMap[selectedButton];
-            ButtonJoinRoom.interactable = selectedRoom.IsOpen
-                && selectedRoom.PlayerCount <= selectedRoom.MaxPlayers;
+            SelectedRoom =
+                RoomButtonSelector.GetSelectedButton().GetComponent<ListViewElementRoom>().Room;
+            ButtonJoinRoom.interactable = SelectedRoom.IsOpen
+                && SelectedRoom.PlayerCount <= SelectedRoom.MaxPlayers;
         }
         else
         {
+            SelectedRoom = null;
             ButtonJoinRoom.interactable = false;
         }
     }
 
     private void AddLobbbyRoomsButtons()
     {
-        foreach (RoomInfo lobbyRoomInfo in PhotonNetwork.GetRoomList())
+        foreach (RoomInfo room in PhotonNetwork.GetRoomList())
         {
-            Button buttonComponent = GameObject.Instantiate<Button>(LobbyRoomButtonPrefab);
-            Text textComponent = buttonComponent.GetComponentInChildren<Text>();
+            ListViewElementRoom element;
 
-            string roomStatusText = lobbyRoomInfo.IsOpen ? "In lobby" : "In progress";
-            string buttonText = string.Format("{0} {1}/{2} ({3})",
-                                            lobbyRoomInfo.Name,
-                                            lobbyRoomInfo.PlayerCount,
-                                            lobbyRoomInfo.MaxPlayers,
-                                            roomStatusText);
-            textComponent.text = buttonText;
-
-            ButtonRoomInfoMap.Add(buttonComponent, lobbyRoomInfo);
-            LobbyRoomsButtonListView.AddControl(buttonComponent.gameObject);
-            RoomButtonSelector.AddButton(buttonComponent);
-
-            if (false == lobbyRoomInfo.IsOpen)
+            if (null != ListViewElementPool && ListViewElementPool.Count > 0)
             {
-                buttonComponent.interactable = false;
+                element = ListViewElementPool.Dequeue();
+                element.gameObject.SetActive(true);
             }
+            else
+            {
+                element = GameObject.Instantiate<ListViewElementRoom>(ListViewElementPrefab);
+            }
+
+            element.Room = room;
+            Button buttonComponent = element.GetComponent<Button>();
+
+            string roomStatusText = room.IsOpen ? "In lobby" : "In progress";
+            string buttonText = string.Format("{0} Players: {1}/{2}\nStatus: {3}",
+                                            room.Name,
+                                            room.PlayerCount,
+                                            room.MaxPlayers,
+                                            roomStatusText);
+            element.Text.text = buttonText;
+
+            ListViewRooms.AddControl(element.gameObject);
+            RoomButtonSelector.AddButton(buttonComponent);
         }
     }
 
@@ -85,24 +94,59 @@ public class UIMainLobby : Photon.PunBehaviour
 
     private void Start()
     {
+        SetRoomListText();
         RoomButtonSelector.SelectedButtonChanged += OnRoomListViewSelectedButtonChanged;
+    }
+
+    private void RefreshRoomList()
+    {
+        if (ListViewRooms.Controls.Count > 0 && null == ListViewElementPool)
+        {
+            ListViewElementPool = new Queue<ListViewElementRoom>();
+        }
+
+        foreach (GameObject obj in ListViewRooms.Controls)
+        {
+            ListViewElementRoom elem = obj.GetComponent<ListViewElementRoom>();
+            elem.gameObject.SetActive(false);
+            ListViewElementPool.Enqueue(elem);
+        }
+
+        ListViewRooms.RemoveAllControls(false);
+        RoomButtonSelector.RemoveAllButtons();
+        AddLobbbyRoomsButtons();
+        ButtonJoinRoom.interactable = false;
+        SetRoomListText();
+    }
+
+    private void SetRoomListText()
+    {
+        string text;
+
+        if (PhotonNetwork.GetRoomList().Length > 0)
+        {
+            text = string.Format(string.Format("Room list ({0})",
+                PhotonNetwork.GetRoomList().Length));
+        }
+        else
+        {
+            text = "Room list";
+        }
+
+        TextRoomList.text = text;
     }
 
     /*Public methods*/
 
-    public void OnJoinRoomButtonClicked()
+    public void OnButtonJoinRoomClicked()
     {
-        RoomInfo selectedRoomInfo = ButtonRoomInfoMap[RoomButtonSelector.GetSelectedButton()];
-        PhotonNetwork.JoinRoom(selectedRoomInfo.Name);
+        PhotonNetwork.JoinRoom(SelectedRoom.Name);
+        ButtonJoinRoom.interactable = false;
     }
 
-    public void RefreshRoomList()
+    public void OnButtonRefreshClicked()
     {
-        ButtonRoomInfoMap.Clear();
-        LobbyRoomsButtonListView.RemoveAllControls();
-        RoomButtonSelector.RemoveAllButtons();
-        AddLobbbyRoomsButtons();
-        ButtonJoinRoom.interactable = false;
+        RefreshRoomList();
     }
 
     public override void OnJoinedRoom()

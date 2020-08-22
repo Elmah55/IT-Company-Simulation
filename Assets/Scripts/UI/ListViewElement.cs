@@ -1,14 +1,9 @@
-﻿using ITCompanySimulation.Character;
-using TMPro;
+﻿using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
 namespace ITCompanySimulation.UI
 {
-    /// <summary>
-    /// This script controls custom list view element
-    /// </summary>
-    [RequireComponent(typeof(LayoutElement))]
     public class ListViewElement : MonoBehaviour
     {
         /*Private consts fields*/
@@ -17,8 +12,6 @@ namespace ITCompanySimulation.UI
 
         [SerializeField]
         private Image m_BackgroundImage;
-        [SerializeField]
-        private Image m_FrontImage;
         [SerializeField]
         private TextMeshProUGUI m_Text;
 
@@ -38,18 +31,6 @@ namespace ITCompanySimulation.UI
                 m_BackgroundImage = value;
             }
         }
-        public Image FrontImage
-        {
-            get
-            {
-                return m_FrontImage;
-            }
-
-            set
-            {
-                m_FrontImage = value;
-            }
-        }
         public TextMeshProUGUI Text
         {
             get
@@ -62,14 +43,9 @@ namespace ITCompanySimulation.UI
                 m_Text = value;
             }
         }
-        public SharedWorker Worker { get; set; }
-
-        //Tried to place here field for generic object that
-        //this element is representing but unity does
-        //not support generic types as of version 2019.2.1f1
 
         /*Private methods*/
 
         /*Public methods*/
-    }
+    } 
 }

@@ -24,7 +24,7 @@ namespace ITCompanySimulation.UI
         [SerializeField]
         private ControlListView ListViewCompanyWorkers;
         [SerializeField]
-        private ListViewElement WorkerListViewElementPrefab;
+        private ListViewElementWorker WorkerListViewElementPrefab;
         [SerializeField]
         private Button ButtonHireWorker;
         [SerializeField]
@@ -47,7 +47,7 @@ namespace ITCompanySimulation.UI
         /// <summary>
         /// Maps button in players list view to its coresponding worker
         /// </summary>
-        private Dictionary<SharedWorker, ListViewElement> WorkerListViewMap;
+        private Dictionary<SharedWorker, ListViewElementWorker> WorkerListViewMap;
         /// <summary>
         /// Maps photon player to its index in players dropdown
         /// </summary>
@@ -116,7 +116,7 @@ namespace ITCompanySimulation.UI
 
             if (null != selectedButton)
             {
-                ListViewElement element = selectedButton.GetComponent<ListViewElement>();
+                ListViewElementWorker element = selectedButton.GetComponent<ListViewElementWorker>();
                 SelectedWorker = WorkerListViewMap.First(x => x.Value == element).Key;
                 SetWorkerInfoText(SelectedWorker);
                 SubscribeToWorkerEvents();
@@ -158,14 +158,14 @@ namespace ITCompanySimulation.UI
 
         private void AddWorkerListViewElement(SharedWorker playerWorker, ControlListView listView)
         {
-            ListViewElement element =
+            ListViewElementWorker element =
                 UIWorkers.CreateWorkerListViewElement(playerWorker, WorkerListViewElementPrefab, TooltipComponent);
 
             Button buttonComponent = element.GetComponent<Button>();
 
             if (null == WorkerListViewMap)
             {
-                WorkerListViewMap = new Dictionary<SharedWorker, ListViewElement>();
+                WorkerListViewMap = new Dictionary<SharedWorker, ListViewElementWorker>();
             }
 
             WorkerListViewMap.Add(playerWorker, element);
@@ -177,7 +177,7 @@ namespace ITCompanySimulation.UI
         {
             if (null != WorkerListViewMap)
             {
-                ListViewElement element = WorkerListViewMap[playerWorker];
+                ListViewElementWorker element = WorkerListViewMap[playerWorker];
                 Button buttonComponent = element.GetComponent<Button>();
 
                 WorkerListViewMap.Remove(playerWorker);
@@ -278,7 +278,7 @@ namespace ITCompanySimulation.UI
         public void OnButtonHireWorkerClick()
         {
             Button selectedWorkerButton = WorkersButtonSelector.GetSelectedButton();
-            ListViewElement element = selectedWorkerButton.GetComponent<ListViewElement>();
+            ListViewElementWorker element = selectedWorkerButton.GetComponent<ListViewElementWorker>();
             SharedWorker selectedWorker = WorkerListViewMap.First(x => x.Value == element).Key;
             SimulationManagerComponent.RemoveOtherPlayerControlledCompanyWorker(SelectedPlayer, selectedWorker.ID);
 

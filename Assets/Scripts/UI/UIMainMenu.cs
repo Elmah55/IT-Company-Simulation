@@ -17,9 +17,9 @@ public class UIMainMenu : Photon.PunBehaviour
     private Button ButtonStartGame;
     private TextMeshProUGUI TextButtonStartGame;
     [SerializeField]
-    private GameObject UIObjectMainMenuPanel;
+    private GameObject PanelMainMenu;
     [SerializeField]
-    private GameObject UIObjectMultiplayer;
+    private GameObject PanelMainLobby;
     private PlayerInfo PlayerInfoComponent;
 
     /*Public consts fields*/
@@ -94,8 +94,8 @@ public class UIMainMenu : Photon.PunBehaviour
         {
             if (true == GameManagerComponent.UseRoom)
             {
-                UIObjectMultiplayer.SetActive(true);
-                UIObjectMainMenuPanel.SetActive(false);
+                PanelMainLobby.SetActive(true);
+                PanelMainMenu.SetActive(false);
             }
             else
             {

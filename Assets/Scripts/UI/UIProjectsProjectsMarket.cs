@@ -16,7 +16,7 @@ namespace ITCompanySimulation.UI
         /*Private fields*/
 
         [SerializeField]
-        private ListViewElement ListViewProjectElementPrefab;
+        private ListViewElementWorker ListViewProjectElementPrefab;
         /// <summary>
         /// Colors that will be applied to selected button component of list view element.
         /// </summary>
@@ -45,7 +45,7 @@ namespace ITCompanySimulation.UI
         private ProjectsMarket ProjectsMarketComponent;
         [SerializeField]
         private Button ButtonTakeProject;
-        private Dictionary<SharedProject, ListViewElement> ProjectListViewMap;
+        private Dictionary<SharedProject, ListViewElementWorker> ProjectListViewMap;
         private SharedProject SelectedProject;
 
         /*Public consts fields*/
@@ -114,7 +114,7 @@ namespace ITCompanySimulation.UI
         {
             if (null != btn)
             {
-                ListViewElement el = btn.GetComponent<ListViewElement>();
+                ListViewElementWorker el = btn.GetComponent<ListViewElementWorker>();
                 SelectedProject = ProjectListViewMap.First(x => x.Value == el).Key;
             }
             else
@@ -128,7 +128,7 @@ namespace ITCompanySimulation.UI
 
         private void OnProjectsMarketProjectRemoved(SharedProject proj)
         {
-            ListViewElement el = ProjectListViewMap[proj];
+            ListViewElementWorker el = ProjectListViewMap[proj];
             ListViewMarketProjects.RemoveControl(el.gameObject);
             ProjectListViewMap.Remove(proj);
 
@@ -138,12 +138,12 @@ namespace ITCompanySimulation.UI
 
         private void OnProjectsMarketProjectAdded(SharedProject proj)
         {
-            ListViewElement newElement = CreateProjectListViewElement(proj, ListViewProjectElementPrefab);
+            ListViewElementWorker newElement = CreateProjectListViewElement(proj, ListViewProjectElementPrefab);
             ButtonSelectorProjects.AddButton(newElement.GetComponent<Button>());
 
             if (null == ProjectListViewMap)
             {
-                ProjectListViewMap = new Dictionary<SharedProject, ListViewElement>();
+                ProjectListViewMap = new Dictionary<SharedProject, ListViewElementWorker>();
             }
 
             ProjectListViewMap.Add(proj, newElement);
@@ -155,13 +155,13 @@ namespace ITCompanySimulation.UI
 
         private void OnControlledCompanyProjectAdded(Scrum scrumObj)
         {
-            ListViewElement newElement = base.CreateProjectListViewElement(
+            ListViewElementWorker newElement = base.CreateProjectListViewElement(
                 scrumObj.BindedProject, ListViewProjectElementPrefab);
             ButtonSelectorProjects.AddButton(newElement.GetComponent<Button>());
 
             if (null == ProjectListViewMap)
             {
-                ProjectListViewMap = new Dictionary<SharedProject, ListViewElement>();
+                ProjectListViewMap = new Dictionary<SharedProject, ListViewElementWorker>();
             }
 
             ProjectListViewMap.Add(scrumObj.BindedProject, newElement);
@@ -176,14 +176,14 @@ namespace ITCompanySimulation.UI
 
         private void OnProjectCompleted(LocalProject proj)
         {
-            ListViewElement e = ProjectListViewMap.First(
+            ListViewElementWorker e = ProjectListViewMap.First(
                 x => x.Key == proj).Value;
             e.BackgroundImage.color = CompletedProjectListViewElementColors;
         }
 
         private void OnProjectProgressUpdated(LocalProject proj)
         {
-            ListViewElement e = ProjectListViewMap.First(x => x.Key == proj).Value;
+            ListViewElementWorker e = ProjectListViewMap.First(x => x.Key == proj).Value;
             e.Text.text = base.GetProjectListViewElementText(proj);
         }
 
@@ -194,9 +194,9 @@ namespace ITCompanySimulation.UI
                                  proj.CompleteBonus);
         }
 
-        private ListViewElement CreateProjectListViewElement(SharedProject proj, ListViewElement prefab)
+        private ListViewElementWorker CreateProjectListViewElement(SharedProject proj, ListViewElementWorker prefab)
         {
-            ListViewElement newElement = GameObject.Instantiate<ListViewElement>(prefab);
+            ListViewElementWorker newElement = GameObject.Instantiate<ListViewElementWorker>(prefab);
             newElement.Text.text = GetProjectListViewElementText(proj);
 
             return newElement;

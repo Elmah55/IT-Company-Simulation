@@ -47,10 +47,10 @@ public class ControlListView : MonoBehaviour
     /// <summary>
     /// Removes control from list view
     /// </summary>
-    /// <param name="removeGameObject">If true game object of list view control will be removed</param>
-    public void RemoveControl(GameObject control, bool removeGameObject = true)
+    /// <param name="destroyGameObject">If true game object of list view control will be destroyed</param>
+    public void RemoveControl(GameObject control, bool destroyGameObject = true)
     {
-        if (true == removeGameObject)
+        if (true == destroyGameObject)
         {
             GameObject.Destroy(control);
         }
@@ -62,27 +62,19 @@ public class ControlListView : MonoBehaviour
     /// <summary>
     /// Removes control with given controls collection index
     /// </summary>
-    public void RemoveControlAt(int index)
+    public void RemoveControlAt(int index, bool destroyGameObject = true)
     {
-        RemoveControl(Controls[index]);
+        RemoveControl(Controls[index], destroyGameObject);
     }
 
     /// <summary>
     /// Removes all control in this list view
     /// </summary>
-    public void RemoveAllControls(bool removeGameObjects = true)
+    public void RemoveAllControls(bool destroyGameObjects = true)
     {
-        if (true == removeGameObjects)
-        {
-            foreach (GameObject control in Controls)
-            {
-                GameObject.Destroy(control);
-            }
-        }
-
         for (int i = Controls.Count - 1; i >= 0; i--)
         {
-            RemoveControlAt(i);
+            RemoveControlAt(i, destroyGameObjects);
         }
     }
 }
