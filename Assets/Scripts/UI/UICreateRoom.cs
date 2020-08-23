@@ -1,22 +1,11 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
+using System.Text.RegularExpressions;
 
 public class UICreateRoom : Photon.PunBehaviour
 {
     /*Private consts fields*/
-
-    /// <summary>
-    /// Stores color of input field that will be set when
-    /// players wants to create the room but values in input fields
-    /// are invalid (e.g string is provided instead of integer)
-    /// </summary>
-    private readonly ColorBlock INPUT_FIELD_INVALID_VALUE_COLOR =
-        new ColorBlock()
-        {
-            normalColor = new Color(217.0f, 73.0f, 73.0f, 255.0f),
-            selectedColor = new Color(217.0f, 73.0f, 73.0f, 255.0f),
-            colorMultiplier = 1.0f
-        };
 
     /*Private fields*/
 
@@ -26,7 +15,14 @@ public class UICreateRoom : Photon.PunBehaviour
     /// one field of this type is required since all input fields
     /// should have same normal color
     /// </summary>
-    private ColorBlock InputFieldNormalColor;
+    private Color InputFieldNormalColor;
+    /// <summary>
+    /// Stores color of input field that will be set when
+    /// players wants to create the room but values in input fields
+    /// are invalid (e.g string is provided instead of integer)
+    /// </summary>
+    [SerializeField]
+    private Color InputFieldInvalidColor;
     private bool TargetBalanceValid = true;
     private bool InitialBalanceValid = true;
     private bool MinimalBalanceValid = true;
@@ -36,13 +32,13 @@ public class UICreateRoom : Photon.PunBehaviour
     [SerializeField]
     private GameObject RoomLobbyPanel;
     [SerializeField]
-    private InputField InputFieldRoomName;
+    private TMP_InputField InputFieldRoomName;
     [SerializeField]
-    private InputField InputFieldTargetBalance;
+    private TMP_InputField InputFieldTargetBalance;
     [SerializeField]
-    private InputField InputFieldInitialBalance;
+    private TMP_InputField InputFieldInitialBalance;
     [SerializeField]
-    private InputField InputFieldMinimalBalance;
+    private TMP_InputField InputFieldMinimalBalance;
     [SerializeField]
     private Button ButtonCreateRoom;
     [SerializeField]
@@ -54,25 +50,25 @@ public class UICreateRoom : Photon.PunBehaviour
     [SerializeField]
     private Slider SliderMinimalBalance;
     [SerializeField]
-    private Text TextRoomName;
+    private TextMeshProUGUI TextRoomName;
     [SerializeField]
-    private Text TextNumberOfPlayers;
+    private TextMeshProUGUI TextNumberOfPlayers;
     [SerializeField]
-    private Text TextTargetBalance;
+    private TextMeshProUGUI TextTargetBalance;
     [SerializeField]
-    private Text TextInitialBalance;
+    private TextMeshProUGUI TextInitialBalance;
     [SerializeField]
-    private Text TextMinimalBalance;
+    private TextMeshProUGUI TextMinimalBalance;
 
     //Below are defined "HelperText" fields that will display
     //information with hints how to fill in input field 
     //when coresponding input field will contain invalid values
     [SerializeField]
-    private Text InputFieldTargetBalanceHelperText;
+    private TextMeshProUGUI TextInputFieldTargetBalanceHelper;
     [SerializeField]
-    private Text InputFieldInitialBalanceHelperText;
+    private TextMeshProUGUI TextInputFieldInitialBalanceHelper;
     [SerializeField]
-    private Text InputFieldMinimalBalanceHelperText;
+    private TextMeshProUGUI TextInputFieldMinimalBalanceHelper;
 
     /*Public consts fields*/
 
@@ -83,7 +79,7 @@ public class UICreateRoom : Photon.PunBehaviour
     private void Start()
     {
         InputFieldRoomName.characterLimit = PlayerInfo.COMPANY_NAME_MAX_LENGHT;
-        InputFieldNormalColor = InputFieldRoomName.colors;
+        InputFieldNormalColor = InputFieldRoomName.GetComponent<Image>().color;
 
         SliderTargetBalance.minValue = SimulationSettings.MIN_TARGET_BALANCE;
         SliderTargetBalance.maxValue = SimulationSettings.MAX_TARGET_BALANCE;
@@ -96,6 +92,10 @@ public class UICreateRoom : Photon.PunBehaviour
         SliderMinimalBalance.maxValue = SimulationSettings.MAX_MINIMAL_BALANCE;
         SliderMinimalBalance.minValue = SimulationSettings.MIN_MINIMAL_BALANCE;
         SliderMinimalBalance.value = SliderInitialBalance.value - 100000;
+
+        TextInputFieldInitialBalanceHelper.gameObject.SetActive(false);
+        TextInputFieldMinimalBalanceHelper.gameObject.SetActive(false);
+        TextInputFieldTargetBalanceHelper.gameObject.SetActive(false);
 
         TextNumberOfPlayers.text =
             "Maximum number of players " + SliderNumberOfPlayers.value;
@@ -112,23 +112,27 @@ public class UICreateRoom : Photon.PunBehaviour
     /// or sets input withing proper range when input is invalid
     /// </summary>
     /// <returns>True if input is correct otherwise false</returns>
-    private bool CheckAndSetNumericInput(InputField input, Text helperText, Slider inputSlider, int minValue, int maxValue)
+    private bool CheckAndSetNumericInput(TMP_InputField input, TextMeshProUGUI helperText, Slider inputSlider, int minValue, int maxValue)
     {
         bool result = false;
+        string regexPattern = @"^ *[0-9]+ *\$? *$";
+        Match regexMatch = Regex.Match(input.text, regexPattern);
 
-        int value;
-        if (true == int.TryParse(input.text, out value))
+        if (true == regexMatch.Success)
         {
+            string regexReplacePattern = @"[^0-9]";
+            string valueStr = Regex.Replace(input.text, regexReplacePattern, string.Empty);
+            int value = int.Parse(valueStr);
             value = Mathf.Clamp(value, minValue, maxValue);
             input.text = value.ToString();
             inputSlider.value = value;
             helperText.gameObject.SetActive(false);
+            input.GetComponent<Image>().color = InputFieldNormalColor;
             result = true;
         }
         else
         {
-            //TODO Fix settings colors
-            //input.colors = INPUT_FIELD_INVALID_VALUE_COLOR;
+            input.GetComponent<Image>().color = InputFieldInvalidColor;
             helperText.gameObject.SetActive(true);
         }
 
@@ -197,7 +201,7 @@ public class UICreateRoom : Photon.PunBehaviour
         SliderInitialBalance.maxValue = SliderTargetBalance.value - 1;
 
         TargetBalanceValid = true;
-        InputFieldTargetBalanceHelperText.gameObject.SetActive(false);
+        TextInputFieldTargetBalanceHelper.gameObject.SetActive(false);
         CheckInput();
     }
 
@@ -211,7 +215,7 @@ public class UICreateRoom : Photon.PunBehaviour
         SliderMinimalBalance.maxValue = SliderInitialBalance.value - 1;
 
         InitialBalanceValid = true;
-        InputFieldInitialBalanceHelperText.gameObject.SetActive(false);
+        TextInputFieldInitialBalanceHelper.gameObject.SetActive(false);
         CheckInput();
     }
 
@@ -220,14 +224,14 @@ public class UICreateRoom : Photon.PunBehaviour
         TextMinimalBalance.text = "Minimal balance " + SliderMinimalBalance.value + " $";
         InputFieldMinimalBalance.text = SliderMinimalBalance.value.ToString() + " $";
         MinimalBalanceValid = true;
-        InputFieldMinimalBalanceHelperText.gameObject.SetActive(false);
+        TextInputFieldMinimalBalanceHelper.gameObject.SetActive(false);
         CheckInput();
     }
 
     public void OnInputFieldTargetBalanceEndEdit(string value)
     {
         TargetBalanceValid = CheckAndSetNumericInput(InputFieldTargetBalance,
-                                                     InputFieldTargetBalanceHelperText,
+                                                     TextInputFieldTargetBalanceHelper,
                                                      SliderTargetBalance,
                                                      SimulationSettings.MIN_TARGET_BALANCE,
                                                      SimulationSettings.MAX_TARGET_BALANCE);
@@ -242,7 +246,7 @@ public class UICreateRoom : Photon.PunBehaviour
     public void OnInputFieldInitialBalanceEndEdit(string value)
     {
         InitialBalanceValid = CheckAndSetNumericInput(InputFieldInitialBalance,
-                                                      InputFieldInitialBalanceHelperText,
+                                                      TextInputFieldInitialBalanceHelper,
                                                       SliderInitialBalance,
                                                       SimulationSettings.MIN_INITIAL_BALANCE,
                                                       (int)(SliderTargetBalance.value - 1)); //Initial value cannot be bigger than target
@@ -256,7 +260,7 @@ public class UICreateRoom : Photon.PunBehaviour
     public void OnInputFiledMinimalBalanceEndEdit(string value)
     {
         MinimalBalanceValid = CheckAndSetNumericInput(InputFieldMinimalBalance,
-                                                      InputFieldMinimalBalanceHelperText,
+                                                      TextInputFieldMinimalBalanceHelper,
                                                       SliderMinimalBalance,
                                                       SimulationSettings.MIN_MINIMAL_BALANCE,
                                                       (int)(SliderInitialBalance.value - 1)); //Minimal value cannot be bigger than initial
@@ -277,7 +281,7 @@ public class UICreateRoom : Photon.PunBehaviour
         }
     }
 
-    public void OnCreateRoomButtonClicked()
+    public void OnButtonCreateRoomClicked()
     {
         GameManagerComponent.SettingsOfSimulation.InitialBalance = (int)SliderInitialBalance.value;
         GameManagerComponent.SettingsOfSimulation.TargetBalance = (int)SliderTargetBalance.value;
