@@ -111,6 +111,7 @@ namespace ITCompanySimulation.Developing
         {
             this.ID = proj.ID;
             this.CompleteBonus = proj.CompleteBonus;
+            this.UsedTechnologies = proj.UsedTechnologies;
         }
 
         public void Start()
