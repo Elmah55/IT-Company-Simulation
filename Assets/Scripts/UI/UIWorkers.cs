@@ -27,11 +27,11 @@ namespace ITCompanySimulation.UI
 
         public static ListViewElementWorker CreateWorkerListViewElement(SharedWorker worker, ListViewElementWorker prefab, Tooltip tooltipComponent = null)
         {
-            ListViewElementWorker el = GameObject.Instantiate<ListViewElementWorker>(prefab);
+            ListViewElementWorker element = GameObject.Instantiate<ListViewElementWorker>(prefab);
 
             if (null != tooltipComponent)
             {
-                MousePointerEvents mousePtrEvt = el.gameObject.AddComponent<MousePointerEvents>();
+                MousePointerEvents mousePtrEvt = element.gameObject.AddComponent<MousePointerEvents>();
 
                 mousePtrEvt.PointerEntered += () =>
                 {
@@ -45,9 +45,10 @@ namespace ITCompanySimulation.UI
                 };
             }
 
-            el.Text.text = GetWorkerListViewElementText(worker);
+            element.Text.text = GetWorkerListViewElementText(worker);
+            element.Worker = worker;
 
-            return el;
+            return element;
         }
 
         public static string GetWorkerListViewElementText(SharedWorker worker)
@@ -106,10 +107,16 @@ namespace ITCompanySimulation.UI
         /// <summary>
         /// Returns list view element representing worker
         /// </summary>
-        public static ListViewElementWorker WorkerToListViewElement(SharedWorker worker, ControlListView listView)
+        public static ListViewElementWorker GetWorkerListViewElement(SharedWorker worker, ControlListView listView)
         {
-            ListViewElementWorker element = listView.Controls.Find(
-                x => x.GetComponent<ListViewElementWorker>().Worker == worker).GetComponent<ListViewElementWorker>();
+            GameObject elementGameObject = listView.Controls.Find(
+                x => x.GetComponent<ListViewElementWorker>().Worker == worker);
+            ListViewElementWorker element = null;
+
+            if (null != elementGameObject)
+            {
+                element = elementGameObject.GetComponent<ListViewElementWorker>();
+            }
 
             return element;
         }

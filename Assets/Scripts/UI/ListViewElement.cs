@@ -14,6 +14,8 @@ namespace ITCompanySimulation.UI
         private Image m_BackgroundImage;
         [SerializeField]
         private TextMeshProUGUI m_Text;
+        [SerializeField]
+        private Button m_Button;
 
         /*Public consts fields*/
 
@@ -25,11 +27,6 @@ namespace ITCompanySimulation.UI
             {
                 return m_BackgroundImage;
             }
-
-            set
-            {
-                m_BackgroundImage = value;
-            }
         }
         public TextMeshProUGUI Text
         {
@@ -37,10 +34,12 @@ namespace ITCompanySimulation.UI
             {
                 return m_Text;
             }
-
-            set
+        }
+        public Button Button
+        {
+            get
             {
-                m_Text = value;
+                return m_Button;
             }
         }
 

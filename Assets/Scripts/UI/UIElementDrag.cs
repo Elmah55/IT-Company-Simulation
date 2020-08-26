@@ -1,11 +1,10 @@
 ﻿using UnityEngine;
-using UnityEngine.Events;
 using UnityEngine.EventSystems;
 
 namespace ITCompanySimulation.UI
 {
     /// <summary>
-    /// Attaching this script to UI element allows to drag it
+    /// Attaching this script to UI element allows to drag it with mouse pointer
     /// </summary>
     [RequireComponent(typeof(RectTransform))]
     public class UIElementDrag : MonoBehaviour, IBeginDragHandler, IEndDragHandler, IDragHandler
@@ -15,7 +14,7 @@ namespace ITCompanySimulation.UI
         /*Private fields*/
 
         private RectTransform TransformComponent;
-        private RectTransform PreviousParentTransform;
+        private RectTransform ParentTransform;
         /// <summary>
         /// Offset of dragged object from mouse position
         /// </summary>
@@ -42,7 +41,7 @@ namespace ITCompanySimulation.UI
         private void Start()
         {
             TransformComponent = GetComponent<RectTransform>();
-            PreviousParentTransform =
+            ParentTransform =
                 TransformComponent.transform.parent.gameObject.GetComponent<RectTransform>();
         }
 
@@ -72,13 +71,13 @@ namespace ITCompanySimulation.UI
             //Parent might be changed by other script when ui element is dropped
             if (TransformComponent.parent.gameObject != DragParentTransform.gameObject)
             {
-                PreviousParentTransform = TransformComponent.parent.gameObject.GetComponent<RectTransform>();
-                TransformComponent.SetParent(PreviousParentTransform);
-                ParentChanged?.Invoke(this.gameObject, PreviousParentTransform.gameObject);
+                ParentTransform = TransformComponent.parent.gameObject.GetComponent<RectTransform>();
+                TransformComponent.SetParent(ParentTransform);
+                ParentChanged?.Invoke(this.gameObject, ParentTransform.gameObject);
             }
             else
             {
-                TransformComponent.SetParent(PreviousParentTransform);
+                TransformComponent.SetParent(ParentTransform);
                 TransformComponent.SetSiblingIndex(SiblingIndex);
             }
         }

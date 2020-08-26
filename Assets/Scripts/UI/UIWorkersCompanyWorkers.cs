@@ -81,7 +81,6 @@ namespace ITCompanySimulation.UI
         {
             ListViewElementWorker element =
                 UIWorkers.CreateWorkerListViewElement(companyWorker, WorkerListViewElementPrefab, TooltipComponent);
-            element.Worker = companyWorker;
             element.Text.text = GetWorkerListViewElementText(companyWorker);
             Button buttonComponent = element.GetComponent<Button>();
 
@@ -134,7 +133,7 @@ namespace ITCompanySimulation.UI
 
         private void RemoveWorkerListViewElement(LocalWorker worker, ControlListView listView)
         {
-            ListViewElementWorker element = UIWorkers.WorkerToListViewElement(worker, listView);
+            ListViewElementWorker element = UIWorkers.GetWorkerListViewElement(worker, listView);
             Button buttonComponent = element.GetComponent<Button>();
             WorkersButtonsSelector.RemoveButton(buttonComponent);
             ListViewWorkers.RemoveControl(element.gameObject);
@@ -191,7 +190,7 @@ namespace ITCompanySimulation.UI
 
         private void OnWorkerSatisfactionChanged(SharedWorker companyWorker)
         {
-            ListViewElementWorker element = UIWorkers.WorkerToListViewElement(companyWorker, ListViewWorkers);
+            ListViewElementWorker element = UIWorkers.GetWorkerListViewElement(companyWorker, ListViewWorkers);
             element.Text.text = GetWorkerListViewElementText((LocalWorker)companyWorker);
         }
 

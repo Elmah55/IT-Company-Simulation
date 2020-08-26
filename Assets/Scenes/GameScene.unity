@@ -6679,7 +6679,7 @@ MonoBehaviour:
   SimulationManagerComponent: {fileID: 746701996}
   ListViewOtherPlayersWorkers: {fileID: 1720815117}
   ListViewCompanyWorkers: {fileID: 2102987939}
-  WorkerListViewElementPrefab: {fileID: 2914978305122529885, guid: 6b9760e56bd65dd4aa7116f685d968d9,
+  WorkerListViewElementPrefab: {fileID: 8638913153878255765, guid: 518ec1aeed28394489deb5df7e7719f7,
     type: 3}
   ButtonHireWorker: {fileID: 501345662}
   TextName: {fileID: 1469216300}
@@ -8997,7 +8997,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 11bee606f29dd9d4ca06b4bc4fb66b2d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  WorkerListViewElementPrefab: {fileID: 2914978305122529885, guid: 6b9760e56bd65dd4aa7116f685d968d9,
+  WorkerListViewElementPrefab: {fileID: 8638913153878255765, guid: 518ec1aeed28394489deb5df7e7719f7,
     type: 3}
   ListViewWorkers: {fileID: 2064567352}
   ButtonFireWorker: {fileID: 76575496}
@@ -25784,11 +25784,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 20e1f1263b2c3ca4bab6a2bae44d00e7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  ListViewElementPrefab: {fileID: -7594708238371196644, guid: d90c8b24306ec1f4db4b4734a2416573,
+    type: 3}
+  TooltipComponent: {fileID: 713441622558336245}
   SimulationManagerComponent: {fileID: 746701996}
   GameTimeComponent: {fileID: 746702000}
-  ListViewWorkerElementPrefab: {fileID: 8180604059064747770, guid: 4ad98dda98f50a14ebdd2d150d82e2a3,
-    type: 3}
-  ListViewProjectElementPrefab: {fileID: 2914978305122529885, guid: 6b9760e56bd65dd4aa7116f685d968d9,
+  ListViewWorkerElementPrefab: {fileID: 8545054951596138240, guid: a945b5b2716dc5041b1dd9ec009e5b0e,
     type: 3}
   ListViewElementSelectedColors:
     m_NormalColor: {r: 0.4433962, g: 0.4162068, b: 0.4162068, a: 1}
@@ -32273,7 +32274,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3bb802bab00fb424ea1e821c073602bb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ListViewProjectElementPrefab: {fileID: 2914978305122529885, guid: 6b9760e56bd65dd4aa7116f685d968d9,
+  ListViewElementPrefab: {fileID: -7594708238371196644, guid: d90c8b24306ec1f4db4b4734a2416573,
+    type: 3}
+  TooltipComponent: {fileID: 713441622558336245}
+  ListViewProjectElementPrefab: {fileID: -7594708238371196644, guid: d90c8b24306ec1f4db4b4734a2416573,
     type: 3}
   ListViewElementSelectedColors:
     m_NormalColor: {r: 0.4433962, g: 0.4162068, b: 0.4162068, a: 1}
@@ -32294,6 +32298,7 @@ MonoBehaviour:
   ListViewMarketProjects: {fileID: 1694421840}
   ListViewCompanyProjects: {fileID: 1177418158}
   ProjectsMarketComponent: {fileID: 746702003}
+  TooltipComponent: {fileID: 713441622558336245}
   ButtonTakeProject: {fileID: 51749401}
 --- !u!224 &1905902103 stripped
 RectTransform:
@@ -33311,7 +33316,7 @@ MonoBehaviour:
   GameTimeComponent: {fileID: 746702000}
   ButtonHireWorker: {fileID: 1266954305}
   ButtonFireWorker: {fileID: 449108249}
-  WorkerListViewElementPrefab: {fileID: 2914978305122529885, guid: 6b9760e56bd65dd4aa7116f685d968d9,
+  WorkerListViewElementPrefab: {fileID: 8638913153878255765, guid: 518ec1aeed28394489deb5df7e7719f7,
     type: 3}
   TextName: {fileID: 989715509}
   TextExpierience: {fileID: 306113294}

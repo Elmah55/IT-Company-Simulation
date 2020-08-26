@@ -1,4 +1,5 @@
 ﻿using ITCompanySimulation.Developing;
+using ITCompanySimulation.Utilities;
 using System.Text;
 using UnityEngine;
 
@@ -11,12 +12,17 @@ namespace ITCompanySimulation.UI
         /*Private fields*/
 
         protected IButtonSelector ButtonSelectorProjects;
+        private static StringBuilder StrBuilder = new StringBuilder();
+        [SerializeField]
+        private ListViewElementProject ListViewElementPrefab;
+        [SerializeField]
+        protected Tooltip TooltipComponent;
 
         /*Public consts fields*/
 
         /*Public fields*/
 
-        protected static StringBuilder StrBuilder = new StringBuilder();
+        protected static IObjectPool<ListViewElementProject> ListViewElementPool;
 
         /*Private methods*/
 
@@ -38,20 +44,78 @@ namespace ITCompanySimulation.UI
             return StrBuilder.ToString();
         }
 
-        protected ListViewElementWorker CreateProjectListViewElement(LocalProject proj, ListViewElementWorker prefab)
-        {
-            ListViewElementWorker newElement = GameObject.Instantiate<ListViewElementWorker>(prefab);
-            newElement.Text.text = GetProjectListViewElementText(proj);
-
-            return newElement;
-        }
-
         protected string GetProjectListViewElementText(LocalProject proj)
         {
             return string.Format("{0}\nCompletion bonus: {1} $\nProgress: {2} %",
                                  proj.Name,
                                  proj.CompleteBonus,
                                  proj.Progress.ToString("0.00"));
+        }
+
+        /// <summary>
+        /// Returns list view element associated with given project
+        /// </summary>
+        /// <param name="listView">List view element will be searched in this list view</param>
+        protected ListViewElementProject GetProjectListViewElement(ControlListView listView, SharedProject proj)
+        {
+            GameObject elementObject = null;
+            ListViewElementProject element = null;
+
+            elementObject = listView.Controls.Find(x =>
+            {
+                return x.GetComponent<ListViewElementProject>().Project == proj;
+            });
+
+            if (null != elementObject)
+            {
+                element = elementObject.GetComponent<ListViewElementProject>();
+            }
+
+            return element;
+        }
+
+        protected void SubscribeToMouseEventPointers(MousePointerEvents events, SharedProject proj, Tooltip tooltipComponent)
+        {
+            events.PointerEntered += () =>
+            {
+                tooltipComponent.gameObject.SetActive(true);
+                string tooltipText = string.Format("Used technologies:\n{0}",
+                    GetProjectTechnologiesString(proj));
+                tooltipComponent.Text = tooltipText;
+            };
+
+            events.PointerExited += () =>
+            {
+                tooltipComponent.gameObject.SetActive(false);
+            };
+        }
+
+        protected ListViewElementProject CreateListViewElement(SharedProject proj)
+        {
+            ListViewElementProject newElement = null;
+
+            if (null != ListViewElementPool)
+            {
+                newElement = ListViewElementPool.GetObject();
+            }
+
+            if (null == newElement)
+            {
+                newElement = GameObject.Instantiate<ListViewElementProject>(ListViewElementPrefab);
+                MousePointerEvents events = newElement.GetComponent<MousePointerEvents>();
+                SubscribeToMouseEventPointers(events, proj, TooltipComponent);
+            }
+            else
+            {
+                MousePointerEvents events = newElement.GetComponent<MousePointerEvents>();
+                events.RemoveAllListeners();
+                SubscribeToMouseEventPointers(events, proj, TooltipComponent);
+            }
+
+            newElement.Project = proj;
+            newElement.gameObject.SetActive(true);
+
+            return newElement;
         }
 
         /*Public methods*/

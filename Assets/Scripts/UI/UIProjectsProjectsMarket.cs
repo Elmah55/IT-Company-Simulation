@@ -1,11 +1,9 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using System.Linq;
 using ITCompanySimulation.Developing;
+using ITCompanySimulation.Utilities;
 using TMPro;
-using ITCompanySimulation.Character;
-using System;
 
 namespace ITCompanySimulation.UI
 {
@@ -16,7 +14,7 @@ namespace ITCompanySimulation.UI
         /*Private fields*/
 
         [SerializeField]
-        private ListViewElementWorker ListViewProjectElementPrefab;
+        private ListViewElementProject ListViewProjectElementPrefab;
         /// <summary>
         /// Colors that will be applied to selected button component of list view element.
         /// </summary>
@@ -45,7 +43,6 @@ namespace ITCompanySimulation.UI
         private ProjectsMarket ProjectsMarketComponent;
         [SerializeField]
         private Button ButtonTakeProject;
-        private Dictionary<SharedProject, ListViewElementWorker> ProjectListViewMap;
         private SharedProject SelectedProject;
 
         /*Public consts fields*/
@@ -76,13 +73,6 @@ namespace ITCompanySimulation.UI
             SetProjectInfoText(SelectedProject);
         }
 
-        private void SetListViewCompanyProjectsText()
-        {
-            TextCompanyProjects.text = string.Format(
-                "Company projects ({0})",
-                SimulationManagerComponent.ControlledCompany.ScrumProcesses.Count);
-        }
-
         private void SetProjectInfoText(SharedProject proj)
         {
             if (null != proj)
@@ -108,14 +98,27 @@ namespace ITCompanySimulation.UI
             ButtonTakeProject.interactable = SelectedProject is SharedProject;
         }
 
+        private void SetListViewMarketProjectsText()
+        {
+            TextMarketProjects.text = string.Format("Market projects ({0})",
+                ProjectsMarketComponent.Projects.Count);
+        }
+
+        private void SetListViewCompanyProjectsText()
+        {
+            TextCompanyProjects.text = string.Format(
+                "Company projects ({0})",
+                SimulationManagerComponent.ControlledCompany.ScrumProcesses.Count);
+        }
+
         #region Events callbacks
 
         private void OnButtonSelectorProjectsSelectedButtonChanged(Button btn)
         {
             if (null != btn)
             {
-                ListViewElementWorker el = btn.GetComponent<ListViewElementWorker>();
-                SelectedProject = ProjectListViewMap.First(x => x.Value == el).Key;
+                ListViewElementProject el = btn.GetComponent<ListViewElementProject>();
+                SelectedProject = el.Project;
             }
             else
             {
@@ -128,63 +131,52 @@ namespace ITCompanySimulation.UI
 
         private void OnProjectsMarketProjectRemoved(SharedProject proj)
         {
-            ListViewElementWorker el = ProjectListViewMap[proj];
-            ListViewMarketProjects.RemoveControl(el.gameObject);
-            ProjectListViewMap.Remove(proj);
+            ListViewElementProject element = GetProjectListViewElement(ListViewMarketProjects, proj);
 
-            TextMarketProjects.text = string.Format("Market projects ({0})", 
-                ProjectsMarketComponent.Projects.Count);
+            if (null == ListViewElementPool)
+            {
+                ListViewElementPool = new ObjectPool<ListViewElementProject>();
+            }
+
+            element.gameObject.SetActive(false);
+            ListViewMarketProjects.RemoveControl(element.gameObject, false);
+            ButtonSelectorProjects.RemoveButton(element.Button);
+            ListViewElementPool.AddObject(element);
+            SetListViewMarketProjectsText();
         }
 
         private void OnProjectsMarketProjectAdded(SharedProject proj)
         {
-            ListViewElementWorker newElement = CreateProjectListViewElement(proj, ListViewProjectElementPrefab);
-            ButtonSelectorProjects.AddButton(newElement.GetComponent<Button>());
-
-            if (null == ProjectListViewMap)
-            {
-                ProjectListViewMap = new Dictionary<SharedProject, ListViewElementWorker>();
-            }
-
-            ProjectListViewMap.Add(proj, newElement);
+            ListViewElementProject newElement = CreateListViewElement(proj);
+            ButtonSelectorProjects.AddButton(newElement.Button);
             ListViewMarketProjects.AddControl(newElement.gameObject);
-
-            TextMarketProjects.text = string.Format("Market projects ({0})", 
-                ProjectsMarketComponent.Projects.Count);
+            newElement.Text.text = GetProjectListViewElementText(proj);
+            SetListViewMarketProjectsText();
         }
 
         private void OnControlledCompanyProjectAdded(Scrum scrumObj)
         {
-            ListViewElementWorker newElement = base.CreateProjectListViewElement(
-                scrumObj.BindedProject, ListViewProjectElementPrefab);
+            ListViewElementProject newElement = CreateListViewElement(scrumObj.BindedProject);
             ButtonSelectorProjects.AddButton(newElement.GetComponent<Button>());
-
-            if (null == ProjectListViewMap)
-            {
-                ProjectListViewMap = new Dictionary<SharedProject, ListViewElementWorker>();
-            }
-
-            ProjectListViewMap.Add(scrumObj.BindedProject, newElement);
             ListViewCompanyProjects.AddControl(newElement.gameObject);
+            newElement.Text.text = base.GetProjectListViewElementText(scrumObj.BindedProject);
 
             scrumObj.BindedProject.ProgressUpdated += OnProjectProgressUpdated;
             scrumObj.BindedProject.Completed += OnProjectCompleted;
 
-            TextCompanyProjects.text = string.Format("Company projects ({0})",
-                SimulationManagerComponent.ControlledCompany.ScrumProcesses.Count);
+            SetListViewCompanyProjectsText();
         }
 
         private void OnProjectCompleted(LocalProject proj)
         {
-            ListViewElementWorker e = ProjectListViewMap.First(
-                x => x.Key == proj).Value;
-            e.BackgroundImage.color = CompletedProjectListViewElementColors;
+            ListViewElementProject element = GetProjectListViewElement(ListViewCompanyProjects, proj);
+            element.BackgroundImage.color = CompletedProjectListViewElementColors;
         }
 
         private void OnProjectProgressUpdated(LocalProject proj)
         {
-            ListViewElementWorker e = ProjectListViewMap.First(x => x.Key == proj).Value;
-            e.Text.text = base.GetProjectListViewElementText(proj);
+            ListViewElementProject element = GetProjectListViewElement(ListViewCompanyProjects, proj);
+            element.Text.text = base.GetProjectListViewElementText(proj);
         }
 
         private string GetProjectListViewElementText(SharedProject proj)
@@ -194,22 +186,14 @@ namespace ITCompanySimulation.UI
                                  proj.CompleteBonus);
         }
 
-        private ListViewElementWorker CreateProjectListViewElement(SharedProject proj, ListViewElementWorker prefab)
-        {
-            ListViewElementWorker newElement = GameObject.Instantiate<ListViewElementWorker>(prefab);
-            newElement.Text.text = GetProjectListViewElementText(proj);
-
-            return newElement;
-        }
-
         #endregion
 
         /*Public methods*/
 
         public void OnButtonTakeProjectClicked()
         {
-            ProjectsMarketComponent.RemoveProject(SelectedProject);
             LocalProject proj = new LocalProject(SelectedProject);
+            ProjectsMarketComponent.RemoveProject(SelectedProject);
             SimulationManagerComponent.ControlledCompany.AddProject(proj);
         }
     }

@@ -27,6 +27,15 @@ namespace ITCompanySimulation.UI
 
         /*Public methods*/
 
+        /// <summary>
+        /// Removes all listeners for pointer enter and pointer exit
+        /// </summary>
+        public void RemoveAllListeners()
+        {
+            PointerEntered = null;
+            PointerExited = null;
+        }
+
         public void OnPointerEnter(PointerEventData eventData)
         {
             PointerEntered?.Invoke();

@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using ITCompanySimulation.Character;
 using UnityEngine.UI;
 using TMPro;
@@ -20,8 +19,6 @@ namespace ITCompanySimulation.UI
         private GameTime GameTimeComponent;
         [SerializeField]
         private ListViewElementWorker ListViewWorkerElementPrefab;
-        [SerializeField]
-        private ListViewElementWorker ListViewProjectElementPrefab;
         /// <summary>
         /// Colors that will be applied to selected button component of list view element.
         /// </summary>
@@ -55,15 +52,6 @@ namespace ITCompanySimulation.UI
         [SerializeField]
         private Button ButtonStopProject;
         private RectTransform TransformComponent;
-        /// <summary>
-        /// Maps worker object to list view element that represents it
-        /// </summary>
-        private Dictionary<LocalWorker, ListViewElementWorker> WorkerListViewMap;
-        /// <summary>
-        /// Maps scrum object to list view element that represents it
-        /// </summary>
-        private Dictionary<Scrum, ListViewElementWorker> ScrumListViewMap;
-        private IButtonSelector ButtonSelectorProjects;
         /// <summary>
         /// Scrum object of project that is currently selected
         /// </summary>
@@ -107,10 +95,12 @@ namespace ITCompanySimulation.UI
             ListViewAssignedWorkers.transform.parent.gameObject.SetActive(false);
         }
 
+        #region Events callbacks
+
         private void OnProjectProgressUpdated(LocalProject proj)
         {
-            ListViewElementWorker e = ScrumListViewMap.First(x => x.Key.BindedProject == proj).Value;
-            e.Text.text = GetProjectListViewElementText(proj);
+            ListViewElementProject element = GetProjectListViewElement(ListViewCompanyProjects, proj);
+            element.Text.text = GetProjectListViewElementText(proj);
 
             if (null != SelectedScrum
                 && SelectedScrum.BindedProject == proj)
@@ -122,36 +112,30 @@ namespace ITCompanySimulation.UI
 
         private void OnProjectCompleted(LocalProject proj)
         {
-            ListViewElementWorker e = ScrumListViewMap.First(
-                x => x.Key.BindedProject == proj).Value;
-            e.BackgroundImage.color = CompletedProjectListViewElementColors;
+            ListViewElementProject element = GetProjectListViewElement(ListViewCompanyProjects, proj);
+            element.BackgroundImage.color = CompletedProjectListViewElementColors;
             SetProjectButtons();
         }
-
-        #region Events callbacks
 
         //On control removed from list view check will be peformed to check
         //if control was removed because worker was removed from project.
         //If player moved worker's control to other list if condition will be true.
         //If worker got removed for other reason (i.e level of satisfaction fell
         //below threshold) if condition will be false
-
         private void OnListViewAssignedWorkersControlRemoved(GameObject ctrl)
         {
-            LocalWorker worker = WorkerListViewMap.First(
-                x => x.Value.gameObject == ctrl).Key;
+            SharedWorker worker = ctrl.GetComponent<ListViewElementWorker>().Worker;
 
             if (true == SelectedScrum.BindedProject.Workers.Contains(worker))
             {
-                SelectedScrum.BindedProject.RemoveWorker(worker);
+                SelectedScrum.BindedProject.RemoveWorker((LocalWorker)worker);
             }
         }
 
         private void OnListViewAssignedWorkersControlAdded(GameObject ctrl)
         {
-            LocalWorker worker = WorkerListViewMap.First(
-                x => x.Value.gameObject == ctrl).Key;
-            SelectedScrum.BindedProject.AddWorker(worker);
+            SharedWorker worker = ctrl.GetComponent<ListViewElementWorker>().Worker;
+            SelectedScrum.BindedProject.AddWorker((LocalWorker)worker);
         }
 
         private void OnControlledCompanyWorkerRemoved(SharedWorker companyWorker)
@@ -163,14 +147,12 @@ namespace ITCompanySimulation.UI
         private void OnControlledCompanyWorkerAdded(SharedWorker companyWorker)
         {
             LocalWorker worker = (LocalWorker)companyWorker;
-            ListViewElementWorker newElement = CreateWorkerListViewElement(companyWorker);
+            ListViewElementWorker newElement =
+                UIWorkers.CreateWorkerListViewElement(companyWorker, ListViewWorkerElementPrefab, TooltipComponent);
+            UIElementDrag drag = newElement.GetComponent<UIElementDrag>();
+            drag.DragParentTransform = gameObject.GetComponent<RectTransform>();
+            newElement.Text.text = GetWorkerListViewElementText(worker);
 
-            if (null == WorkerListViewMap)
-            {
-                WorkerListViewMap = new Dictionary<LocalWorker, ListViewElementWorker>();
-            }
-
-            WorkerListViewMap.Add(worker, newElement);
             ListViewAvailableWorkers.AddControl(newElement.gameObject);
 
             SetListViewAvailableWorkersText();
@@ -178,15 +160,10 @@ namespace ITCompanySimulation.UI
 
         private void OnControlledCompanyProjectAdded(Scrum scrumObj)
         {
-            ListViewElementWorker newElement = CreateProjectListViewElement(scrumObj.BindedProject, ListViewProjectElementPrefab);
-            ButtonSelectorProjects.AddButton(newElement.GetComponent<Button>());
+            ListViewElementProject newElement = CreateListViewElement(scrumObj.BindedProject);
+            newElement.Text.text = GetProjectListViewElementText(scrumObj.BindedProject);
+            ButtonSelectorProjects.AddButton(newElement.Button);
 
-            if (null == ScrumListViewMap)
-            {
-                ScrumListViewMap = new Dictionary<Scrum, ListViewElementWorker>();
-            }
-
-            ScrumListViewMap.Add(scrumObj, newElement);
             ListViewCompanyProjects.AddControl(newElement.gameObject);
 
             scrumObj.BindedProject.ProgressUpdated += OnProjectProgressUpdated;
@@ -202,16 +179,18 @@ namespace ITCompanySimulation.UI
 
                 foreach (LocalWorker worker in SelectedScrum.BindedProject.Workers)
                 {
-                    ListViewElementWorker e = WorkerListViewMap[worker];
-                    e.gameObject.SetActive(false);
+                    ListViewElementWorker element = UIWorkers.GetWorkerListViewElement(worker, ListViewAssignedWorkers);
+                    element.gameObject.SetActive(false);
                 }
             }
 
             if (null != btn)
             {
-                KeyValuePair<Scrum, ListViewElementWorker> pair = ScrumListViewMap.First(
-                    x => x.Value.gameObject == btn.gameObject);
-                SelectedScrum = pair.Key;
+                ListViewElementProject element = btn.GetComponent<ListViewElementProject>();
+                SelectedScrum = SimulationManagerComponent.ControlledCompany.ScrumProcesses.Find(x =>
+                {
+                    return element.Project == x.BindedProject;
+                });
 
                 SetProjectInfo();
                 SetProjectButtons();
@@ -221,8 +200,8 @@ namespace ITCompanySimulation.UI
 
                 foreach (LocalWorker worker in SelectedScrum.BindedProject.Workers)
                 {
-                    ListViewElementWorker e = WorkerListViewMap[worker];
-                    e.gameObject.SetActive(true);
+                    ListViewElementWorker elem = UIWorkers.GetWorkerListViewElement(worker, ListViewAssignedWorkers);
+                    elem.gameObject.SetActive(true);
                 }
             }
             else
@@ -243,11 +222,12 @@ namespace ITCompanySimulation.UI
 
         private void OnSelectedProjectWorkerRemoved(SharedWorker companyWorker)
         {
-            ListViewElementWorker e = WorkerListViewMap[(LocalWorker)companyWorker];
+            ListViewElementWorker element = UIWorkers.GetWorkerListViewElement(companyWorker, ListViewAssignedWorkers);
 
-            if (ListViewAssignedWorkers.Controls.Contains(e.gameObject))
+            //Check if list view element was dragged to other list view
+            if (null != element)
             {
-                ListViewAssignedWorkers.RemoveControl(e.gameObject);
+                ListViewAssignedWorkers.RemoveControl(element.gameObject);
             }
 
             SetProjectButtons();
@@ -267,12 +247,16 @@ namespace ITCompanySimulation.UI
 
         private void OnGameTimeComponentDayChanged()
         {
-            if (null != WorkerListViewMap)
+            foreach (GameObject listViewObject in ListViewAssignedWorkers.Controls)
             {
-                foreach (KeyValuePair<LocalWorker, ListViewElementWorker> item in WorkerListViewMap)
-                {
-                    item.Value.Text.text = GetWorkerListViewElementText(item.Key);
-                }
+                ListViewElementWorker element = listViewObject.GetComponent<ListViewElementWorker>();
+                element.Text.text = GetWorkerListViewElementText((LocalWorker)element.Worker);
+            }
+
+            foreach (GameObject listViewObject in ListViewAvailableWorkers.Controls)
+            {
+                ListViewElementWorker element = listViewObject.GetComponent<ListViewElementWorker>();
+                element.Text.text = GetWorkerListViewElementText((LocalWorker)element.Worker);
             }
         }
 
@@ -328,21 +312,14 @@ namespace ITCompanySimulation.UI
         private void RemoveWorkerListViewElement(SharedWorker companyWorker)
         {
             LocalWorker worker = (LocalWorker)companyWorker;
-            ListViewElementWorker listViewElement = WorkerListViewMap[worker];
             ControlListViewDrop workerListView = (null == worker.AssignedProject) ? ListViewAvailableWorkers : ListViewAssignedWorkers;
-            workerListView.RemoveControl(listViewElement.gameObject);
-            WorkerListViewMap.Remove(worker);
-        }
+            ListViewElementWorker listViewElement = UIWorkers.GetWorkerListViewElement(companyWorker, workerListView);
 
-        private ListViewElementWorker CreateWorkerListViewElement(SharedWorker companyWorker)
-        {
-            LocalWorker worker = (LocalWorker)companyWorker;
-            ListViewElementWorker newElement = GameObject.Instantiate<ListViewElementWorker>(ListViewWorkerElementPrefab);
-            newElement.GetComponent<UIElementDrag>().DragParentTransform = TransformComponent;
-            string elementText = GetWorkerListViewElementText(worker);
-            newElement.GetComponentInChildren<TextMeshProUGUI>().text = elementText;
-
-            return newElement;
+            //Check if element was not removed before when worker left project
+            if (null!=listViewElement)
+            {
+                workerListView.RemoveControl(listViewElement.gameObject); 
+            }
         }
 
         private string GetWorkerListViewElementText(LocalWorker worker)

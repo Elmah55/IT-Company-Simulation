@@ -249,11 +249,11 @@ GameObject:
   - component: {fileID: 4685294493980001060}
   - component: {fileID: 7187884170018954275}
   - component: {fileID: 4446284356181300979}
-  - component: {fileID: 2914978305122529885}
   - component: {fileID: 4564011957279802767}
   - component: {fileID: 537249343295413949}
+  - component: {fileID: -851577767256474239}
   m_Layer: 5
-  m_Name: ListViewElementProject
+  m_Name: ListViewElement
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -338,21 +338,6 @@ MonoBehaviour:
   m_FlexibleWidth: -1
   m_FlexibleHeight: -1
   m_LayoutPriority: 1
---- !u!114 &2914978305122529885
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 9105401937813553112}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 844aca6f31e1f764e8638257c9212be5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_BackgroundImage: {fileID: 7187884170018954275}
-  m_FrontImage: {fileID: 3112297472103586629}
-  m_Text: {fileID: 6476591121585805272}
 --- !u!114 &4564011957279802767
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -410,3 +395,18 @@ CanvasGroup:
   m_Interactable: 1
   m_BlocksRaycasts: 1
   m_IgnoreParentGroups: 0
+--- !u!114 &-851577767256474239
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9105401937813553112}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3417c89b70ed3354ba8ad23fbc00f158, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_BackgroundImage: {fileID: 3112297472103586629}
+  m_Text: {fileID: 6476591121585805272}
+  m_Button: {fileID: 4564011957279802767}
