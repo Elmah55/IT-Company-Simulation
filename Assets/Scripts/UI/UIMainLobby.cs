@@ -140,8 +140,9 @@ public class UIMainLobby : Photon.PunBehaviour
 
     public void OnButtonJoinRoomClicked()
     {
-        PhotonNetwork.JoinRoom(SelectedRoom.Name);
+        UIRoom.SetPhotonPlayerRoomLobbyState(RoomLobbyPlayerState.NotReady);
         ButtonJoinRoom.interactable = false;
+        PhotonNetwork.JoinRoom(SelectedRoom.Name);
     }
 
     public void OnButtonRefreshClicked()

@@ -163,14 +163,34 @@ public static class ProjectData
     };
 }
 
-public static class NetworkingData
+namespace ITCompanySimulation.Multiplayer
 {
+    public static class NetworkingData
+    {
+        /// <summary>
+        /// Bytes codes used for sending custom type data between clients
+        /// </summary>
+        public const byte SHARED_WORKER_BYTE_CODE = 0;
+        public const byte LOCAL_WORKER_BYTE_CODE = 1;
+        public const byte PROJECT_BYTE_CODE = 2;
+        public const byte SIMULATION_SETTINGS_BYTE_CODE = 3;
+    }
+
     /// <summary>
-    /// Bytes codes used for sending custom type data between clients
+    /// This enum defines keys to access photon player custom properties
     /// </summary>
-    public const byte SHARED_WORKER_BYTE_CODE = 0;
-    public const byte LOCAL_WORKER_BYTE_CODE = 1;
-    public const byte PROJECT_BYTE_CODE = 2;
+    public enum PlayerCustomPropertiesKey
+    {
+        RoomLobbyPlayerState
+    }
+
+    /// <summary>
+    /// This enum defines keys to access room custom properties
+    /// </summary>
+    public enum RoomCustomPropertiesKey
+    {
+        SettingsOfSimulation
+    }
 }
 
 /*Delegates*/

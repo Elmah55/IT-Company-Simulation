@@ -1,5 +1,6 @@
 ﻿using ExitGames.Client.Photon;
 using ITCompanySimulation.Character;
+using ITCompanySimulation.Multiplayer;
 using System;
 using System.Collections.Generic;
 using UnityEngine;

@@ -1,4 +1,6 @@
-﻿using System;
+﻿using ExitGames.Client.Photon;
+using ITCompanySimulation.Multiplayer;
+using System;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -69,6 +71,10 @@ public class MainGameManager : Photon.PunBehaviour
 
     private void Start()
     {
+        //TODO: Register all types inside this method
+        PhotonPeer.RegisterType(typeof(SimulationSettings), NetworkingData.SIMULATION_SETTINGS_BYTE_CODE, 
+            SimulationSettings.Serialize, SimulationSettings.Deserialize);
+
         DontDestroyOnLoad(this.gameObject);
         PhotonNetwork.offlineMode = this.OfflineMode;
 

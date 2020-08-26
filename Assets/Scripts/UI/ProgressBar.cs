@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
+using ITCompanySimulation.Utilities;
 
 namespace ITCompanySimulation.UI
 {

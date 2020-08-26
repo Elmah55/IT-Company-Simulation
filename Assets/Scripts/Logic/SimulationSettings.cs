@@ -1,4 +1,5 @@
-﻿/// <summary>
+﻿using System;
+/// <summary>
 /// This class defines settings of simulation
 /// </summary>
 public class SimulationSettings
@@ -48,5 +49,38 @@ public class SimulationSettings
         this.InitialBalance = initialBalance;
         this.TargetBalance = targetBalance;
         this.MinimalBalance = minBalance;
+    }
+
+    public static byte[] Serialize(object simulationSettings)
+    {
+        SimulationSettings settings = (SimulationSettings)simulationSettings;
+        byte[] minimalBalanceArr = BitConverter.GetBytes(settings.MinimalBalance);
+        byte[] targetBalanceArr = BitConverter.GetBytes(settings.TargetBalance);
+        byte[] initialBalanceArr = BitConverter.GetBytes(settings.InitialBalance);
+
+        int resultArrayOffset = 0;
+        byte[] resultArray = 
+            new byte[minimalBalanceArr.Length + targetBalanceArr.Length + initialBalanceArr.Length];
+
+        Array.Copy(minimalBalanceArr, 0, resultArray, resultArrayOffset, minimalBalanceArr.Length);
+        resultArrayOffset += minimalBalanceArr.Length;
+        Array.Copy(targetBalanceArr, 0, resultArray, resultArrayOffset, targetBalanceArr.Length);
+        resultArrayOffset += targetBalanceArr.Length;
+        Array.Copy(initialBalanceArr, 0, resultArray, resultArrayOffset, initialBalanceArr.Length);
+
+        return resultArray;
+    }
+
+    public static object Deserialize(byte[] byteArray)
+    {
+        SimulationSettings settings = new SimulationSettings();
+        int byteArrayOffset = 0;
+        settings.MinimalBalance = BitConverter.ToInt32(byteArray, byteArrayOffset);
+        byteArrayOffset += sizeof(int);
+        settings.TargetBalance = BitConverter.ToInt32(byteArray, byteArrayOffset);
+        byteArrayOffset += sizeof(int);
+        settings.InitialBalance = BitConverter.ToInt32(byteArray, byteArrayOffset);
+
+        return settings;
     }
 }
