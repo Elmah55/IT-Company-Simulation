@@ -217,6 +217,7 @@ namespace ITCompanySimulation.UI
             SetProjectButtons();
             SetListViewAssignedWorkersText();
             SetListViewAvailableWorkersText();
+            SetProjectInfo();
         }
 
         private void OnSelectedProjectWorkerRemoved(SharedWorker companyWorker)
@@ -232,6 +233,7 @@ namespace ITCompanySimulation.UI
             SetProjectButtons();
             SetListViewAssignedWorkersText();
             SetListViewAvailableWorkersText();
+            SetProjectInfo();
         }
 
         private void OnSelectedProjectStopped(LocalProject proj)
@@ -399,7 +401,7 @@ namespace ITCompanySimulation.UI
 
         public void OnButtonStopProjectClicked()
         {
-            SelectedScrum.StartProject();
+            SelectedScrum.StopProject();
         }
     }
 }
