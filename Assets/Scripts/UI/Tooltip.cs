@@ -44,6 +44,28 @@ public class Tooltip : MonoBehaviour
         }
     }
 
+    private void SetTooltipPosition()
+    {
+        Vector3 mousePos = Input.mousePosition;
+        Vector2 tooltipPostion = new Vector2(mousePos.x + 30f, mousePos.y);
+        Vector2 finalPostion;
+        bool result = RectTransformUtility.ScreenPointToLocalPointInRectangle(ParentTransform, tooltipPostion, null, out finalPostion);
+
+        if (true == result)
+        {
+            Transform.localPosition = finalPostion;
+
+        }
+#if DEVELOPMENT_BUILD || UNITY_EDITOR
+        else
+        {
+            string debugMsg = string.Format("[{0}] RectTransformUtility.ScreenPointToLocalPointInRectangle could not find point",
+                this.GetType().Name);
+            Debug.LogWarning(debugMsg);
+        }
+#endif
+    }
+
     private void Start()
     {
         Transform = GetComponent<RectTransform>();
@@ -51,21 +73,14 @@ public class Tooltip : MonoBehaviour
         SetTooltipSize();
     }
 
+    private void OnEnable()
+    {
+        SetTooltipPosition();
+    }
+
     private void Update()
     {
-        Vector3 mousePos = Input.mousePosition;
-        Vector2 tooltipPostion = new Vector2(mousePos.x + 30f, mousePos.y);
-        Vector2 finalPostion;
-
-        if (RectTransformUtility.ScreenPointToLocalPointInRectangle(ParentTransform, tooltipPostion, null, out finalPostion))
-        {
-            Transform.localPosition = finalPostion;
-            
-        }
-        else
-        {
-            Debug.Log("FAIL");
-        }
+        SetTooltipPosition();
     }
 
     /*Public methods*/
