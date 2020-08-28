@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
+using ITCompanySimulation.Utilities;
 
 namespace ITCompanySimulation.Character
 {
@@ -29,7 +30,8 @@ namespace ITCompanySimulation.Character
         [SerializeField]
         private GameObject CharacterPrefab;
         private MainSimulationManager SimulationManagerComponent;
-        private List<Character> SpawnedCharacters = new List<Character>();
+        private List<SharedWorker> SpawnedCharacters = new List<SharedWorker>();
+        private IObjectPool<GameObject> CharactersPool;
 
         /*Public consts fields*/
 
@@ -39,13 +41,29 @@ namespace ITCompanySimulation.Character
 
         private void OnControlledCompanyWorkerRemoved(SharedWorker companyWorker)
         {
-            Character removedChar = SpawnedCharacters.Find(x => x == companyWorker);
-            GameObject.Destroy(removedChar.PhysicalCharacter);
-            SpawnedCharacters.Remove(removedChar);
-            removedChar.PhysicalCharacter = null;
+            RemoveCharacter(companyWorker);
         }
 
         private void OnControlledCompanyWorkerAdded(SharedWorker companyWorker)
+        {
+            SpawnCharacter(companyWorker);
+        }
+
+        private void RemoveCharacter(SharedWorker companyWorker)
+        {
+            SharedWorker removedChar = SpawnedCharacters.Find(x => x == companyWorker);
+
+            if (null == CharactersPool)
+            {
+                CharactersPool = new ObjectPool<GameObject>();
+            }
+
+            removedChar.PhysicalCharacter.gameObject.SetActive(false);
+            CharactersPool.AddObject(companyWorker.PhysicalCharacter);
+            removedChar.PhysicalCharacter = null;
+        }
+
+        private void SpawnCharacter(SharedWorker companyWorker)
         {
             //Spawn new character in game world
             int spawnRetries = 0;
@@ -78,10 +96,34 @@ namespace ITCompanySimulation.Character
 
             if (true == spawnPosCorrect)
             {
-                GameObject newCharacter = GameObject.Instantiate(CharacterPrefab, spawnPos, Quaternion.identity);
+                GameObject newCharacter = null;
+
+                if (null != CharactersPool)
+                {
+                    newCharacter = CharactersPool.GetObject();
+                }
+
+                if (null == newCharacter)
+                {
+                    newCharacter = GameObject.Instantiate(CharacterPrefab, spawnPos, Quaternion.identity);
+                }
+
+                LocalWorker worker = (LocalWorker)companyWorker;
+                worker.AbsenceStarted += OnWorkerAbsenceStarted;
+                worker.AbsenceFinished += OnWorkerAbsenceFinished;
                 companyWorker.PhysicalCharacter = newCharacter;
                 SpawnedCharacters.Add(companyWorker);
             }
+        }
+
+        private void OnWorkerAbsenceStarted(SharedWorker worker)
+        {
+            worker.PhysicalCharacter.gameObject.SetActive(false);
+        }
+
+        private void OnWorkerAbsenceFinished(SharedWorker worker)
+        {
+            worker.PhysicalCharacter.gameObject.SetActive(true);
         }
 
         private void Start()

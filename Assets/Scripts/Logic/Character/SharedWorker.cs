@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
+using UnityEngine;
 
 namespace ITCompanySimulation.Character
 {
@@ -78,6 +79,10 @@ namespace ITCompanySimulation.Character
         /// to each of abilities key
         /// </summary>
         public Dictionary<ProjectTechnology, float> Abilites { get; set; }
+        /// <summary>
+        /// Representation of character in game world
+        /// </summary>
+        public GameObject PhysicalCharacter { get; set; }
         public event WorkerAction SalaryChanged;
         public event WorkerAction ExpierienceTimeChanged;
         public event WorkerAbilityAction AbilityUpdated;

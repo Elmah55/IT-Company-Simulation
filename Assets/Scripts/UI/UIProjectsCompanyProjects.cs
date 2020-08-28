@@ -315,10 +315,10 @@ namespace ITCompanySimulation.UI
             ControlListViewDrop workerListView = (null == worker.AssignedProject) ? ListViewAvailableWorkers : ListViewAssignedWorkers;
             ListViewElementWorker listViewElement = UIWorkers.GetWorkerListViewElement(companyWorker, workerListView);
 
-            //Check if element was not removed before when worker left project
-            if (null!=listViewElement)
+            //Worker might be already removed by other callback
+            if (null != listViewElement)
             {
-                workerListView.RemoveControl(listViewElement.gameObject); 
+                workerListView.RemoveControl(listViewElement.gameObject);
             }
         }
 
