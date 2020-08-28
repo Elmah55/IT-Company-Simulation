@@ -28,8 +28,8 @@ namespace ITCompanySimulation.Developing
         public event LocalProjectAction ProgressUpdated;
         public event LocalProjectAction Started;
         public event LocalProjectAction Stopped;
-        public event WorkerAction WorkerAdded;
-        public event WorkerAction WorkerRemoved;
+        public event SharedWorkerAction WorkerAdded;
+        public event SharedWorkerAction WorkerRemoved;
 
         /// <summary>
         /// Progress of project completed (in %)

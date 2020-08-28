@@ -212,7 +212,12 @@ namespace ITCompanySimulation.Economy
     public delegate void LoanAction(BankLoan load);
 }
 
-public delegate void WorkerAction(SharedWorker companyWorker);
-public delegate void WorkerAbilityAction(SharedWorker companyWorker, ProjectTechnology workerAbility, float workerAbilityValue);
-public delegate void MultiplayerWorkerAction(SharedWorker playerWorker, PhotonPlayer player);
+namespace ITCompanySimulation.Character
+{
+    public delegate void LocalWorkerAction(LocalWorker worker);
+    public delegate void SharedWorkerAction(SharedWorker worker);
+    public delegate void WorkerAbilityAction(SharedWorker worker, ProjectTechnology workerAbility, float workerAbilityValue);
+    public delegate void MultiplayerWorkerAction(SharedWorker worker, PhotonPlayer player); 
+}
+
 public delegate void PhotonPlayerAction(PhotonPlayer player);

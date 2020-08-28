@@ -69,7 +69,7 @@ namespace ITCompanySimulation.UI
             TransformComponent = GetComponent<RectTransform>();
 
             //Add workers that were in company before of start of this script
-            foreach (SharedWorker worker in SimulationManagerComponent.ControlledCompany.Workers)
+            foreach (LocalWorker worker in SimulationManagerComponent.ControlledCompany.Workers)
             {
                 OnControlledCompanyWorkerAdded(worker);
             }
@@ -144,14 +144,13 @@ namespace ITCompanySimulation.UI
             SetListViewAvailableWorkersText();
         }
 
-        private void OnControlledCompanyWorkerAdded(SharedWorker companyWorker)
+        private void OnControlledCompanyWorkerAdded(LocalWorker companyWorker)
         {
-            LocalWorker worker = (LocalWorker)companyWorker;
             ListViewElementWorker newElement =
                 UIWorkers.CreateWorkerListViewElement(companyWorker, ListViewWorkerElementPrefab, TooltipComponent);
             UIElementDrag drag = newElement.GetComponent<UIElementDrag>();
             drag.DragParentTransform = gameObject.GetComponent<RectTransform>();
-            newElement.Text.text = GetWorkerListViewElementText(worker);
+            newElement.Text.text = GetWorkerListViewElementText(companyWorker);
 
             ListViewAvailableWorkers.AddControl(newElement.gameObject);
 

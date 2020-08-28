@@ -250,12 +250,12 @@ public class PlayerCompanyManager : MonoBehaviour
         companyWorker.Satiscation = Mathf.Clamp(companyWorker.Satiscation, 0.0f, 100.0f);
     }
 
-    private void OnCompanyWorkerRemoved(SharedWorker removedWorker)
+    private void OnCompanyWorkerRemoved(LocalWorker removedWorker)
     {
         removedWorker.SalaryChanged -= OnCompanyWorkerSalaryChanged;
     }
 
-    private void OnCompanyWorkerAdded(SharedWorker addedWorker)
+    private void OnCompanyWorkerAdded(LocalWorker addedWorker)
     {
         addedWorker.SalaryChanged += OnCompanyWorkerSalaryChanged;
     }

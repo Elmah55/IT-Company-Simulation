@@ -191,11 +191,11 @@ namespace ITCompanySimulation.Character
                 base.Salary = value;
             }
         }
-        public event WorkerAction AbsenceStarted;
-        public event WorkerAction AbsenceFinished;
-        public event WorkerAction DaysInCompanyChanged;
-        public event WorkerAction DaysOfHolidaysLeftChanged;
-        public event WorkerAction SatisfactionChanged;
+        public event LocalWorkerAction AbsenceStarted;
+        public event LocalWorkerAction AbsenceFinished;
+        public event LocalWorkerAction DaysInCompanyChanged;
+        public event LocalWorkerAction DaysOfHolidaysLeftChanged;
+        public event LocalWorkerAction SatisfactionChanged;
 
         /*Private methods*/
 

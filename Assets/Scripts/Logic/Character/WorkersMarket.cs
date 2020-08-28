@@ -57,8 +57,8 @@ public class WorkersMarket : Photon.PunBehaviour
     /// Workers available on market
     /// </summary>
     public List<SharedWorker> Workers { get; private set; } = new List<SharedWorker>();
-    public event WorkerAction WorkerAdded;
-    public event WorkerAction WorkerRemoved;
+    public event SharedWorkerAction WorkerAdded;
+    public event SharedWorkerAction WorkerRemoved;
 
     /*Private methods*/
 

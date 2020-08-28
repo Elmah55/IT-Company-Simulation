@@ -120,7 +120,7 @@ public class UIDefaultView : MonoBehaviour
         return "Day " + days;
     }
 
-    private void OnControlledCompanyWorkerAddedOrRemoved(SharedWorker companyWorker)
+    private void OnControlledCompanyWorkerAddedOrRemoved(LocalWorker companyWorker)
     {
         TextWorkersCount.text = GetWorkersCountText(SimulationManagerComponent.ControlledCompany.Workers.Count);
     }

@@ -50,8 +50,8 @@ public class PlayerCompany : Company
     /// </summary>
     public List<Scrum> ScrumProcesses { get; private set; }
     public List<LocalProject> CompletedProjects { get; private set; }
-    public event WorkerAction WorkerAdded;
-    public event WorkerAction WorkerRemoved;
+    public event LocalWorkerAction WorkerAdded;
+    public event LocalWorkerAction WorkerRemoved;
     public event ScrumAtion ProjectAdded;
     public event Action<int> BalanceChanged;
 

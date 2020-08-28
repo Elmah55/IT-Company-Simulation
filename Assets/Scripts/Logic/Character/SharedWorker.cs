@@ -83,8 +83,8 @@ namespace ITCompanySimulation.Character
         /// Representation of character in game world
         /// </summary>
         public GameObject PhysicalCharacter { get; set; }
-        public event WorkerAction SalaryChanged;
-        public event WorkerAction ExpierienceTimeChanged;
+        public event SharedWorkerAction SalaryChanged;
+        public event SharedWorkerAction ExpierienceTimeChanged;
         public event WorkerAbilityAction AbilityUpdated;
 
         /*Private methods*/

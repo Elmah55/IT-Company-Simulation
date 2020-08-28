@@ -39,12 +39,12 @@ namespace ITCompanySimulation.Character
 
         /*Private methods*/
 
-        private void OnControlledCompanyWorkerRemoved(SharedWorker companyWorker)
+        private void OnControlledCompanyWorkerRemoved(LocalWorker companyWorker)
         {
             RemoveCharacter(companyWorker);
         }
 
-        private void OnControlledCompanyWorkerAdded(SharedWorker companyWorker)
+        private void OnControlledCompanyWorkerAdded(LocalWorker companyWorker)
         {
             SpawnCharacter(companyWorker);
         }
@@ -63,7 +63,7 @@ namespace ITCompanySimulation.Character
             removedChar.PhysicalCharacter = null;
         }
 
-        private void SpawnCharacter(SharedWorker companyWorker)
+        private void SpawnCharacter(LocalWorker companyWorker)
         {
             //Spawn new character in game world
             int spawnRetries = 0;
@@ -108,20 +108,19 @@ namespace ITCompanySimulation.Character
                     newCharacter = GameObject.Instantiate(CharacterPrefab, spawnPos, Quaternion.identity);
                 }
 
-                LocalWorker worker = (LocalWorker)companyWorker;
-                worker.AbsenceStarted += OnWorkerAbsenceStarted;
-                worker.AbsenceFinished += OnWorkerAbsenceFinished;
+                companyWorker.AbsenceStarted += OnWorkerAbsenceStarted;
+                companyWorker.AbsenceFinished += OnWorkerAbsenceFinished;
                 companyWorker.PhysicalCharacter = newCharacter;
                 SpawnedCharacters.Add(companyWorker);
             }
         }
 
-        private void OnWorkerAbsenceStarted(SharedWorker worker)
+        private void OnWorkerAbsenceStarted(LocalWorker worker)
         {
             worker.PhysicalCharacter.gameObject.SetActive(false);
         }
 
-        private void OnWorkerAbsenceFinished(SharedWorker worker)
+        private void OnWorkerAbsenceFinished(LocalWorker worker)
         {
             worker.PhysicalCharacter.gameObject.SetActive(true);
         }
