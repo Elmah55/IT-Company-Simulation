@@ -66,7 +66,7 @@ namespace ITCompanySimulation.UI
         private void SetWorkerAbilitiesText()
         {
             TextAbilities.text = UIWorkers.GetWorkerAbilitiesString(SelectedWorker);
-            RectTransform transform = TextAbilities.GetComponent<RectTransform>();
+            RectTransform transform = TextAbilities.transform.parent.GetComponent<RectTransform>();
             Vector2 newSize = new Vector2(transform.rect.width, TextAbilities.preferredHeight);
             transform.sizeDelta = newSize;
         }

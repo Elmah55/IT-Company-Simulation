@@ -60,7 +60,6 @@ namespace ITCompanySimulation.UI
         public static string GetWorkerAbilitiesString(SharedWorker worker)
         {
             StrBuilder.Clear();
-            StrBuilder.Append("Abilities:\n");
 
             for (int i = 0; i < worker.Abilites.Count; i++)
             {
@@ -76,31 +75,31 @@ namespace ITCompanySimulation.UI
 
         public static string GetWorkerNameString(SharedWorker worker)
         {
-            return string.Format("Name: {0} {1}",
+            return string.Format("{0} {1}",
                 worker.Name, worker.Surename);
         }
 
         public static string GetWorkerExpierienceString(SharedWorker worker)
         {
-            return string.Format("Expierience: {0} days",
+            return string.Format("{0} days",
                 worker.ExperienceTime);
         }
 
         public static string GetWorkerSalaryString(SharedWorker worker)
         {
-            return string.Format("Salary: {0} $",
+            return string.Format("{0} $",
                 worker.Salary);
         }
 
         public static string GetWorkerSatisfactionString(LocalWorker worker)
         {
-            return string.Format("Satisfaction: {0} %",
+            return string.Format("{0} %",
                  worker.Satiscation.ToString("0.00"));
         }
 
         public static string GetWorkerDaysInCompanyString(LocalWorker worker)
         {
-            return string.Format("Days in company: {0} days",
+            return string.Format("{0} days",
                 worker.DaysInCompany);
         }
 

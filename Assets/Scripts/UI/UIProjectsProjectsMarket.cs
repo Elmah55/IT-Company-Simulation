@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 using ITCompanySimulation.Developing;
 using ITCompanySimulation.Utilities;
@@ -81,9 +80,9 @@ namespace ITCompanySimulation.UI
                 TextCompleteBonus.gameObject.SetActive(true);
                 TextUsedTechnologies.gameObject.SetActive(true);
 
-                TextProjectName.text = string.Format("Name: {0}", proj.Name);
-                TextCompleteBonus.text = string.Format("Complete bonus: {0} $", proj.CompleteBonus);
-                TextUsedTechnologies.text = string.Format("Used technologies: {0}", GetProjectTechnologiesString(proj));
+                TextProjectName.text = proj.Name;
+                TextCompleteBonus.text = string.Format("{0} $", proj.CompleteBonus);
+                TextUsedTechnologies.text = string.Format("{0}", GetProjectTechnologiesString(proj));
             }
             else
             {

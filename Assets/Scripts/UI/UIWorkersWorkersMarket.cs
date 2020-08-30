@@ -73,18 +73,12 @@ namespace ITCompanySimulation.UI
                 TextAbilities.gameObject.SetActive(true);
                 TextExpierience.gameObject.SetActive(true);
 
-                TextName.text = string.Format("Name: {0} {1}",
-                    selectedWorker.Name, selectedWorker.Surename);
-
+                TextName.text = UIWorkers.GetWorkerNameString(selectedWorker);
                 SetWorkerSalaryText(selectedWorker);
-
-                TextExpierience.text = string.Format("Expierience: {0} days",
-                    selectedWorker.ExperienceTime);
-
-
+                TextExpierience.text = UIWorkers.GetWorkerExpierienceString(selectedWorker);
                 TextAbilities.text = UIWorkers.GetWorkerAbilitiesString(selectedWorker);
-                RectTransform textTransform = TextAbilities.rectTransform;
-                textTransform.sizeDelta = new Vector2(textTransform.sizeDelta.x, TextAbilities.preferredHeight);
+                RectTransform textObjectTransform = TextAbilities.transform.parent.GetComponent<RectTransform>();
+                textObjectTransform.sizeDelta = new Vector2(textObjectTransform.sizeDelta.x, TextAbilities.preferredHeight);
             }
             else
             {
@@ -97,8 +91,7 @@ namespace ITCompanySimulation.UI
 
         private void SetWorkerSalaryText(SharedWorker selectedWorker)
         {
-            TextSalary.text = string.Format("Salary: {0} $",
-                selectedWorker.Salary);
+            TextSalary.text = UIWorkers.GetWorkerSalaryString(selectedWorker);
         }
 
         /// <summary>
@@ -178,6 +171,7 @@ namespace ITCompanySimulation.UI
             }
             else
             {
+                SetWorkerInfoText(null);
                 SetActionButtonsState(null);
             }
         }

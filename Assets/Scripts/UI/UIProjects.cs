@@ -74,6 +74,9 @@ namespace ITCompanySimulation.UI
             return element;
         }
 
+        /// <summary>
+        /// Used to display text in tooltip component
+        /// </summary>
         protected void SubscribeToMouseEventPointers(MousePointerEvents events, SharedProject proj, Tooltip tooltipComponent)
         {
             events.PointerEntered += () =>
