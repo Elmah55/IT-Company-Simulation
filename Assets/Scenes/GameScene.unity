@@ -7182,7 +7182,7 @@ GameObject:
   - component: {fileID: 686342785}
   m_Layer: 5
   m_Name: Canvas
-  m_TagString: Untagged
+  m_TagString: Canvas
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -32298,7 +32298,6 @@ MonoBehaviour:
   ListViewMarketProjects: {fileID: 1694421840}
   ListViewCompanyProjects: {fileID: 1177418158}
   ProjectsMarketComponent: {fileID: 746702003}
-  TooltipComponent: {fileID: 713441622558336245}
   ButtonTakeProject: {fileID: 51749401}
 --- !u!224 &1905902103 stripped
 RectTransform:

@@ -75,7 +75,10 @@ public class Tooltip : MonoBehaviour
 
     private void OnEnable()
     {
-        SetTooltipPosition();
+        if (null != ParentTransform)
+        {
+            SetTooltipPosition();
+        }
     }
 
     private void Update()

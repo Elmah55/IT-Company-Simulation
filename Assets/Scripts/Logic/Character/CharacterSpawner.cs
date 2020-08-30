@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 using ITCompanySimulation.Utilities;
+using ITCompanySimulation.UI;
 
 namespace ITCompanySimulation.Character
 {
@@ -108,6 +109,8 @@ namespace ITCompanySimulation.Character
                     newCharacter = GameObject.Instantiate(CharacterPrefab, spawnPos, Quaternion.identity);
                 }
 
+                CharacterText textComponent = newCharacter.GetComponentInChildren<CharacterText>();
+                textComponent.Text = string.Format("{0} {1}", companyWorker.Name, companyWorker.Surename);
                 companyWorker.AbsenceStarted += OnWorkerAbsenceStarted;
                 companyWorker.AbsenceFinished += OnWorkerAbsenceFinished;
                 companyWorker.PhysicalCharacter = newCharacter;
