@@ -1,90 +1,117 @@
 ﻿using TMPro;
 using UnityEngine;
 
-/// <summary>
-/// This class allows to display UI tooltip
-/// </summary>
-public class Tooltip : MonoBehaviour
+namespace ITCompanySimulation.UI
 {
-    /*Private consts fields*/
-
-    /*Private fields*/
-
-    [SerializeField]
-    private TextMeshProUGUI TextComponent;
-    private RectTransform Transform;
-    private RectTransform ParentTransform;
-
-    /*Public consts fields*/
-
-    /*Public fields*/
-
-    public string Text
+    /// <summary>
+    /// This class allows to display UI tooltip
+    /// </summary>
+    public class Tooltip : MonoBehaviour
     {
-        get
+        /*Private consts fields*/
+
+        [Tooltip("Tooltip offset from mouse position on X axis")]
+        public float TooltipOffsetX;
+        [Tooltip("Tooltip offset from mouse position on Y axis")]
+        public float TooltipOffsetY;
+
+        /*Private fields*/
+
+        [SerializeField]
+        private TextMeshProUGUI TextComponent;
+        /// <summary>
+        /// This gameobject's transform
+        /// </summary>
+        private RectTransform ObjectTransform;
+        private RectTransform CanvasTransform;
+        private Canvas CanvasComponent;
+
+        /*Public consts fields*/
+
+        /*Public fields*/
+
+        public string Text
         {
-            return TextComponent.text;
+            get
+            {
+                return TextComponent.text;
+            }
+
+            set
+            {
+                TextComponent.text = value;
+                SetTooltipSize();
+            }
         }
 
-        set
-        {
-            TextComponent.text = value;
-            SetTooltipSize();
-        }
-    }
+        /*Private methods*/
 
-    /*Private methods*/
-
-    private void SetTooltipSize()
-    {
-        if (null != Transform)
+        private void SetTooltipSize()
         {
             Vector2 newSize = new Vector2(TextComponent.preferredWidth, TextComponent.preferredHeight);
-            Transform.sizeDelta = newSize;
+            ObjectTransform.sizeDelta = newSize;
         }
-    }
 
-    private void SetTooltipPosition()
-    {
-        Vector3 mousePos = Input.mousePosition;
-        Vector2 tooltipPostion = new Vector2(mousePos.x + 30f, mousePos.y);
-        Vector2 finalPostion;
-        bool result = RectTransformUtility.ScreenPointToLocalPointInRectangle(ParentTransform, tooltipPostion, null, out finalPostion);
-
-        if (true == result)
+        private void SetTooltipPosition()
         {
-            Transform.localPosition = finalPostion;
+            Vector2 mousePos = Input.mousePosition;
+            Vector2 tooltipPostion =
+                new Vector2(mousePos.x + (TooltipOffsetX * CanvasComponent.scaleFactor),
+                mousePos.y - (TooltipOffsetY * CanvasComponent.scaleFactor));
+            ObjectTransform.position = tooltipPostion;
 
+            //Tooltip reached right edge of screen, move tooltip to left side of mouse pointer
+            if (ObjectTransform.anchoredPosition.x + ObjectTransform.rect.width > CanvasTransform.rect.width)
+            {
+                tooltipPostion =
+                    new Vector2(mousePos.x - (ObjectTransform.rect.width + TooltipOffsetX) * CanvasComponent.scaleFactor,
+                    tooltipPostion.y);
+                ObjectTransform.position = tooltipPostion;
+            }
+
+            //Tooltip reached left edge of screen, move tooltip to right side of mouse pointer
+            if (ObjectTransform.anchoredPosition.x < 0f)
+            {
+                tooltipPostion =
+                    new Vector2(mousePos.x + ((Mathf.Abs(TooltipOffsetX) - ObjectTransform.rect.width) * CanvasComponent.scaleFactor),
+                    tooltipPostion.y);
+                ObjectTransform.position = tooltipPostion;
+            }
+
+            //Tooltip reached botom edge of screen, move tooltip above mouse pointer
+            if (Mathf.Abs(ObjectTransform.anchoredPosition.y - ObjectTransform.rect.width) > CanvasTransform.rect.height)
+            {
+                tooltipPostion = new Vector2(tooltipPostion.x,
+                    mousePos.y + (TooltipOffsetY + ObjectTransform.rect.height) * CanvasComponent.scaleFactor);
+                ObjectTransform.position = tooltipPostion;
+            }
+
+            //Tooltip reached upper edge of screen, move tooltip below mouse pointer
+            if (ObjectTransform.anchoredPosition.y > 0f)
+            {
+                tooltipPostion = new Vector2(tooltipPostion.x,
+                    mousePos.y + ((TooltipOffsetY + ObjectTransform.rect.height) * CanvasComponent.scaleFactor));
+                ObjectTransform.position = tooltipPostion;
+            }
         }
-#if DEVELOPMENT_BUILD || UNITY_EDITOR
-        else
+
+        private void Awake()
         {
-            string debugMsg = string.Format("[{0}] RectTransformUtility.ScreenPointToLocalPointInRectangle could not find point",
-                this.GetType().Name);
-            Debug.LogWarning(debugMsg);
+            ObjectTransform = GetComponent<RectTransform>();
+            CanvasTransform = GameObject.FindGameObjectWithTag("Canvas").GetComponent<RectTransform>();
+            CanvasComponent = CanvasTransform.GetComponent<Canvas>();
         }
-#endif
-    }
 
-    private void Start()
-    {
-        Transform = GetComponent<RectTransform>();
-        ParentTransform = Transform.parent.gameObject.GetComponent<RectTransform>();
-        SetTooltipSize();
-    }
-
-    private void OnEnable()
-    {
-        if (null != ParentTransform)
+        private void OnEnable()
         {
             SetTooltipPosition();
         }
-    }
 
-    private void Update()
-    {
-        SetTooltipPosition();
-    }
+        private void Update()
+        {
+            SetTooltipPosition();
+        }
 
-    /*Public methods*/
+        /*Public methods*/
+    }
 }
