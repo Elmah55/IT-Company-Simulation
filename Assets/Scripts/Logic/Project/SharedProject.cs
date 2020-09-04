@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
 
 namespace ITCompanySimulation.Developing
 {
@@ -10,6 +8,8 @@ namespace ITCompanySimulation.Developing
         /*Private consts fields*/
 
         /*Private fields*/
+
+        private int m_CompletionTime;
 
         /*Public consts fields*/
 
@@ -23,13 +23,40 @@ namespace ITCompanySimulation.Developing
         /// <summary>
         /// How much money company will receive after finishing project
         /// </summary>
-        public int CompleteBonus { get; set; }
+        public int CompletionBonus { get; set; }
+        /// <summary>
+        /// In how many days project should be completed
+        /// </summary>
+        public int CompletionTime
+        {
+            get
+            {
+                return m_CompletionTime;
+            }
+
+            set
+            {
+                m_CompletionTime = value;
+                CompletionTimeUpdated?.Invoke(this);
+            }
+        }
+        /// <summary>
+        /// After exceeding completion time company will have to pay penalty
+        /// </summary>
+        public int CompletionTimeExceededPenalty
+        {
+            get
+            {
+                return (int)(CompletionBonus * 0.25f);
+            }
+        }
         /// <summary>
         /// Stores index of name from project's name table.
         /// Used for serialization
         /// </summary>
         public int ProjectNameIndex { get; set; }
         public List<ProjectTechnology> UsedTechnologies { get; set; }
+        public event SharedProjectAction CompletionTimeUpdated;
 
         /*Private methods*/
 
@@ -41,7 +68,8 @@ namespace ITCompanySimulation.Developing
 
             byte[] nameIndexBytes = BitConverter.GetBytes(projectToSerialize.ProjectNameIndex);
             byte[] IDBytes = BitConverter.GetBytes(projectToSerialize.ID);
-            byte[] completeBonusBytes = BitConverter.GetBytes(projectToSerialize.CompleteBonus);
+            byte[] completeBonusBytes = BitConverter.GetBytes(projectToSerialize.CompletionBonus);
+            byte[] completionTimeBytes = BitConverter.GetBytes(projectToSerialize.CompletionTime);
             byte[] technologiesBytes = new byte[projectToSerialize.UsedTechnologies.Count];
 
             for (int i = 0; i < projectToSerialize.UsedTechnologies.Count; i++)
@@ -55,6 +83,7 @@ namespace ITCompanySimulation.Developing
             int projectBytesSize = nameIndexBytes.Length
                                  + IDBytes.Length
                                  + completeBonusBytes.Length
+                                 +completionTimeBytes.Length
                                  + technologiesBytes.Length
                                  + technologiesBytesSize.Length;
 
@@ -67,6 +96,8 @@ namespace ITCompanySimulation.Developing
             offset += IDBytes.Length;
             Array.Copy(completeBonusBytes, 0, projectBytes, offset, completeBonusBytes.Length);
             offset += completeBonusBytes.Length;
+            Array.Copy(completionTimeBytes, 0, projectBytes, offset, completionTimeBytes.Length);
+            offset += completionTimeBytes.Length;
             Array.Copy(technologiesBytesSize, 0, projectBytes, offset, technologiesBytesSize.Length);
             offset += technologiesBytesSize.Length;
             Array.Copy(technologiesBytes, 0, projectBytes, offset, technologiesBytes.Length);
@@ -80,6 +111,7 @@ namespace ITCompanySimulation.Developing
             int nameIndex;
             int ID;
             int completeBonus;
+            int completionTime;
             int technologiesSize;
             List<ProjectTechnology> technologies = new List<ProjectTechnology>();
 
@@ -88,6 +120,8 @@ namespace ITCompanySimulation.Developing
             ID = BitConverter.ToInt32(projectBytes, offset);
             offset += sizeof(int);
             completeBonus = BitConverter.ToInt32(projectBytes, offset);
+            offset += sizeof(int);
+            completionTime = BitConverter.ToInt32(projectBytes, offset);
             offset += sizeof(int);
             technologiesSize = BitConverter.ToInt32(projectBytes, offset);
 
@@ -100,8 +134,9 @@ namespace ITCompanySimulation.Developing
 
             SharedProject deserializedProject = new SharedProject(ProjectData.Names[nameIndex]);
             deserializedProject.ID = ID;
-            deserializedProject.CompleteBonus = completeBonus;
+            deserializedProject.CompletionBonus = completeBonus;
             deserializedProject.UsedTechnologies = technologies;
+            deserializedProject.CompletionTime = completionTime;
 
             return deserializedProject;
         }
@@ -111,5 +146,5 @@ namespace ITCompanySimulation.Developing
             this.Name = projectName;
             UsedTechnologies = new List<ProjectTechnology>();
         }
-    } 
+    }
 }

@@ -2,7 +2,7 @@
 using UnityEngine.Events;
 
 /// <summary>
-/// This component aggregates messages about events that occured in simualation
+/// This component allows to send notification messages that can be displayed to player
 /// </summary>
 public class SimulationEventNotificator
 {

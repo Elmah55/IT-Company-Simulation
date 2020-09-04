@@ -228,7 +228,7 @@ public class PlayerCompanyManager : MonoBehaviour
     private void OnCompanyProjectCompleted(LocalProject newProject)
     {
         SimulationManagerComponent.ControlledCompany.Balance +=
-            newProject.CompleteBonus;
+            newProject.CompletionBonus;
         newProject.Completed -= OnCompanyProjectCompleted;
     }
 

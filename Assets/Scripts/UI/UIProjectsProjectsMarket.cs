@@ -35,6 +35,8 @@ namespace ITCompanySimulation.UI
         [SerializeField]
         private TextMeshProUGUI TextUsedTechnologies;
         [SerializeField]
+        private TextMeshProUGUI TextCompletionTime;
+        [SerializeField]
         private ControlListView ListViewMarketProjects;
         [SerializeField]
         private ControlListView ListViewCompanyProjects;
@@ -76,19 +78,17 @@ namespace ITCompanySimulation.UI
         {
             if (null != proj)
             {
-                TextProjectName.gameObject.SetActive(true);
-                TextCompleteBonus.gameObject.SetActive(true);
-                TextUsedTechnologies.gameObject.SetActive(true);
-
                 TextProjectName.text = proj.Name;
-                TextCompleteBonus.text = string.Format("{0} $", proj.CompleteBonus);
+                TextCompleteBonus.text = string.Format("{0} $", proj.CompletionBonus);
                 TextUsedTechnologies.text = string.Format("{0}", GetProjectTechnologiesString(proj));
+                TextCompletionTime.text = string.Format("{0} days", proj.CompletionTime);
             }
             else
             {
-                TextProjectName.gameObject.SetActive(false);
-                TextCompleteBonus.gameObject.SetActive(false);
-                TextUsedTechnologies.gameObject.SetActive(false);
+                TextProjectName.text = string.Empty;
+                TextCompleteBonus.text = string.Empty;
+                TextUsedTechnologies.text = string.Empty;
+                TextCompletionTime.text = string.Empty;
             }
         }
 
@@ -142,6 +142,8 @@ namespace ITCompanySimulation.UI
             ButtonSelectorProjects.RemoveButton(element.Button);
             ListViewElementPool.AddObject(element);
             SetListViewMarketProjectsText();
+
+            proj.CompletionTimeUpdated -= OnMarketProjectCompletionTimeUpdated;
         }
 
         private void OnProjectsMarketProjectAdded(SharedProject proj)
@@ -151,6 +153,20 @@ namespace ITCompanySimulation.UI
             ListViewMarketProjects.AddControl(newElement.gameObject);
             newElement.Text.text = GetProjectListViewElementText(proj);
             SetListViewMarketProjectsText();
+
+            proj.CompletionTimeUpdated += OnMarketProjectCompletionTimeUpdated;
+        }
+
+        private void OnCompanyProjectCompletionTimeUpdated(SharedProject proj)
+        {
+            ListViewElementProject element = GetProjectListViewElement(ListViewCompanyProjects, proj);
+            element.Text.text = base.GetProjectListViewElementText((LocalProject)proj);
+        }
+
+        private void OnMarketProjectCompletionTimeUpdated(SharedProject proj)
+        {
+            ListViewElementProject element = GetProjectListViewElement(ListViewMarketProjects, proj);
+            element.Text.text = GetProjectListViewElementText(proj);
         }
 
         private void OnControlledCompanyProjectAdded(Scrum scrumObj)
@@ -162,6 +178,7 @@ namespace ITCompanySimulation.UI
 
             scrumObj.BindedProject.ProgressUpdated += OnProjectProgressUpdated;
             scrumObj.BindedProject.Completed += OnProjectCompleted;
+            scrumObj.BindedProject.CompletionTimeUpdated += OnCompanyProjectCompletionTimeUpdated;
 
             SetListViewCompanyProjectsText();
         }
@@ -180,9 +197,10 @@ namespace ITCompanySimulation.UI
 
         private string GetProjectListViewElementText(SharedProject proj)
         {
-            return string.Format("{0}\nCompletion bonus: {1} $\n",
+            return string.Format("{0}\nCompletion bonus: {1} $\nCompletion time: {2} days",
                                  proj.Name,
-                                 proj.CompleteBonus);
+                                 proj.CompletionBonus,
+                                 proj.CompletionTime);
         }
 
         #endregion

@@ -152,12 +152,12 @@ namespace ITCompanySimulation.Developing
         {
             StopCoroutine(ProjectUpdateCoroutine);
             string playerNotification = string.Format("Project {0} finished. Your company has earned {1} $",
-                finishedProject.Name, finishedProject.CompleteBonus);
+                finishedProject.Name, finishedProject.CompletionBonus);
             SimulationManagerComponent.NotificatorComponent.Notify(playerNotification);
 
 #if DEVELOPMENT_BUILD || UNITY_EDITOR
             string debugInfo = string.Format("Project {0} (ID {2}) finished. {1} $ added to company's balance",
-                finishedProject.Name, finishedProject.CompleteBonus, finishedProject.ID);
+                finishedProject.Name, finishedProject.CompletionBonus, finishedProject.ID);
             Debug.Log(debugInfo);
 #endif
         }
@@ -171,15 +171,13 @@ namespace ITCompanySimulation.Developing
             SimulationManagerComponent.ControlledCompany.WorkerRemoved += OnControlledCompanyWorkerRemoved;
         }
 
-        private void OnControlledCompanyWorkerRemoved(SharedWorker worker)
+        private void OnControlledCompanyWorkerRemoved(LocalWorker worker)
         {
-            LocalWorker companyWorker = (LocalWorker)worker;
-
-            if (BindedProject == companyWorker.AssignedProject)
+            if (BindedProject == worker.AssignedProject)
             {
                 //TODO: Make leaving project event fire first (before worker leaves company).
                 //Make this event fired by Company class
-                BindedProject.RemoveWorker(companyWorker);
+                BindedProject.RemoveWorker(worker);
 
                 if (0 == BindedProject.Workers.Count && true == BindedProject.Active)
                 {
@@ -215,6 +213,20 @@ namespace ITCompanySimulation.Developing
             }
         }
 
+        private void UpdateProjectCompletionTime()
+        {
+            --BindedProject.CompletionTime;
+
+            if (0 == BindedProject.CompletionTime)
+            {
+                SimulationManagerComponent.ControlledCompany.Balance -= BindedProject.CompletionTimeExceededPenalty;
+                string notificationMessage = string.Format(
+                    "Completion time of your project {0} (ID {1}) has been exceeded. Your company paid {2} $ of penalty",
+                    BindedProject.Name, BindedProject.ID, BindedProject.CompletionTimeExceededPenalty);
+               SimulationManagerComponent.NotificatorComponent.Notify(notificationMessage);
+            }
+        }
+
         private void OnGameTimeDayChanged()
         {
             if (true == BindedProject.StartedOnce && false == BindedProject.IsCompleted)
@@ -224,6 +236,7 @@ namespace ITCompanySimulation.Developing
 
             UpdateProjectWorkersExpierience();
             UpdateSprintInfo();
+            UpdateProjectCompletionTime();
         }
 
         /*Public methods*/

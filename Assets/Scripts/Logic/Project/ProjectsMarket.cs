@@ -40,6 +40,11 @@ public class ProjectsMarket : Photon.PunBehaviour
     /// number of projects) - MaxProjectsOnMarket
     /// </summary>
     private const int PROJECT_ADD_PROBABILITY_DAILY = 10;
+    /// <summary>
+    /// Min and max values of days in which project should be completed
+    /// </summary>
+    private const int PROJECT_COMPLETION_TIME_MIN = 60;
+    private const int PROJECT_COMPLETION_TIME_MAX = 160;
 
     /*Private fields*/
 
@@ -101,7 +106,8 @@ public class ProjectsMarket : Photon.PunBehaviour
 
         newProject = new SharedProject(projectName);
         newProject.UsedTechnologies = GenerateProjectTechnologies();
-        newProject.CompleteBonus = CalculateProjectCompleteBonus(newProject);
+        newProject.CompletionBonus = CalculateProjectCompleteBonus(newProject);
+        newProject.CompletionTime = UnityEngine.Random.Range(PROJECT_COMPLETION_TIME_MIN, PROJECT_COMPLETION_TIME_MAX);
         newProject.ID = ProjectID++;
         newProject.ProjectNameIndex = projectNameIndex;
 

@@ -110,8 +110,9 @@ namespace ITCompanySimulation.Developing
         public LocalProject(SharedProject proj) : this(proj.Name)
         {
             this.ID = proj.ID;
-            this.CompleteBonus = proj.CompleteBonus;
+            this.CompletionBonus = proj.CompletionBonus;
             this.UsedTechnologies = proj.UsedTechnologies;
+            this.CompletionTime = proj.CompletionTime;
         }
 
         public void Start()

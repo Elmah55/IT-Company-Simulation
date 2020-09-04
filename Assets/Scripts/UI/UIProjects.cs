@@ -46,10 +46,11 @@ namespace ITCompanySimulation.UI
 
         protected string GetProjectListViewElementText(LocalProject proj)
         {
-            return string.Format("{0}\nCompletion bonus: {1} $\nProgress: {2} %",
+            return string.Format("{0}\nCompletion bonus: {1} $\nProgress: {2} %\nCompletion time: {3} days",
                                  proj.Name,
-                                 proj.CompleteBonus,
-                                 proj.Progress.ToString("0.00"));
+                                 proj.CompletionBonus,
+                                 proj.Progress.ToString("0.00"),
+                                 proj.CompletionTime);
         }
 
         /// <summary>

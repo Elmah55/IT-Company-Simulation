@@ -76,7 +76,7 @@ public class PlayerCompany : Company
 
 #if DEVELOPMENT_BUILD || UNITY_EDITOR
         string debugInfo = string.Format("Project added to company\nName {0}\nID {1}\nComplete bonus {2}",
-            projectToAdd.Name, projectToAdd.ID, projectToAdd.CompleteBonus);
+            projectToAdd.Name, projectToAdd.ID, projectToAdd.CompletionBonus);
         Debug.Log(debugInfo);
 #endif
     }

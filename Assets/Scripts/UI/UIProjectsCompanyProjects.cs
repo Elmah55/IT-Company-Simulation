@@ -261,6 +261,12 @@ namespace ITCompanySimulation.UI
             }
         }
 
+        private void OnSelectedProjectCompletionTimeUpdated(SharedProject proj)
+        {
+            ListViewElementProject element = GetProjectListViewElement(ListViewCompanyProjects, proj);
+            element.Text.text = GetProjectListViewElementText((LocalProject)proj);
+        }
+
         #endregion
 
         private void SetProjectButtons()
@@ -281,7 +287,7 @@ namespace ITCompanySimulation.UI
                 TextProjectName.text =
             string.Format("Name: {0}", SelectedScrum.BindedProject.Name);
                 TextProjectCompletionBonus.text =
-                    string.Format("Completion bonus: {0} $", SelectedScrum.BindedProject.CompleteBonus);
+                    string.Format("Completion bonus: {0} $", SelectedScrum.BindedProject.CompletionBonus);
 
                 TextProjectTechnologies.text =
                     string.Format("Used technologies: {0}", GetProjectTechnologiesString(SelectedScrum.BindedProject));
@@ -357,6 +363,7 @@ namespace ITCompanySimulation.UI
             SelectedScrum.BindedProject.WorkerAdded += OnSelectedProjectWorkerAdded;
             SelectedScrum.BindedProject.Stopped += OnSelectedProjectStopped;
             SelectedScrum.BindedProject.Started += OnSelectedProjectStarted;
+            SelectedScrum.BindedProject.CompletionTimeUpdated += OnSelectedProjectCompletionTimeUpdated;
         }
 
         private void UnsubscribeProjectEvents()
@@ -365,6 +372,7 @@ namespace ITCompanySimulation.UI
             SelectedScrum.BindedProject.WorkerAdded -= OnSelectedProjectWorkerAdded;
             SelectedScrum.BindedProject.Stopped -= OnSelectedProjectStopped;
             SelectedScrum.BindedProject.Started -= OnSelectedProjectStarted;
+            SelectedScrum.BindedProject.CompletionTimeUpdated -= OnSelectedProjectCompletionTimeUpdated;
         }
 
         private void SetListViewAssignedWorkersText()
