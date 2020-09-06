@@ -26,6 +26,8 @@ namespace ITCompanySimulation.UI
         [SerializeField]
         private Button ButtonStartGame;
         [SerializeField]
+        private Button ButtonReady;
+        [SerializeField]
         private TextMeshProUGUI TextButtonReady;
         [SerializeField]
         private ListViewElementPhotonPlayer ListViewElementPrefab;
@@ -57,6 +59,11 @@ namespace ITCompanySimulation.UI
         /*Public fields*/
 
         /*Private methods*/
+
+        private void Start()
+        {
+            ButtonReady.interactable = (false == PhotonNetwork.offlineMode);
+        }
 
         private void OnEnable()
         {

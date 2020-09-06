@@ -7978,6 +7978,7 @@ MonoBehaviour:
   ListViewElementPlayerNotReadyColor: {r: 0.28235295, g: 0.49411765, b: 0.6901961,
     a: 1}
   ButtonStartGame: {fileID: 1187996982}
+  ButtonReady: {fileID: 1670898186}
   TextButtonReady: {fileID: 1761067008}
   ListViewElementPrefab: {fileID: 1576907716044222264, guid: e20a4233070de994d8f16ab5e4a98fe1,
     type: 3}
@@ -8411,6 +8412,18 @@ RectTransform:
   m_AnchoredPosition: {x: 425, y: -145}
   m_SizeDelta: {x: 700, y: 180}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1670898186 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 4586327220578573055, guid: 625c1efbbf5bad243a1b57331f08f4d6,
+    type: 3}
+  m_PrefabInstance: {fileID: 581834661}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4e29b1a8efbd4b44bb3f3716e73f07ff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1688987212
 GameObject:
   m_ObjectHideFlags: 0
