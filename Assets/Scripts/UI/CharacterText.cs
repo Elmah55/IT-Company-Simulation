@@ -57,6 +57,7 @@ namespace ITCompanySimulation.UI
             RectTransform textObjectTransform = TextObject.GetComponent<RectTransform>();
             Vector2 newParentSize = new Vector2(TextComponent.preferredWidth, textObjectTransform.sizeDelta.y);
             textObjectTransform.sizeDelta = newParentSize;
+            textObjectTransform.localScale = Vector3.one;
         }
 
         private void OnDisable()

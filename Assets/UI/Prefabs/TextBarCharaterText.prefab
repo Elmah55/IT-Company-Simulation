@@ -85,7 +85,7 @@ PrefabInstance:
     - target: {fileID: 5173600411428913061, guid: 88e0fbc99cad0404eb901d70925fb8ec,
         type: 3}
       propertyPath: m_SizeDelta.y
-      value: 22
+      value: 27
       objectReference: {fileID: 0}
     - target: {fileID: 5173600411428913061, guid: 88e0fbc99cad0404eb901d70925fb8ec,
         type: 3}
@@ -165,7 +165,7 @@ PrefabInstance:
     - target: {fileID: 2968195115174533672, guid: 88e0fbc99cad0404eb901d70925fb8ec,
         type: 3}
       propertyPath: m_fontSize
-      value: 14
+      value: 17
       objectReference: {fileID: 0}
     - target: {fileID: 2968195115174533672, guid: 88e0fbc99cad0404eb901d70925fb8ec,
         type: 3}
@@ -205,12 +205,17 @@ PrefabInstance:
     - target: {fileID: 2968195115174533672, guid: 88e0fbc99cad0404eb901d70925fb8ec,
         type: 3}
       propertyPath: m_fontSizeBase
-      value: 14
+      value: 17
       objectReference: {fileID: 0}
     - target: {fileID: 2968195115174533672, guid: 88e0fbc99cad0404eb901d70925fb8ec,
         type: 3}
       propertyPath: m_fontSizeMax
       value: 1614
+      objectReference: {fileID: 0}
+    - target: {fileID: 2968195115174533672, guid: 88e0fbc99cad0404eb901d70925fb8ec,
+        type: 3}
+      propertyPath: m_textAlignment
+      value: 514
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 88e0fbc99cad0404eb901d70925fb8ec, type: 3}
