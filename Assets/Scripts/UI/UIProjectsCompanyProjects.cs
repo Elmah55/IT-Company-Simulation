@@ -50,6 +50,10 @@ namespace ITCompanySimulation.UI
         [SerializeField]
         private Button ButtonStartProject;
         [SerializeField]
+        private TextMeshProUGUI TextProgressBarProject;
+        [SerializeField]
+        private ProgressBar ProgressBarProject;
+        [SerializeField]
         private Button ButtonStopProject;
         private RectTransform TransformComponent;
         /// <summary>
@@ -93,6 +97,9 @@ namespace ITCompanySimulation.UI
             SetListViewAvailableWorkersText();
             SetListViewCompanyProjectsText();
             ListViewAssignedWorkers.transform.parent.gameObject.SetActive(false);
+            ProgressBarProject.MinimumValue = 0f;
+            ProgressBarProject.MaximumValue = 100f;
+            ProgressBarProject.Value = ProgressBarProject.MinimumValue;
         }
 
         #region Events callbacks
@@ -105,8 +112,9 @@ namespace ITCompanySimulation.UI
             if (null != SelectedScrum
                 && SelectedScrum.BindedProject == proj)
             {
-                TextProjectEstimatedCompletionTime.text = string.Format("Estimated completion time: {0} days",
-                                                             SelectedScrum.GetProjectEstimatedCompletionTime());
+                int estimatedCompletionTime = SelectedScrum.GetProjectEstimatedCompletionTime();
+                TextProjectEstimatedCompletionTime.text = GetEstimatedCompletionTimeText(estimatedCompletionTime);
+                SetProjectProgressBar(proj);
             }
         }
 
@@ -269,6 +277,20 @@ namespace ITCompanySimulation.UI
 
         #endregion
 
+        private void SetProjectProgressBar(LocalProject proj)
+        {
+            if (null != proj)
+            {
+                ProgressBarProject.Value = proj.Progress;
+                TextProgressBarProject.text = string.Format("Progress {0} %", proj.Progress.ToString("0.00"));
+            }
+            else
+            {
+                ProgressBarProject.Value = 0f;
+                TextProgressBarProject.text = "Progress";
+            }
+        }
+
         private void SetProjectButtons()
         {
             ButtonStartProject.interactable = (null != SelectedScrum
@@ -284,36 +306,22 @@ namespace ITCompanySimulation.UI
         {
             if (null != SelectedScrum)
             {
-                TextProjectName.text =
-            string.Format("Name: {0}", SelectedScrum.BindedProject.Name);
+                TextProjectName.text = SelectedScrum.BindedProject.Name;
                 TextProjectCompletionBonus.text =
-                    string.Format("Completion bonus: {0} $", SelectedScrum.BindedProject.CompletionBonus);
-
-                TextProjectTechnologies.text =
-                    string.Format("Used technologies: {0}", GetProjectTechnologiesString(SelectedScrum.BindedProject));
-
-                int estimatedCompletion = SelectedScrum.GetProjectEstimatedCompletionTime();
-                string estimatedCompletionStr;
-
-                if (-1 == estimatedCompletion)
-                {
-                    estimatedCompletionStr = "Estimated completion time:";
-                }
-                else
-                {
-                    estimatedCompletionStr = string.Format("Estimated completion time: {0} days",
-                                                           estimatedCompletion);
-                }
-
-                TextProjectEstimatedCompletionTime.text = estimatedCompletionStr;
+                    string.Format("{0} $", SelectedScrum.BindedProject.CompletionBonus);
+                TextProjectTechnologies.text = GetProjectTechnologiesString(SelectedScrum.BindedProject);
+                int estimatedCompletionTime = SelectedScrum.GetProjectEstimatedCompletionTime();
+                TextProjectEstimatedCompletionTime.text = GetEstimatedCompletionTimeText(estimatedCompletionTime);
             }
             else
             {
-                TextProjectName.text = "Name:";
-                TextProjectCompletionBonus.text = "Completion bonus:";
-                TextProjectTechnologies.text = "Used technologies:";
-                TextProjectEstimatedCompletionTime.text = "Estimated completion time:";
+                TextProjectName.text = string.Empty;
+                TextProjectCompletionBonus.text = string.Empty;
+                TextProjectTechnologies.text = string.Empty;
+                TextProjectEstimatedCompletionTime.text = string.Empty;
             }
+
+            SetProjectProgressBar(SelectedScrum?.BindedProject);
         }
 
         private void RemoveWorkerListViewElement(SharedWorker companyWorker)

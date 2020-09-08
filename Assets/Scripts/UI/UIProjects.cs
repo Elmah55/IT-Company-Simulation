@@ -122,6 +122,19 @@ namespace ITCompanySimulation.UI
             return newElement;
         }
 
+        protected string GetEstimatedCompletionTimeText(int days)
+        {
+            string estimatedCompletionStr = string.Empty;
+
+            if (-1 != days)
+            {
+                estimatedCompletionStr = string.Format("{0} days",
+                                                       days);
+            }
+
+            return estimatedCompletionStr;
+        }
+
         /*Public methods*/
     }
 }
