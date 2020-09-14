@@ -197,9 +197,8 @@ namespace ITCompanySimulation.UI
 
         private void SetCompanyWorkersListViewText()
         {
-            TextCompanyWorkerListView.text = string.Format("Company workers ({0} / {1})",
-                SimulationManagerComponent.ControlledCompany.Workers.Count,
-                PlayerCompany.MAX_WORKERS_PER_COMPANY);
+            TextCompanyWorkerListView.text =
+                UIWorkers.GetCompanyWorkersListViewString(SimulationManagerComponent.ControlledCompany);
         }
 
         private void AddWorkerListViewElement(SharedWorker worker, ControlListView listView)
@@ -247,6 +246,8 @@ namespace ITCompanySimulation.UI
 
             SetWorkerInfoText(SelectedWorker);
             SetActionButtonsState(SelectedWorker);
+            SetCompanyWorkersListViewText();
+            SetMarketWorkersListViewText();
         }
 
         /*Public methods*/

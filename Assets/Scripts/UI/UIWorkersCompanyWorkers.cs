@@ -39,6 +39,8 @@ namespace ITCompanySimulation.UI
         [SerializeField]
         private TextMeshProUGUI TextSatisfaction;
         [SerializeField]
+        private TextMeshProUGUI TextListViewWorkers;
+        [SerializeField]
         private MainSimulationManager SimulationManagerComponent;
         [SerializeField]
         private Tooltip TooltipComponent;
@@ -140,6 +142,12 @@ namespace ITCompanySimulation.UI
             worker.SatisfactionChanged -= OnWorkerSatisfactionChanged;
         }
 
+        private void SetTextListViewWorkers()
+        {
+            TextListViewWorkers.text = 
+                UIWorkers.GetCompanyWorkersListViewString(SimulationManagerComponent.ControlledCompany);
+        }
+
         private string CreateWorkerInfoString(LocalWorker companyWorker)
         {
             string workerInfo = string.Format("Name: {0}\n" +
@@ -169,6 +177,7 @@ namespace ITCompanySimulation.UI
             SimulationManagerComponent.ControlledCompany.WorkerRemoved += OnControlledCompanyWorkerRemoved;
             WorkersButtonsSelector.SelectedButtonChanged += OnWorkersButtonsSelectorSelectedButtonChanged;
             InitWorkersView();
+            SetTextListViewWorkers();
         }
 
         /// <summary>
@@ -236,12 +245,14 @@ namespace ITCompanySimulation.UI
         {
             LocalWorker companyWorker = (LocalWorker)worker;
             RemoveWorkerListViewElement(companyWorker, ListViewWorkers);
+            SetTextListViewWorkers();
         }
 
         private void OnControlledCompanyWorkerAdded(SharedWorker worker)
         {
             LocalWorker companyWorker = (LocalWorker)worker;
             CreateWorkerListViewElement(companyWorker);
+            SetTextListViewWorkers();
         }
 
         private void OnCompanyWorkerDaysInCompanyChanged(SharedWorker companyWorker)

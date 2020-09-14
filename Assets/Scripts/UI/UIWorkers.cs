@@ -103,6 +103,13 @@ namespace ITCompanySimulation.UI
                 worker.DaysInCompany);
         }
 
+        public static string GetCompanyWorkersListViewString(PlayerCompany company)
+        {
+            return string.Format("Company workers ({0} / {1})",
+                company.Workers.Count,
+                PlayerCompany.MAX_WORKERS_PER_COMPANY);
+        }
+
         /// <summary>
         /// Returns list view element representing worker
         /// </summary>
