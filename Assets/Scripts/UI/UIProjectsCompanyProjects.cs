@@ -4,6 +4,7 @@ using UnityEngine.UI;
 using TMPro;
 using System.Linq;
 using ITCompanySimulation.Developing;
+using ITCompanySimulation.Utilities;
 
 namespace ITCompanySimulation.UI
 {
@@ -60,6 +61,7 @@ namespace ITCompanySimulation.UI
         /// Scrum object of project that is currently selected
         /// </summary>
         private Scrum SelectedScrum;
+        private IObjectPool<ListViewElementWorker> WorkerListViewElementsPool;
 
         /*Public consts fields*/
 
@@ -154,15 +156,31 @@ namespace ITCompanySimulation.UI
 
         private void OnControlledCompanyWorkerAdded(LocalWorker companyWorker)
         {
-            ListViewElementWorker newElement =
-                UIWorkers.CreateWorkerListViewElement(companyWorker, ListViewWorkerElementPrefab, TooltipComponent);
-            UIElementDrag drag = newElement.GetComponent<UIElementDrag>();
-            drag.DragParentTransform = gameObject.GetComponent<RectTransform>();
+            ListViewElementWorker newElement = CreateWorkerListViewElement(companyWorker);
+            ListViewAvailableWorkers.AddControl(newElement.gameObject);
+            SetListViewAvailableWorkersText();
+        }
+
+        private ListViewElementWorker CreateWorkerListViewElement(LocalWorker companyWorker)
+        {
+            ListViewElementWorker newElement = null;
+
+            if (null != WorkerListViewElementsPool)
+            {
+                newElement = WorkerListViewElementsPool.GetObject();
+            }
+
+            if (null == newElement)
+            {
+                newElement = UIWorkers.CreateWorkerListViewElement(companyWorker, ListViewWorkerElementPrefab, TooltipComponent);
+                UIElementDrag drag = newElement.GetComponent<UIElementDrag>();
+                drag.DragParentTransform = gameObject.GetComponent<RectTransform>();
+            }
+
+            newElement.gameObject.SetActive(true);
             newElement.Text.text = GetWorkerListViewElementText(companyWorker);
 
-            ListViewAvailableWorkers.AddControl(newElement.gameObject);
-
-            SetListViewAvailableWorkersText();
+            return newElement;
         }
 
         private void OnControlledCompanyProjectAdded(Scrum scrumObj)
@@ -220,6 +238,9 @@ namespace ITCompanySimulation.UI
             }
         }
 
+        //In current implementation player will drag list view elements
+        //so this callback will be fired when list view element is already placed
+        //in correct list view, no need to add it
         private void OnSelectedProjectWorkerAdded(SharedWorker companyWorker)
         {
             SetProjectButtons();
@@ -235,7 +256,9 @@ namespace ITCompanySimulation.UI
             //Check if list view element was dragged to other list view
             if (null != element)
             {
-                ListViewAssignedWorkers.RemoveControl(element.gameObject);
+                RemoveWorkerListViewElement(element, ListViewAssignedWorkers);
+                ListViewElementWorker newElement = CreateWorkerListViewElement((LocalWorker)companyWorker);
+                ListViewAvailableWorkers.AddControl(newElement.gameObject);
             }
 
             SetProjectButtons();
@@ -324,6 +347,19 @@ namespace ITCompanySimulation.UI
             SetProjectProgressBar(SelectedScrum?.BindedProject);
         }
 
+        private void RemoveWorkerListViewElement(ListViewElementWorker element, ControlListView listView)
+        {
+            listView.RemoveControl(element.gameObject, false);
+            element.gameObject.SetActive(false);
+
+            if (null == WorkerListViewElementsPool)
+            {
+                WorkerListViewElementsPool = new ObjectPool<ListViewElementWorker>();
+            }
+
+            WorkerListViewElementsPool.AddObject(element);
+        }
+
         private void RemoveWorkerListViewElement(SharedWorker companyWorker)
         {
             LocalWorker worker = (LocalWorker)companyWorker;
@@ -333,7 +369,7 @@ namespace ITCompanySimulation.UI
             //Worker might be already removed by other callback
             if (null != listViewElement)
             {
-                workerListView.RemoveControl(listViewElement.gameObject);
+                RemoveWorkerListViewElement(listViewElement, workerListView);
             }
         }
 

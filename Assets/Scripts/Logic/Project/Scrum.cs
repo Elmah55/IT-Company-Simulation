@@ -151,6 +151,12 @@ namespace ITCompanySimulation.Developing
         private void OnProjectFinished(LocalProject finishedProject)
         {
             StopCoroutine(ProjectUpdateCoroutine);
+
+            for (int i = BindedProject.Workers.Count - 1; i >= 0; i--)
+            {
+                BindedProject.RemoveWorker(BindedProject.Workers[i]);
+            }
+
             string playerNotification = string.Format("Project {0} finished. Your company has earned {1} $",
                 finishedProject.Name, finishedProject.CompletionBonus);
             SimulationManagerComponent.NotificatorComponent.Notify(playerNotification);
@@ -215,7 +221,10 @@ namespace ITCompanySimulation.Developing
 
         private void UpdateProjectCompletionTime()
         {
-            --BindedProject.CompletionTime;
+            if (false == BindedProject.IsCompleted)
+            {
+                --BindedProject.CompletionTime;
+            }
 
             if (0 == BindedProject.CompletionTime)
             {
@@ -223,7 +232,7 @@ namespace ITCompanySimulation.Developing
                 string notificationMessage = string.Format(
                     "Completion time of your project {0} (ID {1}) has been exceeded. Your company paid {2} $ of penalty",
                     BindedProject.Name, BindedProject.ID, BindedProject.CompletionTimeExceededPenalty);
-               SimulationManagerComponent.NotificatorComponent.Notify(notificationMessage);
+                SimulationManagerComponent.NotificatorComponent.Notify(notificationMessage);
             }
         }
 
