@@ -3,6 +3,7 @@ using System.Linq;
 using System.Collections.Generic;
 using UnityEngine;
 using ITCompanySimulation.Character;
+using ITCompanySimulation.UI;
 
 /// <summary>
 /// This is core class for all aspects of gameplay that will
@@ -17,6 +18,8 @@ public class MainSimulationManager : Photon.PunBehaviour
 
     private PlayerInfo PlayerInfoComponent;
     private GameTime GameTimeComponent;
+    [SerializeField]
+    private InfoWindow InfoWindowComponent;
 
     /*Public consts fields*/
 
@@ -64,7 +67,7 @@ public class MainSimulationManager : Photon.PunBehaviour
     /// ID of PhotonPlayer object of winner player valid only
     /// when IsSimulationFinished is true
     /// </summary>
-    public int WinnerPhotonPlayerID { get; private set; }
+    public PhotonPlayer WinnerPlayer { get; private set; }
     public SimulationFinishReason FinishReason { get; private set; }
 
     /*Private methods*/
@@ -89,9 +92,9 @@ public class MainSimulationManager : Photon.PunBehaviour
         if (true == PhotonNetwork.isMasterClient)
         {
             this.photonView.RPC("SetSimulationSettingsRPC",
-                                PhotonTargets.Others, 
-                                Settings.MinimalBalance, 
-                                Settings.InitialBalance, 
+                                PhotonTargets.Others,
+                                Settings.MinimalBalance,
+                                Settings.InitialBalance,
                                 Settings.TargetBalance);
         }
     }
@@ -272,13 +275,42 @@ public class MainSimulationManager : Photon.PunBehaviour
         //Stop time so events in game are no longer updated
         Time.timeScale = 0.0f;
         IsSimulationFinished = true;
-        this.WinnerPhotonPlayerID = winnerPhotonPlayerID;
+        this.WinnerPlayer = PhotonNetwork.playerList.FirstOrDefault(x => x.ID == winnerPhotonPlayerID);
         this.FinishReason = (SimulationFinishReason)finishReason;
+        string finishGameInfoMsg = "Game finished";
+
+        //Check if player didnt left already
+        if (null != WinnerPlayer)
+        {
+            switch (this.FinishReason)
+            {
+                case SimulationFinishReason.PlayerCompanyReachedTargetBalance:
+                    string winnerInfo = (WinnerPlayer.IsLocal ? "You have" : WinnerPlayer.NickName) + " won";
+                    finishGameInfoMsg = string.Format("Game finished !\n{0}", winnerInfo);
+                    break;
+                //This will be called only on local client
+                case SimulationFinishReason.PlayerCompanyReachedMinimalBalance:
+                    finishGameInfoMsg = string.Format("Your company's balance reached minimum allowed balance ({0} $)",
+                    Settings.MinimalBalance);
+                    break;
+                case SimulationFinishReason.OnePlayerInRoom:
+                    finishGameInfoMsg = "You are the only player left in simulation.\nYou have won !";
+                    break;
+                default:
+                    finishGameInfoMsg = "Game finished";
+                    break;
+            }
+        }
+
+        InfoWindowComponent.Show(finishGameInfoMsg, () =>
+         {
+             GameManagerComponent.FinishGame();
+         });
         SimulationFinished?.Invoke(winnerPhotonPlayerID, (SimulationFinishReason)finishReason);
     }
 
     [PunRPC]
-    private void SetSimulationSettingsRPC(int minimalBalance,int initialBalance, int targetBalance)
+    private void SetSimulationSettingsRPC(int minimalBalance, int initialBalance, int targetBalance)
     {
         Settings = new SimulationSettings(initialBalance, targetBalance, minimalBalance);
         GameManagerComponent.SettingsOfSimulation = Settings;
@@ -322,7 +354,7 @@ public class MainSimulationManager : Photon.PunBehaviour
         PlayerInfoComponent = gameManagerObject.GetComponent<PlayerInfo>();
         GameTimeComponent = GetComponent<GameTime>();
         NotificatorComponent = new SimulationEventNotificator(GameTimeComponent);
-        Settings = GameManagerComponent.SettingsOfSimulation;   
+        Settings = GameManagerComponent.SettingsOfSimulation;
 
         InitPlayersWorkers();
         SynchronizeSimulationSettings();

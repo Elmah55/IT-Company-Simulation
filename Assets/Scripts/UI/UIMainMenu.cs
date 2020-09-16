@@ -41,9 +41,13 @@ public class UIMainMenu : Photon.PunBehaviour
         ButtonStartGameSetState();
     }
 
-    private void Start()
+    private void Awake()
     {
         PlayerInfoComponent = GameManagerComponent.GetComponent<PlayerInfo>();
+    }
+
+    private void Start()
+    {
         ButtonStartGameSetState();
     }
 
