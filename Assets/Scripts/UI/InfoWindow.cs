@@ -49,7 +49,7 @@ namespace ITCompanySimulation.UI
 
         private void Awake()
         {
-            ConfirmationButton.onClick.AddListener(ConfirmationButtonClicked);
+            ConfirmationButton.onClick.AddListener(OnConfirmationButtonClicked);
         }
 
         /*Public methods*/

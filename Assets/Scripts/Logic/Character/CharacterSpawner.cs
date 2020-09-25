@@ -2,6 +2,7 @@
 using UnityEngine;
 using ITCompanySimulation.Utilities;
 using ITCompanySimulation.UI;
+using ITCompanySimulation.Core;
 
 namespace ITCompanySimulation.Character
 {

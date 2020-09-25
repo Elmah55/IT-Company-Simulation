@@ -4,6 +4,7 @@ using TMPro;
 using System.Text.RegularExpressions;
 using ExitGames.Client.Photon;
 using ITCompanySimulation.Multiplayer;
+using ITCompanySimulation.Core;
 
 namespace ITCompanySimulation.UI
 {

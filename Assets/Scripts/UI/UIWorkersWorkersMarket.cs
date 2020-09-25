@@ -4,6 +4,7 @@ using UnityEngine.UI;
 using System.Linq;
 using ITCompanySimulation.Character;
 using TMPro;
+using ITCompanySimulation.Core;
 
 namespace ITCompanySimulation.UI
 {

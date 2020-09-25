@@ -2,6 +2,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using ITCompanySimulation.Core;
 
 public class UIMainMenu : Photon.PunBehaviour
 {

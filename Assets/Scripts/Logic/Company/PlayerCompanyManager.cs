@@ -1,4 +1,5 @@
 ﻿using ITCompanySimulation.Character;
+using ITCompanySimulation.Core;
 using ITCompanySimulation.Developing;
 using System.Collections.Generic;
 using UnityEngine;

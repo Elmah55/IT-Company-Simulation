@@ -5,6 +5,7 @@ using TMPro;
 using System.Linq;
 using ITCompanySimulation.Developing;
 using ITCompanySimulation.Utilities;
+using ITCompanySimulation.Core;
 
 namespace ITCompanySimulation.UI
 {
