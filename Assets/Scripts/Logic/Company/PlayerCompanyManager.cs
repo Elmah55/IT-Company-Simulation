@@ -102,7 +102,12 @@ public class PlayerCompanyManager : MonoBehaviour
                 ++companyWorker.DaysSinceAbsent;
             }
 
-            SimulateWorkerAbsence(companyWorker);
+            //Calculate only every 10 days
+            if (0 == GameTimeComponent.CurrentTime.Day % 10)
+            {
+                SimulateWorkerAbsence(companyWorker);
+            }
+
             SimulateWorkerSatisfaction(companyWorker);
         }
     }
@@ -156,7 +161,11 @@ public class PlayerCompanyManager : MonoBehaviour
         if (true == companyWorker.Available)
         {
             SimulateWorkerSickenss(companyWorker);
-            SimulateWorkerHoliday(companyWorker);
+
+            if (companyWorker.DaysOfHolidaysLeft > 0)
+            {
+                SimulateWorkerHoliday(companyWorker);
+            }
         }
         else if (0 == companyWorker.DaysUntilAvailable)
         {
@@ -167,7 +176,7 @@ public class PlayerCompanyManager : MonoBehaviour
     private void SimulateWorkerSickenss(LocalWorker companyWorker)
     {
         //What is the probability of worker being sick (in %)
-        int notSickProbability = 100 - (int)(companyWorker.DaysSinceAbsent * 0.2);
+        int notSickProbability = 100 - (int)(companyWorker.DaysSinceAbsent * 0.01f);
         int randomNumber = Random.Range(0, 100);
 
         if (randomNumber >= notSickProbability)
@@ -194,7 +203,7 @@ public class PlayerCompanyManager : MonoBehaviour
     private void SimulateWorkerHoliday(LocalWorker companyWorker)
     {
         //What is the probability of worker going to holidays (in %)
-        int holidayProbability = 100 - (int)(companyWorker.DaysSinceAbsent * 0.2);
+        int holidayProbability = 100 - (int)(companyWorker.DaysSinceAbsent * 0.01f);
         int randomNumber = Random.Range(0, 100);
 
 

@@ -111,11 +111,11 @@ namespace ITCompanySimulation.Character
 
                     if (true == m_Available)
                     {
-                        AbsenceStarted?.Invoke(this);
+                        AbsenceFinished?.Invoke(this);
                     }
                     else
                     {
-                        AbsenceFinished?.Invoke(this);
+                        AbsenceStarted?.Invoke(this);
                     }
                 }
             }
