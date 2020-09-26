@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using ITCompanySimulation.Character;
 using ITCompanySimulation.UI;
-using ITCompanySimulation.Core;
 
 namespace ITCompanySimulation.Core
 {
@@ -23,6 +22,12 @@ namespace ITCompanySimulation.Core
         private GameTime GameTimeComponent;
         [SerializeField]
         private InfoWindow InfoWindowComponent;
+        /// <summary>
+        /// Sets the time scale that simulation should be run with. 1.0 is default scale
+        /// </summary>
+        [SerializeField]
+        [Range(0.1f, 10.0f)]
+        private float SimulationTimeScale;
 
         /*Public consts fields*/
 
@@ -72,8 +77,14 @@ namespace ITCompanySimulation.Core
         /// </summary>
         public PhotonPlayer WinnerPlayer { get; private set; }
         public SimulationFinishReason FinishReason { get; private set; }
+        public bool IsSimulationActive { get; private set; }
 
         /*Private methods*/
+
+        private void Update()
+        {
+            Time.timeScale = SimulationTimeScale;
+        }
 
         private void InitPlayersWorkers()
         {
@@ -116,7 +127,7 @@ namespace ITCompanySimulation.Core
         {
             if (newBalance >= GameManagerComponent.SettingsOfSimulation.TargetBalance)
             {
-                this.photonView.RPC("FinishGameRPC",
+                this.photonView.RPC("FinishSimulationRPC",
                                     PhotonTargets.All,
                                     PhotonNetwork.player.ID,
                                     (int)SimulationFinishReason.PlayerCompanyReachedTargetBalance);
@@ -129,7 +140,7 @@ namespace ITCompanySimulation.Core
                                     PhotonTargets.Others,
                                     PhotonNetwork.player.ID);
 
-                FinishGameRPC(PhotonNetwork.player.ID, (int)finishReason);
+                FinishSimulationRPC(PhotonNetwork.player.ID, (int)finishReason);
             }
         }
 
@@ -273,14 +284,15 @@ namespace ITCompanySimulation.Core
         }
 
         [PunRPC]
-        private void FinishGameRPC(int winnerPhotonPlayerID, int finishReason)
+        private void FinishSimulationRPC(int winnerPhotonPlayerID, int finishReason)
         {
             //Stop time so events in game are no longer updated
-            Time.timeScale = 0.0f;
+            SimulationTimeScale = 0f;
             IsSimulationFinished = true;
+            IsSimulationActive = false;
             this.WinnerPlayer = PhotonNetwork.playerList.FirstOrDefault(x => x.ID == winnerPhotonPlayerID);
             this.FinishReason = (SimulationFinishReason)finishReason;
-            string finishGameInfoMsg = "Game finished";
+            string finishSimulationInfoMsg = "Game finished";
 
             //Check if player didnt left already
             if (null != WinnerPlayer)
@@ -289,24 +301,25 @@ namespace ITCompanySimulation.Core
                 {
                     case SimulationFinishReason.PlayerCompanyReachedTargetBalance:
                         string winnerInfo = (WinnerPlayer.IsLocal ? "You have" : WinnerPlayer.NickName) + " won";
-                        finishGameInfoMsg = string.Format("Game finished !\n{0}", winnerInfo);
+                        finishSimulationInfoMsg = string.Format("Game finished !\n{0}", winnerInfo);
                         break;
-                    //This will be called only on local client
                     case SimulationFinishReason.PlayerCompanyReachedMinimalBalance:
-                        finishGameInfoMsg = string.Format("Your company's balance reached minimum allowed balance ({0} $)",
+                        finishSimulationInfoMsg = string.Format("Your company's balance reached minimum allowed balance ({0} $)",
                         Settings.MinimalBalance);
                         break;
                     case SimulationFinishReason.OnePlayerInRoom:
-                        finishGameInfoMsg = "You are the only player left in simulation.\nYou have won !";
+                        finishSimulationInfoMsg = "You are the only player left in simulation.\nYou have won !";
+                        break;
+                    case SimulationFinishReason.Disconnected:
+                        finishSimulationInfoMsg = "You have been disconnected from server";
                         break;
                     default:
-                        finishGameInfoMsg = "Game finished";
                         break;
                 }
             }
 
             SimulationFinished?.Invoke(winnerPhotonPlayerID, (SimulationFinishReason)finishReason);
-            InfoWindowComponent.Show(finishGameInfoMsg, GameManagerComponent.FinishGame);
+            InfoWindowComponent.Show(finishSimulationInfoMsg, GameManagerComponent.FinishSession);
         }
 
         [PunRPC]
@@ -329,6 +342,13 @@ namespace ITCompanySimulation.Core
                 "RemoveControlledCompanyWorkerRPC", target, workerID, PhotonNetwork.player.ID);
         }
 
+        public override void OnDisconnectedFromPhoton()
+        {
+            base.OnDisconnectedFromPhoton();
+
+            FinishSimulationRPC(PhotonNetwork.player.ID, (int)SimulationFinishReason.Disconnected);
+        }
+
         public override void OnPhotonPlayerDisconnected(PhotonPlayer otherPlayer)
         {
             base.OnPhotonPlayerDisconnected(otherPlayer);
@@ -336,7 +356,7 @@ namespace ITCompanySimulation.Core
             //Only one player is left in room (local player) so he wins the game
             if (1 == PhotonNetwork.room.PlayerCount)
             {
-                FinishGameRPC(PhotonNetwork.player.ID, (int)SimulationFinishReason.OnePlayerInRoom);
+                FinishSimulationRPC(PhotonNetwork.player.ID, (int)SimulationFinishReason.OnePlayerInRoom);
             }
             else
             {
@@ -355,6 +375,7 @@ namespace ITCompanySimulation.Core
             GameTimeComponent = GetComponent<GameTime>();
             NotificatorComponent = new SimulationEventNotificator(GameTimeComponent);
             Settings = GameManagerComponent.SettingsOfSimulation;
+            IsSimulationActive = true;
 
             InitPlayersWorkers();
             SynchronizeSimulationSettings();

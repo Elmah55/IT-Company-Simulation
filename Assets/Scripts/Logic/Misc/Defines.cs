@@ -65,7 +65,8 @@ public enum SimulationFinishReason
 {
     PlayerCompanyReachedTargetBalance,
     PlayerCompanyReachedMinimalBalance,
-    OnePlayerInRoom
+    OnePlayerInRoom,
+    Disconnected
 }
 
 public enum SimulationEventNotificationPriority

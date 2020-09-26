@@ -1,6 +1,5 @@
 ﻿using ExitGames.Client.Photon;
 using ITCompanySimulation.Multiplayer;
-using ITCompanySimulation.UI;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -35,14 +34,7 @@ namespace ITCompanySimulation.Core
         private int TargetCompanyBalance;
         [SerializeField]
         private int MinimalCompanyBalance;
-        private InfoWindow InfoWindowComponent;
 
-        /// <summary>
-        /// Sets the time scale that simulation should be run with. 1.0 is default scale
-        /// </summary>
-        [SerializeField]
-        [Range(0.1f, 10.0f)]
-        private float SimulationTimeScale;
         /// <summary>
         /// When this is set to true simulation will be run in
         /// Offline Mode. It means that this client won't be connected
@@ -88,7 +80,6 @@ namespace ITCompanySimulation.Core
 
             PhotonNetwork.OnEventCall += PhotonNetworkOnEventCall;
             SceneManager.sceneLoaded += OnSceneLoaded;
-            GetInfoWindowComponent();
         }
 
         private void OnSceneLoaded(Scene loadedScene, LoadSceneMode sceneLoadMode)
@@ -105,20 +96,7 @@ namespace ITCompanySimulation.Core
 
                     PhotonNetwork.RaiseEvent((byte)RaiseEventCode.ClientReadyToReceiveData, null, true, options);
                 }
-
-                GetInfoWindowComponent();
             }
-        }
-
-        private void Update()
-        {
-            Time.timeScale = SimulationTimeScale;
-        }
-
-        private void GetInfoWindowComponent()
-        {
-            InfoWindowComponent = GameObject.FindGameObjectWithTag("InfoWindow").GetComponent<InfoWindow>();
-            InfoWindowComponent.Hide();
         }
 
         private void PhotonNetworkOnEventCall(byte eventCode, object content, int senderId)
@@ -176,7 +154,7 @@ namespace ITCompanySimulation.Core
             }
         }
 
-        public void FinishGame()
+        public void FinishSession()
         {
             PhotonNetwork.LeaveRoom();
             //TODO: Find way to prevent spawning other GameManager
@@ -231,11 +209,6 @@ namespace ITCompanySimulation.Core
         public override void OnDisconnectedFromPhoton()
         {
             base.OnDisconnectedFromPhoton();
-
-            if ((int)SceneIndex.Game == SceneManager.GetActiveScene().buildIndex)
-            {
-                InfoWindowComponent.Show("You have been disconnected from server", FinishGame);
-            }
 
 #if DEVELOPMENT_BUILD || UNITY_EDITOR
             string msg = "Disconnected from Photon";

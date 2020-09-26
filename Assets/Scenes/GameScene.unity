@@ -7460,6 +7460,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   InfoWindowComponent: {fileID: 2102242763710635583}
+  SimulationTimeScale: 1
 --- !u!4 &746701997
 Transform:
   m_ObjectHideFlags: 0
@@ -37131,7 +37132,7 @@ PrefabInstance:
     - target: {fileID: 2102242762890866094, guid: 405a7d24991297f40917a70dd34394f2,
         type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2102242762890866094, guid: 405a7d24991297f40917a70dd34394f2,
         type: 3}
