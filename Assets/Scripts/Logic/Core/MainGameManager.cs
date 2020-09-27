@@ -162,9 +162,6 @@ namespace ITCompanySimulation.Core
             //object is not needed and client won't have connect to
             //photon server every time menu scene is loaded
             SceneManager.LoadScene((int)SceneIndex.Menu);
-            //There is already another game object existing with this
-            //script when menu scene is loaded
-            Destroy(this.gameObject);
         }
 
         /// <summary>
