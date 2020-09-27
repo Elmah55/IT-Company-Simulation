@@ -184,6 +184,7 @@ namespace ITCompanySimulation.Core
                 OtherPlayersWorkers.First(x => x.Key.ID == photonPlayerID).Value.First(x => x.ID == workerID);
             ProjectTechnology updatedAbilityEnum = (ProjectTechnology)updatedAbility;
             updatedWorker.UpdateAbility(updatedAbilityEnum, updatedAbilityValue);
+            //TODO: Add event for ability and attribute change for other player's worker so UI can be updated
         }
 
         /// <summary>
@@ -225,8 +226,10 @@ namespace ITCompanySimulation.Core
         {
             KeyValuePair<PhotonPlayer, List<SharedWorker>> workerPair = OtherPlayersWorkers.First(x => x.Key.ID == photonPlayerID);
             List<SharedWorker> workers = workerPair.Value;
-            workers.Remove(removedWorker);
-            OtherPlayerWorkerRemoved?.Invoke(removedWorker, workerPair.Key);
+            //TODO: Pass only worker's id since worker being removed is already cached on this client
+            SharedWorker localRemovedWorker = workers.Find(x => x.ID == removedWorker.ID);
+            workers.Remove(localRemovedWorker);
+            OtherPlayerWorkerRemoved?.Invoke(localRemovedWorker, workerPair.Key);
 
 #if DEVELOPMENT_BUILD || UNITY_EDITOR
             string debugInfo = string.Format("Received worker update from player {0} (ID: {1}).\n" +
@@ -286,40 +289,43 @@ namespace ITCompanySimulation.Core
         [PunRPC]
         private void FinishSimulationRPC(int winnerPhotonPlayerID, int finishReason)
         {
-            //Stop time so events in game are no longer updated
-            SimulationTimeScale = 0f;
-            IsSimulationFinished = true;
-            IsSimulationActive = false;
-            this.WinnerPlayer = PhotonNetwork.playerList.FirstOrDefault(x => x.ID == winnerPhotonPlayerID);
-            this.FinishReason = (SimulationFinishReason)finishReason;
-            string finishSimulationInfoMsg = "Game finished";
-
-            //Check if player didnt left already
-            if (null != WinnerPlayer)
+            if (false == IsSimulationFinished)
             {
-                switch (this.FinishReason)
-                {
-                    case SimulationFinishReason.PlayerCompanyReachedTargetBalance:
-                        string winnerInfo = (WinnerPlayer.IsLocal ? "You have" : WinnerPlayer.NickName) + " won";
-                        finishSimulationInfoMsg = string.Format("Game finished !\n{0}", winnerInfo);
-                        break;
-                    case SimulationFinishReason.PlayerCompanyReachedMinimalBalance:
-                        finishSimulationInfoMsg = string.Format("Your company's balance reached minimum allowed balance ({0} $)",
-                        Settings.MinimalBalance);
-                        break;
-                    case SimulationFinishReason.OnePlayerInRoom:
-                        finishSimulationInfoMsg = "You are the only player left in simulation.\nYou have won !";
-                        break;
-                    case SimulationFinishReason.Disconnected:
-                        finishSimulationInfoMsg = "You have been disconnected from server";
-                        break;
-                    default:
-                        break;
-                }
-            }
+                //Stop time so events in game are no longer updated
+                SimulationTimeScale = 0f;
+                IsSimulationFinished = true;
+                IsSimulationActive = false;
+                this.WinnerPlayer = PhotonNetwork.playerList.FirstOrDefault(x => x.ID == winnerPhotonPlayerID);
+                this.FinishReason = (SimulationFinishReason)finishReason;
+                string finishSimulationInfoMsg = "Game finished";
 
-            SimulationFinished?.Invoke(winnerPhotonPlayerID, (SimulationFinishReason)finishReason);
-            InfoWindowComponent.Show(finishSimulationInfoMsg, GameManagerComponent.FinishSession);
+                //Check if player didnt left already
+                if (null != WinnerPlayer)
+                {
+                    switch (this.FinishReason)
+                    {
+                        case SimulationFinishReason.PlayerCompanyReachedTargetBalance:
+                            string winnerInfo = (WinnerPlayer.IsLocal ? "You have" : WinnerPlayer.NickName) + " won";
+                            finishSimulationInfoMsg = string.Format("Game finished !\n{0}", winnerInfo);
+                            break;
+                        case SimulationFinishReason.PlayerCompanyReachedMinimalBalance:
+                            finishSimulationInfoMsg = string.Format("Your company's balance reached minimum allowed balance ({0} $)",
+                            Settings.MinimalBalance);
+                            break;
+                        case SimulationFinishReason.OnePlayerInRoom:
+                            finishSimulationInfoMsg = "You are the only player left in simulation.\nYou have won !";
+                            break;
+                        case SimulationFinishReason.Disconnected:
+                            finishSimulationInfoMsg = "You have been disconnected from server";
+                            break;
+                        default:
+                            break;
+                    }
+                }
+
+                SimulationFinished?.Invoke(winnerPhotonPlayerID, (SimulationFinishReason)finishReason);
+                InfoWindowComponent.Show(finishSimulationInfoMsg, GameManagerComponent.FinishSession);
+            }
         }
 
         [PunRPC]
@@ -382,5 +388,5 @@ namespace ITCompanySimulation.Core
             //TEST
             CreateCompany();
         }
-    } 
+    }
 }

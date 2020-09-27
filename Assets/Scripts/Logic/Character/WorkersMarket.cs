@@ -266,7 +266,7 @@ public class WorkersMarket : Photon.PunBehaviour
 
         if (true == PhotonNetwork.isMasterClient)
         {
-            foreach (LocalWorker singleWorker in Workers)
+            foreach (SharedWorker singleWorker in Workers)
             {
                 this.photonView.RPC("AddWorkerInternal", newPlayer, singleWorker);
             }

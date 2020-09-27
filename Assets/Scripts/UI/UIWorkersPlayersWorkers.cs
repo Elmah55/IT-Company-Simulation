@@ -36,6 +36,10 @@ namespace ITCompanySimulation.UI
         private TextMeshProUGUI TextAbilities;
         [SerializeField]
         private TextMeshProUGUI TextSalary;
+        [SerializeField]
+        private TextMeshProUGUI TextListViewOtherPlayersWorkers;
+        [SerializeField]
+        private TextMeshProUGUI TextListViewCompanyWorkers;
         /// <summary>
         /// Dropdown that holds list of other players in room
         /// </summary>
@@ -93,6 +97,7 @@ namespace ITCompanySimulation.UI
             if (SelectedPlayer.ID == player.ID)
             {
                 AddWorkerListViewElement(worker, ListViewOtherPlayersWorkers);
+                SetTextListViewOtherPlayersWorkers();
             }
         }
 
@@ -100,11 +105,8 @@ namespace ITCompanySimulation.UI
         {
             if (SelectedPlayer.ID == player.ID)
             {
-                Button selectedWorkerButton = WorkersButtonSelector.GetSelectedButton();
-
-                WorkerListViewMap.Remove(removedWorker);
-                WorkersButtonSelector.RemoveButton(selectedWorkerButton);
-                ListViewOtherPlayersWorkers.RemoveControl(selectedWorkerButton.gameObject);
+                RemoveWorkerListViewElement(removedWorker, ListViewOtherPlayersWorkers);
+                SetTextListViewOtherPlayersWorkers();
             }
         }
 
@@ -121,7 +123,8 @@ namespace ITCompanySimulation.UI
                 SelectedWorker = WorkerListViewMap.First(x => x.Value == element).Key;
                 SetWorkerInfoText(SelectedWorker);
                 SubscribeToWorkerEvents();
-                ButtonHireWorker.interactable = false == SelectedWorker is LocalWorker;
+                ButtonHireWorker.interactable = (false == SelectedWorker is LocalWorker)
+                    && (PlayerCompany.MAX_WORKERS_PER_COMPANY > SimulationManagerComponent.ControlledCompany.Workers.Count);
             }
             else
             {
@@ -133,16 +136,18 @@ namespace ITCompanySimulation.UI
         private void OnControlledCompanyWorkerRemoved(SharedWorker companyWorker)
         {
             RemoveWorkerListViewElement(companyWorker, ListViewCompanyWorkers);
+            SetTextListViewCompanyWorkers();
         }
 
         private void OnControlledCompanyWorkerAdded(SharedWorker companyWorker)
         {
             AddWorkerListViewElement(companyWorker, ListViewCompanyWorkers);
+            SetTextListViewCompanyWorkers();
         }
 
         private void OnSelectedWorkerSalaryChanged(SharedWorker companyWorker)
         {
-            SetWorkerSalaryText(companyWorker);
+            TextSalary.text = UIWorkers.GetWorkerSalaryString(companyWorker);
         }
 
         #endregion
@@ -155,6 +160,28 @@ namespace ITCompanySimulation.UI
         private void UnsubscribeFromWorkerEvents()
         {
             SelectedWorker.SalaryChanged -= OnSelectedWorkerSalaryChanged;
+        }
+
+        private void SetTextListViewCompanyWorkers()
+        {
+            TextListViewCompanyWorkers.text = string.Format("Company workers ({0}/{1})",
+                SimulationManagerComponent.ControlledCompany.Workers.Count,
+                PlayerCompany.MAX_WORKERS_PER_COMPANY);
+        }
+
+        private void SetTextListViewOtherPlayersWorkers()
+        {
+            if (null != SelectedPlayer)
+            {
+                TextListViewOtherPlayersWorkers.text = string.Format("{0}'s workers ({1}/{2})",
+                    SelectedPlayer.NickName,
+                    SimulationManagerComponent.OtherPlayersWorkers[SelectedPlayer].Count,
+                    PlayerCompany.MAX_WORKERS_PER_COMPANY);
+            }
+            else
+            {
+                TextListViewOtherPlayersWorkers.text = "Other player's workers";
+            }
         }
 
         private void AddWorkerListViewElement(SharedWorker playerWorker, ControlListView listView)
@@ -174,16 +201,16 @@ namespace ITCompanySimulation.UI
             WorkersButtonSelector.AddButton(buttonComponent);
         }
 
-        private void RemoveWorkerListViewElement(SharedWorker playerWorker, ControlListView listView)
+        private void RemoveWorkerListViewElement(SharedWorker worker, ControlListView listView)
         {
             if (null != WorkerListViewMap)
             {
-                ListViewElementWorker element = WorkerListViewMap[playerWorker];
-                Button buttonComponent = element.GetComponent<Button>();
+                ListViewElementWorker element = WorkerListViewMap[worker];
+                Button buttonComponent = element.Button;
 
-                WorkerListViewMap.Remove(playerWorker);
-                listView.RemoveControl(element.gameObject);
+                WorkerListViewMap.Remove(worker);
                 WorkersButtonSelector.RemoveButton(buttonComponent);
+                listView.RemoveControl(element.gameObject);
             }
         }
 
@@ -205,6 +232,8 @@ namespace ITCompanySimulation.UI
             }
 
             OnWorkersSelectedButtonChanged(null);
+            SetTextListViewCompanyWorkers();
+            SetTextListViewOtherPlayersWorkers();
         }
 
         private void AddListViewPlayersWorkersElements(PhotonPlayer otherPlayer)
@@ -241,37 +270,21 @@ namespace ITCompanySimulation.UI
         {
             if (null != selectedWorker)
             {
-                TextName.gameObject.SetActive(true);
-                TextSalary.gameObject.SetActive(true);
-                TextAbilities.gameObject.SetActive(true);
-                TextExpierience.gameObject.SetActive(true);
-
-                TextName.text = string.Format("Name: {0} {1}",
-                    selectedWorker.Name, selectedWorker.Surename);
-
-                SetWorkerSalaryText(selectedWorker);
-
-                TextExpierience.text = string.Format("Expierience: {0} days",
-                    selectedWorker.ExperienceTime);
-
+                TextName.text = UIWorkers.GetWorkerNameString(selectedWorker);
+                TextSalary.text = UIWorkers.GetWorkerSalaryString(selectedWorker);
+                TextExpierience.text = UIWorkers.GetWorkerExpierienceString(selectedWorker);
 
                 TextAbilities.text = UIWorkers.GetWorkerAbilitiesString(selectedWorker);
-                RectTransform textTransform = TextAbilities.rectTransform;
+                RectTransform textTransform = TextAbilities.rectTransform.parent.GetComponent<RectTransform>();
                 textTransform.sizeDelta = new Vector2(textTransform.sizeDelta.x, TextAbilities.preferredHeight);
             }
             else
             {
-                TextName.gameObject.SetActive(false);
-                TextSalary.gameObject.SetActive(false);
-                TextAbilities.gameObject.SetActive(false);
-                TextExpierience.gameObject.SetActive(false);
+                TextName.text = string.Empty;
+                TextSalary.text = string.Empty;
+                TextAbilities.text = string.Empty;
+                TextExpierience.text = string.Empty;
             }
-        }
-
-        private void SetWorkerSalaryText(SharedWorker worker)
-        {
-            TextSalary.text = string.Format("Salary: {0} $",
-                worker.Salary);
         }
 
         /*Public methods*/
