@@ -110,6 +110,7 @@ namespace ITCompanySimulation.Character
                     newCharacter = GameObject.Instantiate(CharacterPrefab, spawnPos, Quaternion.identity);
                 }
 
+                newCharacter.gameObject.SetActive(true);
                 CharacterText textComponent = newCharacter.GetComponentInChildren<CharacterText>();
                 textComponent.Text = string.Format("{0} {1}", companyWorker.Name, companyWorker.Surename);
                 companyWorker.AbsenceStarted += OnWorkerAbsenceStarted;

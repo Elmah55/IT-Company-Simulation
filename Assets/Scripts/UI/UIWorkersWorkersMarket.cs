@@ -179,7 +179,7 @@ namespace ITCompanySimulation.UI
 
         private void OnGameTimeDayChanged()
         {
-            if (true == gameObject.activeSelf)
+            if (null != WorkerListViewMap)
             {
                 foreach (KeyValuePair<SharedWorker, ListViewElementWorker> pair in WorkerListViewMap)
                 {

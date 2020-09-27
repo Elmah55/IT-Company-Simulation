@@ -212,9 +212,9 @@ namespace ITCompanySimulation.Core
         private void OnControlledCompanyWorkerRemoved(SharedWorker removedWorker)
         {
             this.photonView.RPC(
-                "OnControlledCompanyWorkerRemovedRPC", PhotonTargets.Others, removedWorker, PhotonNetwork.player.ID);
-
+                "OnControlledCompanyWorkerRemovedRPC", PhotonTargets.Others, removedWorker.ID, PhotonNetwork.player.ID);
             removedWorker.SalaryChanged -= OnCompanyWorkerSalaryChanged;
+            removedWorker.AbilityUpdated -= OnCompanyWorkerAbilityUpdated;
         }
 
         /// <summary>
@@ -222,19 +222,18 @@ namespace ITCompanySimulation.Core
         /// of other players' workers
         /// </summary>
         [PunRPC]
-        private void OnControlledCompanyWorkerRemovedRPC(SharedWorker removedWorker, int photonPlayerID)
+        private void OnControlledCompanyWorkerRemovedRPC(int removedWorkerID, int photonPlayerID)
         {
             KeyValuePair<PhotonPlayer, List<SharedWorker>> workerPair = OtherPlayersWorkers.First(x => x.Key.ID == photonPlayerID);
             List<SharedWorker> workers = workerPair.Value;
-            //TODO: Pass only worker's id since worker being removed is already cached on this client
-            SharedWorker localRemovedWorker = workers.Find(x => x.ID == removedWorker.ID);
+            SharedWorker localRemovedWorker = workers.Find(x => x.ID == removedWorkerID);
             workers.Remove(localRemovedWorker);
             OtherPlayerWorkerRemoved?.Invoke(localRemovedWorker, workerPair.Key);
 
 #if DEVELOPMENT_BUILD || UNITY_EDITOR
             string debugInfo = string.Format("Received worker update from player {0} (ID: {1}).\n" +
                 "Worker removed (ID: {2}). Local workers collection synchronized",
-                workerPair.Key.NickName, workerPair.Key.ID, removedWorker.ID);
+                workerPair.Key.NickName, workerPair.Key.ID, removedWorkerID);
             Debug.Log(debugInfo);
 #endif
         }
