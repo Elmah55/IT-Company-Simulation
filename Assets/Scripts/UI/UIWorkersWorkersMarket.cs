@@ -50,6 +50,12 @@ namespace ITCompanySimulation.UI
         private Tooltip TooltipComponent;
         private IButtonSelector WorkersButtonSelector = new ButtonSelector();
         private SharedWorker SelectedWorker;
+        /// <summary>
+        /// Holds default value of object of abilities text
+        /// as it will be resized. It allows to restore default
+        /// size when none worker is selected
+        /// </summary>
+        private Vector2 TextAbilitiesSize;
 
         /*Public consts fields*/
 
@@ -174,6 +180,8 @@ namespace ITCompanySimulation.UI
             {
                 SetWorkerInfoText(null);
                 SetActionButtonsState(null);
+                RectTransform textObjectTransform = TextAbilities.transform.parent.GetComponent<RectTransform>();
+                textObjectTransform.sizeDelta = TextAbilitiesSize;
             }
         }
 
@@ -207,6 +215,16 @@ namespace ITCompanySimulation.UI
             ListViewElementWorker element = UIWorkers.CreateWorkerListViewElement(worker, WorkerListViewElementPrefab, TooltipComponent);
 
             Button buttonComponent = element.GetComponent<Button>();
+            MousePointerEvents mousePtrEvts = element.GetComponent<MousePointerEvents>();
+
+            mousePtrEvts.PointerDoubleClick += () =>
+                {
+                    if (listView == ListViewMarketWorkers
+                          && SimulationManagerComponent.ControlledCompany.Workers.Count < PlayerCompany.MAX_WORKERS_PER_COMPANY)
+                    {
+                        OnHireWorkerButtonClicked();
+                    }
+                };
 
             if (null == WorkerListViewMap)
             {
@@ -249,6 +267,9 @@ namespace ITCompanySimulation.UI
             SetActionButtonsState(SelectedWorker);
             SetCompanyWorkersListViewText();
             SetMarketWorkersListViewText();
+
+            RectTransform textObjectTransform = TextAbilities.transform.parent.GetComponent<RectTransform>();
+            TextAbilitiesSize = textObjectTransform.sizeDelta;
         }
 
         /*Public methods*/

@@ -150,6 +150,13 @@ namespace ITCompanySimulation.UI
         private void OnProjectsMarketProjectAdded(SharedProject proj)
         {
             ListViewElementProject newElement = CreateListViewElement(proj);
+            MousePointerEvents mousePtrEvts = newElement.GetComponent<MousePointerEvents>();
+
+            mousePtrEvts.PointerDoubleClick += () =>
+              {
+                  OnButtonTakeProjectClicked();
+              };
+
             ButtonSelectorProjects.AddButton(newElement.Button);
             ListViewMarketProjects.AddControl(newElement.gameObject);
             newElement.Text.text = GetProjectListViewElementText(proj);

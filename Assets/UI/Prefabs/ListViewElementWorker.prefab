@@ -16,6 +16,18 @@ MonoBehaviour:
   m_Text: {fileID: 3457359205262476468}
   m_Button: {fileID: 5281834091581708003}
   m_FrontImage: {fileID: 6713568114012735529}
+--- !u!114 &-1134961410342725120
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 596333872930450612}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 115f718b149be59468825146160c10d2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &8510247137257902956
 PrefabInstance:
   m_ObjectHideFlags: 0
