@@ -174,22 +174,13 @@ namespace ITCompanySimulation.Developing
             GameTimeComponent = GetComponent<GameTime>();
             GameTimeComponent.DayChanged += OnGameTimeDayChanged;
             SimulationManagerComponent = GetComponent<MainSimulationManager>();
-
-            SimulationManagerComponent.ControlledCompany.WorkerRemoved += OnControlledCompanyWorkerRemoved;
         }
 
-        private void OnControlledCompanyWorkerRemoved(LocalWorker worker)
+        private void OnBindedProjectWorkerRemoved(SharedWorker worker)
         {
-            if (BindedProject == worker.AssignedProject)
+            if (0 == BindedProject.Workers.Count && true == BindedProject.Active)
             {
-                //TODO: Make leaving project event fire first (before worker leaves company).
-                //Make this event fired by Company class
-                BindedProject.RemoveWorker(worker);
-
-                if (0 == BindedProject.Workers.Count && true == BindedProject.Active)
-                {
-                    StopProject();
-                }
+                StopProject();
             }
         }
 
@@ -267,6 +258,7 @@ namespace ITCompanySimulation.Developing
             {
                 BindedProject.Completed += OnProjectFinished;
                 BindedProject.TimeOfStart = GameTimeComponent.CurrentTime;
+                BindedProject.WorkerRemoved += OnBindedProjectWorkerRemoved;
             }
 
             BindedProject.Start();

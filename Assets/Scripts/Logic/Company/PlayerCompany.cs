@@ -99,6 +99,12 @@ public class PlayerCompany : Company
     {
         Workers.Remove(workerToRemove);
         workerToRemove.WorkingCompany = null;
+
+        if (null != workerToRemove.AssignedProject)
+        {
+            workerToRemove.AssignedProject.RemoveWorker(workerToRemove);
+        }
+
         WorkerRemoved?.Invoke(workerToRemove);
 
 

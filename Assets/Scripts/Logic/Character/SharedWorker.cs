@@ -225,5 +225,10 @@ namespace ITCompanySimulation.Character
 
             return deserializedWorker;
         }
+
+        public override int GetHashCode()
+        {
+            return ID;
+        }
     }
 }

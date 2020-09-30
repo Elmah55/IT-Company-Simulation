@@ -10503,7 +10503,7 @@ PrefabInstance:
     - target: {fileID: 382524634025743179, guid: f8df458a5e3f90747984a55db0ae704a,
         type: 3}
       propertyPath: InitialCompanyBalance
-      value: 315000
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 382524634025743177, guid: f8df458a5e3f90747984a55db0ae704a,
         type: 3}

@@ -180,6 +180,7 @@ namespace ITCompanySimulation.UI
 
             newElement.gameObject.SetActive(true);
             newElement.Text.text = GetWorkerListViewElementText(companyWorker);
+            newElement.Worker = companyWorker;
 
             return newElement;
         }
@@ -194,6 +195,7 @@ namespace ITCompanySimulation.UI
 
             scrumObj.BindedProject.ProgressUpdated += OnProjectProgressUpdated;
             scrumObj.BindedProject.Completed += OnProjectCompleted;
+            scrumObj.BindedProject.WorkerRemoved += OnProjectWorkerRemoved;
             SetListViewCompanyProjectsText();
         }
 
@@ -250,7 +252,7 @@ namespace ITCompanySimulation.UI
             SetProjectInfo();
         }
 
-        private void OnSelectedProjectWorkerRemoved(SharedWorker companyWorker)
+        private void OnProjectWorkerRemoved(SharedWorker companyWorker)
         {
             ListViewElementWorker element = UIWorkers.GetWorkerListViewElement(companyWorker, ListViewAssignedWorkers);
 
@@ -366,12 +368,7 @@ namespace ITCompanySimulation.UI
             LocalWorker worker = (LocalWorker)companyWorker;
             ControlListViewDrop workerListView = (null == worker.AssignedProject) ? ListViewAvailableWorkers : ListViewAssignedWorkers;
             ListViewElementWorker listViewElement = UIWorkers.GetWorkerListViewElement(companyWorker, workerListView);
-
-            //Worker might be already removed by other callback
-            if (null != listViewElement)
-            {
-                RemoveWorkerListViewElement(listViewElement, workerListView);
-            }
+            RemoveWorkerListViewElement(listViewElement, workerListView);
         }
 
         private string GetWorkerListViewElementText(LocalWorker worker)
@@ -404,7 +401,6 @@ namespace ITCompanySimulation.UI
 
         private void SubscribeProjectEvents()
         {
-            SelectedScrum.BindedProject.WorkerRemoved += OnSelectedProjectWorkerRemoved;
             SelectedScrum.BindedProject.WorkerAdded += OnSelectedProjectWorkerAdded;
             SelectedScrum.BindedProject.Stopped += OnSelectedProjectStopped;
             SelectedScrum.BindedProject.Started += OnSelectedProjectStarted;
@@ -413,7 +409,6 @@ namespace ITCompanySimulation.UI
 
         private void UnsubscribeProjectEvents()
         {
-            SelectedScrum.BindedProject.WorkerRemoved -= OnSelectedProjectWorkerRemoved;
             SelectedScrum.BindedProject.WorkerAdded -= OnSelectedProjectWorkerAdded;
             SelectedScrum.BindedProject.Stopped -= OnSelectedProjectStopped;
             SelectedScrum.BindedProject.Started -= OnSelectedProjectStarted;
