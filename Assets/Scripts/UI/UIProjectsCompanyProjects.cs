@@ -50,13 +50,9 @@ namespace ITCompanySimulation.UI
         [SerializeField]
         private TextMeshProUGUI TextListViewAssignedWorkers;
         [SerializeField]
-        private Button ButtonStartProject;
-        [SerializeField]
         private TextMeshProUGUI TextProgressBarProject;
         [SerializeField]
         private ProgressBar ProgressBarProject;
-        [SerializeField]
-        private Button ButtonStopProject;
         private RectTransform TransformComponent;
         /// <summary>
         /// Scrum object of project that is currently selected
@@ -96,7 +92,6 @@ namespace ITCompanySimulation.UI
             GameTimeComponent.DayChanged += OnGameTimeComponentDayChanged;
 
             SetProjectInfo();
-            SetProjectButtons();
             SetListViewAvailableWorkersText();
             SetListViewCompanyProjectsText();
             ListViewAssignedWorkers.transform.parent.gameObject.SetActive(false);
@@ -125,7 +120,6 @@ namespace ITCompanySimulation.UI
         {
             ListViewElementProject element = GetProjectListViewElement(ListViewCompanyProjects, proj);
             element.BackgroundImage.color = CompletedProjectListViewElementColors;
-            SetProjectButtons();
         }
 
         //On control removed from list view check will be peformed to check
@@ -221,7 +215,6 @@ namespace ITCompanySimulation.UI
                 });
 
                 SetProjectInfo();
-                SetProjectButtons();
                 SubscribeProjectEvents();
                 SetListViewAssignedWorkersText();
                 ListViewAssignedWorkers.transform.parent.gameObject.SetActive(true);
@@ -236,7 +229,6 @@ namespace ITCompanySimulation.UI
             {
                 SelectedScrum = null;
                 SetProjectInfo();
-                SetProjectButtons();
                 ListViewAssignedWorkers.transform.parent.gameObject.SetActive(false);
             }
         }
@@ -246,7 +238,6 @@ namespace ITCompanySimulation.UI
         //in correct list view, no need to add it
         private void OnSelectedProjectWorkerAdded(SharedWorker companyWorker)
         {
-            SetProjectButtons();
             SetListViewAssignedWorkersText();
             SetListViewAvailableWorkersText();
             SetProjectInfo();
@@ -264,20 +255,9 @@ namespace ITCompanySimulation.UI
                 ListViewAvailableWorkers.AddControl(newElement.gameObject);
             }
 
-            SetProjectButtons();
             SetListViewAssignedWorkersText();
             SetListViewAvailableWorkersText();
             SetProjectInfo();
-        }
-
-        private void OnSelectedProjectStopped(LocalProject proj)
-        {
-            SetProjectButtons();
-        }
-
-        private void OnSelectedProjectStarted(LocalProject proj)
-        {
-            SetProjectButtons();
         }
 
         private void OnGameTimeComponentDayChanged()
@@ -315,17 +295,6 @@ namespace ITCompanySimulation.UI
                 ProgressBarProject.Value = 0f;
                 TextProgressBarProject.text = "Progress";
             }
-        }
-
-        private void SetProjectButtons()
-        {
-            ButtonStartProject.interactable = (null != SelectedScrum
-                && false == SelectedScrum.BindedProject.Active
-                && false == SelectedScrum.BindedProject.IsCompleted)
-                && SelectedScrum.BindedProject.Workers.Count > 0;
-
-            ButtonStopProject.interactable = (null != SelectedScrum
-                && true == SelectedScrum.BindedProject.Active);
         }
 
         private void SetProjectInfo()
@@ -402,16 +371,12 @@ namespace ITCompanySimulation.UI
         private void SubscribeProjectEvents()
         {
             SelectedScrum.BindedProject.WorkerAdded += OnSelectedProjectWorkerAdded;
-            SelectedScrum.BindedProject.Stopped += OnSelectedProjectStopped;
-            SelectedScrum.BindedProject.Started += OnSelectedProjectStarted;
             SelectedScrum.BindedProject.CompletionTimeUpdated += OnSelectedProjectCompletionTimeUpdated;
         }
 
         private void UnsubscribeProjectEvents()
         {
             SelectedScrum.BindedProject.WorkerAdded -= OnSelectedProjectWorkerAdded;
-            SelectedScrum.BindedProject.Stopped -= OnSelectedProjectStopped;
-            SelectedScrum.BindedProject.Started -= OnSelectedProjectStarted;
             SelectedScrum.BindedProject.CompletionTimeUpdated -= OnSelectedProjectCompletionTimeUpdated;
         }
 

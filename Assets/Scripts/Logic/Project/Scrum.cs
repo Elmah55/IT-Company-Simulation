@@ -38,6 +38,7 @@ namespace ITCompanySimulation.Developing
         private Coroutine ProjectUpdateCoroutine;
         private SprintStage m_CurrentSprintStage;
         private int m_SprintNumber = 1;
+        private LocalProject m_BindedProject;
 
         /*Public consts fields*/
 
@@ -46,7 +47,33 @@ namespace ITCompanySimulation.Developing
         /// <summary>
         /// Project binded to this instance of scrum
         /// </summary>
-        public LocalProject BindedProject { get; set; }
+        public LocalProject BindedProject
+        {
+            get
+            {
+                return m_BindedProject;
+            }
+
+            set
+            {
+                if (value != m_BindedProject)
+                {
+                    if (null != m_BindedProject)
+                    {
+                        throw new InvalidOperationException("Project can be assigned only once");
+                    }
+
+                    m_BindedProject = value;
+                    BindedProject.Completed += OnProjectFinished;
+                    BindedProject.TimeOfStart = GameTimeComponent.CurrentTime;
+                    BindedProject.WorkerRemoved += OnBindedProjectWorkerRemoved;
+                    BindedProject.WorkerAdded += OnBindedProjectWorkerAdded;
+                    GameTimeComponent.DayChanged += OnGameTimeDayChanged;
+                }
+            }
+        }
+
+
         /// <summary>
         /// Number of sprint sprint is currently in progress
         /// </summary>
@@ -125,8 +152,7 @@ namespace ITCompanySimulation.Developing
         {
             foreach (LocalWorker projectWorker in BindedProject.Workers)
             {
-                if (true == projectWorker.Available
-                    && true == BindedProject.Active)
+                if (true == projectWorker.Available)
                 {
                     ++projectWorker.ExperienceTime;
                 }
@@ -169,11 +195,18 @@ namespace ITCompanySimulation.Developing
 #endif
         }
 
-        private void Start()
+        private void Awake()
         {
             GameTimeComponent = GetComponent<GameTime>();
-            GameTimeComponent.DayChanged += OnGameTimeDayChanged;
             SimulationManagerComponent = GetComponent<MainSimulationManager>();
+        }
+
+        private void OnBindedProjectWorkerAdded(SharedWorker worker)
+        {
+            if (BindedProject.Workers.Count > 0 && false == BindedProject.Active && false == BindedProject.IsCompleted)
+            {
+                StartProject();
+            }
         }
 
         private void OnBindedProjectWorkerRemoved(SharedWorker worker)
@@ -184,30 +217,27 @@ namespace ITCompanySimulation.Developing
             }
         }
 
-        private void UpdateSprintInfo()
+        private void UpdateSprint()
         {
-            if (true == BindedProject.Active)
+            CurrentSprintDays++;
+
+            if (DAYS_PER_SPRINT == CurrentSprintDays)
             {
-                CurrentSprintDays++;
+                CurrentSprintDays = 0;
+                SprintNumber++;
+            }
 
-                if (DAYS_PER_SPRINT == CurrentSprintDays)
-                {
-                    CurrentSprintDays = 0;
-                    SprintNumber++;
-                }
-
-                if (CurrentSprintDays < 2)
-                {
-                    CurrentSprintStage = SprintStage.Planning;
-                }
-                else if (CurrentSprintDays < 29)
-                {
-                    CurrentSprintStage = SprintStage.Developing;
-                }
-                else
-                {
-                    CurrentSprintStage = SprintStage.Retrospective;
-                }
+            if (CurrentSprintDays < 2)
+            {
+                CurrentSprintStage = SprintStage.Planning;
+            }
+            else if (CurrentSprintDays < 29)
+            {
+                CurrentSprintStage = SprintStage.Developing;
+            }
+            else
+            {
+                CurrentSprintStage = SprintStage.Retrospective;
             }
         }
 
@@ -235,8 +265,12 @@ namespace ITCompanySimulation.Developing
                 BindedProject.DaysSinceStart++;
             }
 
-            UpdateProjectWorkersExpierience();
-            UpdateSprintInfo();
+            if (true == BindedProject.Active)
+            {
+                UpdateProjectWorkersExpierience();
+                UpdateSprint();
+            }
+
             UpdateProjectCompletionTime();
         }
 
@@ -252,13 +286,6 @@ namespace ITCompanySimulation.Developing
             if (0 == BindedProject.Workers.Count)
             {
                 throw new InvalidOperationException("Cannot start project without no workers");
-            }
-
-            if (false == BindedProject.StartedOnce)
-            {
-                BindedProject.Completed += OnProjectFinished;
-                BindedProject.TimeOfStart = GameTimeComponent.CurrentTime;
-                BindedProject.WorkerRemoved += OnBindedProjectWorkerRemoved;
             }
 
             BindedProject.Start();
