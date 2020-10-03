@@ -50,6 +50,11 @@ namespace ITCompanySimulation.UI
         {
             Vector2 newSize = new Vector2(TextComponent.preferredWidth, TextComponent.preferredHeight);
             ObjectTransform.sizeDelta = newSize;
+
+            //Size has to be set twice. For some reason when settings size only once its not perfectly fitted.
+            //Possible text mesh pro issue
+            newSize = new Vector2(TextComponent.preferredWidth, TextComponent.preferredHeight);
+            ObjectTransform.sizeDelta = newSize;
         }
 
         private void SetTooltipPosition()
