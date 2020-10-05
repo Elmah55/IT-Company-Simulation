@@ -33,6 +33,8 @@ namespace ITCompanySimulation.Character
         private GameObject CharacterPrefab;
         private MainSimulationManager SimulationManagerComponent;
         private List<SharedWorker> SpawnedCharacters = new List<SharedWorker>();
+        [SerializeField]
+        private Transform[] SpawnPoints;
         private IObjectPool<GameObject> CharactersPool;
 
         /*Public consts fields*/
@@ -67,37 +69,11 @@ namespace ITCompanySimulation.Character
 
         private void SpawnCharacter(LocalWorker companyWorker)
         {
-            //Spawn new character in game world
-            int spawnRetries = 0;
-            bool spawnPosCorrect = false;
-            Vector2 spawnPos = Vector2.zero;
-
-            while (false == spawnPosCorrect)
+            if (SpawnPoints != null && SpawnPoints.Length > 0)
             {
-                float spawnPosX = Random.Range(SpawnBounds.xMin, SpawnBounds.xMax);
-                float spawnPosY = Random.Range(SpawnBounds.yMin, SpawnBounds.yMax);
-                spawnPos = new Vector2(spawnPosX, spawnPosY);
-
-                //Check if there's no obstacle at spawn position
-                Collider2D[] colliders = Physics2D.OverlapCircleAll(spawnPos, SPAWN_POS_MINIMUM_COLLIDER_DISTANCE);
-                spawnPosCorrect = (colliders.Length == 0);
-                ++spawnRetries;
-
-                if (spawnRetries > MAX_SPAWN_RETRIES)
-                {
-#if DEVELOPMENT_BUILD || UNITY_EDITOR
-                    string debugInfo =
-                        string.Format("[{0}] Failed to spawn character in game world after {1} retries",
-                                      this.GetType().Name,
-                                      MAX_SPAWN_RETRIES);
-                    Debug.Log(debugInfo);
-#endif
-                    break;
-                }
-            }
-
-            if (true == spawnPosCorrect)
-            {
+                int randomIndex = Random.Range(0, SpawnPoints.Length);
+                Transform randomTransform = SpawnPoints[randomIndex];
+                Vector2 spawnPos = randomTransform.position;
                 GameObject newCharacter = null;
 
                 if (null != CharactersPool)
@@ -118,6 +94,16 @@ namespace ITCompanySimulation.Character
                 companyWorker.PhysicalCharacter = newCharacter;
                 SpawnedCharacters.Add(companyWorker);
             }
+#if DEVELOPMENT_BUILD || UNITY_EDITOR
+            else
+            {
+                string debugInfo =
+                    string.Format("[{0}] Failed to spawn character in game world (no spawn points defined)",
+                                  this.GetType().Name,
+                                  MAX_SPAWN_RETRIES);
+                Debug.Log(debugInfo);
+            }
+#endif
         }
 
         private void OnWorkerAbsenceStarted(LocalWorker worker)
