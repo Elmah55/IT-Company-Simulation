@@ -13,6 +13,8 @@ public class CameraController : MonoBehaviour
 
     private Camera CameraComponent;
     private Vector2 LastMousePosition;
+    private float CameraDefaultZoom;
+    private float CameraPreviousZoom;
 
     /*Public consts fields*/
 
@@ -27,6 +29,24 @@ public class CameraController : MonoBehaviour
 
     /*Private methods*/
 
+    /// <summary>
+    /// Checks for camera position position and if it exceeded defined bounds moves it inside bounds
+    /// </summary>
+    private void CheckCameraBounds()
+    {
+        Vector2 camerPos = CameraComponent.transform.position;
+        //Take zoom into consideration when calculating bounds. The bigger the zoom is the bigger bounds should be
+        float zoomBoundFactor = CameraComponent.orthographicSize > CameraDefaultZoom ?
+            (1f / (CameraComponent.orthographicSize - CameraDefaultZoom)) : (0.7f * (CameraDefaultZoom - CameraComponent.orthographicSize));
+        camerPos.x = Mathf.Clamp(camerPos.x, CameraPostionBounds.min.x * zoomBoundFactor, CameraPostionBounds.max.x * zoomBoundFactor);
+        camerPos.y = Mathf.Clamp(camerPos.y, CameraPostionBounds.min.y * zoomBoundFactor, CameraPostionBounds.max.y * zoomBoundFactor);
+        //Setting position like that makes camera not render tilemap
+        CameraComponent.transform.position = camerPos;
+    }
+
+    /// <summary>
+    /// Moves camera based on user input
+    /// </summary>
     private void SetCameraPosition()
     {
         if (true == Input.GetMouseButton(RIGHT_MOUSE_BUTTON))
@@ -34,14 +54,19 @@ public class CameraController : MonoBehaviour
             Vector2 mouseMovement = (Vector2)Input.mousePosition - LastMousePosition;
             mouseMovement *= CameraMovementSpeed * CameraComponent.orthographicSize;
             CameraComponent.transform.Translate(-mouseMovement * Time.deltaTime);
-            Vector2 camerPos = CameraComponent.transform.position;
-            camerPos.x = Mathf.Clamp(camerPos.x, CameraPostionBounds.min.x, CameraPostionBounds.max.x);
-            camerPos.y = Mathf.Clamp(camerPos.y, CameraPostionBounds.min.y, CameraPostionBounds.max.y);
-            //Setting position like that makes camera not render tilemap
-            //CameraComponent.transform.position = camerPos;
+            CheckCameraBounds();
+        }
+
+        if (CameraPreviousZoom != CameraComponent.orthographicSize)
+        {
+            CheckCameraBounds();
+            CameraPreviousZoom = CameraComponent.orthographicSize;
         }
     }
 
+    /// <summary>
+    /// Sets camera zoom based on user input
+    /// </summary>
     private void SetCameraZoom()
     {
         float zoom = Input.GetAxis("Mouse ScrollWheel") * Time.deltaTime * CameraZoomSpeed;
@@ -52,6 +77,7 @@ public class CameraController : MonoBehaviour
     private void Start()
     {
         CameraComponent = GetComponent<Camera>();
+        CameraDefaultZoom = CameraComponent.orthographicSize;
     }
 
     private void Update()
