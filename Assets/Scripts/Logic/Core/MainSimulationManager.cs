@@ -144,6 +144,8 @@ namespace ITCompanySimulation.Core
             }
         }
 
+        #region Workers events
+
         private void OnControlledCompanyWorkerAdded(SharedWorker addedWorker)
         {
             this.photonView.RPC(
@@ -151,6 +153,26 @@ namespace ITCompanySimulation.Core
 
             addedWorker.SalaryChanged += OnCompanyWorkerSalaryChanged;
             addedWorker.AbilityUpdated += OnCompanyWorkerAbilityUpdated;
+            addedWorker.ExpierienceTimeChanged += OnCompanyWorkerExpierienceTimeChanged;
+        }
+
+        private void OnControlledCompanyWorkerRemoved(SharedWorker removedWorker)
+        {
+            this.photonView.RPC(
+                "OnControlledCompanyWorkerRemovedRPC", PhotonTargets.Others, removedWorker.ID, PhotonNetwork.player.ID);
+            removedWorker.SalaryChanged -= OnCompanyWorkerSalaryChanged;
+            removedWorker.AbilityUpdated -= OnCompanyWorkerAbilityUpdated;
+            removedWorker.ExpierienceTimeChanged -= OnCompanyWorkerExpierienceTimeChanged;
+        }
+
+        private void OnCompanyWorkerExpierienceTimeChanged(SharedWorker companyWorker)
+        {
+            this.photonView.RPC("OnOtherPlayerCompanyWorkerAttirbuteChangedRPC",
+                    PhotonTargets.Others,
+                    PhotonNetwork.player.ID,
+                    companyWorker.ID,
+                    companyWorker.ExperienceTime,
+                    (int)WorkerAttribute.ExpierienceTime);
         }
 
         private void OnCompanyWorkerAbilityUpdated(SharedWorker companyWorker, ProjectTechnology workerAbility, float workerAbilityValue)
@@ -184,7 +206,6 @@ namespace ITCompanySimulation.Core
                 OtherPlayersWorkers.First(x => x.Key.ID == photonPlayerID).Value.First(x => x.ID == workerID);
             ProjectTechnology updatedAbilityEnum = (ProjectTechnology)updatedAbility;
             updatedWorker.UpdateAbility(updatedAbilityEnum, updatedAbilityValue);
-            //TODO: Add event for ability and attribute change for other player's worker so UI can be updated
         }
 
         /// <summary>
@@ -204,17 +225,13 @@ namespace ITCompanySimulation.Core
                     int newSalary = (int)attributeValue;
                     updatedWorker.Salary = newSalary;
                     break;
+                case WorkerAttribute.ExpierienceTime:
+                    int newExpierienceTime = (int)attributeValue;
+                    updatedWorker.ExperienceTime = newExpierienceTime;
+                    break;
                 default:
                     break;
             }
-        }
-
-        private void OnControlledCompanyWorkerRemoved(SharedWorker removedWorker)
-        {
-            this.photonView.RPC(
-                "OnControlledCompanyWorkerRemovedRPC", PhotonTargets.Others, removedWorker.ID, PhotonNetwork.player.ID);
-            removedWorker.SalaryChanged -= OnCompanyWorkerSalaryChanged;
-            removedWorker.AbilityUpdated -= OnCompanyWorkerAbilityUpdated;
         }
 
         /// <summary>
@@ -257,6 +274,8 @@ namespace ITCompanySimulation.Core
             Debug.Log(debugInfo);
 #endif
         }
+
+        #endregion
 
         [PunRPC]
         private void OnOtherPlayerControlledCompanyMinimalBalanceReachedRPC(int photonPlayerID)

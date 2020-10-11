@@ -99,6 +99,8 @@ namespace ITCompanySimulation.UI
                 AddWorkerListViewElement(worker, ListViewOtherPlayersWorkers);
                 SetTextListViewOtherPlayersWorkers();
             }
+
+            SubscribeToWorkerEvents(worker);
         }
 
         private void OnOtherPlayerWorkerRemoved(SharedWorker removedWorker, PhotonPlayer player)
@@ -108,13 +110,15 @@ namespace ITCompanySimulation.UI
                 RemoveWorkerListViewElement(removedWorker, ListViewOtherPlayersWorkers);
                 SetTextListViewOtherPlayersWorkers();
             }
+
+            UnsubscribeFromWorkerEvents(removedWorker);
         }
 
         private void OnWorkersSelectedButtonChanged(Button selectedButton)
         {
             if (null != SelectedWorker)
             {
-                UnsubscribeFromWorkerEvents();
+                UnsubscribeFromSelectedWorkerEvents();
             }
 
             if (null != selectedButton)
@@ -122,7 +126,7 @@ namespace ITCompanySimulation.UI
                 ListViewElementWorker element = selectedButton.GetComponent<ListViewElementWorker>();
                 SelectedWorker = WorkerListViewMap.First(x => x.Value == element).Key;
                 SetWorkerInfoText(SelectedWorker);
-                SubscribeToWorkerEvents();
+                SubscribeToSelectedWorkerEvents();
                 ButtonHireWorker.interactable = (false == SelectedWorker is LocalWorker)
                     && (PlayerCompany.MAX_WORKERS_PER_COMPANY > SimulationManagerComponent.ControlledCompany.Workers.Count);
             }
@@ -137,29 +141,62 @@ namespace ITCompanySimulation.UI
         {
             RemoveWorkerListViewElement(companyWorker, ListViewCompanyWorkers);
             SetTextListViewCompanyWorkers();
+            UnsubscribeFromWorkerEvents(companyWorker);
         }
 
         private void OnControlledCompanyWorkerAdded(SharedWorker companyWorker)
         {
             AddWorkerListViewElement(companyWorker, ListViewCompanyWorkers);
             SetTextListViewCompanyWorkers();
+            SubscribeToWorkerEvents(companyWorker);
         }
 
-        private void OnSelectedWorkerSalaryChanged(SharedWorker companyWorker)
+        private void OnWorkerSalaryChanged(SharedWorker companyWorker)
         {
-            TextSalary.text = UIWorkers.GetWorkerSalaryString(companyWorker);
+            if (null != SelectedWorker && companyWorker.ID == SelectedWorker.ID)
+            {
+                TextSalary.text = UIWorkers.GetWorkerSalaryString(companyWorker);
+            }
+
+            ListViewElementWorker elem = null;
+
+            if (companyWorker is LocalWorker)
+            {
+                elem = UIWorkers.GetWorkerListViewElement(companyWorker, ListViewCompanyWorkers);
+            }
+            else
+            {
+                elem = UIWorkers.GetWorkerListViewElement(companyWorker, ListViewOtherPlayersWorkers);
+            }
+
+            elem.Text.text = UIWorkers.GetWorkerListViewElementText(companyWorker);
+        }
+
+        private void OnSelectedWorkerExpierienceTimeChanged(SharedWorker companyWorker)
+        {
+            TextExpierience.text = UIWorkers.GetWorkerExpierienceString(companyWorker);
         }
 
         #endregion
 
-        private void SubscribeToWorkerEvents()
+        private void SubscribeToWorkerEvents(SharedWorker worker)
         {
-            SelectedWorker.SalaryChanged += OnSelectedWorkerSalaryChanged;
+            worker.SalaryChanged += OnWorkerSalaryChanged;
         }
 
-        private void UnsubscribeFromWorkerEvents()
+        private void UnsubscribeFromWorkerEvents(SharedWorker worker)
         {
-            SelectedWorker.SalaryChanged -= OnSelectedWorkerSalaryChanged;
+            worker.SalaryChanged -= OnSelectedWorkerExpierienceTimeChanged;
+        }
+
+        private void SubscribeToSelectedWorkerEvents()
+        {
+            SelectedWorker.ExpierienceTimeChanged += OnSelectedWorkerExpierienceTimeChanged;
+        }
+
+        private void UnsubscribeFromSelectedWorkerEvents()
+        {
+            SelectedWorker.ExpierienceTimeChanged -= OnWorkerSalaryChanged;
         }
 
         private void SetTextListViewCompanyWorkers()
@@ -229,6 +266,14 @@ namespace ITCompanySimulation.UI
             foreach (LocalWorker worker in SimulationManagerComponent.ControlledCompany.Workers)
             {
                 OnControlledCompanyWorkerAdded(worker);
+            }
+
+            foreach (var playerWorkers in SimulationManagerComponent.OtherPlayersWorkers)
+            {
+                foreach (var worker in playerWorkers.Value)
+                {
+                    SubscribeToWorkerEvents(worker);
+                }
             }
 
             OnWorkersSelectedButtonChanged(null);
