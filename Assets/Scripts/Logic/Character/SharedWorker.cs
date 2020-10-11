@@ -39,7 +39,7 @@ namespace ITCompanySimulation.Character
 
             set
             {
-                if (value!=m_ExpierienceTime)
+                if (value != m_ExpierienceTime)
                 {
                     m_ExpierienceTime = value;
                     ExpierienceTimeChanged?.Invoke(this);
@@ -91,14 +91,12 @@ namespace ITCompanySimulation.Character
 
         /*Public methods*/
 
-        public SharedWorker(string name, string surename)
+        public SharedWorker(string name, string surename, Gender gender) : base(name, surename, gender)
         {
-            this.Name = name;
-            this.Surename = surename;
             this.Salary = BASE_SALARY;
         }
 
-        public SharedWorker(SharedWorker worker) : this(worker.Name, worker.Surename)
+        public SharedWorker(SharedWorker worker) : this(worker.Name, worker.Surename, worker.Gender)
         {
             this.ID = worker.ID;
             this.Salary = worker.Salary;
@@ -136,6 +134,7 @@ namespace ITCompanySimulation.Character
             byte[] salaryBytes = BitConverter.GetBytes(workerToSerialize.Salary);
             byte[] abilitiesBytes;
             byte[] IDBytes = BitConverter.GetBytes(workerToSerialize.ID);
+            byte[] genderBytes = BitConverter.GetBytes((int)workerToSerialize.Gender);
 
             //This is used so receiving client knows how much bytes of name and surename should be read
             byte[] nameSize = BitConverter.GetBytes(nameBytes.Length);
@@ -159,7 +158,8 @@ namespace ITCompanySimulation.Character
                                 + abilitiesBytes.Length
                                 + expierienceTimeBytes.Length
                                 + salaryBytes.Length
-                                + IDBytes.Length;
+                                + IDBytes.Length
+                                + genderBytes.Length;
 
             byte[] workerBytes = new byte[workerBytesSize];
             int offset = 0;
@@ -181,6 +181,8 @@ namespace ITCompanySimulation.Character
             Array.Copy(salaryBytes, 0, workerBytes, offset, expierienceTimeBytes.Length);
             offset += salaryBytes.Length;
             Array.Copy(IDBytes, 0, workerBytes, offset, IDBytes.Length);
+            offset += IDBytes.Length;
+            Array.Copy(genderBytes, 0, workerBytes, offset, genderBytes.Length);
 
             return workerBytes;
         }
@@ -197,8 +199,6 @@ namespace ITCompanySimulation.Character
             offset += sizeof(int);
             string surename = Encoding.Unicode.GetString(workerBytes, offset, surenameSize);
             offset += surenameSize;
-
-            SharedWorker deserializedWorker = new SharedWorker(name, surename);
 
             int abilitiesSize = BitConverter.ToInt32(workerBytes, offset);
             offset += sizeof(int);
@@ -217,6 +217,10 @@ namespace ITCompanySimulation.Character
             int salary = BitConverter.ToInt32(workerBytes, offset);
             offset += sizeof(int);
             int workerID = BitConverter.ToInt32(workerBytes, offset);
+            offset += sizeof(int);
+            Gender workerGender = (Gender)BitConverter.ToInt32(workerBytes, offset);
+
+            SharedWorker deserializedWorker = new SharedWorker(name, surename, workerGender);
 
             deserializedWorker.Abilites = abilities;
             deserializedWorker.ExperienceTime = expierienceTime;

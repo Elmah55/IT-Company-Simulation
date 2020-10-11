@@ -15,6 +15,7 @@ public class WorkersMarket : Photon.PunBehaviour
 
     private readonly int NUMBER_OF_PROJECT_TECHNOLOGIES =
         Enum.GetValues(typeof(ProjectTechnology)).Length;
+    private const int NUMBER_OF_GENDERS = 2;
     /// <summary>
     /// How many abilities created worker can have
     /// </summary>
@@ -94,13 +95,23 @@ public class WorkersMarket : Photon.PunBehaviour
 
     private SharedWorker GenerateSingleWorker()
     {
-        //Randomly selected name and surename for new worker
-        string newWorkerName =
-            WorkerData.Names[UnityEngine.Random.Range(0, WorkerData.Names.Count)];
+        //Randomly selected name, surename and gender for new worker
+        Gender newWorkerGender = (Gender)UnityEngine.Random.Range(0, NUMBER_OF_GENDERS);
+        string newWorkerName;
+
+        if (Gender.Male == newWorkerGender)
+        {
+            newWorkerName = WorkerData.MaleNames[UnityEngine.Random.Range(0, WorkerData.MaleNames.Count)];
+        }
+        else
+        {
+            newWorkerName = WorkerData.FemaleNames[UnityEngine.Random.Range(0, WorkerData.FemaleNames.Count)];
+        }
+
         string newWorkerSurename =
             WorkerData.Surenames[UnityEngine.Random.Range(0, WorkerData.Surenames.Count)];
 
-        SharedWorker newMarketWorker = new SharedWorker(newWorkerName, newWorkerSurename);
+        SharedWorker newMarketWorker = new SharedWorker(newWorkerName, newWorkerSurename, newWorkerGender);
 
         newMarketWorker.Abilites = CreateWorkerAbilities();
         newMarketWorker.ExperienceTime = CalculateWorkerExpierience(newMarketWorker);

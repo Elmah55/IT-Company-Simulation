@@ -1,5 +1,4 @@
-﻿using ITCompanySimulation.Character;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
@@ -104,6 +103,12 @@ namespace ITCompanySimulation.Character
         Sickness,
         Holiday
     }
+
+    public enum Gender
+    {
+        Male,
+        Female
+    }
 }
 
 /*Classes*/
@@ -113,7 +118,7 @@ namespace ITCompanySimulation.Character
 /// </summary>
 public class EnumToString
 {
-    public static Dictionary<ProjectTechnology, string> ProjectTechnologiesStrings = new Dictionary<ProjectTechnology, string>()
+    public static IReadOnlyDictionary<ProjectTechnology, string> ProjectTechnologiesStrings = new Dictionary<ProjectTechnology, string>()
     {
         { ProjectTechnology.C,"C" },
         { ProjectTechnology.Cpp,"C++" },
@@ -130,24 +135,49 @@ public class EnumToString
 /// </summary>
 public static class WorkerData
 {
-    public static List<string> Names = new List<string>()
+    public static IReadOnlyList<string> MaleNames = new List<string>()
     {
         "John",
         "Adam",
         "David",
         "Kenny",
         "Michael",
-        "Kathie",
-        "Anna",
-        "Alice"
+        "Peter",
+        "Roger",
+        "Charles",
+        "Harper",
+        "Jack",
+        "Carter",
+        "Easton",
+        "Robert"
     };
 
-    public static List<string> Surenames = new List<string>()
+    public static IReadOnlyList<string> FemaleNames = new List<string>()
+    {
+        "Kathie",
+        "Kate",
+        "Anna",
+        "Alice",
+        "Evelyn",
+        "Ella",
+        "Scarlett",
+        "Madison",
+        "Lily",
+        "Lucy"
+    };
+
+    public static IReadOnlyList<string> Surenames = new List<string>()
     {
         "Smith",
         "Crew",
         "Kendrick",
-        "Sanny"
+        "Sanny",
+        "Sanchez",
+        "Brown",
+        "Hughes",
+        "Warren",
+        "Cempy",
+        "Kowalik"
     };
 }
 
@@ -156,7 +186,7 @@ public static class WorkerData
 /// </summary>
 public static class ProjectData
 {
-    public static List<string> Names = new List<string>()
+    public static IReadOnlyList<string> Names = new List<string>()
     {
         "Automotive embedded",
         "Telecommunications embedded",
@@ -219,7 +249,7 @@ namespace ITCompanySimulation.Character
     public delegate void LocalWorkerAction(LocalWorker worker);
     public delegate void SharedWorkerAction(SharedWorker worker);
     public delegate void WorkerAbilityAction(SharedWorker worker, ProjectTechnology workerAbility, float workerAbilityValue);
-    public delegate void MultiplayerWorkerAction(SharedWorker worker, PhotonPlayer player); 
+    public delegate void MultiplayerWorkerAction(SharedWorker worker, PhotonPlayer player);
 }
 
 public delegate void PhotonPlayerAction(PhotonPlayer player);
