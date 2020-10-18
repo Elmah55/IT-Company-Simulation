@@ -63,12 +63,14 @@ namespace ITCompanySimulation.Core
 
         /*Private methods*/
 
-        private void Start()
+        private void Awake()
         {
             //TODO: Register all types inside this method
 
             DontDestroyOnLoad(this.gameObject);
             PhotonNetwork.offlineMode = this.OfflineMode;
+            this.photonView.viewID = 1;
+            PlayerInfo.Load();
 
             if (false == PhotonNetwork.offlineMode)
             {
@@ -81,6 +83,8 @@ namespace ITCompanySimulation.Core
 
         private void OnSceneLoaded(Scene loadedScene, LoadSceneMode sceneLoadMode)
         {
+            NumberOfClientsReadyToReceiveData = 0;
+
             if ((int)SceneIndex.Game == loadedScene.buildIndex)
             {
                 if (false == PhotonNetwork.isMasterClient)
@@ -120,9 +124,6 @@ namespace ITCompanySimulation.Core
         [PunRPC]
         private void StartGameInternal()
         {
-            //PhotonView component won't be need anymore since
-            //MainSimulationManager's PhotonView component will be used in game scene
-            GameObject.Destroy(this.photonView);
             SceneManager.LoadScene((int)SceneIndex.Game);
         }
 

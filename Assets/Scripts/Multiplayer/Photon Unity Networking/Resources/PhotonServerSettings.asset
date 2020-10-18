@@ -64,4 +64,5 @@ MonoBehaviour:
   - OnOtherPlayerControlledCompanyMinimalBalanceReachedRPC
   - SetSimulationSettingsRPC
   - FinishSimulationRPC
+  - OnAllClientsReady
   DisableAutoOpenWizard: 1

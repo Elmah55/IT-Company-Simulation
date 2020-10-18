@@ -20,8 +20,6 @@ namespace ITCompanySimulation.UI
         private TMP_InputField InputFieldPlayerNickName;
         [SerializeField]
         private TextMeshProUGUI TextCredentialsSaved;
-        [SerializeField]
-        private PlayerInfo PlayerInfoComponent;
         /// <summary>
         /// How long is this text active
         /// </summary>
@@ -35,8 +33,8 @@ namespace ITCompanySimulation.UI
 
         private void Start()
         {
-            InputFieldCompanyName.text = PlayerInfoComponent.CompanyName;
-            InputFieldPlayerNickName.text = PlayerInfoComponent.Nickname;
+            InputFieldCompanyName.text = PlayerInfo.CompanyName;
+            InputFieldPlayerNickName.text = PlayerInfo.Nickname;
             TextCredentialsSaved.gameObject.SetActive(false);
         }
 
@@ -62,7 +60,7 @@ namespace ITCompanySimulation.UI
 
         public void OnButtonSaveCliked()
         {
-            PlayerInfoComponent.Apply(InputFieldCompanyName.text, InputFieldPlayerNickName.text);
+            PlayerInfo.Apply(InputFieldCompanyName.text, InputFieldPlayerNickName.text);
             TextCredentialsSaved.gameObject.SetActive(true);
             TextCredentialsSavedActiveTime = 0f;
         }

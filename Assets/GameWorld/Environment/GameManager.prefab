@@ -10,7 +10,6 @@ GameObject:
   m_Component:
   - component: {fileID: 382524634025743177}
   - component: {fileID: 382524634025743179}
-  - component: {fileID: 9102001420582795775}
   - component: {fileID: 9102001420582795774}
   m_Layer: 0
   m_Name: GameManager
@@ -48,21 +47,8 @@ MonoBehaviour:
   InitialCompanyBalance: 0
   TargetCompanyBalance: 330000
   MinimalCompanyBalance: -10000000
-  SimulationTimeScale: 10
   OfflineMode: 1
   UseRoom: 0
---- !u!114 &9102001420582795775
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 382524634025743175}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 48f1f3ad4f94a19499feac0b07ee8183, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!114 &9102001420582795774
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -5,7 +5,7 @@
 /// and company name that will be used during game
 /// </summary>
 // Derive from MonoBehaviour because PlayerPrefs.GetString cannot be used in constructor
-public class PlayerInfo : MonoBehaviour
+public static class PlayerInfo
 {
     /*Private consts fields*/
 
@@ -23,9 +23,9 @@ public class PlayerInfo : MonoBehaviour
 
     /*Public fields*/
 
-    public string CompanyName { get; private set; }
-    public string Nickname { get; private set; }
-    public bool CredentialsCompleted
+    public static string CompanyName { get; private set; }
+    public static string Nickname { get; private set; }
+    public static bool CredentialsCompleted
     {
         get
         {
@@ -36,14 +36,9 @@ public class PlayerInfo : MonoBehaviour
 
     /*Private methods*/
 
-    private void Start()
-    {
-        Load();
-    }
-
     /*Public methods*/
 
-    public void Apply(string companyName, string nickname)
+    public static void Apply(string companyName, string nickname)
     {
         CompanyName = companyName;
         Nickname = nickname;
@@ -52,13 +47,13 @@ public class PlayerInfo : MonoBehaviour
         PlayerPrefs.SetString(NICKNAME_KEY, nickname);
         PlayerPrefs.Save();
 
-        PhotonNetwork.player.NickName = this.Nickname;
+        PhotonNetwork.player.NickName = Nickname;
     }
 
-    public void Load()
+    public static void Load()
     {
         CompanyName = PlayerPrefs.GetString(COMPANY_NAME_KEY, DEFAULT_KEY_VALUE);
         Nickname = PlayerPrefs.GetString(NICKNAME_KEY, DEFAULT_KEY_VALUE);
-        PhotonNetwork.player.NickName = this.Nickname;
+        PhotonNetwork.player.NickName = Nickname;
     }
 }

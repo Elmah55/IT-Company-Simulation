@@ -18,7 +18,6 @@ namespace ITCompanySimulation.Core
 
         /*Private fields*/
 
-        private PlayerInfo PlayerInfoComponent;
         private GameTime GameTimeComponent;
         [SerializeField]
         private InfoWindow InfoWindowComponent;
@@ -28,17 +27,12 @@ namespace ITCompanySimulation.Core
         [SerializeField]
         [Range(0.1f, 10.0f)]
         private float SimulationTimeScale;
+        private MainGameManager GameManagerComponent;
 
         /*Public consts fields*/
 
         /*Public fields*/
 
-        /// <summary>
-        /// MainGameManager component will be fetched from "GameManager" object created
-        /// in menu scene. Its public field will be stored here for other objects that need
-        /// to use it
-        /// </summary>
-        public MainGameManager GameManagerComponent { get; private set; }
         public PlayerCompany ControlledCompany { get; private set; }
         public SimulationEventNotificator NotificatorComponent { get; private set; }
         /// <summary>
@@ -367,12 +361,7 @@ namespace ITCompanySimulation.Core
 
         public void Start()
         {
-            //Obtain refence to game manager object wich was created in
-            //menu scene
-            GameObject gameManagerObject = GameObject.Find("GameManager");
-
-            GameManagerComponent = gameManagerObject.GetComponent<MainGameManager>();
-            PlayerInfoComponent = gameManagerObject.GetComponent<PlayerInfo>();
+            GameManagerComponent = GameObject.FindGameObjectWithTag("GameManager").GetComponent<MainGameManager>();
             GameTimeComponent = GetComponent<GameTime>();
             NotificatorComponent = new SimulationEventNotificator(GameTimeComponent);
             IsSimulationActive = true;

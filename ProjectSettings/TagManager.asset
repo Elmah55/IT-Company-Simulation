@@ -7,6 +7,7 @@ TagManager:
   - Fire
   - Canvas
   - InfoWindow
+  - GameManager
   layers:
   - Default
   - TransparentFX

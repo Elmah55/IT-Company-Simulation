@@ -21,7 +21,6 @@ public class UIMainMenu : Photon.PunBehaviour
     private GameObject PanelMainMenu;
     [SerializeField]
     private GameObject PanelMainLobby;
-    private PlayerInfo PlayerInfoComponent;
 
     /*Public consts fields*/
 
@@ -42,13 +41,9 @@ public class UIMainMenu : Photon.PunBehaviour
         ButtonStartGameSetState();
     }
 
-    private void Awake()
-    {
-        PlayerInfoComponent = GameManagerComponent.GetComponent<PlayerInfo>();
-    }
-
     private void Start()
     {
+        GameManagerComponent = GameObject.FindGameObjectWithTag("GameManager").GetComponent<MainGameManager>();
         ButtonStartGameSetState();
     }
 
@@ -58,7 +53,7 @@ public class UIMainMenu : Photon.PunBehaviour
         //Always "connected" while in offline mode
         if (true == PhotonNetwork.insideLobby || true == PhotonNetwork.offlineMode)
         {
-            if (false == PlayerInfoComponent.CredentialsCompleted)
+            if (false == PlayerInfo.CredentialsCompleted)
             {
                 ButtonStartGameStateMissingCredentials();
             }
@@ -126,7 +121,7 @@ public class UIMainMenu : Photon.PunBehaviour
     {
         base.OnJoinedLobby();
 
-        if (true == PlayerInfoComponent.CredentialsCompleted)
+        if (true == PlayerInfo.CredentialsCompleted)
         {
             ButtonStartGameStateConnected();
         }
