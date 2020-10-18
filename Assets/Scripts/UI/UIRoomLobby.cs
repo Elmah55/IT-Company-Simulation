@@ -68,6 +68,13 @@ namespace ITCompanySimulation.UI
 
         private void OnEnable()
         {
+            int initialBalance = (int)PhotonNetwork.room.CustomProperties[RoomCustomPropertiesKey.SettingsOfSimulationInitialBalance.ToString()];
+            int targetBalance = (int)PhotonNetwork.room.CustomProperties[RoomCustomPropertiesKey.SettingsOfSimulationTargetBalance.ToString()];
+            int minimalBalance = (int)PhotonNetwork.room.CustomProperties[RoomCustomPropertiesKey.SettingsOfSimulationMinimalBalance.ToString()];
+            SimulationSettings.InitialBalance = initialBalance;
+            SimulationSettings.TargetBalance = targetBalance;
+            SimulationSettings.MinimalBalance = minimalBalance;
+
             AddPlayersListViewElements();
             SetSimulationSettingsText();
             SetListViewPlayersText();
@@ -147,11 +154,9 @@ namespace ITCompanySimulation.UI
 
         private void SetSimulationSettingsText()
         {
-            SimulationSettings settings =
-                (SimulationSettings)PhotonNetwork.room.CustomProperties[RoomCustomPropertiesKey.SettingsOfSimulation.ToString()];
-            TextMinimalBalance.text = string.Format("{0} $", settings.MinimalBalance);
-            TextTargetBalance.text = string.Format("{0} $", settings.TargetBalance);
-            TextInitialBalance.text = string.Format("{0} $", settings.InitialBalance);
+            TextMinimalBalance.text = string.Format("{0} $", SimulationSettings.MinimalBalance);
+            TextTargetBalance.text = string.Format("{0} $", SimulationSettings.TargetBalance);
+            TextInitialBalance.text = string.Format("{0} $", SimulationSettings.InitialBalance);
             TextRoomName.text = PhotonNetwork.room.Name;
         }
 

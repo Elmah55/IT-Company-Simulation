@@ -221,7 +221,9 @@ namespace ITCompanySimulation.Multiplayer
     /// </summary>
     public enum RoomCustomPropertiesKey
     {
-        SettingsOfSimulation
+        SettingsOfSimulationMinimalBalance,
+        SettingsOfSimulationInitialBalance,
+        SettingsOfSimulationTargetBalance
     }
 }
 

@@ -288,9 +288,9 @@ namespace ITCompanySimulation.UI
 
         public void OnButtonCreateRoomClicked()
         {
-            GameManagerComponent.SettingsOfSimulation.InitialBalance = (int)SliderInitialBalance.value;
-            GameManagerComponent.SettingsOfSimulation.TargetBalance = (int)SliderTargetBalance.value;
-            GameManagerComponent.SettingsOfSimulation.MinimalBalance = (int)SliderMinimalBalance.value;
+            SimulationSettings.InitialBalance = (int)SliderInitialBalance.value;
+            SimulationSettings.TargetBalance = (int)SliderTargetBalance.value;
+            SimulationSettings.MinimalBalance = (int)SliderMinimalBalance.value;
 
             RoomOptions options = new RoomOptions();
             options.MaxPlayers = (byte)SliderNumberOfPlayers.value;
@@ -299,7 +299,11 @@ namespace ITCompanySimulation.UI
             //Photon requires to use string keys
             Hashtable roomProperties = new Hashtable();
             roomProperties.Add(
-               RoomCustomPropertiesKey.SettingsOfSimulation.ToString(), GameManagerComponent.SettingsOfSimulation);
+               RoomCustomPropertiesKey.SettingsOfSimulationInitialBalance.ToString(), SimulationSettings.InitialBalance);
+            roomProperties.Add(
+                RoomCustomPropertiesKey.SettingsOfSimulationTargetBalance.ToString(), SimulationSettings.TargetBalance);
+            roomProperties.Add(
+                RoomCustomPropertiesKey.SettingsOfSimulationMinimalBalance.ToString(), SimulationSettings.MinimalBalance);
             options.CustomRoomProperties = roomProperties;
 
             ButtonCreateRoom.interactable = false;

@@ -77,7 +77,7 @@ namespace ITCompanySimulation.Economy
             SimulationManagerComponent = GetComponent<MainSimulationManager>();
             GameTimeComponent = GetComponent<GameTime>();
 
-            MaxLoanAmout = SimulationManagerComponent.GameManagerComponent.SettingsOfSimulation.TargetBalance / 10;
+            MaxLoanAmout = SimulationSettings.TargetBalance / 10;
             MinLoanAmount = MaxLoanAmout / 10;
 
         }

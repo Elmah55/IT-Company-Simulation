@@ -61,21 +61,15 @@ public class UIDefaultView : MonoBehaviour
         SimulationManagerComponent.ControlledCompany.WorkerAdded += OnControlledCompanyWorkerAddedOrRemoved;
         SimulationManagerComponent.ControlledCompany.WorkerRemoved += OnControlledCompanyWorkerAddedOrRemoved;
         SimulationManagerComponent.NotificatorComponent.NotificationReceived += OnNotificationReceived;
-        SimulationManagerComponent.SettingsUpdated += OnSimulationSettingsUpdated;
         SetBalanceTexts();
         TextWorkersCount.text = GetWorkersCountText(SimulationManagerComponent.ControlledCompany.Workers.Count);
-    }
-
-    private void OnSimulationSettingsUpdated(SimulationSettings obj)
-    {
-        SetBalanceTexts();
     }
 
     private void SetBalanceTexts()
     {
         TextCompanyBalanceCurrent.text = GetCompanyBalanceText(SimulationManagerComponent.ControlledCompany.Balance);
-        TextCompanyBalanceMinimal.text = GetMinimalBalanceText(SimulationManagerComponent.Settings.MinimalBalance);
-        TextCompanyBalanceTarget.text = GetTargetBalanceText(SimulationManagerComponent.Settings.TargetBalance);
+        TextCompanyBalanceMinimal.text = GetMinimalBalanceText(SimulationSettings.MinimalBalance);
+        TextCompanyBalanceTarget.text = GetTargetBalanceText(SimulationSettings.TargetBalance);
     }
 
     private void OnNotificationReceived(SimulationEventNotification notification)

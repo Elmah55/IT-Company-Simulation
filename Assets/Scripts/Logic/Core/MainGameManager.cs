@@ -60,15 +60,12 @@ namespace ITCompanySimulation.Core
         /// room and default room and simulation settings will be set
         /// </summary>
         public bool UseRoom;
-        public SimulationSettings SettingsOfSimulation { get; set; } = new SimulationSettings();
 
         /*Private methods*/
 
         private void Start()
         {
             //TODO: Register all types inside this method
-            PhotonPeer.RegisterType(typeof(SimulationSettings), NetworkingData.SIMULATION_SETTINGS_BYTE_CODE,
-                SimulationSettings.Serialize, SimulationSettings.Deserialize);
 
             DontDestroyOnLoad(this.gameObject);
             PhotonNetwork.offlineMode = this.OfflineMode;
@@ -136,9 +133,9 @@ namespace ITCompanySimulation.Core
             if (false == UseRoom)
             {
                 //Create room with default settings and join it
-                SettingsOfSimulation.InitialBalance = this.InitialCompanyBalance;
-                SettingsOfSimulation.TargetBalance = this.TargetCompanyBalance;
-                SettingsOfSimulation.MinimalBalance = this.MinimalCompanyBalance;
+                SimulationSettings.InitialBalance = this.InitialCompanyBalance;
+                SimulationSettings.TargetBalance = this.TargetCompanyBalance;
+                SimulationSettings.MinimalBalance = this.MinimalCompanyBalance;
                 RoomOptions options = new RoomOptions() { MaxPlayers = MAX_NUMBER_OF_PLAYERS_PER_ROOM };
                 PhotonNetwork.JoinOrCreateRoom("Default", options, PhotonNetwork.lobby);
             }

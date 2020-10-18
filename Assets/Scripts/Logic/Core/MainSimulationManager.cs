@@ -41,7 +41,6 @@ namespace ITCompanySimulation.Core
         public MainGameManager GameManagerComponent { get; private set; }
         public PlayerCompany ControlledCompany { get; private set; }
         public SimulationEventNotificator NotificatorComponent { get; private set; }
-        public SimulationSettings Settings { get; private set; }
         /// <summary>
         /// Invoked when any of player has reached the target balance
         /// and won game
@@ -65,7 +64,6 @@ namespace ITCompanySimulation.Core
         /// <summary>
         /// This will map ID of photon player to list of player that his company has.
         /// </summary>
-        public event Action<SimulationSettings> SettingsUpdated;
         public Dictionary<PhotonPlayer, List<SharedWorker>> OtherPlayersWorkers { get; private set; } = new Dictionary<PhotonPlayer, List<SharedWorker>>();
         /// <summary>
         /// True when any of player has won the game
@@ -101,18 +99,6 @@ namespace ITCompanySimulation.Core
             }
         }
 
-        private void SynchronizeSimulationSettings()
-        {
-            if (true == PhotonNetwork.isMasterClient)
-            {
-                this.photonView.RPC("SetSimulationSettingsRPC",
-                                    PhotonTargets.Others,
-                                    Settings.MinimalBalance,
-                                    Settings.InitialBalance,
-                                    Settings.TargetBalance);
-            }
-        }
-
         private void CreateCompany()
         {
             ControlledCompany = new PlayerCompany("", gameObject);
@@ -120,19 +106,19 @@ namespace ITCompanySimulation.Core
             ControlledCompany.WorkerAdded += OnControlledCompanyWorkerAdded;
             ControlledCompany.WorkerRemoved += OnControlledCompanyWorkerRemoved;
             ControlledCompany.BalanceChanged += OnControlledCompanyBalanceChanged;
-            ControlledCompany.Balance = GameManagerComponent.SettingsOfSimulation.InitialBalance;
+            ControlledCompany.Balance = SimulationSettings.InitialBalance;
         }
 
         private void OnControlledCompanyBalanceChanged(int newBalance)
         {
-            if (newBalance >= GameManagerComponent.SettingsOfSimulation.TargetBalance)
+            if (newBalance >= SimulationSettings.TargetBalance)
             {
                 this.photonView.RPC("FinishSimulationRPC",
                                     PhotonTargets.All,
                                     PhotonNetwork.player.ID,
                                     (int)SimulationFinishReason.PlayerCompanyReachedTargetBalance);
             }
-            else if (newBalance <= GameManagerComponent.SettingsOfSimulation.MinimalBalance)
+            else if (newBalance <= SimulationSettings.MinimalBalance)
             {
                 SimulationFinishReason finishReason = SimulationFinishReason.PlayerCompanyReachedMinimalBalance;
 
@@ -328,7 +314,7 @@ namespace ITCompanySimulation.Core
                             break;
                         case SimulationFinishReason.PlayerCompanyReachedMinimalBalance:
                             finishSimulationInfoMsg = string.Format("Your company's balance reached minimum allowed balance ({0} $)",
-                            Settings.MinimalBalance);
+                            SimulationSettings.MinimalBalance);
                             break;
                         case SimulationFinishReason.OnePlayerInRoom:
                             finishSimulationInfoMsg = "You are the only player left in simulation.\nYou have won !";
@@ -344,15 +330,6 @@ namespace ITCompanySimulation.Core
                 SimulationFinished?.Invoke(winnerPhotonPlayerID, (SimulationFinishReason)finishReason);
                 InfoWindowComponent.Show(finishSimulationInfoMsg, GameManagerComponent.FinishSession);
             }
-        }
-
-        [PunRPC]
-        private void SetSimulationSettingsRPC(int minimalBalance, int initialBalance, int targetBalance)
-        {
-            Settings = new SimulationSettings(initialBalance, targetBalance, minimalBalance);
-            GameManagerComponent.SettingsOfSimulation = Settings;
-            ControlledCompany.Balance = Settings.InitialBalance;
-            SettingsUpdated?.Invoke(Settings);
         }
 
         /*Public methods*/
@@ -398,11 +375,9 @@ namespace ITCompanySimulation.Core
             PlayerInfoComponent = gameManagerObject.GetComponent<PlayerInfo>();
             GameTimeComponent = GetComponent<GameTime>();
             NotificatorComponent = new SimulationEventNotificator(GameTimeComponent);
-            Settings = GameManagerComponent.SettingsOfSimulation;
             IsSimulationActive = true;
 
             InitPlayersWorkers();
-            SynchronizeSimulationSettings();
             //TEST
             CreateCompany();
         }
