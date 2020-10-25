@@ -4,145 +4,172 @@ using UnityEngine.UI;
 using TMPro;
 using ITCompanySimulation.Core;
 
-public class UIMainMenu : Photon.PunBehaviour
+namespace ITCompanySimulation.UI
 {
-    /*Private consts fields*/
-
-    /*Private fields*/
-
-    [SerializeField]
-    private GameObject CredentialsPanel;
-    [SerializeField]
-    private MainGameManager GameManagerComponent;
-    [SerializeField]
-    private Button ButtonStartGame;
-    private TextMeshProUGUI TextButtonStartGame;
-    [SerializeField]
-    private GameObject PanelMainMenu;
-    [SerializeField]
-    private GameObject PanelMainLobby;
-
-    /*Public consts fields*/
-
-    /*Public fields*/
-
-    /*Private methods*/
-
-    private void OnEnable()
+    public class UIMainMenu : Photon.PunBehaviour
     {
-        if (null == TextButtonStartGame)
+        /*Private consts fields*/
+
+        /*Private fields*/
+
+        [SerializeField]
+        private GameObject CredentialsPanel;
+        [SerializeField]
+        private MainGameManager GameManagerComponent;
+        [SerializeField]
+        private Button ButtonStartGame;
+        private TextMeshProUGUI TextButtonStartGame;
+        [SerializeField]
+        private GameObject PanelMainMenu;
+        [SerializeField]
+        private GameObject PanelMainLobby;
+        [SerializeField]
+        private InfoWindow InfoWindowComponent;
+        private bool ReconnectFailed;
+
+        /*Public consts fields*/
+
+        /*Public fields*/
+
+        /*Private methods*/
+
+        private void OnEnable()
+        {
+            //Other view can be enabled and this script can be not
+            //active before connetion is made so to avoid button 
+            //showing wrong status it should be set again OnEnable
+            ButtonStartGameSetState();
+        }
+
+        private void OnDestroy()
+        {
+            GameManagerComponent.ReconnectFailed -= OnGameManagerComponentReconnectFailed;
+        }
+
+        private void Awake()
         {
             TextButtonStartGame = ButtonStartGame.GetComponentInChildren<TextMeshProUGUI>();
+            GameManagerComponent = GameObject.FindGameObjectWithTag("GameManager").GetComponent<MainGameManager>();
+            GameManagerComponent.ReconnectFailed += OnGameManagerComponentReconnectFailed;
         }
 
-        //Other view can be enabled and this script can be not
-        //active before connetion is made so to avoid button 
-        //showing wrong status it should be set again OnEnable
-        ButtonStartGameSetState();
-    }
-
-    private void Start()
-    {
-        GameManagerComponent = GameObject.FindGameObjectWithTag("GameManager").GetComponent<MainGameManager>();
-        ButtonStartGameSetState();
-    }
-
-    private void ButtonStartGameSetState()
-    {
-        //Auto join lobby is enabled
-        //Always "connected" while in offline mode
-        if (true == PhotonNetwork.insideLobby || true == PhotonNetwork.offlineMode)
+        private void OnGameManagerComponentReconnectFailed()
         {
-            if (false == PlayerInfo.CredentialsCompleted)
+            InfoWindowComponent.Show("Connection to server failed", null);
+            ButtonStartGameStateDisconnected();
+            ReconnectFailed = true;
+        }
+
+        private void ButtonStartGameSetState()
+        {
+            //Auto join lobby is enabled
+            //Always "connected" while in offline mode
+            if (true == PhotonNetwork.insideLobby || true == PhotonNetwork.offlineMode)
             {
-                ButtonStartGameStateMissingCredentials();
+                if (false == PlayerInfo.CredentialsCompleted)
+                {
+                    ButtonStartGameStateMissingCredentials();
+                }
+                else
+                {
+                    ButtonStartGameStateConnected();
+                }
             }
-            else
+            else if (false == ReconnectFailed)
             {
-                ButtonStartGameStateConnected();
+                ButtonStartGameStateConnecting();
+            }
+            else if (true == ReconnectFailed)
+            {
+                ButtonStartGameStateDisconnected();
             }
         }
-        else
+
+        private void ButtonStartGameStateConnecting()
         {
-            ButtonStartGameStateConnecting();
+            TextButtonStartGame.text = "Connecting...";
+            ButtonStartGame.interactable = false;
         }
-    }
 
-    private void ButtonStartGameStateConnecting()
-    {
-        TextButtonStartGame.text = "Connecting...";
-        ButtonStartGame.interactable = false;
-    }
-
-    private void ButtonStartGameStateMissingCredentials()
-    {
-        TextButtonStartGame.text = "Enter credentials";
-        ButtonStartGame.onClick.RemoveAllListeners();
-        ButtonStartGame.onClick.AddListener(() =>
+        private void ButtonStartGameStateMissingCredentials()
         {
-            CredentialsPanel.SetActive(true);
-            this.gameObject.SetActive(false);
-        });
-        ButtonStartGame.interactable = true;
-    }
+            TextButtonStartGame.text = "Enter credentials";
+            ButtonStartGame.onClick.RemoveAllListeners();
+            ButtonStartGame.onClick.AddListener(() =>
+            {
+                CredentialsPanel.SetActive(true);
+                this.gameObject.SetActive(false);
+            });
+            ButtonStartGame.interactable = true;
+        }
 
-    private void ButtonStartGameStateConnected()
-    {
-        TextButtonStartGame.text = "Start";
-        ButtonStartGame.onClick.RemoveAllListeners();
-        ButtonStartGame.onClick.AddListener(() =>
+        private void ButtonStartGameStateConnected()
         {
-            if (true == GameManagerComponent.UseRoom)
+            TextButtonStartGame.text = "Start";
+            ButtonStartGame.onClick.RemoveAllListeners();
+            ButtonStartGame.onClick.AddListener(() =>
             {
-                PanelMainLobby.SetActive(true);
-                PanelMainMenu.SetActive(false);
-            }
-            else
+                if (true == GameManagerComponent.UseRoom)
+                {
+                    PanelMainLobby.SetActive(true);
+                    PanelMainMenu.SetActive(false);
+                }
+                else
+                {
+                    GameManagerComponent.StartGame();
+                    ButtonStartGame.interactable = false;
+                }
+            });
+            ButtonStartGame.interactable = true;
+        }
+
+        private void ButtonStartGameStateDisconnected()
+        {
+            TextButtonStartGame.text = "Connect";
+            ButtonStartGame.interactable = true;
+            ButtonStartGame.onClick.RemoveAllListeners();
+            ButtonStartGame.onClick.AddListener(() =>
             {
-                GameManagerComponent.StartGame();
-                ButtonStartGame.interactable = false;
-            }
-        });
-        ButtonStartGame.interactable = true;
-    }
+                ReconnectFailed = false;
+                GameManagerComponent.Connect();
+            });
+        }
 
-    /*Public methods*/
+        /*Public methods*/
 
-    public void OnButtonExitClicked()
-    {
+        public void OnButtonExitClicked()
+        {
 #if UNITY_EDITOR
-        EditorApplication.isPlaying = false;
+            EditorApplication.isPlaying = false;
 #else
         Application.Quit();
 #endif
-    }
-
-    public override void OnJoinedLobby()
-    {
-        base.OnJoinedLobby();
-
-        if (true == PlayerInfo.CredentialsCompleted)
-        {
-            ButtonStartGameStateConnected();
         }
-        else
+
+        public override void OnJoinedLobby()
         {
-            ButtonStartGameStateMissingCredentials();
+            base.OnJoinedLobby();
+
+            if (true == PlayerInfo.CredentialsCompleted)
+            {
+                ButtonStartGameStateConnected();
+            }
+            else
+            {
+                ButtonStartGameStateMissingCredentials();
+            }
+
+            ReconnectFailed = false;
+        }
+
+        public override void OnDisconnectedFromPhoton()
+        {
+            base.OnDisconnectedFromPhoton();
+
+            if (false == ReconnectFailed)
+            {
+                ButtonStartGameStateConnecting();
+            }
         }
     }
-
-    public override void OnDisconnectedFromPhoton()
-    {
-        base.OnDisconnectedFromPhoton();
-
-        ButtonStartGameStateConnecting();
-    }
-
-    public override void OnConnectionFail(DisconnectCause cause)
-    {
-        base.OnConnectionFail(cause);
-
-        ButtonStartGameStateConnecting();
-    }
-
 }

@@ -802,6 +802,7 @@ MonoBehaviour:
   ButtonStartGame: {fileID: 4586327220310216812}
   PanelMainMenu: {fileID: 159318599}
   PanelMainLobby: {fileID: 1570264024}
+  InfoWindowComponent: {fileID: 2013029160}
 --- !u!1001 &175753178
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -7990,6 +7991,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1534108176}
   - component: {fileID: 1534108175}
+  - component: {fileID: 1534108177}
   m_Layer: 0
   m_Name: Scripts
   m_TagString: Untagged
@@ -8025,6 +8027,18 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1534108177
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1534108174}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fce0092fbb7fb8a43a12933e3399c52e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &1560261267
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -8343,6 +8357,7 @@ MonoBehaviour:
   ListViewElementPrefab: {fileID: 2856125452965984952, guid: e41c8d3ebf947a84db7d99aaca559e6c,
     type: 3}
   ButtonJoinRoom: {fileID: 435496526}
+  InfoWindowComponent: {fileID: 2013029160}
 --- !u!1001 &1608288579
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -9741,6 +9756,18 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &2013029160 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 1394963346, guid: 405a7d24991297f40917a70dd34394f2,
+    type: 3}
+  m_PrefabInstance: {fileID: 678220424}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9b70db14e4777b142803d9f7ddc4ad39, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!1 &2074505642

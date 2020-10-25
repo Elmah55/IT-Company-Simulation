@@ -1,6 +1,6 @@
-﻿using ExitGames.Client.Photon;
-using ITCompanySimulation.Multiplayer;
+﻿using System.Collections;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.SceneManagement;
 
 namespace ITCompanySimulation.Core
@@ -14,6 +14,11 @@ namespace ITCompanySimulation.Core
         /*Private consts fields*/
 
         private const string GAME_VERSION = "1.0";
+        /// <summary>
+        /// How many reconnect should be made when cannot connect to server
+        /// or after being disconnected from server
+        /// </summary>
+        private const int MAX_RECONNECT_RETRIES = 5;
 
         /*Private fields*/
 
@@ -46,6 +51,7 @@ namespace ITCompanySimulation.Core
         /// </summary>
         [SerializeField]
         private bool OfflineMode;
+        private int ReconnectRetries = 0;
 
         /*Public consts fields*/
 
@@ -60,6 +66,7 @@ namespace ITCompanySimulation.Core
         /// room and default room and simulation settings will be set
         /// </summary>
         public bool UseRoom;
+        public event UnityAction ReconnectFailed;
 
         /*Private methods*/
 
@@ -127,6 +134,13 @@ namespace ITCompanySimulation.Core
             SceneManager.LoadScene((int)SceneIndex.Game);
         }
 
+        private IEnumerator ReconnectCoroutine()
+        {
+            yield return new WaitForSecondsRealtime(5.0f);
+            PhotonNetwork.ConnectUsingSettings(GAME_VERSION);
+            ++ReconnectRetries;
+        }
+
         /*Public methods*/
 
         public void StartGame()
@@ -162,6 +176,23 @@ namespace ITCompanySimulation.Core
             SceneManager.LoadScene((int)SceneIndex.Menu);
         }
 
+        public void Connect()
+        {
+            ReconnectRetries = 0;
+            PhotonNetwork.ConnectUsingSettings(GAME_VERSION);
+        }
+
+        public override void OnConnectedToMaster()
+        {
+            base.OnConnectedToMaster();
+
+            ReconnectRetries = 0;
+#if DEVELOPMENT_BUILD || UNITY_EDITOR
+            string msg = string.Format("[{0}] Connected to master", this.GetType().Name);
+            Debug.Log(msg);
+#endif
+        }
+
         /// <summary>
         /// Is called when client is connected to photon since auto
         /// join lobby is set to true
@@ -171,7 +202,8 @@ namespace ITCompanySimulation.Core
             base.OnJoinedLobby();
 
 #if DEVELOPMENT_BUILD || UNITY_EDITOR
-            string msg = string.Format("Connected to Photon. Joined lobby: {0}",
+            string msg = string.Format("[{0}] Joined lobby: {1}",
+                                       this.GetType().Name,
                                        PhotonNetwork.lobby.Name);
             Debug.Log(msg);
 #endif
@@ -188,11 +220,12 @@ namespace ITCompanySimulation.Core
             }
 
 #if DEVELOPMENT_BUILD || UNITY_EDITOR
-            string msg = string.Format("Joined room\n" +
-                               "Name: {0}\n" +
-                               "Number of players: {1}\n" +
-                               "Max number of players : {2}" +
-                               "Open: {3}",
+            string msg = string.Format("[{0}] Joined room\n" +
+                               "Name: {1}\n" +
+                               "Number of players: {2}\n" +
+                               "Max number of players : {3}" +
+                               "Open: {4}",
+                               this.GetType().Name,
                                PhotonNetwork.room.Name,
                                PhotonNetwork.room.PlayerCount,
                                PhotonNetwork.room.MaxPlayers,
@@ -205,8 +238,17 @@ namespace ITCompanySimulation.Core
         {
             base.OnDisconnectedFromPhoton();
 
+            if (MAX_RECONNECT_RETRIES != ReconnectRetries)
+            {
+                StartCoroutine(ReconnectCoroutine());
+            }
+            else
+            {
+                ReconnectFailed?.Invoke();
+            }
+
 #if DEVELOPMENT_BUILD || UNITY_EDITOR
-            string msg = "Disconnected from Photon";
+            string msg = string.Format("[{0}] Disconnected from Photon", this.GetType().Name);
             Debug.Log(msg);
 #endif
         }
@@ -216,7 +258,9 @@ namespace ITCompanySimulation.Core
             base.OnConnectionFail(cause);
 
 #if DEVELOPMENT_BUILD || UNITY_EDITOR
-            string msg = string.Format("Connection failed. Reason: {0}", cause);
+            string msg = string.Format("[{0}] Connection failed. Reason: {1}",
+                                       this.GetType().Name,
+                                       cause);
             Debug.Log(msg);
 #endif
         }
@@ -226,7 +270,7 @@ namespace ITCompanySimulation.Core
             base.OnPhotonJoinRoomFailed(codeAndMsg);
 
 #if DEVELOPMENT_BUILD || UNITY_EDITOR
-            string msg = "Failed to join the room";
+            string msg = string.Format("[{0}] Failed to join the room", this.GetType().Name);
             Debug.Log(msg);
 #endif
         }

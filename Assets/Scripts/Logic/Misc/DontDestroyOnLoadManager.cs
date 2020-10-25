@@ -19,7 +19,7 @@ public class DontDestroyOnLoadManager : MonoBehaviour
 
     /*Private methods*/
 
-    private void Start()
+    private void Awake()
     {
         if (null != ObjectsPrefabs)
         {
