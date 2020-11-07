@@ -80,7 +80,7 @@ public class WorkersMarket : Photon.PunBehaviour
     {
 #if DEVELOPMENT_BUILD || UNITY_EDITOR
         string className = this.GetType().Name;
-        string debugInfo = string.Format("{0} generating {1} workers...",
+        string debugInfo = string.Format("[{0}] generating {1} workers...",
            className, MaxWorkersOnMarket);
         Debug.Log(debugInfo);
 #endif
@@ -92,7 +92,7 @@ public class WorkersMarket : Photon.PunBehaviour
         }
 
 #if DEVELOPMENT_BUILD || UNITY_EDITOR
-        debugInfo = string.Format("{0} generated {1} workers",
+        debugInfo = string.Format("[{0}] generated {1} workers",
            className, this.Workers.Count);
         Debug.Log(debugInfo);
 #endif

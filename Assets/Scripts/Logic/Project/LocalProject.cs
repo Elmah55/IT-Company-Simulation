@@ -141,8 +141,8 @@ namespace ITCompanySimulation.Developing
 
 #if DEVELOPMENT_BUILD || UNITY_EDITOR
                 string debugInfo = string.Format(
-                    "Project (ID: {0}) stopped",
-                    this.ID);
+                    "[{1}] Project (ID: {0}) stopped",
+                    this.ID, this.GetType().Name);
                 Debug.Log(debugInfo);
 #endif
             }
@@ -156,14 +156,14 @@ namespace ITCompanySimulation.Developing
 
 #if DEVELOPMENT_BUILD || UNITY_EDITOR
             string debugInfo = string.Format(
-                "Worker added to project\n" +
+                "[{5}] Worker added to project\n" +
                 "PROJECT -------------------\n" +
                 "Name: {0}\n" +
                 "ID: {1}\n" +
                 "WORKER -------------------\n" +
                 "Name: {2} {3}\n" +
                 "ID: {4}",
-                this.Name, this.ID, projectWorker.Name, projectWorker.Surename, projectWorker.ID);
+                this.Name, this.ID, projectWorker.Name, projectWorker.Surename, projectWorker.ID, this.GetType().Name);
             Debug.Log(debugInfo);
 #endif
         }
@@ -176,14 +176,14 @@ namespace ITCompanySimulation.Developing
 
 #if DEVELOPMENT_BUILD || UNITY_EDITOR
             string debugInfo = string.Format(
-                "Worker removed from project\n" +
+                "[{5}] Worker removed from project\n" +
                 "PROJECT -------------------\n" +
                 "Name: {0}\n" +
                 "ID: {1}\n" +
                 "WORKER -------------------\n" +
                 "Name: {2} {3}\n" +
                 "ID: {4}",
-                this.Name, this.ID, projectWorker.Name, projectWorker.Surename, projectWorker.ID);
+                this.Name, this.ID, projectWorker.Name, projectWorker.Surename, projectWorker.ID, this.GetType().Name);
             Debug.Log(debugInfo);
 #endif
         }

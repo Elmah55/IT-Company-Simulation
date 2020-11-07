@@ -228,9 +228,9 @@ namespace ITCompanySimulation.Core
             OtherPlayerWorkerRemoved?.Invoke(localRemovedWorker, workerPair.Key);
 
 #if DEVELOPMENT_BUILD || UNITY_EDITOR
-            string debugInfo = string.Format("Received worker update from player {0} (ID: {1}).\n" +
+            string debugInfo = string.Format("[{3}] Received worker update from player {0} (ID: {1}).\n" +
                 "Worker removed (ID: {2}). Local workers collection synchronized",
-                workerPair.Key.NickName, workerPair.Key.ID, removedWorkerID);
+                workerPair.Key.NickName, workerPair.Key.ID, removedWorkerID, this.GetType().Name);
             Debug.Log(debugInfo);
 #endif
         }
@@ -248,9 +248,9 @@ namespace ITCompanySimulation.Core
             OtherPlayerWorkerAdded?.Invoke(addedWorker, workerPair.Key);
 
 #if DEVELOPMENT_BUILD || UNITY_EDITOR
-            string debugInfo = string.Format("Received worker update from player {0} (ID: {1}).\n" +
+            string debugInfo = string.Format("[{3}] Received worker update from player {0} (ID: {1}).\n" +
                 "Worker added (ID: {2}). Local workers collection synchronized",
-                workerPair.Key.NickName, workerPair.Key.ID, addedWorker.ID);
+                workerPair.Key.NickName, workerPair.Key.ID, addedWorker.ID, this.GetType().Name);
             Debug.Log(debugInfo);
 #endif
         }
@@ -278,8 +278,8 @@ namespace ITCompanySimulation.Core
             NotificatorComponent.Notify(notification);
 
 #if DEVELOPMENT_BUILD || UNITY_EDITOR
-            string debugInfo = string.Format("Player {0} (ID: {1}) removed worker ID: {2} from your company",
-                sender.NickName, sender.ID, workerToRemove.ID);
+            string debugInfo = string.Format("[{3}] Player {0} (ID: {1}) removed worker ID: {2} from your company",
+                sender.NickName, sender.ID, workerToRemove.ID, this.GetType().Name);
             Debug.Log(debugInfo);
 #endif
         }

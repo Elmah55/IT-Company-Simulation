@@ -189,8 +189,8 @@ namespace ITCompanySimulation.Developing
             SimulationManagerComponent.NotificatorComponent.Notify(playerNotification);
 
 #if DEVELOPMENT_BUILD || UNITY_EDITOR
-            string debugInfo = string.Format("Project {0} (ID {2}) finished. {1} $ added to company's balance",
-                finishedProject.Name, finishedProject.CompletionBonus, finishedProject.ID);
+            string debugInfo = string.Format("[{3}] Project {0} (ID {2}) finished. {1} $ added to company's balance",
+                finishedProject.Name, finishedProject.CompletionBonus, finishedProject.ID, this.GetType().Name);
             Debug.Log(debugInfo);
 #endif
         }

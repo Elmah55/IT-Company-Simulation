@@ -75,8 +75,8 @@ public class PlayerCompany : Company
         ProjectAdded?.Invoke(projectScrum);
 
 #if DEVELOPMENT_BUILD || UNITY_EDITOR
-        string debugInfo = string.Format("Project added to company\nName {0}\nID {1}\nComplete bonus {2}",
-            projectToAdd.Name, projectToAdd.ID, projectToAdd.CompletionBonus);
+        string debugInfo = string.Format("[{3}] Project added to company\nName {0}\nID {1}\nComplete bonus {2}",
+            projectToAdd.Name, projectToAdd.ID, projectToAdd.CompletionBonus, this.GetType().Name);
         Debug.Log(debugInfo);
 #endif
     }
@@ -89,8 +89,8 @@ public class PlayerCompany : Company
         WorkerAdded?.Invoke(workerToAdd);
 
 #if DEVELOPMENT_BUILD || UNITY_EDITOR
-        string debugInfo = string.Format("Worker added to company\nName {0} {1}\nID {2}\n",
-            workerToAdd.Name, workerToAdd.Surename, workerToAdd.ID);
+        string debugInfo = string.Format("[{3}] Worker added to company\nName {0} {1}\nID {2}\n",
+            workerToAdd.Name, workerToAdd.Surename, workerToAdd.ID, this.GetType().Name);
         Debug.Log(debugInfo);
 #endif
     }
@@ -109,8 +109,8 @@ public class PlayerCompany : Company
 
 
 #if DEVELOPMENT_BUILD || UNITY_EDITOR
-        string debugInfo = string.Format("Worker removed from company\nName {0} {1}\nID {2}\n",
-            workerToRemove.Name, workerToRemove.Surename, workerToRemove.ID);
+        string debugInfo = string.Format("[{3}] Worker removed from company\nName {0} {1}\nID {2}\n",
+            workerToRemove.Name, workerToRemove.Surename, workerToRemove.ID, this.GetType().Name);
         Debug.Log(debugInfo);
 #endif
     }
