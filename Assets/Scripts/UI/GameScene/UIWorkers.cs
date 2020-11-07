@@ -47,6 +47,7 @@ namespace ITCompanySimulation.UI
 
             element.Text.text = GetWorkerListViewElementText(worker);
             element.Worker = worker;
+            element.FrontImage.sprite = worker.Avatar;
 
             return element;
         }

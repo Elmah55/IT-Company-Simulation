@@ -21,11 +21,11 @@
 
         /*Public methods*/
 
-        public Character(string name, string surename, Gender gender)
+        public Character(string charName, string charSurename, Gender charGender)
         {
-            this.Name = name;
-            this.Surename = surename;
-            this.Gender = Gender;
+            this.Name = charName;
+            this.Surename = charSurename;
+            this.Gender = charGender;
         }
     }
 }

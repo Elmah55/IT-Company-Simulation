@@ -4,6 +4,7 @@ using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace ITCompanySimulation.Character
 {
@@ -83,6 +84,10 @@ namespace ITCompanySimulation.Character
         /// Representation of character in game world
         /// </summary>
         public GameObject PhysicalCharacter { get; set; }
+        /// <summary>
+        /// Avatar to visualize worker in UI
+        /// </summary>
+        public Sprite Avatar { get; set; }
         public event SharedWorkerAction SalaryChanged;
         public event SharedWorkerAction ExpierienceTimeChanged;
         public event WorkerAbilityAction AbilityUpdated;
@@ -102,6 +107,7 @@ namespace ITCompanySimulation.Character
             this.Salary = worker.Salary;
             this.Abilites = worker.Abilites;
             this.ExperienceTime = worker.ExperienceTime;
+            this.Avatar = worker.Avatar;
         }
 
         /// <summary>

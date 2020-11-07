@@ -4,6 +4,7 @@ using ITCompanySimulation.Multiplayer;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 /// <summary>
 /// This class handles represents workers market. Each of player can hire worker
@@ -43,6 +44,10 @@ public class WorkersMarket : Photon.PunBehaviour
     /// </summary>
     private int WorkerID;
     private GameTime GameTimeComponent;
+    [SerializeField]
+    private Sprite[] WorkersAvatarsMale;
+    [SerializeField]
+    private Sprite[] WorkersAvatarsFemale;
 
     /*Public consts fields*/
 
@@ -117,6 +122,7 @@ public class WorkersMarket : Photon.PunBehaviour
         newMarketWorker.ExperienceTime = CalculateWorkerExpierience(newMarketWorker);
         newMarketWorker.Salary = CalculateWorkerSalary(newMarketWorker);
         newMarketWorker.ID = WorkerID++;
+        newMarketWorker.Avatar = CreateWorkerAvatar(newMarketWorker);
 
         if (WorkerID < newMarketWorker.ID)
         {
@@ -124,6 +130,23 @@ public class WorkersMarket : Photon.PunBehaviour
         }
 
         return newMarketWorker;
+    }
+
+    private Sprite CreateWorkerAvatar(SharedWorker worker)
+    {
+        Sprite avatar = null;
+        int randomIndex = UnityEngine.Random.Range(0, WorkersAvatarsMale.Length - 1);
+
+        if (Gender.Male == worker.Gender)
+        {
+            avatar = WorkersAvatarsMale[randomIndex];
+        }
+        else
+        {
+            avatar = WorkersAvatarsFemale[randomIndex];
+        }
+
+        return avatar;
     }
 
     private Dictionary<ProjectTechnology, float> CreateWorkerAbilities()

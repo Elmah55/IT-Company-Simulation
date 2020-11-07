@@ -20792,6 +20792,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 48033cb840be67a4392f198500bc15ac, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  WorkersAvatarsMale:
+  - {fileID: 21300000, guid: 9552d3dc94f0ecc44859bb38be5c6a66, type: 3}
+  - {fileID: 21300000, guid: 1e3fc770d06e48f439602772b5150f2c, type: 3}
+  - {fileID: 21300000, guid: 131afec3113041647935e98b82e17df2, type: 3}
+  - {fileID: 21300000, guid: 96d2d54927c849248bf1fd20aaebc0e5, type: 3}
+  WorkersAvatarsFemale:
+  - {fileID: 21300000, guid: c25faf2dd864a4843abde32ccd441093, type: 3}
+  - {fileID: 21300000, guid: dfb049196c952ad4eac700395588e6e5, type: 3}
+  - {fileID: 21300000, guid: 65fdf02778e29eb49983fe3ed5469556, type: 3}
+  - {fileID: 21300000, guid: c0ff8e0481e7f5645a81b5beb6d0f89b, type: 3}
   NumberOfWorkersGeneratedInOfflineMode: 133
 --- !u!114 &746702002
 MonoBehaviour:
