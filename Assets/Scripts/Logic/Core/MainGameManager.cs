@@ -1,4 +1,8 @@
-﻿using System.Collections;
+﻿using ExitGames.Client.Photon;
+using ITCompanySimulation.Character;
+using ITCompanySimulation.Developing;
+using ITCompanySimulation.Multiplayer;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.SceneManagement;
@@ -73,6 +77,12 @@ namespace ITCompanySimulation.Core
         private void Awake()
         {
             //TODO: Register all types inside this method
+            //Register custom classes that will be sent between clients
+            PhotonPeer.RegisterType(typeof(SharedProject), NetworkingData.PROJECT_BYTE_CODE, SharedProject.Serialize, SharedProject.Deserialize);
+            //Needed to register both base and derived class of worker because photon API requires
+            //derived class to be register event when using base class argument in method
+            PhotonPeer.RegisterType(typeof(LocalWorker), NetworkingData.LOCAL_WORKER_BYTE_CODE, SharedWorker.Serialize, SharedWorker.Deserialize);
+            PhotonPeer.RegisterType(typeof(SharedWorker), NetworkingData.SHARED_WORKER_BYTE_CODE, SharedWorker.Serialize, SharedWorker.Deserialize);
 
             DontDestroyOnLoad(this.gameObject);
             PhotonNetwork.offlineMode = this.OfflineMode;
@@ -169,10 +179,6 @@ namespace ITCompanySimulation.Core
         public void FinishSession()
         {
             PhotonNetwork.LeaveRoom();
-            //TODO: Find way to prevent spawning other GameManager
-            //object when menu scene is loaded so destroying of this
-            //object is not needed and client won't have connect to
-            //photon server every time menu scene is loaded
             SceneManager.LoadScene((int)SceneIndex.Menu);
         }
 

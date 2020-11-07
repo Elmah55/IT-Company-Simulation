@@ -219,12 +219,6 @@ public class WorkersMarket : Photon.PunBehaviour
 
     private void Start()
     {
-        //Register type for sending workers available on market to other players
-        //Needed to register both base and derived class of worker because photon API requires
-        //derived class to be register event when using base class argument in method
-        PhotonPeer.RegisterType(typeof(LocalWorker), NetworkingData.LOCAL_WORKER_BYTE_CODE, SharedWorker.Serialize, SharedWorker.Deserialize);
-        PhotonPeer.RegisterType(typeof(SharedWorker), NetworkingData.SHARED_WORKER_BYTE_CODE, SharedWorker.Serialize, SharedWorker.Deserialize);
-
         GameTimeComponent = GetComponent<GameTime>();
         GameTimeComponent.DayChanged += OnGameTimeDayChanged;
 

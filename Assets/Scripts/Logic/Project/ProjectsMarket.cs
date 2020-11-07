@@ -1,6 +1,4 @@
-﻿using ExitGames.Client.Photon;
-using ITCompanySimulation.Developing;
-using ITCompanySimulation.Multiplayer;
+﻿using ITCompanySimulation.Developing;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -202,9 +200,6 @@ public class ProjectsMarket : Photon.PunBehaviour
 
     private void Start()
     {
-        //Register type for sending projects available on market to other players
-        PhotonPeer.RegisterType(typeof(SharedProject), NetworkingData.PROJECT_BYTE_CODE, SharedProject.Serialize, SharedProject.Deserialize);
-
         //Master client will generate all the workers on market
         //then send it to other clients
         if (true == PhotonNetwork.isMasterClient)

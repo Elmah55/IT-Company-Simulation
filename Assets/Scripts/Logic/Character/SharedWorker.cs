@@ -134,6 +134,7 @@ namespace ITCompanySimulation.Character
             SharedWorker workerToSerialize = (SharedWorker)workerObject;
 
             //TODO: send string index instead of sending an actual string
+            //TODO: send avatar index
             byte[] nameBytes = Encoding.Unicode.GetBytes(workerToSerialize.Name);
             byte[] surenameBytes = Encoding.Unicode.GetBytes(workerToSerialize.Surename);
             byte[] expierienceTimeBytes = BitConverter.GetBytes(workerToSerialize.ExperienceTime);
