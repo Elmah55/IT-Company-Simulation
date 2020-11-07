@@ -1,4 +1,6 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.EventSystems;
 
 public class CameraController : MonoBehaviour
 {
@@ -15,6 +17,7 @@ public class CameraController : MonoBehaviour
     private Vector2 LastMousePosition;
     private float CameraDefaultZoom;
     private float CameraPreviousZoom;
+    private int DontDisableCameraControlLayer;
 
     /*Public consts fields*/
 
@@ -40,7 +43,6 @@ public class CameraController : MonoBehaviour
             (1f / (CameraComponent.orthographicSize - CameraDefaultZoom)) : (0.7f * (CameraDefaultZoom - CameraComponent.orthographicSize));
         camerPos.x = Mathf.Clamp(camerPos.x, CameraPostionBounds.min.x * zoomBoundFactor, CameraPostionBounds.max.x * zoomBoundFactor);
         camerPos.y = Mathf.Clamp(camerPos.y, CameraPostionBounds.min.y * zoomBoundFactor, CameraPostionBounds.max.y * zoomBoundFactor);
-        //Setting position like that makes camera not render tilemap
         CameraComponent.transform.position = camerPos;
     }
 
@@ -78,12 +80,71 @@ public class CameraController : MonoBehaviour
     {
         CameraComponent = GetComponent<Camera>();
         CameraDefaultZoom = CameraComponent.orthographicSize;
+        string layerName = "DontDisableCameraControl";
+        DontDisableCameraControlLayer = LayerMask.NameToLayer(layerName);
+
+#if DEVELOPMENT_BUILD || UNITY_EDITOR
+        if (-1 == DontDisableCameraControlLayer)
+        {
+            string debugMsg = string.Format(
+                "[{0}] Could not get layer \"{1}\" by name. Holding mouse pointer over all UI elements will disable camera control",
+                this.GetType().Name, layerName);
+            Debug.Log(debugMsg);
+        }
+#endif
+    }
+
+    /// <summary>
+    /// Checks if camera control should be active this frame
+    /// </summary>
+    private bool GetCameraControlActive()
+    {
+        bool result = true;
+
+        if (-1 != DontDisableCameraControlLayer)
+        {
+            PointerEventData data = new PointerEventData(EventSystem.current);
+            data.position = Input.mousePosition;
+            List<RaycastResult> results = new List<RaycastResult>();
+            EventSystem.current.RaycastAll(data, results);
+
+            //Dont change camera position when mouse is over UI element unless it has
+            //specific layer. It is use to prevent situation like zooming when user is scrolling list
+            if (results.Count > 0)
+            {
+                foreach (RaycastResult rayResult in results)
+                {
+                    if (rayResult.gameObject.layer != DontDisableCameraControlLayer)
+                    {
+                        result = false;
+                        break;
+                    }
+                }
+            }
+            else
+            {
+                result = false;
+            }
+        }
+        else
+        {
+            result = false;
+        }
+
+        return result;
     }
 
     private void Update()
     {
-        SetCameraPosition();
-        SetCameraZoom();
+        //Whether camera control should be enabled this frame
+        bool cameraControlActive = GetCameraControlActive();
+
+        if (true == cameraControlActive)
+        {
+            SetCameraPosition();
+            SetCameraZoom();
+        }
+
         LastMousePosition = Input.mousePosition;
     }
 
