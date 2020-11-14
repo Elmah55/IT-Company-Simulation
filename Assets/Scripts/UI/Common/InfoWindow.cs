@@ -2,12 +2,13 @@
 using TMPro;
 using UnityEngine.Events;
 using UnityEngine.UI;
+using System.Collections.Generic;
 
 namespace ITCompanySimulation.UI
 {
     /// <summary>
     /// This class control info window that can provide some information to player.
-    /// It contains text and confirmation button
+    /// It contains text and confirmation button.
     /// </summary>
     public class InfoWindow : MonoBehaviour
     {
@@ -19,9 +20,27 @@ namespace ITCompanySimulation.UI
         private TextMeshProUGUI m_Text;
         [SerializeField]
         private Button ConfirmationButton;
+        [SerializeField]
+        private Button CancelButton;
         /// <summary>
-        /// Invoked when player clicks button in this window
-        private UnityAction ConfirmationButtonClicked;
+        /// Invoked when player clicks "Ok" button in this window
+        /// </summary>
+        private UnityAction ConfirmButtonClicked;
+        /// <summary>
+        /// Invoked when player clicks "Cancel" button in this window
+        /// </summary>
+        private UnityAction CancelButtonClicked;
+        /// <summary>
+        /// Info window actions will be queued here in case showing window is called when info window is already visible
+        /// </summary>
+        private Queue<InfoWindowData> InfoWindowActions;
+        private struct InfoWindowData
+        {
+            public string Text;
+            public UnityAction OnConfirmAction;
+            public UnityAction OnCancelAction;
+            public bool Cancel;
+        }
 
         /*Public consts fields*/
 
@@ -42,48 +61,76 @@ namespace ITCompanySimulation.UI
 
         /*Private methods*/
 
-        private void OnConfirmationButtonClicked()
+        private void OnConfirmButtonClicked()
         {
-            ConfirmationButtonClicked?.Invoke();
+            ConfirmButtonClicked?.Invoke();
+        }
+
+        private void OnCancelButtonClicked()
+        {
+            CancelButtonClicked?.Invoke();
         }
 
         private void Awake()
         {
-            ConfirmationButton.onClick.AddListener(OnConfirmationButtonClicked);
+            ConfirmationButton.onClick.AddListener(OnConfirmButtonClicked);
+            ConfirmationButton.onClick.AddListener(Hide);
+            CancelButton.onClick.AddListener(OnCancelButtonClicked);
+            CancelButton.onClick.AddListener(Hide);
+        }
+
+        private void Show(string text, UnityAction onConfirmAction, UnityAction onCancelAction, bool cancel)
+        {
+            if (true == gameObject.GetActive())
+            {
+                //Info window is already active, store show action so it can be displayed after user closes window
+                if (null == InfoWindowActions)
+                {
+                    InfoWindowActions = new Queue<InfoWindowData>();
+                }
+
+                InfoWindowData data = new InfoWindowData();
+                data.Text = text;
+                data.OnConfirmAction = onConfirmAction;
+                data.OnCancelAction = onCancelAction;
+                data.Cancel = cancel;
+
+                InfoWindowActions.Enqueue(data);
+            }
+            else
+            {
+                CancelButton.gameObject.SetActive(cancel);
+                this.Text = text;
+                ConfirmButtonClicked = onConfirmAction;
+                CancelButtonClicked = onCancelAction;
+                gameObject.SetActive(true);
+            }
         }
 
         /*Public methods*/
 
         /// <summary>
-        /// Makes info window visible
-        /// </summary>
-        public void Show()
-        {
-            Show(null);
-        }
-
-        /// <summary>
-        /// Makes info window visible
-        /// </summary>
-        /// <param name="onConfirmAction"> Method invoked after player has pressed confirmation button.
-        /// If it is null nothing happens</param>
-        public void Show(UnityAction onConfirmAction)
-        {
-            ConfirmationButtonClicked = onConfirmAction;
-            gameObject.SetActive(true);
-        }
-
-        /// <summary>
-        /// Makes info window visible
+        /// Makes info window visible with "Ok" button. If used when info window is already visible, info window data
+        /// will be queued and displayed when previous window is closed.
         /// </summary>
         /// <param name="onConfirmAction">Method invoked after player has pressed confirmation button.
         /// If it is null nothing happens</param>
         /// <param name="text">Text displayed in this window</param>
-        public void Show(string text, UnityAction onConfirmAction)
+        /// <param name="onConfirmAction">Event invoked when "Ok" button is pressed</param>
+        public void ShowOk(string text, UnityAction onConfirmAction)
         {
-            this.Text = text;
-            ConfirmationButtonClicked = onConfirmAction;
-            gameObject.SetActive(true);
+            Show(text, onConfirmAction, null, false);
+        }
+
+        /// <summary>
+        /// Makes info window visible with "Ok" and "Cancel" button.
+        /// </summary>
+        /// <param name="text">Text displayed in this window</param>
+        /// <param name="onConfirmAction">Event invoked when "Ok" button is pressed</param>
+        /// <param name="onCancelAction">Event invoked when "Cancel" button is pressed</param>
+        public void ShowOkCancel(string text, UnityAction onConfirmAction, UnityAction onCancelAction)
+        {
+            Show(text, onConfirmAction, onCancelAction, true);
         }
 
         /// <summary>
@@ -92,6 +139,13 @@ namespace ITCompanySimulation.UI
         public void Hide()
         {
             gameObject.SetActive(false);
+
+            if (null != InfoWindowActions && InfoWindowActions.Count > 0)
+            {
+                //Show next data
+                InfoWindowData data = InfoWindowActions.Dequeue();
+                Show(data.Text, data.OnConfirmAction, data.OnCancelAction, data.Cancel);
+            }
         }
     }
 }

@@ -55,7 +55,7 @@ namespace ITCompanySimulation.UI
 
         private void OnGameManagerComponentReconnectFailed()
         {
-            InfoWindowComponent.Show("Connection to server failed", null);
+            InfoWindowComponent.ShowOk("Connection to server failed", null);
             ButtonStartGameStateDisconnected();
             ReconnectFailed = true;
         }

@@ -322,7 +322,7 @@ namespace ITCompanySimulation.Core
                 }
 
                 SimulationFinished?.Invoke(winnerPhotonPlayerID, (SimulationFinishReason)finishReason);
-                InfoWindowComponent.Show(finishSimulationInfoMsg, GameManagerComponent.FinishSession);
+                InfoWindowComponent.ShowOk(finishSimulationInfoMsg, GameManagerComponent.FinishSession);
             }
         }
 

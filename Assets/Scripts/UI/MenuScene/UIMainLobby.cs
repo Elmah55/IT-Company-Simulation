@@ -163,7 +163,7 @@ namespace ITCompanySimulation.UI
         {
             base.OnPhotonJoinRoomFailed(codeAndMsg);
 
-            InfoWindowComponent.Show(codeAndMsg[1].ToString(), RefreshRoomList);
+            InfoWindowComponent.ShowOk(codeAndMsg[1].ToString(), RefreshRoomList);
         }
     } 
 }
