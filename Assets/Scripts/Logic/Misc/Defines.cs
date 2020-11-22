@@ -128,6 +128,14 @@ public class EnumToString
         { ProjectTechnology.Python,"Python" },
         { ProjectTechnology.Java,"Java" }
     };
+
+    public static IReadOnlyDictionary<FullScreenMode, string> FullScreenModeStrings = new Dictionary<FullScreenMode, string>()
+    {
+        { FullScreenMode.ExclusiveFullScreen,"Exclusive fullscreen" },
+        { FullScreenMode.FullScreenWindow,"Fullscreen window" },
+        { FullScreenMode.MaximizedWindow,"Maximized window" },
+        { FullScreenMode.Windowed,"Windowed" }
+    };
 }
 
 /// <summary>
