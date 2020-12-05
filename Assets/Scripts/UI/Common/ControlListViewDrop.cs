@@ -28,6 +28,7 @@ namespace ITCompanySimulation.UI
 
             if (null != drag)
             {
+                drag.ParentTransform = Layout.GetComponent<RectTransform>();
                 drag.ParentChanged += OnDraggedElementParentChanged;
             }
         }

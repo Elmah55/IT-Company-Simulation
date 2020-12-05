@@ -14,7 +14,6 @@ namespace ITCompanySimulation.UI
         /*Private fields*/
 
         private RectTransform TransformComponent;
-        private RectTransform ParentTransform;
         /// <summary>
         /// Offset of dragged object from mouse position
         /// </summary>
@@ -34,6 +33,7 @@ namespace ITCompanySimulation.UI
         /// when dragging
         /// </summary>
         public RectTransform DragParentTransform { get; set; }
+        public RectTransform ParentTransform { get; set; }
         public event ParentChangeAction ParentChanged;
 
         /*Private methods*/
