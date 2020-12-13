@@ -160,12 +160,11 @@ public class PlayerCompanyManager : MonoBehaviour
 
         if (true == companyWorker.Available)
         {
-            SimulateWorkerSickenss(companyWorker);
-
-            if (companyWorker.DaysOfHolidaysLeft > 0)
-            {
-                SimulateWorkerHoliday(companyWorker);
-            }
+            SimulateWorkerSickness(companyWorker);
+        }
+        else if (true == companyWorker.Available && companyWorker.DaysOfHolidaysLeft > 0)
+        {
+            SimulateWorkerHoliday(companyWorker);
         }
         else if (0 == companyWorker.DaysUntilAvailable)
         {
@@ -173,7 +172,7 @@ public class PlayerCompanyManager : MonoBehaviour
         }
     }
 
-    private void SimulateWorkerSickenss(LocalWorker companyWorker)
+    private void SimulateWorkerSickness(LocalWorker companyWorker)
     {
         //What is the probability of worker being sick (in %)
         int notSickProbability = 100 - (int)(companyWorker.DaysSinceAbsent * 0.01f);
