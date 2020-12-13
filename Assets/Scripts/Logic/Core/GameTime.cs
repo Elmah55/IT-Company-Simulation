@@ -1,13 +1,15 @@
 ﻿using System;
 using System.Collections;
 using UnityEngine;
+using ITCompanySimulation.Utilities;
+using UnityEngine.Events;
 
 /// <summary>
 /// This class handles updating time in game world. Time
 /// measured here is based on const values and might not be
 /// equal to scaled time
 /// </summary>
-public class GameTime : Photon.PunBehaviour
+public class GameTime : Photon.PunBehaviour, IDataReceiver
 {
     /*Private consts fields*/
 
@@ -41,9 +43,12 @@ public class GameTime : Photon.PunBehaviour
             return TIME_UPDATE_FREQUENCY;
         }
     }
+    public bool IsDataReceived { get; private set; }
+
     public event Action DayChanged;
     public event Action MonthChanged;
     public event Action YearChanged;
+    public event UnityAction DataReceived;
 
     /*Private methods*/
 
@@ -76,6 +81,7 @@ public class GameTime : Photon.PunBehaviour
 
     private void StartTime()
     {
+        StopAllCoroutines();
         CurrentTime = DateTime.Now;
         StartCoroutine(UpdateGameTime());
     }
@@ -85,6 +91,11 @@ public class GameTime : Photon.PunBehaviour
     {
         CurrentTime = new DateTime(year, month, day);
         //Inform all subscribers right after receiving new date from master client
+        if (false == IsDataReceived)
+        {
+            IsDataReceived = true;
+            DataReceived?.Invoke();
+        }
         DayChanged?.Invoke();
         StartCoroutine(UpdateGameTime());
     }
@@ -117,6 +128,18 @@ public class GameTime : Photon.PunBehaviour
         if (true == PhotonNetwork.isMasterClient)
         {
             PhotonViewComponent.RPC("StartTime", newPlayer,
+                CurrentTime.Day, CurrentTime.Month, CurrentTime.Year);
+        }
+    }
+
+    public override void OnMasterClientSwitched(PhotonPlayer newMasterClient)
+    {
+        base.OnMasterClientSwitched(newMasterClient);
+
+        if (true == PhotonNetwork.isMasterClient)
+        {
+            StartTime();
+            PhotonViewComponent.RPC("StartTime", PhotonTargets.Others,
                 CurrentTime.Day, CurrentTime.Month, CurrentTime.Year);
         }
     }

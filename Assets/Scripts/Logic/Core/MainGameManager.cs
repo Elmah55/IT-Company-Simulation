@@ -2,16 +2,18 @@
 using ITCompanySimulation.Character;
 using ITCompanySimulation.Developing;
 using ITCompanySimulation.Multiplayer;
+using ITCompanySimulation.Utilities;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.SceneManagement;
+using System.Linq;
 
 namespace ITCompanySimulation.Core
 {
     /// <summary>
-    /// This class handles main game aspects like loading scenes, transf and
-    /// handling multiplayer connection
+    /// This class handles main game aspects like loading scenes, transfer,
+    /// handling multiplayer connection and multiplayer session
     /// </summary>
     public class MainGameManager : Photon.PunBehaviour
     {
@@ -33,7 +35,19 @@ namespace ITCompanySimulation.Core
         /// he is ready to receive data
         /// </summary>
         private int NumberOfClientsReadyToReceiveData;
-
+        /// <summary>
+        /// Each of clients will send notification to master client when
+        /// he received all data
+        /// </summary>
+        private int NumberOfClientsWithDataReceived;
+        /// <summary>
+        /// Number of this client's data transfers required by components to start simulation
+        /// </summary>
+        private int NumberOfCompletedDataTransfers;
+        /// <summary>
+        /// Components that need to receive data before starting session
+        /// </summary>
+        private IDataReceiver[] DataReceiverComponents;
         /// <summary>
         /// Below values can be used to set balance when game creation through room is not used
         /// </summary>
@@ -43,7 +57,6 @@ namespace ITCompanySimulation.Core
         private int TargetCompanyBalance;
         [SerializeField]
         private int MinimalCompanyBalance;
-
         /// <summary>
         /// When this is set to true simulation will be run in
         /// Offline Mode. It means that this client won't be connected
@@ -71,12 +84,12 @@ namespace ITCompanySimulation.Core
         /// </summary>
         public bool UseRoom;
         public event UnityAction ReconnectFailed;
+        public event UnityAction SessionStarted;
 
         /*Private methods*/
 
         private void Awake()
         {
-            //TODO: Register all types inside this method
             //Register custom classes that will be sent between clients
             PhotonPeer.RegisterType(typeof(SharedProject), NetworkingData.PROJECT_BYTE_CODE, SharedProject.Serialize, SharedProject.Deserialize);
             //Needed to register both base and derived class of worker because photon API requires
@@ -100,19 +113,42 @@ namespace ITCompanySimulation.Core
 
         private void OnSceneLoaded(Scene loadedScene, LoadSceneMode sceneLoadMode)
         {
-            NumberOfClientsReadyToReceiveData = 0;
-
             if ((int)SceneIndex.Game == loadedScene.buildIndex)
             {
-                if (false == PhotonNetwork.isMasterClient)
+                NumberOfClientsReadyToReceiveData = 0;
+                NumberOfClientsWithDataReceived = 0;
+                NumberOfCompletedDataTransfers = 0;
+
+                if (false == PhotonNetwork.offlineMode)
                 {
+                    DataReceiverComponents = GameObject.FindObjectsOfType<MonoBehaviour>().OfType<IDataReceiver>().ToArray();
 
-                    RaiseEventOptions options = new RaiseEventOptions
+                    foreach (IDataReceiver receiver in DataReceiverComponents)
                     {
-                        Receivers = ReceiverGroup.Others
-                    };
+                        if (true == receiver.IsDataReceived)
+                        {
+                            OnComponentDataTransfered();
+                        }
+                        else
+                        {
+                            receiver.DataReceived += OnComponentDataTransfered;
+                        }
+                    }
 
-                    PhotonNetwork.RaiseEvent((byte)RaiseEventCode.ClientReadyToReceiveData, null, true, options);
+                    if (false == PhotonNetwork.isMasterClient)
+                    {
+                        RaiseEventOptions options = new RaiseEventOptions
+                        {
+                            Receivers = ReceiverGroup.Others
+                        };
+
+                        PhotonNetwork.RaiseEvent((byte)RaiseEventCode.ClientReadyToReceiveData, null, true, options);
+                    }
+                }
+                else
+                {
+                    //No need to receive data in offline mode
+                    SessionStarted?.Invoke();
                 }
             }
         }
@@ -122,14 +158,30 @@ namespace ITCompanySimulation.Core
             switch (eventCode)
             {
                 case (byte)RaiseEventCode.ClientReadyToReceiveData:
+                    ++NumberOfClientsReadyToReceiveData;
+
                     if (true == PhotonNetwork.isMasterClient)
                     {
-                        ++NumberOfClientsReadyToReceiveData;
-
                         //All other players are ready to receive data, time to start game for master client
                         if (NumberOfClientsReadyToReceiveData == PhotonNetwork.playerList.Length - 1)
                         {
                             StartGameInternal();
+                        }
+                    }
+                    break;
+                case (byte)RaiseEventCode.ClientReceivedData:
+                    ++NumberOfClientsWithDataReceived;
+
+                    if (true == PhotonNetwork.isMasterClient)
+                    {
+                        if (NumberOfClientsWithDataReceived == PhotonNetwork.otherPlayers.Length)
+                        {
+#if DEVELOPMENT_BUILD || UNITY_EDITOR
+                            Debug.LogFormat("[{0}] All clients ({1}) received data. Starting sesssion",
+                                this.GetType().Name, PhotonNetwork.otherPlayers.Length);
+#endif
+                            //Session can be started now, notify other components
+                            SessionStarted?.Invoke();
                         }
                     }
                     break;
@@ -149,6 +201,29 @@ namespace ITCompanySimulation.Core
             yield return new WaitForSecondsRealtime(5.0f);
             PhotonNetwork.ConnectUsingSettings(GAME_VERSION);
             ++ReconnectRetries;
+        }
+
+        private void OnComponentDataTransfered()
+        {
+            ++NumberOfCompletedDataTransfers;
+
+            if (DataReceiverComponents.Length == NumberOfCompletedDataTransfers)
+            {
+                if (false == PhotonNetwork.isMasterClient)
+                {
+#if DEVELOPMENT_BUILD || UNITY_EDITOR
+                    Debug.LogFormat("[{0}] All components received data. Notifying master client",
+                        this.GetType().Name);
+#endif
+                    //Notify master client that all required data is received
+                    RaiseEventOptions options = new RaiseEventOptions
+                    {
+                        Receivers = ReceiverGroup.Others
+                    };
+
+                    PhotonNetwork.RaiseEvent((byte)RaiseEventCode.ClientReceivedData, null, true, options);
+                }
+            }
         }
 
         /*Public methods*/
@@ -220,7 +295,7 @@ namespace ITCompanySimulation.Core
             base.OnJoinedRoom();
 
             //Game will be started in online mode but only with one player in room
-            if (false == UseRoom)
+            if (false == UseRoom && false == PhotonNetwork.offlineMode)
             {
                 StartGameInternal();
             }

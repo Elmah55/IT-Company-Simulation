@@ -65,4 +65,14 @@ MonoBehaviour:
   - SetSimulationSettingsRPC
   - FinishSimulationRPC
   - OnAllClientsReady
+  - OnClientDataTransfersCompleted
+  - SetMaxWorkersOnMarket
+  - AddWorkerInternalRPC
+  - RemoveWorkerInternalRPC
+  - SetMaxWorkersOnMarketRPC
+  - TruncateWorkersRPC
+  - AddProjectRPC
+  - RemoveProjectInternalRPC
+  - SetMaxProjectsOnMarketRPC
+  - TruncateProjectsRPC
   DisableAutoOpenWizard: 1

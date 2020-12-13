@@ -124,6 +124,16 @@ namespace ITCompanySimulation.Core
             }
         }
 
+        private void OnGameManagerComponentSessionStarted()
+        {
+            SimulationTimeScale = 1f;
+
+#if DEVELOPMENT_BUILD || UNITY_EDITOR
+            Debug.LogFormat("[{0}] Session started. Starting simulation with time scale {1}",
+                this.GetType().Name, SimulationTimeScale);
+#endif
+        }
+
         #region Workers events
 
         private void OnControlledCompanyWorkerAdded(SharedWorker addedWorker)
@@ -359,9 +369,11 @@ namespace ITCompanySimulation.Core
             }
         }
 
-        public void Start()
+        public void Awake()
         {
             GameManagerComponent = GameObject.FindGameObjectWithTag("GameManager").GetComponent<MainGameManager>();
+            //TODO: Add info window when waiting for session start
+            GameManagerComponent.SessionStarted += OnGameManagerComponentSessionStarted;
             GameTimeComponent = GetComponent<GameTime>();
             NotificatorComponent = new SimulationEventNotificator(GameTimeComponent);
             IsSimulationActive = true;
