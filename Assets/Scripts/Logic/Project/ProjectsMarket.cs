@@ -80,7 +80,7 @@ public class ProjectsMarket : Photon.PunBehaviour, IDataReceiver
 
     private void OnGameTimeDayChanged()
     {
-        if (Projects.Count < MaxProjectsOnMarket)
+        if (true == PhotonNetwork.isMasterClient && Projects.Count < MaxProjectsOnMarket)
         {
             int randomNumber = UnityEngine.Random.Range(1, 101);
 

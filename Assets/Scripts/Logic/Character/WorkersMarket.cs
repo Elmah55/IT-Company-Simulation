@@ -247,7 +247,7 @@ public class WorkersMarket : Photon.PunBehaviour, IDataReceiver
 
     private void OnGameTimeDayChanged()
     {
-        if (Workers.Count < MaxWorkersOnMarket)
+        if (true == PhotonNetwork.isMasterClient && Workers.Count < MaxWorkersOnMarket)
         {
             int randomNuber = UnityEngine.Random.Range(0, 101);
 
