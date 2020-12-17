@@ -1,10 +1,10 @@
 ﻿using UnityEngine;
+using System;
 
 /// <summary>
 /// This class hold player defined preferences like nickname
 /// and company name that will be used during game
 /// </summary>
-// Derive from MonoBehaviour because PlayerPrefs.GetString cannot be used in constructor
 public static class PlayerInfo
 {
     /*Private consts fields*/
@@ -17,14 +17,52 @@ public static class PlayerInfo
 
     /*Private fields*/
 
+    private static string m_CompanyName;
+    private static string m_Nickname;
+
     /*Public consts fields*/
 
     public const int COMPANY_NAME_MAX_LENGHT = 40;
+    public const int PLAYER_NICKNAME_MAX_LENGTH = 40;
 
     /*Public fields*/
 
-    public static string CompanyName { get; private set; }
-    public static string Nickname { get; private set; }
+    public static string CompanyName
+    {
+        get
+        {
+            return m_CompanyName;
+        }
+
+        set
+        {
+            if (value.Length > COMPANY_NAME_MAX_LENGHT)
+            {
+                throw new InvalidOperationException(
+                    "Exceeded company name length. Max allowed length is " + COMPANY_NAME_MAX_LENGHT);
+            }
+
+            m_CompanyName = value;
+        }
+    }
+    public static string Nickname
+    {
+        get
+        {
+            return m_Nickname;
+        }
+
+        set
+        {
+            if (value.Length > PLAYER_NICKNAME_MAX_LENGTH)
+            {
+                throw new InvalidOperationException(
+                    "Exceeded player nickname length. Max allowed length is " + PLAYER_NICKNAME_MAX_LENGTH);
+            }
+
+            m_Nickname = value;
+        }
+    }
     public static bool CredentialsCompleted
     {
         get
