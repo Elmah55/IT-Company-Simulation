@@ -8,6 +8,7 @@ TagManager:
   - Canvas
   - InfoWindow
   - GameManager
+  - ScriptsGameObject
   layers:
   - Default
   - TransparentFX

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using ITCompanySimulation.Utilities;
 using UnityEngine.Events;
+using ITCompanySimulation.UI;
 
 /// <summary>
 /// This class handles represents workers market. Each of player can hire worker
@@ -43,10 +44,7 @@ public class WorkersMarket : Photon.PunBehaviour, IDataReceiver
     /// </summary>
     private int WorkerID;
     private GameTime GameTimeComponent;
-    [SerializeField]
-    private Sprite[] WorkersAvatarsMale;
-    [SerializeField]
-    private Sprite[] WorkersAvatarsFemale;
+    private ResourceHolder Resources;
 
     /*Public consts fields*/
 
@@ -105,27 +103,25 @@ public class WorkersMarket : Photon.PunBehaviour, IDataReceiver
     {
         //Randomly selected name, surename and gender for new worker
         Gender newWorkerGender = (Gender)UnityEngine.Random.Range(0, NUMBER_OF_GENDERS);
-        string newWorkerName;
 
-        if (Gender.Male == newWorkerGender)
-        {
-            newWorkerName = WorkerData.MaleNames[UnityEngine.Random.Range(0, WorkerData.MaleNames.Count)];
-        }
-        else
-        {
-            newWorkerName = WorkerData.FemaleNames[UnityEngine.Random.Range(0, WorkerData.FemaleNames.Count)];
-        }
-
+        int nameIndex;
+        string newWorkerName = CreateWorkerName(newWorkerGender, out nameIndex);
+        int surenameIndex = UnityEngine.Random.Range(0, WorkerData.Surenames.Count);
         string newWorkerSurename =
-            WorkerData.Surenames[UnityEngine.Random.Range(0, WorkerData.Surenames.Count)];
+            WorkerData.Surenames[surenameIndex];
 
-        SharedWorker newMarketWorker = new SharedWorker(newWorkerName, newWorkerSurename, newWorkerGender);
+        SharedWorker newMarketWorker =
+            new SharedWorker(newWorkerName, newWorkerSurename, newWorkerGender);
 
         newMarketWorker.Abilites = CreateWorkerAbilities();
         newMarketWorker.ExperienceTime = CalculateWorkerExpierience(newMarketWorker);
         newMarketWorker.Salary = CalculateWorkerSalary(newMarketWorker);
         newMarketWorker.ID = WorkerID++;
-        newMarketWorker.Avatar = CreateWorkerAvatar(newMarketWorker);
+        int avatarIndex;
+        newMarketWorker.Avatar = CreateWorkerAvatar(newMarketWorker, out avatarIndex);
+        newMarketWorker.AvatarIndex = avatarIndex;
+        newMarketWorker.NameIndex = nameIndex;
+        newMarketWorker.SurenameIndex = surenameIndex;
 
         if (WorkerID < newMarketWorker.ID)
         {
@@ -135,18 +131,39 @@ public class WorkersMarket : Photon.PunBehaviour, IDataReceiver
         return newMarketWorker;
     }
 
-    private Sprite CreateWorkerAvatar(SharedWorker worker)
+    private string CreateWorkerName(Gender workerGender, out int nameIndex)
     {
-        Sprite avatar = null;
-        int randomIndex = UnityEngine.Random.Range(0, WorkersAvatarsMale.Length - 1);
+        string newWorkerName;
 
-        if (Gender.Male == worker.Gender)
+        if (Gender.Male == workerGender)
         {
-            avatar = WorkersAvatarsMale[randomIndex];
+            nameIndex = UnityEngine.Random.Range(0, WorkerData.MaleNames.Count);
+            newWorkerName = WorkerData.MaleNames[nameIndex];
         }
         else
         {
-            avatar = WorkersAvatarsFemale[randomIndex];
+            nameIndex = UnityEngine.Random.Range(0, WorkerData.FemaleNames.Count);
+            newWorkerName = WorkerData.FemaleNames[nameIndex];
+        }
+
+        return newWorkerName;
+    }
+
+    private Sprite CreateWorkerAvatar(SharedWorker worker, out int avatarIndex)
+    {
+        Sprite avatar = null;
+        int randomIndex = UnityEngine.Random.Range(0,
+            worker.Gender == Gender.Male ? 
+            Resources.MaleCharactersAvatars.Length - 1 : Resources.FemaleCharactersAvatars.Length - 1);
+        avatarIndex = randomIndex;
+
+        if (Gender.Male == worker.Gender)
+        {
+            avatar = Resources.MaleCharactersAvatars[randomIndex];
+        }
+        else
+        {
+            avatar = Resources.FemaleCharactersAvatars[randomIndex];
         }
 
         return avatar;
@@ -224,6 +241,7 @@ public class WorkersMarket : Photon.PunBehaviour, IDataReceiver
     {
         GameTimeComponent = GetComponent<GameTime>();
         GameTimeComponent.DayChanged += OnGameTimeDayChanged;
+        Resources = GetComponent<ResourceHolder>();
 
         //Master client will generate all the workers on market
         //then send it to other clients

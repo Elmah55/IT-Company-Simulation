@@ -1,10 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Runtime.Serialization.Formatters.Binary;
-using System.Text;
 using UnityEngine;
-using UnityEngine.UI;
+using ITCompanySimulation.UI;
 
 namespace ITCompanySimulation.Character
 {
@@ -16,6 +13,7 @@ namespace ITCompanySimulation.Character
 
         private int m_Salary;
         private int m_ExpierienceTime;
+        private static ResourceHolder Resources;
 
         /*Public consts fields*/
 
@@ -88,6 +86,13 @@ namespace ITCompanySimulation.Character
         /// Avatar to visualize worker in UI
         /// </summary>
         public Sprite Avatar { get; set; }
+        /// <summary>
+        /// Indexes will be used for serialization to reduce
+        /// amount of data sent to other clients
+        /// </summary>
+        public int NameIndex { get; set; }
+        public int SurenameIndex { get; set; }
+        public int AvatarIndex { get; set; }
         public event SharedWorkerAction SalaryChanged;
         public event SharedWorkerAction ExpierienceTimeChanged;
         public event WorkerAbilityAction AbilityUpdated;
@@ -108,6 +113,9 @@ namespace ITCompanySimulation.Character
             this.Abilites = worker.Abilites;
             this.ExperienceTime = worker.ExperienceTime;
             this.Avatar = worker.Avatar;
+            this.NameIndex = worker.NameIndex;
+            this.SurenameIndex = worker.SurenameIndex;
+            this.AvatarIndex = worker.AvatarIndex;
         }
 
         /// <summary>
@@ -133,10 +141,9 @@ namespace ITCompanySimulation.Character
         {
             SharedWorker workerToSerialize = (SharedWorker)workerObject;
 
-            //TODO: send string index instead of sending an actual string
-            //TODO: send avatar index
-            byte[] nameBytes = Encoding.Unicode.GetBytes(workerToSerialize.Name);
-            byte[] surenameBytes = Encoding.Unicode.GetBytes(workerToSerialize.Surename);
+            byte[] nameIndexBytes = BitConverter.GetBytes(workerToSerialize.NameIndex);
+            byte[] surenameIndexBytes = BitConverter.GetBytes(workerToSerialize.SurenameIndex);
+            byte[] avatarIndexBytes = BitConverter.GetBytes(workerToSerialize.AvatarIndex);
             byte[] expierienceTimeBytes = BitConverter.GetBytes(workerToSerialize.ExperienceTime);
             byte[] salaryBytes = BitConverter.GetBytes(workerToSerialize.Salary);
             byte[] abilitiesBytes;
@@ -144,23 +151,26 @@ namespace ITCompanySimulation.Character
             byte[] genderBytes = BitConverter.GetBytes((int)workerToSerialize.Gender);
 
             //This is used so receiving client knows how much bytes of name and surename should be read
-            byte[] nameSize = BitConverter.GetBytes(nameBytes.Length);
-            byte[] surenameSize = BitConverter.GetBytes(surenameBytes.Length);
-            byte[] abilitiesSize;
+            byte[] abilitiesSize = BitConverter.GetBytes(workerToSerialize.Abilites.Count);
+            //Serialize ability type and its value (2*size)
+            int abilitiesSizeInBytes = workerToSerialize.Abilites.Count * 2 * sizeof(int);
+            abilitiesBytes = new byte[abilitiesSizeInBytes];
 
-            using (MemoryStream memStream = new MemoryStream())
+            int abilitiesBytesOffset = 0;
+            foreach (var ability in workerToSerialize.Abilites)
             {
-                BinaryFormatter formatter = new BinaryFormatter();
-                formatter.Serialize(memStream, workerToSerialize.Abilites);
-                abilitiesBytes = memStream.ToArray();
+                byte[] abilityTypeBytes = BitConverter.GetBytes((int)ability.Key);
+                byte[] abilityValueBytes = BitConverter.GetBytes(ability.Value);
+
+                Array.Copy(abilityTypeBytes, 0, abilitiesBytes, abilitiesBytesOffset, abilityTypeBytes.Length);
+                abilitiesBytesOffset += abilityTypeBytes.Length;
+                Array.Copy(abilityValueBytes, 0, abilitiesBytes, abilitiesBytesOffset, abilityValueBytes.Length);
+                abilitiesBytesOffset += abilityValueBytes.Length;
             }
 
-            abilitiesSize = BitConverter.GetBytes(abilitiesBytes.Length);
-
-            int workerBytesSize = nameBytes.Length
-                                + surenameBytes.Length
-                                + nameSize.Length
-                                + surenameSize.Length
+            int workerBytesSize = nameIndexBytes.Length
+                                + surenameIndexBytes.Length
+                                + avatarIndexBytes.Length
                                 + abilitiesSize.Length
                                 + abilitiesBytes.Length
                                 + expierienceTimeBytes.Length
@@ -171,14 +181,12 @@ namespace ITCompanySimulation.Character
             byte[] workerBytes = new byte[workerBytesSize];
             int offset = 0;
 
-            Array.Copy(nameSize, 0, workerBytes, offset, nameSize.Length);
-            offset += nameSize.Length;
-            Array.Copy(nameBytes, 0, workerBytes, offset, nameBytes.Length);
-            offset += nameBytes.Length;
-            Array.Copy(surenameSize, 0, workerBytes, offset, surenameSize.Length);
-            offset += surenameSize.Length;
-            Array.Copy(surenameBytes, 0, workerBytes, offset, surenameBytes.Length);
-            offset += surenameBytes.Length;
+            Array.Copy(nameIndexBytes, 0, workerBytes, offset, nameIndexBytes.Length);
+            offset += nameIndexBytes.Length;
+            Array.Copy(surenameIndexBytes, 0, workerBytes, offset, surenameIndexBytes.Length);
+            offset += surenameIndexBytes.Length;
+            Array.Copy(avatarIndexBytes, 0, workerBytes, offset, avatarIndexBytes.Length);
+            offset += avatarIndexBytes.Length;
             Array.Copy(abilitiesSize, 0, workerBytes, offset, abilitiesSize.Length);
             offset += abilitiesSize.Length;
             Array.Copy(abilitiesBytes, 0, workerBytes, offset, abilitiesBytes.Length);
@@ -196,29 +204,34 @@ namespace ITCompanySimulation.Character
 
         public static object Deserialize(byte[] workerBytes)
         {
+            if (null == Resources)
+            {
+                GameObject scriptsObject = GameObject.FindGameObjectWithTag("ScriptsGameObject");
+                Resources = scriptsObject.GetComponent<ResourceHolder>(); ;
+            }
+
             int offset = 0;
 
-            int nameSize = BitConverter.ToInt32(workerBytes, offset);
+            int nameIndex = BitConverter.ToInt32(workerBytes, offset);
             offset += sizeof(int);
-            string name = Encoding.Unicode.GetString(workerBytes, offset, nameSize);
-            offset += nameSize;
-            int surenameSize = BitConverter.ToInt32(workerBytes, offset);
+            int surenameIndex = BitConverter.ToInt32(workerBytes, offset);
             offset += sizeof(int);
-            string surename = Encoding.Unicode.GetString(workerBytes, offset, surenameSize);
-            offset += surenameSize;
-
+            int avatarIndex = BitConverter.ToInt32(workerBytes, offset);
+            offset += sizeof(int);
             int abilitiesSize = BitConverter.ToInt32(workerBytes, offset);
             offset += sizeof(int);
 
-            Dictionary<ProjectTechnology, float> abilities;
+            Dictionary<ProjectTechnology, float> abilities = new Dictionary<ProjectTechnology, float>();
 
-            using (MemoryStream memStream = new MemoryStream(workerBytes, offset, abilitiesSize))
+            for (int i = 0; i < abilitiesSize; i++)
             {
-                BinaryFormatter formatter = new BinaryFormatter();
-                abilities = (Dictionary<ProjectTechnology, float>)formatter.Deserialize(memStream);
+                ProjectTechnology abilityType = (ProjectTechnology)BitConverter.ToInt32(workerBytes, offset);
+                offset += sizeof(int);
+                float abilityValue = BitConverter.ToSingle(workerBytes, offset);
+                offset += sizeof(float);
+                abilities.Add(abilityType, abilityValue);
             }
 
-            offset += abilitiesSize;
             int expierienceTime = BitConverter.ToInt32(workerBytes, offset);
             offset += sizeof(int);
             int salary = BitConverter.ToInt32(workerBytes, offset);
@@ -227,12 +240,20 @@ namespace ITCompanySimulation.Character
             offset += sizeof(int);
             Gender workerGender = (Gender)BitConverter.ToInt32(workerBytes, offset);
 
+            string name = (Gender.Male == workerGender) ? WorkerData.MaleNames[nameIndex] : WorkerData.FemaleNames[nameIndex];
+            string surename = WorkerData.Surenames[surenameIndex];
+            Sprite avatar = (Gender.Male == workerGender) ? Resources.MaleCharactersAvatars[avatarIndex] : Resources.FemaleCharactersAvatars[avatarIndex];
+
             SharedWorker deserializedWorker = new SharedWorker(name, surename, workerGender);
 
             deserializedWorker.Abilites = abilities;
             deserializedWorker.ExperienceTime = expierienceTime;
             deserializedWorker.Salary = salary;
             deserializedWorker.ID = workerID;
+            deserializedWorker.NameIndex = nameIndex;
+            deserializedWorker.SurenameIndex = surenameIndex;
+            deserializedWorker.AvatarIndex = avatarIndex;
+            deserializedWorker.Avatar = avatar;
 
             return deserializedWorker;
         }
