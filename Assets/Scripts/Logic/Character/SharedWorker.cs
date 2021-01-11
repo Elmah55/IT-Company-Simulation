@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using ITCompanySimulation.UI;
+using ITCompanySimulation.Utilities;
 
 namespace ITCompanySimulation.Character
 {
@@ -77,7 +78,7 @@ namespace ITCompanySimulation.Character
         /// depending on worker experience. Ability level is indicated by value assigned
         /// to each of abilities key
         /// </summary>
-        public Dictionary<ProjectTechnology, float> Abilites { get; set; }
+        public Dictionary<ProjectTechnology, SafeFloat> Abilites { get; set; }
         /// <summary>
         /// Representation of character in game world
         /// </summary>
@@ -127,11 +128,12 @@ namespace ITCompanySimulation.Character
         {
             if (true == Abilites.ContainsKey(ability))
             {
-                Abilites[ability] += abilityValue;
+                SafeFloat abilityCurrentValue = Abilites[ability];
+                Abilites[ability] = new SafeFloat(abilityCurrentValue.Value + abilityValue);
             }
             else
             {
-                Abilites.Add(ability, abilityValue);
+                Abilites.Add(ability, new SafeFloat(abilityValue));
             }
 
             AbilityUpdated?.Invoke(this, ability, abilityValue);
@@ -160,7 +162,7 @@ namespace ITCompanySimulation.Character
             foreach (var ability in workerToSerialize.Abilites)
             {
                 byte[] abilityTypeBytes = BitConverter.GetBytes((int)ability.Key);
-                byte[] abilityValueBytes = BitConverter.GetBytes(ability.Value);
+                byte[] abilityValueBytes = BitConverter.GetBytes(ability.Value.Value);
 
                 Array.Copy(abilityTypeBytes, 0, abilitiesBytes, abilitiesBytesOffset, abilityTypeBytes.Length);
                 abilitiesBytesOffset += abilityTypeBytes.Length;
@@ -221,7 +223,7 @@ namespace ITCompanySimulation.Character
             int abilitiesSize = BitConverter.ToInt32(workerBytes, offset);
             offset += sizeof(int);
 
-            Dictionary<ProjectTechnology, float> abilities = new Dictionary<ProjectTechnology, float>();
+            Dictionary<ProjectTechnology, SafeFloat> abilities = new Dictionary<ProjectTechnology, SafeFloat>();
 
             for (int i = 0; i < abilitiesSize; i++)
             {
@@ -229,7 +231,7 @@ namespace ITCompanySimulation.Character
                 offset += sizeof(int);
                 float abilityValue = BitConverter.ToSingle(workerBytes, offset);
                 offset += sizeof(float);
-                abilities.Add(abilityType, abilityValue);
+                abilities.Add(abilityType, new SafeFloat(abilityValue));
             }
 
             int expierienceTime = BitConverter.ToInt32(workerBytes, offset);

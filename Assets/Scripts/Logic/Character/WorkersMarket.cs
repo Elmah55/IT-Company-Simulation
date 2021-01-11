@@ -153,7 +153,7 @@ public class WorkersMarket : Photon.PunBehaviour, IDataReceiver
     {
         Sprite avatar = null;
         int randomIndex = UnityEngine.Random.Range(0,
-            worker.Gender == Gender.Male ? 
+            worker.Gender == Gender.Male ?
             Resources.MaleCharactersAvatars.Length - 1 : Resources.FemaleCharactersAvatars.Length - 1);
         avatarIndex = randomIndex;
 
@@ -169,9 +169,9 @@ public class WorkersMarket : Photon.PunBehaviour, IDataReceiver
         return avatar;
     }
 
-    private Dictionary<ProjectTechnology, float> CreateWorkerAbilities()
+    private Dictionary<ProjectTechnology, SafeFloat> CreateWorkerAbilities()
     {
-        Dictionary<ProjectTechnology, float> workerAbilities = new Dictionary<ProjectTechnology, float>();
+        Dictionary<ProjectTechnology, SafeFloat> workerAbilities = new Dictionary<ProjectTechnology, SafeFloat>();
 
         //Value that will be used when adding abilities for
         //worker. After each ability added this value will be
@@ -197,7 +197,7 @@ public class WorkersMarket : Photon.PunBehaviour, IDataReceiver
 
                     if (true == uniqueAbility)
                     {
-                        workerAbilities.Add(newAbility, newAbilityValue);
+                        workerAbilities.Add(newAbility, new SafeFloat(newAbilityValue));
                     }
                 }
             }
@@ -214,9 +214,9 @@ public class WorkersMarket : Photon.PunBehaviour, IDataReceiver
         int expierienceBonus = newWorker.ExperienceTime * 6;
         int abilitiesBonus = 0;
 
-        foreach (KeyValuePair<ProjectTechnology, float> workerAbility in newWorker.Abilites)
+        foreach (KeyValuePair<ProjectTechnology, SafeFloat> workerAbility in newWorker.Abilites)
         {
-            abilitiesBonus += (int)(workerAbility.Value * 30.0f);
+            abilitiesBonus += (int)(workerAbility.Value.Value * 30.0f);
         }
 
         workerSalary += expierienceBonus;
@@ -229,9 +229,9 @@ public class WorkersMarket : Photon.PunBehaviour, IDataReceiver
     {
         int workerExpierience = UnityEngine.Random.Range(0, 101);
 
-        foreach (KeyValuePair<ProjectTechnology, float> workerAbility in newWorker.Abilites)
+        foreach (KeyValuePair<ProjectTechnology, SafeFloat> workerAbility in newWorker.Abilites)
         {
-            workerExpierience += (int)(45 * workerAbility.Value);
+            workerExpierience += (int)(45 * workerAbility.Value.Value);
         }
 
         return workerExpierience;

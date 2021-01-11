@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using ITCompanySimulation.Developing;
+using ITCompanySimulation.Utilities;
 
 /// <summary>
 /// This class represents the IT company that player
@@ -19,7 +20,7 @@ public class PlayerCompany : Company
     /// scripts used in game
     /// </summary>
     private GameObject ScriptsGameObject;
-    private int m_Balance;
+    private SafeInt m_Balance;
 
     /*Public consts fields*/
 
@@ -34,13 +35,13 @@ public class PlayerCompany : Company
     {
         get
         {
-            return m_Balance;
+            return m_Balance.Value;
         }
 
         set
         {
-            m_Balance = value;
-            BalanceChanged?.Invoke(m_Balance);
+            m_Balance.Value = value;
+            BalanceChanged?.Invoke(m_Balance.Value);
         }
     }
     public List<LocalWorker> Workers { get; private set; }

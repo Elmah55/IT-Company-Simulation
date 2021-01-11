@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using ITCompanySimulation.Core;
+using ITCompanySimulation.Utilities;
 
 namespace ITCompanySimulation.UI
 {
@@ -156,10 +157,10 @@ namespace ITCompanySimulation.UI
                                               "Abilities: ",
                                               companyWorker.Name, companyWorker.Surename);
 
-            foreach (KeyValuePair<ProjectTechnology, float> workerAbility in companyWorker.Abilites)
+            foreach (KeyValuePair<ProjectTechnology, SafeFloat> workerAbility in companyWorker.Abilites)
             {
                 string abilityName = EnumToString.ProjectTechnologiesStrings[workerAbility.Key];
-                workerInfo += string.Format("{0} {1} | ", abilityName, workerAbility.Value.ToString("0.00"));
+                workerInfo += string.Format("{0} {1} | ", abilityName, workerAbility.Value.Value.ToString("0.00"));
             }
 
             workerInfo += string.Format("\nSalary: {0}$\n" +

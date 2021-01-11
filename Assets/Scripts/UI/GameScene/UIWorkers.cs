@@ -1,4 +1,5 @@
 ﻿using ITCompanySimulation.Character;
+using ITCompanySimulation.Utilities;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -64,11 +65,11 @@ namespace ITCompanySimulation.UI
 
             for (int i = 0; i < worker.Abilites.Count; i++)
             {
-                KeyValuePair<ProjectTechnology, float> ability = worker.Abilites.ElementAt(i);
+                KeyValuePair<ProjectTechnology, SafeFloat> ability = worker.Abilites.ElementAt(i);
 
                 StrBuilder.AppendFormat("{0} {1}\n",
                     EnumToString.ProjectTechnologiesStrings[ability.Key],
-                    ability.Value.ToString("0.00"));
+                    ability.Value.Value.ToString("0.00"));
             }
 
             return StrBuilder.ToString();
