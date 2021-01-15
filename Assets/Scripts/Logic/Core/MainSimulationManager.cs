@@ -78,6 +78,20 @@ namespace ITCompanySimulation.Core
             Time.timeScale = SimulationTimeScale;
         }
 
+        private void Awake()
+        {
+            GameManagerComponent = GameObject.FindGameObjectWithTag("GameManager").GetComponent<MainGameManager>();
+            //TODO: Add info window when waiting for session start
+            GameManagerComponent.SessionStarted += OnGameManagerComponentSessionStarted;
+            GameTimeComponent = GetComponent<GameTime>();
+            NotificatorComponent = new SimulationEventNotificator(GameTimeComponent);
+            IsSimulationActive = true;
+
+            InitPlayersWorkers();
+            //TEST
+            CreateCompany();
+        }
+
         private void InitPlayersWorkers()
         {
             //Init PlayersWorkers
@@ -341,10 +355,19 @@ namespace ITCompanySimulation.Core
         /// <summary>
         /// Removes worker with given ID from company of target PhotonPlayer
         /// </summary>
-        public void RemoveOtherPlayerControlledCompanyWorker(PhotonPlayer target, int workerID)
+        public void RemoveOtherPlayerControlledCompanyWorker(PhotonPlayer target, SharedWorker worker)
         {
             this.photonView.RPC(
-                "RemoveControlledCompanyWorkerRPC", target, workerID, PhotonNetwork.player.ID);
+                "RemoveControlledCompanyWorkerRPC", target, worker.ID, PhotonNetwork.player.ID);
+        }
+
+        public void HireOtherPlayerWorker(PhotonPlayer otherPlayer, SharedWorker worker)
+        {
+            RemoveOtherPlayerControlledCompanyWorker(otherPlayer, worker);
+            LocalWorker hiredWorker = new LocalWorker(worker);
+            hiredWorker.Salary = hiredWorker.HireSalary;
+            ControlledCompany.Balance -= hiredWorker.Salary;
+            ControlledCompany.AddWorker(hiredWorker);
         }
 
         public override void OnDisconnectedFromPhoton()
@@ -367,20 +390,6 @@ namespace ITCompanySimulation.Core
             {
                 OtherPlayersWorkers.Remove(otherPlayer);
             }
-        }
-
-        public void Awake()
-        {
-            GameManagerComponent = GameObject.FindGameObjectWithTag("GameManager").GetComponent<MainGameManager>();
-            //TODO: Add info window when waiting for session start
-            GameManagerComponent.SessionStarted += OnGameManagerComponentSessionStarted;
-            GameTimeComponent = GetComponent<GameTime>();
-            NotificatorComponent = new SimulationEventNotificator(GameTimeComponent);
-            IsSimulationActive = true;
-
-            InitPlayersWorkers();
-            //TEST
-            CreateCompany();
         }
     }
 }

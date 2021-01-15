@@ -5655,6 +5655,7 @@ MonoBehaviour:
   TextListViewCompanyWorkers: {fileID: 352890276}
   DropdownPlayersList: {fileID: 86519377}
   TooltipComponent: {fileID: 713441622558336245}
+  InfoWindowComponent: {fileID: 2102242763710635583}
 --- !u!114 &617129151
 MonoBehaviour:
   m_ObjectHideFlags: 0

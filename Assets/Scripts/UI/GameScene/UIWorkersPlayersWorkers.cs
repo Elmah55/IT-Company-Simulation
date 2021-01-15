@@ -47,6 +47,8 @@ namespace ITCompanySimulation.UI
         private TMP_Dropdown DropdownPlayersList;
         [SerializeField]
         private Tooltip TooltipComponent;
+        [SerializeField]
+        private InfoWindow InfoWindowComponent;
         private PhotonPlayer SelectedPlayer;
         private SharedWorker SelectedWorker;
         /// <summary>
@@ -339,16 +341,12 @@ namespace ITCompanySimulation.UI
             Button selectedWorkerButton = WorkersButtonSelector.GetSelectedButton();
             ListViewElementWorker element = selectedWorkerButton.GetComponent<ListViewElementWorker>();
             SharedWorker selectedWorker = WorkerListViewMap.First(x => x.Value == element).Key;
-            SimulationManagerComponent.RemoveOtherPlayerControlledCompanyWorker(SelectedPlayer, selectedWorker.ID);
 
-            LocalWorker localSelectedWorker = selectedWorker as LocalWorker;
-
-            if (null == localSelectedWorker)
-            {
-                localSelectedWorker = new LocalWorker(selectedWorker);
-            }
-
-            SimulationManagerComponent.ControlledCompany.AddWorker(localSelectedWorker);
+            string infoWindowText = string.Format("Do you want to hire this worker ? It will cost you {0} $", selectedWorker.HireSalary);
+            InfoWindowComponent.ShowOkCancel(infoWindowText, () =>
+             {
+                 SimulationManagerComponent.HireOtherPlayerWorker(SelectedPlayer, selectedWorker);
+             }, null);
         }
 
         public override void OnPhotonPlayerDisconnected(PhotonPlayer otherPlayer)

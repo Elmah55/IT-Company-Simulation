@@ -146,7 +146,7 @@ namespace ITCompanySimulation.UI
 
         private void SetTextListViewWorkers()
         {
-            TextListViewWorkers.text = 
+            TextListViewWorkers.text =
                 UIWorkers.GetCompanyWorkersListViewString(SimulationManagerComponent.ControlledCompany);
         }
 
@@ -290,7 +290,7 @@ namespace ITCompanySimulation.UI
             Button selectedButton = WorkersButtonsSelector.GetSelectedButton();
             ListViewElementWorker element = selectedButton.GetComponent<ListViewElementWorker>();
             LocalWorker companyWorker = (LocalWorker)element.Worker;
-            companyWorker.SetSalary(companyWorker.Salary + salaryRaiseAmount);
+            companyWorker.Salary = companyWorker.Salary + salaryRaiseAmount;
         }
 
         public void OnSalaryRaiseAmountSliderValueChanged(float value)

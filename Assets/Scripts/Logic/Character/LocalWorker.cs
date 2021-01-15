@@ -201,11 +201,6 @@ namespace ITCompanySimulation.Character
 
         /*Public methods*/
 
-        public void SetSalary(int amount)
-        {
-            this.Salary = amount;
-        }
-
         public LocalWorker(string name, string surename, Gender gender) : base(name, surename, gender) { }
 
         public LocalWorker(SharedWorker worker) : base(worker) { }
