@@ -1,4 +1,5 @@
-﻿using ITCompanySimulation.Developing;
+﻿using ITCompanySimulation.Core;
+using ITCompanySimulation.Developing;
 using ITCompanySimulation.Utilities;
 using System;
 using System.Collections.Generic;
@@ -52,10 +53,6 @@ public class ProjectsMarket : Photon.PunBehaviour, IDataReceiver
     /// How many projects can be on market at one time
     /// </summary>
     private int MaxProjectsOnMarket;
-    /// <summary>
-    /// Used to assing unique ID for each project
-    /// </summary>
-    private int ProjectID;
     private GameTime GameTimeComponent;
     /// <summary>
     /// How many projects should be generated in market
@@ -111,13 +108,8 @@ public class ProjectsMarket : Photon.PunBehaviour, IDataReceiver
         newProject.UsedTechnologies = GenerateProjectTechnologies();
         newProject.CompletionBonus = CalculateProjectCompleteBonus(newProject);
         newProject.CompletionTime = UnityEngine.Random.Range(PROJECT_COMPLETION_TIME_MIN, PROJECT_COMPLETION_TIME_MAX);
-        newProject.ID = ProjectID++;
+        newProject.ID = MainSimulationManager.GenerateID();
         newProject.ProjectNameIndex = projectNameIndex;
-
-        if (ProjectID < newProject.ID)
-        {
-            throw new OverflowException("Maximum number of generated projects exceeded");
-        }
 
         return newProject;
     }

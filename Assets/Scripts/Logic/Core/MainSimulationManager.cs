@@ -27,6 +27,10 @@ namespace ITCompanySimulation.Core
         [SerializeField]
         [Range(0.1f, 10.0f)]
         private float SimulationTimeScale;
+        /// <summary>
+        /// Used for generating IDs of items
+        /// </summary>
+        private static int m_ID;
         private MainGameManager GameManagerComponent;
 
         /*Public consts fields*/
@@ -368,6 +372,16 @@ namespace ITCompanySimulation.Core
             hiredWorker.Salary = hiredWorker.HireSalary;
             ControlledCompany.Balance -= hiredWorker.Salary;
             ControlledCompany.AddWorker(hiredWorker);
+        }
+
+        public static int GenerateID()
+        {
+            if (m_ID == int.MaxValue)
+            {
+                throw new InvalidOperationException("Reached max ID value. Cannot generate ID");
+            }
+
+            return m_ID++;
         }
 
         public override void OnDisconnectedFromPhoton()

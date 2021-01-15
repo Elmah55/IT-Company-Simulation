@@ -5,6 +5,7 @@ using UnityEngine;
 using ITCompanySimulation.Utilities;
 using UnityEngine.Events;
 using ITCompanySimulation.UI;
+using ITCompanySimulation.Core;
 
 /// <summary>
 /// This class handles represents workers market. Each of player can hire worker
@@ -39,10 +40,6 @@ public class WorkersMarket : Photon.PunBehaviour, IDataReceiver
     /// How many workers can be on market at one time
     /// </summary>
     private int MaxWorkersOnMarket;
-    /// <summary>
-    /// Used to assing unique ID for each worker
-    /// </summary>
-    private int WorkerID;
     private GameTime GameTimeComponent;
     private ResourceHolder Resources;
 
@@ -116,17 +113,12 @@ public class WorkersMarket : Photon.PunBehaviour, IDataReceiver
         newMarketWorker.Abilites = CreateWorkerAbilities();
         newMarketWorker.ExperienceTime = CalculateWorkerExpierience(newMarketWorker);
         newMarketWorker.Salary = CalculateWorkerSalary(newMarketWorker);
-        newMarketWorker.ID = WorkerID++;
+        newMarketWorker.ID = MainSimulationManager.GenerateID();
         int avatarIndex;
         newMarketWorker.Avatar = CreateWorkerAvatar(newMarketWorker, out avatarIndex);
         newMarketWorker.AvatarIndex = avatarIndex;
         newMarketWorker.NameIndex = nameIndex;
         newMarketWorker.SurenameIndex = surenameIndex;
-
-        if (WorkerID < newMarketWorker.ID)
-        {
-            throw new OverflowException("Maximum number of generated workers exceeded");
-        }
 
         return newMarketWorker;
     }
