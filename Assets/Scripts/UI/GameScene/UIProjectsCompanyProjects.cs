@@ -183,6 +183,7 @@ namespace ITCompanySimulation.UI
         {
             ListViewElementProject newElement = CreateListViewElement(scrumObj.BindedProject);
             newElement.Text.text = GetProjectListViewElementText(scrumObj.BindedProject);
+            newElement.FrontImage.sprite = scrumObj.BindedProject.Icon;
             ButtonSelectorProjects.AddButton(newElement.Button);
 
             ListViewCompanyProjects.AddControl(newElement.gameObject);

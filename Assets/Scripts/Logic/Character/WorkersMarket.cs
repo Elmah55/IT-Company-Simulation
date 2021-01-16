@@ -91,7 +91,7 @@ public class WorkersMarket : Photon.PunBehaviour, IDataReceiver
 
 #if DEVELOPMENT_BUILD || UNITY_EDITOR
         debugInfo = string.Format("[{0}] generated {1} workers",
-           className, workersToGenerate);
+           className, Workers.Count);
         Debug.Log(debugInfo);
 #endif
     }

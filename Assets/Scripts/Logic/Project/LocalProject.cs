@@ -113,6 +113,9 @@ namespace ITCompanySimulation.Developing
             this.CompletionBonus = proj.CompletionBonus;
             this.UsedTechnologies = proj.UsedTechnologies;
             this.CompletionTime = proj.CompletionTime;
+            this.NameIndex = proj.NameIndex;
+            this.IconIndex = proj.IconIndex;
+            this.Icon = proj.Icon;
         }
 
         public void Start()

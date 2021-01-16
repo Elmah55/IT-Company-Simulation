@@ -1,5 +1,7 @@
-﻿using System;
+﻿using ITCompanySimulation.UI;
+using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace ITCompanySimulation.Developing
 {
@@ -10,6 +12,7 @@ namespace ITCompanySimulation.Developing
         /*Private fields*/
 
         private int m_CompletionTime;
+        private static ResourceHolder ResourceHolderComponent;
 
         /*Public consts fields*/
 
@@ -54,7 +57,16 @@ namespace ITCompanySimulation.Developing
         /// Stores index of name from project's name table.
         /// Used for serialization
         /// </summary>
-        public int ProjectNameIndex { get; set; }
+        public int NameIndex { get; set; }
+        /// <summary>
+        /// UI icon associated with this project
+        /// </summary>
+        public Sprite Icon { get; set; }
+        /// <summary>
+        /// Stores index of name from project's icon table.
+        /// Used for serialization
+        /// </summary>
+        public int IconIndex { get; set; }
         public List<ProjectTechnology> UsedTechnologies { get; set; }
         public event SharedProjectAction CompletionTimeUpdated;
 
@@ -66,7 +78,8 @@ namespace ITCompanySimulation.Developing
         {
             SharedProject projectToSerialize = (SharedProject)projectObject;
 
-            byte[] nameIndexBytes = BitConverter.GetBytes(projectToSerialize.ProjectNameIndex);
+            byte[] nameIndexBytes = BitConverter.GetBytes(projectToSerialize.NameIndex);
+            byte[] iconIndexBytes = BitConverter.GetBytes(projectToSerialize.IconIndex);
             byte[] IDBytes = BitConverter.GetBytes(projectToSerialize.ID);
             byte[] completeBonusBytes = BitConverter.GetBytes(projectToSerialize.CompletionBonus);
             byte[] completionTimeBytes = BitConverter.GetBytes(projectToSerialize.CompletionTime);
@@ -81,9 +94,10 @@ namespace ITCompanySimulation.Developing
             byte[] technologiesBytesSize = BitConverter.GetBytes(technologiesBytes.Length);
 
             int projectBytesSize = nameIndexBytes.Length
+                                 + iconIndexBytes.Length
                                  + IDBytes.Length
                                  + completeBonusBytes.Length
-                                 +completionTimeBytes.Length
+                                 + completionTimeBytes.Length
                                  + technologiesBytes.Length
                                  + technologiesBytesSize.Length;
 
@@ -92,6 +106,8 @@ namespace ITCompanySimulation.Developing
 
             Array.Copy(nameIndexBytes, 0, projectBytes, offset, nameIndexBytes.Length);
             offset += nameIndexBytes.Length;
+            Array.Copy(iconIndexBytes, 0, projectBytes, offset, iconIndexBytes.Length);
+            offset += iconIndexBytes.Length;
             Array.Copy(IDBytes, 0, projectBytes, offset, IDBytes.Length);
             offset += IDBytes.Length;
             Array.Copy(completeBonusBytes, 0, projectBytes, offset, completeBonusBytes.Length);
@@ -107,8 +123,14 @@ namespace ITCompanySimulation.Developing
 
         public static object Deserialize(byte[] projectBytes)
         {
+            if (null == ResourceHolderComponent)
+            {
+                ResourceHolderComponent = GameObject.FindGameObjectWithTag("ScriptsGameObject").GetComponent<ResourceHolder>();
+            }
+
             int offset = 0;
             int nameIndex;
+            int iconIndex;
             int ID;
             int completeBonus;
             int completionTime;
@@ -116,6 +138,8 @@ namespace ITCompanySimulation.Developing
             List<ProjectTechnology> technologies = new List<ProjectTechnology>();
 
             nameIndex = BitConverter.ToInt32(projectBytes, offset);
+            offset += sizeof(int);
+            iconIndex = BitConverter.ToInt32(projectBytes, offset);
             offset += sizeof(int);
             ID = BitConverter.ToInt32(projectBytes, offset);
             offset += sizeof(int);
@@ -137,7 +161,9 @@ namespace ITCompanySimulation.Developing
             deserializedProject.CompletionBonus = completeBonus;
             deserializedProject.UsedTechnologies = technologies;
             deserializedProject.CompletionTime = completionTime;
-
+            deserializedProject.IconIndex = iconIndex;
+            deserializedProject.Icon = ResourceHolderComponent.ProjectsIcons[iconIndex];
+;
             return deserializedProject;
         }
 

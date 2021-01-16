@@ -160,6 +160,7 @@ namespace ITCompanySimulation.UI
             ButtonSelectorProjects.AddButton(newElement.Button);
             ListViewMarketProjects.AddControl(newElement.gameObject);
             newElement.Text.text = GetProjectListViewElementText(proj);
+            newElement.FrontImage.sprite = proj.Icon;
             SetListViewMarketProjectsText();
 
             proj.CompletionTimeUpdated += OnMarketProjectCompletionTimeUpdated;

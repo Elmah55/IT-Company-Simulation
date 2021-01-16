@@ -1,5 +1,6 @@
 ﻿using ITCompanySimulation.Core;
 using ITCompanySimulation.Developing;
+using ITCompanySimulation.UI;
 using ITCompanySimulation.Utilities;
 using System;
 using System.Collections.Generic;
@@ -61,6 +62,7 @@ public class ProjectsMarket : Photon.PunBehaviour, IDataReceiver
     [Range(1.0f, 1000.0f)]
     [SerializeField]
     private int NumberOfProjectsGeneratedInOfflineMode;
+    private ResourceHolder ResourceHolderComponent;
 
     /*Public consts fields*/
 
@@ -109,7 +111,10 @@ public class ProjectsMarket : Photon.PunBehaviour, IDataReceiver
         newProject.CompletionBonus = CalculateProjectCompleteBonus(newProject);
         newProject.CompletionTime = UnityEngine.Random.Range(PROJECT_COMPLETION_TIME_MIN, PROJECT_COMPLETION_TIME_MAX);
         newProject.ID = MainSimulationManager.GenerateID();
-        newProject.ProjectNameIndex = projectNameIndex;
+        newProject.NameIndex = projectNameIndex;
+        //Every project name is associated with one icon
+        newProject.IconIndex = projectNameIndex;
+        newProject.Icon = ResourceHolderComponent.ProjectsIcons[projectNameIndex];
 
         return newProject;
     }
@@ -146,7 +151,7 @@ public class ProjectsMarket : Photon.PunBehaviour, IDataReceiver
 
 #if DEVELOPMENT_BUILD || UNITY_EDITOR
         debugInfo = string.Format("[{0}] generated {1} projects",
-           className, MaxProjectsOnMarket - Projects.Count);
+           className, Projects.Count);
         Debug.Log(debugInfo);
 #endif
     }
@@ -228,6 +233,8 @@ public class ProjectsMarket : Photon.PunBehaviour, IDataReceiver
 
     private void Start()
     {
+        ResourceHolderComponent = GetComponent<ResourceHolder>();
+
         //Master client will generate all the workers on market
         //then send it to other clients
         if (true == PhotonNetwork.isMasterClient)

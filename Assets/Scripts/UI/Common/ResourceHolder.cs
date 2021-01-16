@@ -17,27 +17,12 @@ namespace ITCompanySimulation.UI
 
         /*Public fields*/
 
-        public Sprite[] MaleCharactersAvatars
-        {
-            get
-            {
-                return m_MaleCharactersAvatars;
-            }
-        }
-        public Sprite[] FemaleCharactersAvatars
-        {
-            get
-            {
-                return m_FemaleCharactersAvatars;
-            }
-        }
+        public Sprite[] MaleCharactersAvatars;
+        public Sprite[] FemaleCharactersAvatars;
+        //Index in this arrays should match index in project names array
+        public Sprite[] ProjectsIcons;
 
         /*Private methods*/
-
-        [SerializeField]
-        private Sprite[] m_MaleCharactersAvatars;
-        [SerializeField]
-        private Sprite[] m_FemaleCharactersAvatars;
 
         /*Public methods*/
     }
