@@ -1,5 +1,7 @@
 ﻿using ITCompanySimulation.Character;
 using ITCompanySimulation.Core;
+using ITCompanySimulation.UI;
+using ITCompanySimulation.Utilities;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
@@ -37,6 +39,8 @@ public class UIDefaultView : MonoBehaviour
     [SerializeField]
     private TextMeshProUGUI TextCompanyBalanceTarget;
     [SerializeField]
+    private ProgressBar ProgressBarBalance;
+    [SerializeField]
     private GameTime GameTimeComponent;
     [SerializeField]
     private MainSimulationManager SimulationManagerComponent;
@@ -63,6 +67,7 @@ public class UIDefaultView : MonoBehaviour
         SimulationManagerComponent.NotificatorComponent.NotificationReceived += OnNotificationReceived;
         SetBalanceTexts();
         TextWorkersCount.text = GetWorkersCountText(SimulationManagerComponent.ControlledCompany.Workers.Count);
+        SetProgressBarBalance(SimulationManagerComponent.ControlledCompany.Balance);
     }
 
     private void SetBalanceTexts()
@@ -123,12 +128,24 @@ public class UIDefaultView : MonoBehaviour
     private void OnControlledCompanyBalanceChanged(int newBalance)
     {
         TextCompanyBalanceCurrent.text = GetCompanyBalanceText(newBalance);
+        SetProgressBarBalance(newBalance);
     }
 
     private void OnGameTimeDayChanged()
     {
         TextDaysSinceStart.text = GetDaysSinceStartText(GameTimeComponent.DaysSinceStart);
         TextDate.text = GameTimeComponent.CurrentTime.ToLongDateString();
+    }
+
+    private void SetProgressBarBalance(float value)
+    {
+        //Map balance value to progess bar value
+        float progressBarValue = Utils.MapRange(value,
+                                                0f,
+                                                SimulationSettings.TargetBalance,
+                                                ProgressBarBalance.MinimumValue,
+                                                ProgressBarBalance.MaximumValue);
+        ProgressBarBalance.Value = progressBarValue;
     }
 
     /*Public methods*/
