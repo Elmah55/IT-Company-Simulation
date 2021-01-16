@@ -24,7 +24,7 @@ namespace ITCompanySimulation.Developing
         /// How much ability value should be added to worker during
         /// one update
         /// </summary>
-        private const float ABILITY_UPDATE_VALUE = 0.001f;
+        private const float ABILITY_UPDATE_VALUE = 0.06f;
         private const int DAYS_PER_SPRINT = 30;
 
         /*Private fields*/
