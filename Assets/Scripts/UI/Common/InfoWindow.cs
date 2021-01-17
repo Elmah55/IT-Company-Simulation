@@ -39,7 +39,13 @@ namespace ITCompanySimulation.UI
             public string Text;
             public UnityAction OnConfirmAction;
             public UnityAction OnCancelAction;
-            public bool Cancel;
+            public InfoWindowType Type;
+        }
+        private enum InfoWindowType
+        {
+            Text,
+            Ok,
+            OkCancel
         }
 
         /*Public consts fields*/
@@ -79,7 +85,7 @@ namespace ITCompanySimulation.UI
             CancelButton.onClick.AddListener(Hide);
         }
 
-        private void Show(string text, UnityAction onConfirmAction, UnityAction onCancelAction, bool cancel)
+        private void Show(string text, UnityAction onConfirmAction, UnityAction onCancelAction, InfoWindowType type)
         {
             if (true == gameObject.GetActive())
             {
@@ -93,13 +99,30 @@ namespace ITCompanySimulation.UI
                 data.Text = text;
                 data.OnConfirmAction = onConfirmAction;
                 data.OnCancelAction = onCancelAction;
-                data.Cancel = cancel;
+                data.Type = type;
 
                 InfoWindowActions.Enqueue(data);
             }
             else
             {
-                CancelButton.gameObject.SetActive(cancel);
+                switch (type)
+                {
+                    case InfoWindowType.Text:
+                        CancelButton.gameObject.SetActive(false);
+                        ConfirmationButton.gameObject.SetActive(false);
+                        break;
+                    case InfoWindowType.Ok:
+                        CancelButton.gameObject.SetActive(false);
+                        ConfirmationButton.gameObject.SetActive(true);
+                        break;
+                    case InfoWindowType.OkCancel:
+                        CancelButton.gameObject.SetActive(true);
+                        ConfirmationButton.gameObject.SetActive(true);
+                        break;
+                    default:
+                        break;
+                }
+
                 this.Text = text;
                 ConfirmButtonClicked = onConfirmAction;
                 CancelButtonClicked = onCancelAction;
@@ -108,6 +131,16 @@ namespace ITCompanySimulation.UI
         }
 
         /*Public methods*/
+
+        /// <summary>
+        /// Makes info window visible with text only. If used when info window is already visible, info window data
+        /// will be queued and displayed when previous window is closed.
+        /// </summary>
+        /// <param name="text">Text displayed in this window</param>
+        public void Show(string text)
+        {
+            Show(text, null, null, InfoWindowType.Text);
+        }
 
         /// <summary>
         /// Makes info window visible with "Ok" button. If used when info window is already visible, info window data
@@ -119,18 +152,19 @@ namespace ITCompanySimulation.UI
         /// <param name="onConfirmAction">Event invoked when "Ok" button is pressed</param>
         public void ShowOk(string text, UnityAction onConfirmAction)
         {
-            Show(text, onConfirmAction, null, false);
+            Show(text, onConfirmAction, null, InfoWindowType.Ok);
         }
 
         /// <summary>
-        /// Makes info window visible with "Ok" and "Cancel" button.
+        /// Makes info window visible with "Ok" and "Cancel" button. If used when info window is already visible, info window data
+        /// will be queued and displayed when previous window is closed.
         /// </summary>
         /// <param name="text">Text displayed in this window</param>
         /// <param name="onConfirmAction">Event invoked when "Ok" button is pressed</param>
         /// <param name="onCancelAction">Event invoked when "Cancel" button is pressed</param>
         public void ShowOkCancel(string text, UnityAction onConfirmAction, UnityAction onCancelAction)
         {
-            Show(text, onConfirmAction, onCancelAction, true);
+            Show(text, onConfirmAction, onCancelAction, InfoWindowType.OkCancel);
         }
 
         /// <summary>
@@ -144,7 +178,7 @@ namespace ITCompanySimulation.UI
             {
                 //Show next data
                 InfoWindowData data = InfoWindowActions.Dequeue();
-                Show(data.Text, data.OnConfirmAction, data.OnCancelAction, data.Cancel);
+                Show(data.Text, data.OnConfirmAction, data.OnCancelAction, data.Type);
             }
         }
     }

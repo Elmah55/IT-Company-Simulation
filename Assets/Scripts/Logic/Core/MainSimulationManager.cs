@@ -85,7 +85,7 @@ namespace ITCompanySimulation.Core
         private void Awake()
         {
             GameManagerComponent = GameObject.FindGameObjectWithTag("GameManager").GetComponent<MainGameManager>();
-            //TODO: Add info window when waiting for session start
+            InfoWindowComponent.Show("Waiting for session start...");
             GameManagerComponent.SessionStarted += OnGameManagerComponentSessionStarted;
             GameTimeComponent = GetComponent<GameTime>();
             NotificatorComponent = new SimulationEventNotificator(GameTimeComponent);
@@ -144,6 +144,7 @@ namespace ITCompanySimulation.Core
 
         private void OnGameManagerComponentSessionStarted()
         {
+            InfoWindowComponent.Hide();
             SimulationTimeScale = 1f;
 
 #if DEVELOPMENT_BUILD || UNITY_EDITOR

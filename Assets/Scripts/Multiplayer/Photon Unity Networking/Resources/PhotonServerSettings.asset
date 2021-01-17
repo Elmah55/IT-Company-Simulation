@@ -28,51 +28,31 @@ MonoBehaviour:
   NetworkLogging: 1
   RunInBackground: 1
   RpcList:
+  - AddProjectRPC
+  - AddWorkerInternalRPC
   - Chat
-  - ColorRpc
   - DestroyRpc
-  - DoJump
-  - Flash
+  - FinishSimulationRPC
   - InstantiateRpc
-  - Marco
+  - OnControlledCompanyWorkerAddedRPC
+  - OnControlledCompanyWorkerRemovedRPC
+  - OnOtherPlayerCompanyWorkerAbilityChangedRPC
+  - OnOtherPlayerCompanyWorkerAttirbuteChangedRPC
+  - OnOtherPlayerControlledCompanyMinimalBalanceReachedRPC
   - PickupItemInit
-  - Polo
   - PunPickup
   - PunPickupSimple
   - PunRespawn
+  - RemoveControlledCompanyWorkerRPC
+  - RemoveProjectInternalRPC
+  - RemoveWorkerInternalRPC
   - RequestForPickupItems
   - RequestForPickupTimes
-  - TaggedPlayer
-  - StartTime
-  - SetWorkers
-  - AddWorker
-  - RemoveWorker
-  - AddWorkerInternal
-  - RemoveWorkerInternal
-  - AddProject
-  - RemoveProjectInternal
-  - FinishGame
-  - StartGameInternal
-  - OnControlledCompanyWorkerAddedRPC
-  - OnControlledCompanyWorkerRemovedRPC
-  - RemoveControlledCompanyWorkerRPC
-  - FinishGameRPC
-  - OnCompanyWorkerSalaryChangedRPC
-  - OnOtherPlayerCompanyWorkerSalaryChangedRPC
-  - OnOtherPlayerCompanyWorkerAttirbuteChangedRPC
-  - OnOtherPlayerCompanyWorkerAbilityChangedRPC
-  - OnOtherPlayerControlledCompanyMinimalBalanceReachedRPC
-  - SetSimulationSettingsRPC
-  - FinishSimulationRPC
-  - OnAllClientsReady
-  - OnClientDataTransfersCompleted
-  - SetMaxWorkersOnMarket
-  - AddWorkerInternalRPC
-  - RemoveWorkerInternalRPC
-  - SetMaxWorkersOnMarketRPC
-  - TruncateWorkersRPC
-  - AddProjectRPC
-  - RemoveProjectInternalRPC
   - SetMaxProjectsOnMarketRPC
+  - SetMaxWorkersOnMarketRPC
+  - StartGameInternal
+  - StartTime
   - TruncateProjectsRPC
+  - TruncateWorkersRPC
+  - StartSessionRPC
   DisableAutoOpenWizard: 1

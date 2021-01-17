@@ -180,8 +180,7 @@ namespace ITCompanySimulation.Core
                             Debug.LogFormat("[{0}] All clients ({1}) received data. Starting sesssion",
                                 this.GetType().Name, PhotonNetwork.otherPlayers.Length);
 #endif
-                            //Session can be started now, notify other components
-                            SessionStarted?.Invoke();
+                            photonView.RPC("StartSessionRPC", PhotonTargets.All);
                         }
                     }
                     break;
@@ -194,6 +193,13 @@ namespace ITCompanySimulation.Core
         private void StartGameInternal()
         {
             SceneManager.LoadScene((int)SceneIndex.Game);
+        }
+
+        [PunRPC]
+        private void StartSessionRPC()
+        {
+            //Session can be started now, notify other components
+            SessionStarted?.Invoke();
         }
 
         private IEnumerator ReconnectCoroutine()
