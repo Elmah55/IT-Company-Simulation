@@ -3,6 +3,7 @@ using System.Collections;
 using UnityEngine;
 using ITCompanySimulation.Utilities;
 using UnityEngine.Events;
+using ITCompanySimulation.Core;
 
 /// <summary>
 /// This class handles updating time in game world. Time
@@ -22,7 +23,7 @@ public class GameTime : Photon.PunBehaviour, IDataReceiver
 
     /*Private fields*/
 
-    private PhotonView PhotonViewComponent;
+    private MainSimulationManager SimulationManagerComponent;
 
     /*Public consts fields*/
 
@@ -34,6 +35,11 @@ public class GameTime : Photon.PunBehaviour, IDataReceiver
     /// </summary>
     public int DaysSinceStart { get; private set; }
     /// <summary>
+    /// Sets the time scale that simulation should be run with. 1.0 is default scale
+    /// </summary>
+    [Range(0.1f, 10.0f)]
+    public float Scale;
+    /// <summary>
     /// Returns number of seconds in one day (scaled time)
     /// </summary>
     public static float SecondsInDay
@@ -44,6 +50,7 @@ public class GameTime : Photon.PunBehaviour, IDataReceiver
         }
     }
     public bool IsDataReceived { get; private set; }
+    public bool IsTimeStarted { get; private set; }
 
     public event Action DayChanged;
     public event Action MonthChanged;
@@ -79,15 +86,8 @@ public class GameTime : Photon.PunBehaviour, IDataReceiver
         }
     }
 
-    private void StartTime()
-    {
-        StopAllCoroutines();
-        CurrentTime = DateTime.Now;
-        StartCoroutine(UpdateGameTime());
-    }
-
     [PunRPC]
-    private void StartTime(int day, int month, int year)
+    private void SetTimeRPC(int day, int month, int year)
     {
         CurrentTime = new DateTime(year, month, day);
         //Inform all subscribers right after receiving new date from master client
@@ -97,16 +97,12 @@ public class GameTime : Photon.PunBehaviour, IDataReceiver
             DataReceived?.Invoke();
         }
         DayChanged?.Invoke();
-        StartCoroutine(UpdateGameTime());
     }
 
-    /*Public methods*/
-
-    // Start is called before the first frame update
-    public void Start()
+    private void Awake()
     {
         DaysSinceStart = 1;
-        PhotonViewComponent = GetComponent<PhotonView>();
+        Scale = 1f;
 
         //Only master client shoud start timer with default time.
         //In other cases client will receive current time from
@@ -114,21 +110,38 @@ public class GameTime : Photon.PunBehaviour, IDataReceiver
         //clients is synchronized
         if (true == PhotonNetwork.isMasterClient)
         {
-            StartTime();
-            PhotonViewComponent.RPC("StartTime", PhotonTargets.Others,
+            CurrentTime = DateTime.Now;
+            this.photonView.RPC("SetTimeRPC", PhotonTargets.Others,
                 CurrentTime.Day, CurrentTime.Month, CurrentTime.Year);
         }
     }
 
-    public override void OnPhotonPlayerConnected(PhotonPlayer newPlayer)
+    private void Update()
     {
-        base.OnPhotonPlayerConnected(newPlayer);
-
-        //Synchronize connected client's time with master client's time
-        if (true == PhotonNetwork.isMasterClient)
+        if (true == IsTimeStarted)
         {
-            PhotonViewComponent.RPC("StartTime", newPlayer,
-                CurrentTime.Day, CurrentTime.Month, CurrentTime.Year);
+            Time.timeScale = Scale;
+        }
+    }
+
+    /*Public methods*/
+
+    public void StartTime()
+    {
+        if (false == IsTimeStarted)
+        {
+            StartCoroutine(UpdateGameTime());
+            IsTimeStarted = true;
+        }
+    }
+
+    public void StopTime()
+    {
+        if (true == IsTimeStarted)
+        {
+            StopAllCoroutines();
+            IsTimeStarted = false;
+            Time.timeScale = 0f;
         }
     }
 
@@ -139,7 +152,7 @@ public class GameTime : Photon.PunBehaviour, IDataReceiver
         if (true == PhotonNetwork.isMasterClient)
         {
             StartTime();
-            PhotonViewComponent.RPC("StartTime", PhotonTargets.Others,
+            this.photonView.RPC("StartTime", PhotonTargets.Others,
                 CurrentTime.Day, CurrentTime.Month, CurrentTime.Year);
         }
     }

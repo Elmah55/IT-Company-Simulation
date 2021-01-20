@@ -20778,7 +20778,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   InfoWindowComponent: {fileID: 2102242763710635583}
-  SimulationTimeScale: 1
 --- !u!4 &746701997
 Transform:
   m_ObjectHideFlags: 0
@@ -20859,6 +20858,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2aed065ec2cd3474385098e9d297e05e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  Scale: 1
 --- !u!114 &746702001
 MonoBehaviour:
   m_ObjectHideFlags: 0

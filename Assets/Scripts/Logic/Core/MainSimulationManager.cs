@@ -22,12 +22,6 @@ namespace ITCompanySimulation.Core
         [SerializeField]
         private InfoWindow InfoWindowComponent;
         /// <summary>
-        /// Sets the time scale that simulation should be run with. 1.0 is default scale
-        /// </summary>
-        [SerializeField]
-        [Range(0.1f, 10.0f)]
-        private float SimulationTimeScale;
-        /// <summary>
         /// Used for generating IDs of items
         /// </summary>
         private static int m_ID;
@@ -77,19 +71,13 @@ namespace ITCompanySimulation.Core
 
         /*Private methods*/
 
-        private void Update()
-        {
-            Time.timeScale = SimulationTimeScale;
-        }
-
         private void Awake()
         {
             GameManagerComponent = GameObject.FindGameObjectWithTag("GameManager").GetComponent<MainGameManager>();
+            GameTimeComponent = GetComponent<GameTime>();
             InfoWindowComponent.Show("Waiting for session start...");
             GameManagerComponent.SessionStarted += OnGameManagerComponentSessionStarted;
-            GameTimeComponent = GetComponent<GameTime>();
             NotificatorComponent = new SimulationEventNotificator(GameTimeComponent);
-            IsSimulationActive = true;
 
             InitPlayersWorkers();
             //TEST
@@ -145,11 +133,12 @@ namespace ITCompanySimulation.Core
         private void OnGameManagerComponentSessionStarted()
         {
             InfoWindowComponent.Hide();
-            SimulationTimeScale = 1f;
+            GameTimeComponent.StartTime();
+            IsSimulationActive = true;
 
 #if DEVELOPMENT_BUILD || UNITY_EDITOR
             Debug.LogFormat("[{0}] Session started. Starting simulation with time scale {1}",
-                this.GetType().Name, SimulationTimeScale);
+                this.GetType().Name, GameTimeComponent.Scale);
 #endif
         }
 
@@ -316,10 +305,12 @@ namespace ITCompanySimulation.Core
         [PunRPC]
         private void FinishSimulationRPC(int winnerPhotonPlayerID, int finishReason)
         {
+            //Check if simulation has been already finished.
+            //Simulation finish can be triggered by few events (see SimulationFinishReason enum)
             if (false == IsSimulationFinished)
             {
                 //Stop time so events in game are no longer updated
-                SimulationTimeScale = 0f;
+                GameTimeComponent.StopTime();
                 IsSimulationFinished = true;
                 IsSimulationActive = false;
                 this.WinnerPlayer = PhotonNetwork.playerList.FirstOrDefault(x => x.ID == winnerPhotonPlayerID);
