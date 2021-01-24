@@ -9,6 +9,10 @@ using UnityEngine.Events;
 using UnityEngine.SceneManagement;
 using System.Linq;
 
+#if DEVELOPMENT_BUILD || UNITY_EDITOR
+using System.Reflection;
+#endif
+
 namespace ITCompanySimulation.Core
 {
     /// <summary>
@@ -83,6 +87,10 @@ namespace ITCompanySimulation.Core
         /// room and default room and simulation settings will be set
         /// </summary>
         public bool UseRoom;
+        /// <summary>
+        /// True when session has started and is active
+        /// </summary>
+        public bool IsSessionActive { get; private set; }
         public event UnityAction ReconnectFailed;
         public event UnityAction SessionStarted;
 
@@ -115,6 +123,7 @@ namespace ITCompanySimulation.Core
         {
             if ((int)SceneIndex.Game == loadedScene.buildIndex)
             {
+                SessionStarted = null;
                 NumberOfClientsReadyToReceiveData = 0;
                 NumberOfClientsWithDataReceived = 0;
                 NumberOfCompletedDataTransfers = 0;
@@ -148,7 +157,7 @@ namespace ITCompanySimulation.Core
                 else
                 {
                     //No need to receive data in offline mode
-                    SessionStarted?.Invoke();
+                    StartSessionRPC();
                 }
             }
         }
@@ -198,7 +207,23 @@ namespace ITCompanySimulation.Core
         [PunRPC]
         private void StartSessionRPC()
         {
-            //Session can be started now, notify other components
+#if DEVELOPMENT_BUILD || UNITY_EDITOR
+            Debug.LogFormat("[{0}] {1} called. Starting session...",
+                this.GetType().Name,
+                MethodBase.GetCurrentMethod().Name);
+#endif
+            StartCoroutine(StartSessionCoroutine());
+        }
+
+        private IEnumerator StartSessionCoroutine()
+        {
+            //Wait one frame so components that want to subcribe to
+            //SessionStarted event can be initialized after game scene
+            //being loaded
+            yield return null;
+
+            IsSessionActive = true;
+            //Session has started now, notify other components
             SessionStarted?.Invoke();
         }
 
@@ -259,6 +284,7 @@ namespace ITCompanySimulation.Core
 
         public void FinishSession()
         {
+            IsSessionActive = false;
             PhotonNetwork.LeaveRoom();
             SceneManager.LoadScene((int)SceneIndex.Menu);
         }

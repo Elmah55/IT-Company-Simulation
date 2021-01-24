@@ -71,12 +71,16 @@ namespace ITCompanySimulation.Core
 
         /*Private methods*/
 
+        private void Start()
+        {
+            InfoWindowComponent.Show("Waiting for session start...");
+            GameManagerComponent.SessionStarted += OnGameManagerComponentSessionStarted;
+        }
+
         private void Awake()
         {
             GameManagerComponent = GameObject.FindGameObjectWithTag("GameManager").GetComponent<MainGameManager>();
             GameTimeComponent = GetComponent<GameTime>();
-            InfoWindowComponent.Show("Waiting for session start...");
-            GameManagerComponent.SessionStarted += OnGameManagerComponentSessionStarted;
             NotificatorComponent = new SimulationEventNotificator(GameTimeComponent);
 
             InitPlayersWorkers();
