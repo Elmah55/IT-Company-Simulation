@@ -74,8 +74,38 @@ public class PlayerCompanyManager : MonoBehaviour
     {
         foreach (LocalWorker companyWorker in SimulationManagerComponent.ControlledCompany.Workers)
         {
-            SimulationManagerComponent.ControlledCompany.Balance -= companyWorker.Salary;
-            TotalMonthlyExpenses += companyWorker.Salary;
+            int salaryAmount;
+
+            if (companyWorker.DaysInCompany >= 31)
+            {
+                //Worker has been hired for at least one month
+                //for sure (31 days or more). Pay full salary
+                salaryAmount = companyWorker.Salary;
+            }
+            else
+            {
+                //Check if worker was hired for whole month when month
+                //has less than 31 days
+                int daysInCurrentMonth = System.DateTime.DaysInMonth(
+                    GameTimeComponent.CurrentTime.Year,
+                    GameTimeComponent.CurrentTime.Month);
+
+                if (companyWorker.DaysInCompany >= daysInCurrentMonth)
+                {
+                    salaryAmount = companyWorker.Salary;
+                }
+                else
+                {
+                    //Worker was not hired for whole month. Calculate how many % of
+                    //salary should be paid
+
+                    float salaryPercentage = companyWorker.DaysInCompany / (float)daysInCurrentMonth;
+                    salaryAmount = (int)(companyWorker.Salary * salaryPercentage);
+                }
+            }
+
+            SimulationManagerComponent.ControlledCompany.Balance -= salaryAmount;
+            TotalMonthlyExpenses += salaryAmount;
         }
     }
 
