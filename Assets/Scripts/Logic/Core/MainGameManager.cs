@@ -8,6 +8,7 @@ using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.SceneManagement;
 using System.Linq;
+using System;
 
 #if DEVELOPMENT_BUILD || UNITY_EDITOR
 using System.Reflection;
@@ -109,6 +110,10 @@ namespace ITCompanySimulation.Core
             PhotonNetwork.offlineMode = this.OfflineMode;
             this.photonView.viewID = 1;
             PlayerInfo.Load();
+            //In PUN Classic, if the client does not set a UserId,
+            //the UserId will be set to the Nickname before connecting. In PUN2 this is no longer the case.
+            string userID = Guid.NewGuid().ToString();
+            PhotonNetwork.AuthValues = new AuthenticationValues(userID);
 
             if (false == PhotonNetwork.offlineMode)
             {
