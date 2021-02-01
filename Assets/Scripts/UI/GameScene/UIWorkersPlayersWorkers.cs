@@ -235,6 +235,15 @@ namespace ITCompanySimulation.UI
                 WorkerListViewMap = new Dictionary<SharedWorker, ListViewElementWorker>();
             }
 
+            if (listView == ListViewOtherPlayersWorkers)
+            {
+                MousePointerEvents mouseEvts = element.GetComponent<MousePointerEvents>();
+                mouseEvts.PointerDoubleClick += () =>
+                {
+                    OnButtonHireWorkerClick();
+                };
+            }
+
             WorkerListViewMap.Add(playerWorker, element);
             listView.AddControl(element.gameObject);
             WorkersButtonSelector.AddButton(buttonComponent);
