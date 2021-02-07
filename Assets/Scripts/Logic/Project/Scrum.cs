@@ -122,6 +122,7 @@ namespace ITCompanySimulation.Developing
         private float CalculateProjectProgress()
         {
             float projectProgressValue = 0.0f;
+            float projectProgressMultiplier = 0.07f;
 
             foreach (LocalWorker projectWorker in BindedProject.Workers)
             {
@@ -130,6 +131,8 @@ namespace ITCompanySimulation.Developing
                     projectProgressValue += projectWorker.Score;
                 }
             }
+
+            projectProgressValue *= projectProgressMultiplier;
 
             return projectProgressValue;
         }
