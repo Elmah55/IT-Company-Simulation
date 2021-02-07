@@ -133,7 +133,7 @@ namespace ITCompanySimulation.Core
                 NumberOfClientsWithDataReceived = 0;
                 NumberOfCompletedDataTransfers = 0;
 
-                if (false == PhotonNetwork.offlineMode)
+                if (false == PhotonNetwork.offlineMode && true == UseRoom)
                 {
                     DataReceiverComponents = GameObject.FindObjectsOfType<MonoBehaviour>().OfType<IDataReceiver>().ToArray();
 
