@@ -19,6 +19,11 @@ namespace ITCompanySimulation.Character
         /*Public consts fields*/
 
         public const int BASE_SALARY = 800;
+        /// <summary>
+        /// The maximum value of one ability that worker
+        /// can have
+        /// </summary>
+        public const float MAX_ABILITY_VALUE = 10.0f;
 
         /*Public fields*/
 
@@ -126,6 +131,8 @@ namespace ITCompanySimulation.Character
         /// </summary>
         public void UpdateAbility(ProjectTechnology ability, float abilityValue)
         {
+            abilityValue = Mathf.Clamp(abilityValue, 0f, MAX_ABILITY_VALUE);
+
             if (true == Abilites.ContainsKey(ability))
             {
                 SafeFloat abilityCurrentValue = Abilites[ability];

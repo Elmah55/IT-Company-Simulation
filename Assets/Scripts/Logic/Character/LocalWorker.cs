@@ -27,11 +27,6 @@ namespace ITCompanySimulation.Character
         /// How many days of holidays per year worker can use in one year
         /// </summary>
         public const int DAYS_OF_HOLIDAYS_PER_YEAR = 25;
-        /// <summary>
-        /// The maximum value of one ability that worker
-        /// can have
-        /// </summary>
-        public const float MAX_ABILITY_VALUE = 10.0f;
 
         /*Public fields*/
 
