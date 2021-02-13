@@ -4455,10 +4455,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 93b91c315ae2ccb46b6aeaa319b1522e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  CameraMovementSpeed: 0.1
+  CanvasComponent: {fileID: 686342783}
+  CameraMovementSpeed: 0.05
   CameraZoomSpeed: 80
   CameraPostionBounds:
-    m_Center: {x: 1.4, y: -0.8, z: 0}
+    m_Center: {x: 1.648733, y: -0.6392777, z: 0}
     m_Extent: {x: 2, y: 2, z: 0}
 --- !u!20 &519420031
 Camera:

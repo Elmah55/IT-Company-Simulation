@@ -17,7 +17,13 @@ public class CameraController : MonoBehaviour
     private Vector2 LastMousePosition;
     private float CameraDefaultZoom;
     private float CameraPreviousZoom;
+    /// <summary>
+    /// Objects with this layer won't cancel camera control
+    /// when mouse pointer is over them
+    /// </summary>
     private int DontDisableCameraControlLayer;
+    [SerializeField]
+    private Canvas CanvasComponent;
 
     /*Public consts fields*/
 
@@ -55,7 +61,8 @@ public class CameraController : MonoBehaviour
         {
             Vector2 mouseMovement = (Vector2)Input.mousePosition - LastMousePosition;
             mouseMovement *= CameraMovementSpeed * CameraComponent.orthographicSize;
-            CameraComponent.transform.Translate(-mouseMovement * Time.deltaTime);
+            Vector3 cameraTranslation = -mouseMovement * Time.deltaTime * (1f / CanvasComponent.scaleFactor);
+            CameraComponent.transform.Translate(cameraTranslation);
             CheckCameraBounds();
         }
 
@@ -76,9 +83,13 @@ public class CameraController : MonoBehaviour
         CameraComponent.orthographicSize = Mathf.Clamp(CameraComponent.orthographicSize, CAMERA_MAX_ZOOM, CAMERA_MIN_ZOOM);
     }
 
-    private void Start()
+    private void Awake()
     {
         CameraComponent = GetComponent<Camera>();
+    }
+
+    private void Start()
+    {
         CameraDefaultZoom = CameraComponent.orthographicSize;
         string layerName = "DontDisableCameraControl";
         DontDisableCameraControlLayer = LayerMask.NameToLayer(layerName);
