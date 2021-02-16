@@ -46,6 +46,8 @@ namespace ITCompanySimulation.UI
         private MainSimulationManager SimulationManagerComponent;
         [SerializeField]
         private Tooltip TooltipComponent;
+        [SerializeField]
+        private InfoWindow InfoWindowComponent;
         private LocalWorker SelectedWorker;
 
         /*Public consts fields*/
@@ -281,7 +283,13 @@ namespace ITCompanySimulation.UI
             Button selectedButton = WorkersButtonsSelector.GetSelectedButton();
             ListViewElementWorker element = selectedButton.GetComponent<ListViewElementWorker>();
             LocalWorker workerToRemove = (LocalWorker)element.Worker;
-            SimulationManagerComponent.ControlledCompany.RemoveWorker(workerToRemove);
+
+            string infoWindowMsg = string.Format("Do you really want to fire {0} {1} ?",
+                                                 workerToRemove.Name,
+                                                 workerToRemove.Surename);
+            InfoWindowComponent.ShowOkCancel(infoWindowMsg,
+                                             () => { SimulationManagerComponent.ControlledCompany.RemoveWorker(workerToRemove); },
+                                             null);
         }
 
         public void OnButtonGiveSalaryRaiseClicked()
