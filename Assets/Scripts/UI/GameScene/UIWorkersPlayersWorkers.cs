@@ -58,7 +58,8 @@ namespace ITCompanySimulation.UI
         /// <summary>
         /// Maps photon player to its index in players dropdown
         /// </summary>
-        private Dictionary<PhotonPlayer, int> PhotonPlayerDropdownMap = new Dictionary<PhotonPlayer, int>();
+        private Dictionary<PhotonPlayer, TMP_Dropdown.OptionData> PhotonPlayerDropdownOptionMap = 
+            new Dictionary<PhotonPlayer, TMP_Dropdown.OptionData>();
         private IButtonSelector WorkersButtonSelector = new ButtonSelector();
 
         /*Public consts fields*/
@@ -84,8 +85,10 @@ namespace ITCompanySimulation.UI
                     }
                 }
 
-                SelectedPlayer = PhotonNetwork.playerList[index];
+                SelectedPlayer = PhotonNetwork.otherPlayers[index];
+                SelectedWorker = null;
                 playerWorkers = SimulationManagerComponent.OtherPlayersWorkers[SelectedPlayer];
+                SetTextListViewOtherPlayersWorkers();
 
                 foreach (SharedWorker worker in playerWorkers)
                 {
@@ -134,6 +137,7 @@ namespace ITCompanySimulation.UI
             }
             else
             {
+                SelectedWorker = null;
                 SetWorkerInfoText(null);
                 ButtonHireWorker.interactable = false;
             }
@@ -198,7 +202,7 @@ namespace ITCompanySimulation.UI
 
         private void UnsubscribeFromSelectedWorkerEvents()
         {
-            SelectedWorker.ExpierienceTimeChanged -= OnWorkerSalaryChanged;
+            SelectedWorker.ExpierienceTimeChanged -= OnSelectedWorkerExpierienceTimeChanged;
         }
 
         private void SetTextListViewCompanyWorkers()
@@ -304,18 +308,18 @@ namespace ITCompanySimulation.UI
 
         private void InitDropdownPlayersList()
         {
-            List<string> dropdownOptions = new List<string>();
+            List<TMP_Dropdown.OptionData> dropdownOptions = new List<TMP_Dropdown.OptionData>();
 
             if (false == PhotonNetwork.offlineMode)
             {
-                foreach (KeyValuePair<PhotonPlayer, List<SharedWorker>> workersListPair in SimulationManagerComponent.OtherPlayersWorkers)
+                foreach (PhotonPlayer player in PhotonNetwork.otherPlayers)
                 {
                     string dropdownOptionText = string.Format("({0}) {1}",
-                                                              workersListPair.Key.ID,
-                                                              workersListPair.Key.NickName);
-
-                    PhotonPlayerDropdownMap.Add(workersListPair.Key, dropdownOptions.Count);
-                    dropdownOptions.Add(dropdownOptionText);
+                                                              player.ID,
+                                                              player.NickName);
+                    TMP_Dropdown.OptionData option = new TMP_Dropdown.OptionData(dropdownOptionText);
+                    PhotonPlayerDropdownOptionMap.Add(player, option);
+                    dropdownOptions.Add(option);
                 }
             }
 
@@ -358,18 +362,24 @@ namespace ITCompanySimulation.UI
              }, null);
         }
 
-        public override void OnPhotonPlayerDisconnected(PhotonPlayer otherPlayer)
+        public override void OnPhotonPlayerDisconnected(PhotonPlayer disconnectedPlayer)
         {
-            base.OnPhotonPlayerDisconnected(otherPlayer);
+            base.OnPhotonPlayerDisconnected(disconnectedPlayer);
 
-            int playerDropdownIndex = PhotonPlayerDropdownMap[otherPlayer];
-            PhotonPlayerDropdownMap.Remove(otherPlayer);
-            DropdownPlayersList.options.RemoveAt(playerDropdownIndex);
+            TMP_Dropdown.OptionData option = PhotonPlayerDropdownOptionMap[disconnectedPlayer];
+            PhotonPlayerDropdownOptionMap.Remove(disconnectedPlayer);
+            DropdownPlayersList.options.Remove(option);
 
-            if (SelectedPlayer.ID == otherPlayer.ID)
+            if (SelectedPlayer.ID == disconnectedPlayer.ID)
             {
                 ListViewOtherPlayersWorkers.RemoveAllControls();
-                WorkersButtonSelector.RemoveAllButtons();
+                SelectedPlayer = null;
+
+                if (0 != DropdownPlayersList.options.Count)
+                {
+                    DropdownPlayersList.SetValueWithoutNotify(0);
+                    OnDropdownPlayersListValueChanged(DropdownPlayersList.value);
+                }
             }
         }
     }

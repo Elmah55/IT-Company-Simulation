@@ -144,16 +144,4 @@ public class GameTime : Photon.PunBehaviour, IDataReceiver
             Time.timeScale = 0f;
         }
     }
-
-    public override void OnMasterClientSwitched(PhotonPlayer newMasterClient)
-    {
-        base.OnMasterClientSwitched(newMasterClient);
-
-        if (true == PhotonNetwork.isMasterClient)
-        {
-            StartTime();
-            this.photonView.RPC("StartTime", PhotonTargets.Others,
-                CurrentTime.Day, CurrentTime.Month, CurrentTime.Year);
-        }
-    }
 }
