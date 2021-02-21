@@ -143,7 +143,7 @@ public class ProjectsMarket : Photon.PunBehaviour, IDataReceiver
         Debug.Log(debugInfo);
 #endif
 
-        while (MaxProjectsOnMarket != Projects.Count)
+        while (MaxProjectsOnMarket > Projects.Count)
         {
             SharedProject newProject = GenerateSingleProject();
             this.photonView.RPC("AddProjectRPC", PhotonTargets.All, newProject);
@@ -265,7 +265,7 @@ public class ProjectsMarket : Photon.PunBehaviour, IDataReceiver
     {
         base.OnMasterClientSwitched(newMasterClient);
 
-        if (true == PhotonNetwork.isMasterClient)
+        if (true == PhotonNetwork.isMasterClient && 0 != PhotonNetwork.otherPlayers.Length)
         {
             MaxProjectsOnMarket = CalculateMaxProjectsOnMarket();
             this.photonView.RPC("SetMaxProjectsOnMarketRPC", PhotonTargets.Others, MaxProjectsOnMarket);
