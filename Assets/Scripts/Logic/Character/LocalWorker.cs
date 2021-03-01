@@ -50,7 +50,7 @@ namespace ITCompanySimulation.Character
                     {
                         if (AssignedProject.UsedTechnologies.Contains(workerAbility))
                         {
-                            score += Abilites[workerAbility].Value * 0.1f;
+                            score += Abilites[workerAbility].Value * 0.5f;
                         }
                     }
                 }

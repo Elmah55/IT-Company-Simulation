@@ -19,7 +19,7 @@ public class GameTime : Photon.PunBehaviour, IDataReceiver
     /// specified by this value passes next day in game world
     /// occurs. This value is seconds in game time (scaled time)
     /// </summary>
-    private const float TIME_UPDATE_FREQUENCY = 6.0f;
+    private const float TIME_UPDATE_FREQUENCY = 6f;
 
     /*Private fields*/
 

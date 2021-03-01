@@ -22,11 +22,11 @@ public class ProjectsMarket : Photon.PunBehaviour, IDataReceiver
     /// How many projects should be added to market
     /// per one player in game
     /// </summary>
-    private const int PROJECTS_ON_MARKET_PER_PLAYER = 2;
+    private const int PROJECTS_ON_MARKET_PER_PLAYER = 8;
     /// <summary>
     /// How many abilites can one project have at a time
     /// </summary>
-    private const int MAX_NUMBER_OF_PROJECT_ABILITIES = 3;
+    private const int MAX_NUMBER_OF_PROJECT_ABILITIES = 1;
     /// <summary>
     /// How much money will be added to bonus for completing
     /// project per one technology in project
@@ -35,7 +35,7 @@ public class ProjectsMarket : Photon.PunBehaviour, IDataReceiver
     /// <summary>
     /// Base amount of money for completing project
     /// </summary>
-    private const int PROJECT_BONUS_BASE = 40000;
+    private const int PROJECT_BONUS_BASE = 80000;
     /// <summary>
     /// Probability in % of adding new project each day
     /// (only when number of projects did not reach maximum
@@ -45,7 +45,7 @@ public class ProjectsMarket : Photon.PunBehaviour, IDataReceiver
     /// <summary>
     /// Min and max values of days in which project should be completed
     /// </summary>
-    private const int PROJECT_COMPLETION_TIME_MIN = 60;
+    private const int PROJECT_COMPLETION_TIME_MIN = 40;
     private const int PROJECT_COMPLETION_TIME_MAX = 160;
 
     /*Private fields*/
@@ -108,8 +108,8 @@ public class ProjectsMarket : Photon.PunBehaviour, IDataReceiver
 
         newProject = new SharedProject(projectName);
         newProject.UsedTechnologies = GenerateProjectTechnologies();
-        newProject.CompletionBonus = CalculateProjectCompleteBonus(newProject);
         newProject.CompletionTime = UnityEngine.Random.Range(PROJECT_COMPLETION_TIME_MIN, PROJECT_COMPLETION_TIME_MAX);
+        newProject.CompletionBonus = CalculateProjectCompleteBonus(newProject);
         newProject.ID = MainSimulationManager.GenerateID();
         newProject.NameIndex = projectNameIndex;
         //Every project name is associated with one icon
@@ -127,6 +127,15 @@ public class ProjectsMarket : Photon.PunBehaviour, IDataReceiver
         {
             projectCompleteBonus += PROJECT_BONUS_PER_TECHNOLOGY;
         }
+
+        //Used to calculate completion bonus taking project's completion time
+        //into consideration
+        float completionTimeMultiplier = 3f / Utils.MapRange(newProject.CompletionTime,
+                                                             PROJECT_COMPLETION_TIME_MIN,
+                                                             PROJECT_COMPLETION_TIME_MAX,
+                                                             1f,
+                                                             3f);
+        projectCompleteBonus = (int)(completionTimeMultiplier * projectCompleteBonus);
 
         return projectCompleteBonus;
     }
