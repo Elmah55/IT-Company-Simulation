@@ -64,6 +64,8 @@ namespace ITCompanySimulation.UI
         private TextMeshProUGUI TextInitialBalance;
         [SerializeField]
         private TextMeshProUGUI TextMinimalBalance;
+        [SerializeField]
+        private InfoWindow InfoWindowComponent;
 
         //Below are defined "HelperText" fields that will display
         //information with hints how to fill in input field 
@@ -168,15 +170,6 @@ namespace ITCompanySimulation.UI
                 ButtonCreateRoom.interactable = true;
             }
 
-            foreach (RoomInfo info in PhotonNetwork.GetRoomList())
-            {
-                if (info.Name == InputFieldRoomName.text)
-                {
-                    TextRoomName.text = "Room with this name already exsists";
-                    ButtonCreateRoom.interactable = false;
-                    break;
-                }
-            }
             return result;
         }
 
@@ -319,11 +312,11 @@ namespace ITCompanySimulation.UI
             this.gameObject.SetActive(false);
         }
 
-        public override void OnPhotonJoinRoomFailed(object[] codeAndMsg)
+        public override void OnPhotonCreateRoomFailed(object[] codeAndMsg)
         {
-            base.OnPhotonJoinRoomFailed(codeAndMsg);
-
+            base.OnPhotonCreateRoomFailed(codeAndMsg);
             ButtonCreateRoom.interactable = true;
+            InfoWindowComponent.ShowOk(codeAndMsg[1].ToString(), null);
         }
     } 
 }

@@ -12191,6 +12191,7 @@ MonoBehaviour:
   TextTargetBalance: {fileID: 175753180}
   TextInitialBalance: {fileID: 898213647}
   TextMinimalBalance: {fileID: 619408883}
+  InfoWindowComponent: {fileID: 2013029160}
   TextInputFieldTargetBalanceHelper: {fileID: 1960283808}
   TextInputFieldInitialBalanceHelper: {fileID: 39439582}
   TextInputFieldMinimalBalanceHelper: {fileID: 2007422785}
