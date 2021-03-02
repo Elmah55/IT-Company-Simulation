@@ -148,6 +148,7 @@ namespace ITCompanySimulation.Developing
             completionTime = BitConverter.ToInt32(projectBytes, offset);
             offset += sizeof(int);
             technologiesSize = BitConverter.ToInt32(projectBytes, offset);
+            offset += sizeof(int);
 
             for (int i = 0; i < technologiesSize; i++)
             {
