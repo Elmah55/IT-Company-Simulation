@@ -132,12 +132,7 @@ public class PlayerCompanyManager : MonoBehaviour
                 ++companyWorker.DaysSinceAbsent;
             }
 
-            //Calculate only every 10 days
-            if (0 == GameTimeComponent.CurrentTime.Day % 10)
-            {
-                SimulateWorkerAbsence(companyWorker);
-            }
-
+            SimulateWorkerAbsence(companyWorker);
             SimulateWorkerSatisfaction(companyWorker);
         }
     }
@@ -192,11 +187,13 @@ public class PlayerCompanyManager : MonoBehaviour
         {
             SimulateWorkerSickness(companyWorker);
         }
-        else if (true == companyWorker.Available && companyWorker.DaysOfHolidaysLeft > 0)
+
+        if (true == companyWorker.Available && companyWorker.DaysOfHolidaysLeft > 0)
         {
             SimulateWorkerHoliday(companyWorker);
         }
-        else if (0 == companyWorker.DaysUntilAvailable)
+
+        if (0 == companyWorker.DaysUntilAvailable)
         {
             companyWorker.Available = true;
         }
@@ -205,10 +202,10 @@ public class PlayerCompanyManager : MonoBehaviour
     private void SimulateWorkerSickness(LocalWorker companyWorker)
     {
         //What is the probability of worker being sick (in %)
-        int notSickProbability = 100 - (int)(companyWorker.DaysSinceAbsent * 0.01f);
-        int randomNumber = Random.Range(0, 100);
+        float notSickProbability = companyWorker.DaysSinceAbsent * 0.001f;
+        float randomNumber = Random.Range(0f, 100f);
 
-        if (randomNumber >= notSickProbability)
+        if (randomNumber <= notSickProbability)
         {
             //Worker is sick
             int sicknessDuration = Random.Range(LocalWorker.MIN_SICKNESS_DURATION, LocalWorker.MAX_SICKNESS_DURATION);
@@ -232,11 +229,10 @@ public class PlayerCompanyManager : MonoBehaviour
     private void SimulateWorkerHoliday(LocalWorker companyWorker)
     {
         //What is the probability of worker going to holidays (in %)
-        int holidayProbability = 100 - (int)(companyWorker.DaysSinceAbsent * 0.01f);
-        int randomNumber = Random.Range(0, 100);
+        float holidayProbability = companyWorker.DaysSinceAbsent * 0.001f;
+        float randomNumber = Random.Range(0f, 100f);
 
-
-        if (randomNumber >= holidayProbability)
+        if (randomNumber <= holidayProbability)
         {
             //Worker is on holidays
             int holidayDuration = Random.Range(LocalWorker.MIN_HOLIDAY_DURATION, LocalWorker.MAX_HOLIDAY_DURATION);
