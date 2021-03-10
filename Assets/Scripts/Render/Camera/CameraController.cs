@@ -61,7 +61,7 @@ public class CameraController : MonoBehaviour
         {
             Vector2 mouseMovement = (Vector2)Input.mousePosition - LastMousePosition;
             mouseMovement *= CameraMovementSpeed * CameraComponent.orthographicSize;
-            Vector3 cameraTranslation = -mouseMovement * Time.deltaTime * (1f / CanvasComponent.scaleFactor);
+            Vector3 cameraTranslation = -mouseMovement * Time.unscaledDeltaTime * (1f / CanvasComponent.scaleFactor);
             CameraComponent.transform.Translate(cameraTranslation);
             CheckCameraBounds();
         }
@@ -78,7 +78,7 @@ public class CameraController : MonoBehaviour
     /// </summary>
     private void SetCameraZoom()
     {
-        float zoom = Input.GetAxis("Mouse ScrollWheel") * Time.deltaTime * CameraZoomSpeed;
+        float zoom = Input.GetAxis("Mouse ScrollWheel") * Time.unscaledDeltaTime * CameraZoomSpeed;
         CameraComponent.orthographicSize -= zoom;
         CameraComponent.orthographicSize = Mathf.Clamp(CameraComponent.orthographicSize, CAMERA_MAX_ZOOM, CAMERA_MIN_ZOOM);
     }
