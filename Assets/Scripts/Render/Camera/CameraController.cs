@@ -15,6 +15,18 @@ public class CameraController : MonoBehaviour
 
     private Camera CameraComponent;
     private Vector2 LastMousePosition;
+    /// <summary>
+    /// Stored last direction that camera was moving to continue camera movement
+    /// in that direction for some time after player stopped moving mouse (smooth
+    /// camera effect)
+    /// </summary>
+    private Vector2 LastCameraDirection;
+    /// <summary>
+    /// Controls how smooth camera movement should. The bigger the value
+    /// the longer camera will continue movement
+    /// </summary>
+    private float LastCameraDirectionMovementFactor;
+    private float LastCameraZoom;
     private float CameraDefaultZoom;
     private float CameraPreviousZoom;
     /// <summary>
@@ -29,8 +41,14 @@ public class CameraController : MonoBehaviour
 
     /*Public fields*/
 
+    [Range(1f, 10f)]
     public float CameraMovementSpeed;
+    [Range(0f, 10f)]
+    public float CameraMovementSmoothness;
+    [Range(1f, 10f)]
     public float CameraZoomSpeed;
+    [Range(0f, 10f)]
+    public float CameraZoomSmoothness;
     /// <summary>
     /// Bounds defining possible camera movment
     /// </summary>
@@ -57,13 +75,27 @@ public class CameraController : MonoBehaviour
     /// </summary>
     private void SetCameraPosition()
     {
+        if (0f != CameraMovementSmoothness)
+        {
+            LastCameraDirectionMovementFactor -= (2f / CameraMovementSmoothness) * Time.unscaledDeltaTime;
+            LastCameraDirectionMovementFactor = Mathf.Clamp(LastCameraDirectionMovementFactor, 0f, 1f);
+            LastCameraDirection *= LastCameraDirectionMovementFactor;
+            CameraComponent.transform.Translate(LastCameraDirection);
+        }
+
+        CheckCameraBounds();
+
         if (true == Input.GetMouseButton(RIGHT_MOUSE_BUTTON))
         {
             Vector2 mouseMovement = (Vector2)Input.mousePosition - LastMousePosition;
-            mouseMovement *= CameraMovementSpeed * CameraComponent.orthographicSize;
-            Vector3 cameraTranslation = -mouseMovement * Time.unscaledDeltaTime * (1f / CanvasComponent.scaleFactor);
-            CameraComponent.transform.Translate(cameraTranslation);
-            CheckCameraBounds();
+            mouseMovement *= (CameraMovementSpeed / 100f) * CameraComponent.orthographicSize;
+            LastCameraDirection = -mouseMovement * Time.unscaledDeltaTime * (1f / CanvasComponent.scaleFactor);
+            LastCameraDirectionMovementFactor = 1f;
+
+            if (0f == CameraMovementSmoothness)
+            {
+                CameraComponent.transform.Translate(LastCameraDirection);
+            }
         }
 
         if (CameraPreviousZoom != CameraComponent.orthographicSize)
@@ -78,9 +110,30 @@ public class CameraController : MonoBehaviour
     /// </summary>
     private void SetCameraZoom()
     {
-        float zoom = Input.GetAxis("Mouse ScrollWheel") * Time.unscaledDeltaTime * CameraZoomSpeed;
-        CameraComponent.orthographicSize -= zoom;
+        float cameraZoom = Input.GetAxis("Mouse ScrollWheel") * Time.unscaledDeltaTime * CameraZoomSpeed * 10f;
+
+        if (0f != cameraZoom)
+        {
+            LastCameraZoom = cameraZoom;
+        }
+
+        CameraComponent.orthographicSize -= 0f != CameraZoomSmoothness ? LastCameraZoom : cameraZoom;
         CameraComponent.orthographicSize = Mathf.Clamp(CameraComponent.orthographicSize, CAMERA_MAX_ZOOM, CAMERA_MIN_ZOOM);
+
+        //This calculations are needed only when camera zoom smoothness is enabled
+        if (0f != CameraZoomSmoothness)
+        {
+            float cameraZoomChange = (1f / CameraZoomSmoothness) * Time.unscaledDeltaTime;
+            LastCameraZoom = LastCameraZoom > 0 ? (LastCameraZoom - cameraZoomChange) : (LastCameraZoom + cameraZoomChange);
+
+            //Take floating point error into consideration
+            if (Mathf.Abs(LastCameraZoom) <= 0.02f)
+            {
+                LastCameraZoom = 0f;
+            }
+
+            LastCameraZoom = Mathf.Clamp(LastCameraZoom, -1f, 1f);
+        }
     }
 
     private void Awake()
