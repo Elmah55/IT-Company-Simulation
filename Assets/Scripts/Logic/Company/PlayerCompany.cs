@@ -115,4 +115,14 @@ public class PlayerCompany : Company
         Debug.Log(debugInfo);
 #endif
     }
+
+    /// <summary>
+    /// Checks if company can hire worker
+    /// </summary>
+    /// <returns>True if company can hire worker, false otherwise</returns>
+    public bool CanHireWorker()
+    {
+        bool result = this.Workers.Count < MAX_WORKERS_PER_COMPANY;
+        return result;
+    }
 }

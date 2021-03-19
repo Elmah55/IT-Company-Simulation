@@ -58,7 +58,7 @@ namespace ITCompanySimulation.UI
         /// <summary>
         /// Maps photon player to its index in players dropdown
         /// </summary>
-        private Dictionary<PhotonPlayer, TMP_Dropdown.OptionData> PhotonPlayerDropdownOptionMap = 
+        private Dictionary<PhotonPlayer, TMP_Dropdown.OptionData> PhotonPlayerDropdownOptionMap =
             new Dictionary<PhotonPlayer, TMP_Dropdown.OptionData>();
         private IButtonSelector WorkersButtonSelector = new ButtonSelector();
 
@@ -244,7 +244,10 @@ namespace ITCompanySimulation.UI
                 MousePointerEvents mouseEvts = element.GetComponent<MousePointerEvents>();
                 mouseEvts.PointerDoubleClick += () =>
                 {
-                    OnButtonHireWorkerClick();
+                    if (true == SimulationManagerComponent.ControlledCompany.CanHireWorker())
+                    {
+                        OnButtonHireWorkerClick();
+                    }
                 };
             }
 

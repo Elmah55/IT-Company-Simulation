@@ -220,7 +220,7 @@ namespace ITCompanySimulation.UI
             mousePtrEvts.PointerDoubleClick += () =>
                 {
                     if (listView == ListViewMarketWorkers
-                          && SimulationManagerComponent.ControlledCompany.Workers.Count < PlayerCompany.MAX_WORKERS_PER_COMPANY)
+                          && true == SimulationManagerComponent.ControlledCompany.CanHireWorker())
                     {
                         OnHireWorkerButtonClicked();
                     }
