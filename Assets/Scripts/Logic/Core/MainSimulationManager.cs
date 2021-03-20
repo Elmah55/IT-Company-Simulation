@@ -346,7 +346,8 @@ namespace ITCompanySimulation.Core
                 }
 
                 SimulationFinished?.Invoke(winnerPhotonPlayerID, (SimulationFinishReason)finishReason);
-                InfoWindowComponent.ShowOk(finishSimulationInfoMsg, GameManagerComponent.FinishSession);
+                GameManagerComponent.FinishSession();
+                InfoWindowComponent.ShowOk(finishSimulationInfoMsg, () => GameManagerComponent.LoadScene((int)SceneIndex.Menu));
             }
         }
 
