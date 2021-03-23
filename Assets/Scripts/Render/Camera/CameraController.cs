@@ -63,8 +63,7 @@ public class CameraController : MonoBehaviour
     {
         Vector2 camerPos = CameraComponent.transform.position;
         //Take zoom into consideration when calculating bounds. The bigger the zoom is the bigger bounds should be
-        float zoomBoundFactor = CameraComponent.orthographicSize > CameraDefaultZoom ?
-            (1f / (CameraComponent.orthographicSize - CameraDefaultZoom)) : (0.7f * (CameraDefaultZoom - CameraComponent.orthographicSize));
+        float zoomBoundFactor = 3f / CameraComponent.orthographicSize;
         camerPos.x = Mathf.Clamp(camerPos.x, CameraPostionBounds.min.x * zoomBoundFactor, CameraPostionBounds.max.x * zoomBoundFactor);
         camerPos.y = Mathf.Clamp(camerPos.y, CameraPostionBounds.min.y * zoomBoundFactor, CameraPostionBounds.max.y * zoomBoundFactor);
         CameraComponent.transform.position = camerPos;

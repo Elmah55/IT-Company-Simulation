@@ -4476,8 +4476,8 @@ MonoBehaviour:
   CameraZoomSpeed: 3.77
   CameraZoomSmoothness: 6
   CameraPostionBounds:
-    m_Center: {x: 1.648733, y: -0.6392777, z: 0}
-    m_Extent: {x: 2, y: 2, z: 0}
+    m_Center: {x: 1.5, y: -0.5, z: 0}
+    m_Extent: {x: 3, y: 3, z: 0}
 --- !u!20 &519420031
 Camera:
   m_ObjectHideFlags: 0
@@ -4575,7 +4575,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 1.4, y: -0.81}
+  m_AnchoredPosition: {x: 2, y: -0.53}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &520557497
