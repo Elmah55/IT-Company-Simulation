@@ -206,7 +206,7 @@ namespace ITCompanySimulation.Core
         [PunRPC]
         private void StartGameInternal()
         {
-            LoadScene((int)SceneIndex.Game);
+            LoadScene(SceneIndex.Game);
         }
 
         [PunRPC]
@@ -299,11 +299,11 @@ namespace ITCompanySimulation.Core
             PhotonNetwork.ConnectUsingSettings(GAME_VERSION);
         }
 
-        public void LoadScene(int sceneIndex)
+        public void LoadScene(SceneIndex index)
         {
-            if (SceneManager.GetActiveScene().buildIndex != sceneIndex)
+            if (SceneManager.GetActiveScene().buildIndex != (int)index)
             {
-                SceneManager.LoadScene(sceneIndex);
+                SceneManager.LoadScene((int)index);
             }
         }
 

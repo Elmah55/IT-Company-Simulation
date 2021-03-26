@@ -33,6 +33,7 @@ public class UIGameSceneMenu : MonoBehaviour
         UnityAction okAction = () =>
         {
             GameManagerComponent.FinishSession();
+            GameManagerComponent.LoadScene(SceneIndex.Menu);
         };
 
         InfoWindowComponent.ShowOkCancel(infoWindowText, okAction, null);
