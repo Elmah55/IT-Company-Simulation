@@ -110,19 +110,30 @@ namespace ITCompanySimulation.UI
         {
             if (null != selectedWorker)
             {
-                //Does not have company assigned so its market worker
-                if (false == (selectedWorker is LocalWorker))
+                if (true == (selectedWorker is LocalWorker))
+                {
+                    LocalWorker selectedLocalWorker = (LocalWorker)selectedWorker;
+
+                    //Check if it is worker that was previously hired in this player's company
+                    //(will not be converted to SharedWorker since no need to send it through photon)
+                    if (selectedLocalWorker.WorkingCompany == null)
+                    {
+                        ButtonFireWorker.interactable = false;
+                        ButtonHireWorker.interactable = true;
+                    }
+                    else
+                    {
+                        ButtonFireWorker.interactable = true;
+                        ButtonHireWorker.interactable = false;
+                    }
+                }
+                else if (true == (selectedWorker is SharedWorker))
                 {
                     ButtonFireWorker.interactable = false;
                     ButtonHireWorker.interactable = true;
                 }
-                else
-                {
-                    ButtonFireWorker.interactable = true;
-                    ButtonHireWorker.interactable = false;
-                }
 
-                if (PlayerCompany.MAX_WORKERS_PER_COMPANY == SimulationManagerComponent.ControlledCompany.Workers.Count)
+                if (false == SimulationManagerComponent.ControlledCompany.CanHireWorker)
                 {
                     ButtonHireWorker.interactable = false;
                 }
@@ -220,7 +231,7 @@ namespace ITCompanySimulation.UI
             mousePtrEvts.PointerDoubleClick += () =>
                 {
                     if (listView == ListViewMarketWorkers
-                          && true == SimulationManagerComponent.ControlledCompany.CanHireWorker())
+                          && true == SimulationManagerComponent.ControlledCompany.CanHireWorker)
                     {
                         OnHireWorkerButtonClicked();
                     }

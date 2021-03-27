@@ -44,6 +44,18 @@ public class PlayerCompany : Company
             BalanceChanged?.Invoke(m_Balance.Value);
         }
     }
+
+    /// <summary>
+    /// Checks if company can hire worker
+    /// </summary>
+    public bool CanHireWorker
+    {
+        get
+        {
+            bool result = this.Workers.Count < MAX_WORKERS_PER_COMPANY;
+            return result;
+        }
+    }
     public List<LocalWorker> Workers { get; private set; }
     /// <summary>
     /// List of scrum processes for this company. Every project
@@ -114,15 +126,5 @@ public class PlayerCompany : Company
             workerToRemove.Name, workerToRemove.Surename, workerToRemove.ID, this.GetType().Name);
         Debug.Log(debugInfo);
 #endif
-    }
-
-    /// <summary>
-    /// Checks if company can hire worker
-    /// </summary>
-    /// <returns>True if company can hire worker, false otherwise</returns>
-    public bool CanHireWorker()
-    {
-        bool result = this.Workers.Count < MAX_WORKERS_PER_COMPANY;
-        return result;
     }
 }

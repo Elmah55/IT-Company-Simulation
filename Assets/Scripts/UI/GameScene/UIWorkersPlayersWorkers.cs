@@ -244,7 +244,7 @@ namespace ITCompanySimulation.UI
                 MousePointerEvents mouseEvts = element.GetComponent<MousePointerEvents>();
                 mouseEvts.PointerDoubleClick += () =>
                 {
-                    if (true == SimulationManagerComponent.ControlledCompany.CanHireWorker())
+                    if (true == SimulationManagerComponent.ControlledCompany.CanHireWorker)
                     {
                         OnButtonHireWorkerClick();
                     }
