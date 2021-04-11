@@ -14,10 +14,10 @@ namespace ITCompanySimulation.UI
 
         [SerializeField]
         private GameObject CredentialsPanel;
-        [SerializeField]
         private MainGameManager GameManagerComponent;
         [SerializeField]
         private Button ButtonStartGame;
+        private MenuButtonSoundEffects ButtonStartGameSoundEffects;
         private TextMeshProUGUI TextButtonStartGame;
         [SerializeField]
         private GameObject PanelMainMenu;
@@ -51,6 +51,7 @@ namespace ITCompanySimulation.UI
             TextButtonStartGame = ButtonStartGame.GetComponentInChildren<TextMeshProUGUI>();
             GameManagerComponent = GameObject.FindGameObjectWithTag("GameManager").GetComponent<MainGameManager>();
             GameManagerComponent.ReconnectFailed += OnGameManagerComponentReconnectFailed;
+            ButtonStartGameSoundEffects = ButtonStartGame.GetComponent<MenuButtonSoundEffects>();
         }
 
         private void OnGameManagerComponentReconnectFailed()
@@ -95,6 +96,7 @@ namespace ITCompanySimulation.UI
         {
             TextButtonStartGame.text = "Enter credentials";
             ButtonStartGame.onClick.RemoveAllListeners();
+            ButtonStartGameSoundEffects.AddSoundEffects();
             ButtonStartGame.onClick.AddListener(() =>
             {
                 CredentialsPanel.SetActive(true);
@@ -107,6 +109,7 @@ namespace ITCompanySimulation.UI
         {
             TextButtonStartGame.text = "Start";
             ButtonStartGame.onClick.RemoveAllListeners();
+            ButtonStartGameSoundEffects.AddSoundEffects();
             ButtonStartGame.onClick.AddListener(() =>
             {
                 if (true == GameManagerComponent.UseRoom)
@@ -128,6 +131,7 @@ namespace ITCompanySimulation.UI
             TextButtonStartGame.text = "Connect";
             ButtonStartGame.interactable = true;
             ButtonStartGame.onClick.RemoveAllListeners();
+            ButtonStartGameSoundEffects.AddSoundEffects();
             ButtonStartGame.onClick.AddListener(() =>
             {
                 ReconnectFailed = false;
