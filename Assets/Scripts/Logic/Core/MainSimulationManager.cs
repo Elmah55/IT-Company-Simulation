@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using ITCompanySimulation.Character;
 using ITCompanySimulation.UI;
+using ITCompanySimulation.Multiplayer;
 
 namespace ITCompanySimulation.Core
 {

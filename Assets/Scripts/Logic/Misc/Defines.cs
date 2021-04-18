@@ -263,4 +263,14 @@ namespace ITCompanySimulation.Character
     public delegate void MultiplayerWorkerAction(SharedWorker worker, PhotonPlayer player);
 }
 
-public delegate void PhotonPlayerAction(PhotonPlayer player);
+namespace ITCompanySimulation.Multiplayer
+{
+    /// <summary>
+    /// Delagate for event fired when photon chat message from other client is received
+    /// </summary>
+    /// <param name="senderNickname">Nickname of player that sent message</param>
+    /// <param name="message">String containing message</param>
+    public delegate void PhotonChatMessageAction(string senderNickname, string message);
+    public delegate void PhotonPlayerAction(PhotonPlayer player);
+}
+
