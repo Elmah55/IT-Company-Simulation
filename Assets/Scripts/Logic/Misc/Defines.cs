@@ -250,11 +250,6 @@ namespace ITCompanySimulation.UI
     public delegate void ParentChangeAction(GameObject obj, GameObject newParent);
 }
 
-namespace ITCompanySimulation.Economy
-{
-    public delegate void LoanAction(BankLoan load);
-}
-
 namespace ITCompanySimulation.Character
 {
     public delegate void LocalWorkerAction(LocalWorker worker);
