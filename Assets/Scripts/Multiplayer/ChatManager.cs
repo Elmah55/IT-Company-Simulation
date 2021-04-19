@@ -46,16 +46,21 @@ namespace ITCompanySimulation.Multiplayer
 
         public bool SendChatMessage(string msg)
         {
-            bool result = Client.PublishMessage(Channel, msg);
+            bool result = false;
+
+            if (null != Client)
+            {
+                result = Client.PublishMessage(Channel, msg);
 
 #if DEVELOPMENT_BUILD || UNITY_EDITOR
-            if (false == result)
-            {
-                Debug.LogErrorFormat("[{0}] Failed to send message on channel: {1}",
-                             this.GetType().Name,
-                             Channel);
-            }
+                if (false == result)
+                {
+                    Debug.LogErrorFormat("[{0}] Failed to send message on channel: {1}",
+                                 this.GetType().Name,
+                                 Channel);
+                }
 #endif
+            }
 
             return result;
         }
@@ -163,19 +168,25 @@ namespace ITCompanySimulation.Multiplayer
 
         public override void OnJoinedRoom()
         {
-            base.OnJoinedRoom();
-            //User should be subscribed only to one channel.
-            //There should be only one chat per photon room.
-            string[] channels = { PhotonNetwork.room.Name };
-            Client.Subscribe(channels);
+            if (null != Client)
+            {
+                base.OnJoinedRoom();
+                //User should be subscribed only to one channel.
+                //There should be only one chat per photon room.
+                string[] channels = { PhotonNetwork.room.Name };
+                Client.Subscribe(channels);
+            }
         }
 
         public override void OnLeftRoom()
         {
-            base.OnLeftRoom();
-            var subscribedChannels = Client.PublicChannels;
-            string[] channels = subscribedChannels.Keys.ToArray();
-            Client.Unsubscribe(channels);
+            if (null != Client)
+            {
+                base.OnLeftRoom();
+                var subscribedChannels = Client.PublicChannels;
+                string[] channels = subscribedChannels.Keys.ToArray();
+                Client.Unsubscribe(channels);
+            }
         }
     }
 }

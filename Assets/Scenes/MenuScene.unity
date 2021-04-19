@@ -11496,6 +11496,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1693690097}
+  - component: {fileID: 1693690098}
   m_Layer: 5
   m_Name: ChatWindow
   m_TagString: Untagged
@@ -11524,6 +11525,21 @@ RectTransform:
   m_AnchoredPosition: {x: -456.8, y: 25}
   m_SizeDelta: {x: 537.4, y: 420}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1693690098
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1693690096}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0363b44659d8f28469850a3811bd0157, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  InputFieldMessage: {fileID: 1797989117}
+  TextChatDisplay: {fileID: 1859700727}
+  ActivateChatInputFieldKey: 99
 --- !u!224 &1693838465 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 1514465755172770401, guid: 6ceea165fd3fc9a409ee5316021cebfc,
@@ -11695,6 +11711,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_textInfo.pageCount
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1133591972139954319, guid: 9e240527922386c45b2f734d1e6bf6a5,
+        type: 3}
+      propertyPath: m_text
+      value: Press 'C' to activate
       objectReference: {fileID: 0}
     - target: {fileID: 7168802432034402223, guid: 9e240527922386c45b2f734d1e6bf6a5,
         type: 3}
@@ -13127,7 +13148,6 @@ GameObject:
   - component: {fileID: 2121629629}
   - component: {fileID: 2121629631}
   - component: {fileID: 2121629630}
-  - component: {fileID: 2121629632}
   - component: {fileID: 2121629633}
   m_Layer: 5
   m_Name: Background
@@ -13194,20 +13214,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2121629628}
   m_CullTransparentMesh: 0
---- !u!114 &2121629632
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2121629628}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0363b44659d8f28469850a3811bd0157, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  InputFieldMessage: {fileID: 1797989117}
-  TextChatDisplay: {fileID: 1859700727}
 --- !u!114 &2121629633
 MonoBehaviour:
   m_ObjectHideFlags: 0

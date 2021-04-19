@@ -7,7 +7,7 @@ namespace ITCompanySimulation.UI
     /// <summary>
     /// Class for handling UI related to in-game chat.
     /// </summary>
-    public class Chat : MonoBehaviour
+    public class ChatWindow : MonoBehaviour
     {
         /*Private consts fields*/
 
@@ -18,7 +18,7 @@ namespace ITCompanySimulation.UI
         /// to send
         /// </summary>
         [SerializeField]
-        private TMP_InputField InputFieldMessage;
+        protected TMP_InputField InputFieldMessage;
         /// <summary>
         /// All chat messages will be stored in this text
         /// component
@@ -26,6 +26,9 @@ namespace ITCompanySimulation.UI
         [SerializeField]
         private TextMeshProUGUI TextChatDisplay;
         private IMultiplayerChat ChatComponent;
+        [SerializeField]
+        [Tooltip("Key that will activate input field of chat")]
+        private KeyCode ActivateChatInputFieldKey;
 
         /*Public consts fields*/
 
@@ -37,6 +40,11 @@ namespace ITCompanySimulation.UI
         {
             InputFieldMessage.text = string.Empty;
             TextChatDisplay.text = string.Empty;
+        }
+
+        private void OnDestroy()
+        {
+            ChatComponent.MessageReceived -= OnMessageReceived;
         }
 
         private void Awake()
@@ -52,6 +60,11 @@ namespace ITCompanySimulation.UI
             {
                 bool result = ChatComponent.SendChatMessage(InputFieldMessage.text);
                 InputFieldMessage.text = string.Empty;
+                InputFieldMessage.ActivateInputField();
+            }
+
+            if (true == Input.GetKeyDown(ActivateChatInputFieldKey))
+            {
                 InputFieldMessage.ActivateInputField();
             }
         }
