@@ -39,7 +39,7 @@ namespace ITCompanySimulation.UI
         [SerializeField]
         private ControlListView ListViewPlayers;
         [SerializeField]
-        private MainGameManager GameManagerComponent;
+        private ApplicationManager ApplicationManagerComponent;
         [SerializeField]
         private GameObject PanelMainLobby;
         private IObjectPool<ListViewElementPhotonPlayer> ListViewElementPool;
@@ -63,7 +63,7 @@ namespace ITCompanySimulation.UI
 
         private void Start()
         {
-            GameManagerComponent = GameObject.FindGameObjectWithTag("GameManager").GetComponent<MainGameManager>();
+            ApplicationManagerComponent = GameObject.FindGameObjectWithTag("ApplicationManager").GetComponent<ApplicationManager>();
             ButtonReady.interactable = (false == PhotonNetwork.offlineMode);
         }
 
@@ -274,7 +274,7 @@ namespace ITCompanySimulation.UI
         public void OnButtonStartGameClicked()
         {
             ButtonStartGame.interactable = false;
-            GameManagerComponent.StartGame();
+            ApplicationManagerComponent.StartGame();
         }
 
         public void OnButtonLeaveRoomClicked()

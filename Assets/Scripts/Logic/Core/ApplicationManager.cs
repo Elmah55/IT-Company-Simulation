@@ -17,10 +17,10 @@ using System.Reflection;
 namespace ITCompanySimulation.Core
 {
     /// <summary>
-    /// This class handles main game aspects like loading scenes, transfer,
+    /// This class handles application aspects like loading scenes, data transfer,
     /// handling multiplayer connection and multiplayer session
     /// </summary>
-    public class MainGameManager : Photon.PunBehaviour
+    public class ApplicationManager : Photon.PunBehaviour
     {
         /*Private consts fields*/
 

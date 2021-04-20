@@ -23,7 +23,7 @@ public class GameTime : Photon.PunBehaviour, IDataReceiver
 
     /*Private fields*/
 
-    private MainSimulationManager SimulationManagerComponent;
+    private SimulationManager SimulationManagerComponent;
 
     /*Public consts fields*/
 

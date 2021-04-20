@@ -33,7 +33,7 @@ namespace ITCompanySimulation.UI
         private bool MinimalBalanceValid = true;
         private bool RoomNameValid = false;
         [SerializeField]
-        private MainGameManager GameManagerComponent;
+        private ApplicationManager ApplicationManagerComponent;
         [SerializeField]
         private GameObject RoomLobbyPanel;
         [SerializeField]
@@ -94,8 +94,8 @@ namespace ITCompanySimulation.UI
             SliderInitialBalance.minValue = SimulationSettings.MIN_INITIAL_BALANCE;
             SliderInitialBalance.maxValue = SliderTargetBalance.value - 1;
             SliderInitialBalance.value = SliderTargetBalance.value - 50000;
-            SliderNumberOfPlayers.minValue = MainGameManager.MIN_NUMBER_OF_PLAYERS_PER_ROOM;
-            SliderNumberOfPlayers.maxValue = MainGameManager.MAX_NUMBER_OF_PLAYERS_PER_ROOM;
+            SliderNumberOfPlayers.minValue = ApplicationManager.MIN_NUMBER_OF_PLAYERS_PER_ROOM;
+            SliderNumberOfPlayers.maxValue = ApplicationManager.MAX_NUMBER_OF_PLAYERS_PER_ROOM;
             SliderMinimalBalance.maxValue = SimulationSettings.MAX_MINIMAL_BALANCE;
             SliderMinimalBalance.minValue = SimulationSettings.MIN_MINIMAL_BALANCE;
             SliderMinimalBalance.value = SliderInitialBalance.value - 100000;

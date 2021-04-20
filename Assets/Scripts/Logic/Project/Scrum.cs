@@ -30,7 +30,7 @@ namespace ITCompanySimulation.Developing
         /*Private fields*/
 
         private GameTime GameTimeComponent;
-        private MainSimulationManager SimulationManagerComponent;
+        private SimulationManager SimulationManagerComponent;
         /// <summary>
         /// How many days since start of current sprint
         /// </summary>
@@ -201,7 +201,7 @@ namespace ITCompanySimulation.Developing
         private void Awake()
         {
             GameTimeComponent = GetComponent<GameTime>();
-            SimulationManagerComponent = GetComponent<MainSimulationManager>();
+            SimulationManagerComponent = GetComponent<SimulationManager>();
         }
 
         private void OnBindedProjectWorkerAdded(SharedWorker worker)

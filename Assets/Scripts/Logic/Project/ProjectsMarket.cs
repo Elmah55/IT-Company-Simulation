@@ -110,7 +110,7 @@ public class ProjectsMarket : Photon.PunBehaviour, IDataReceiver
         newProject.UsedTechnologies = GenerateProjectTechnologies();
         newProject.CompletionTime = UnityEngine.Random.Range(PROJECT_COMPLETION_TIME_MIN, PROJECT_COMPLETION_TIME_MAX);
         newProject.CompletionBonus = CalculateProjectCompleteBonus(newProject);
-        newProject.ID = MainSimulationManager.GenerateID();
+        newProject.ID = SimulationManager.GenerateID();
         newProject.NameIndex = projectNameIndex;
         //Every project name is associated with one icon
         newProject.IconIndex = projectNameIndex;

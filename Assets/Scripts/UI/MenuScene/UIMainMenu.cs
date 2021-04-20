@@ -14,7 +14,7 @@ namespace ITCompanySimulation.UI
 
         [SerializeField]
         private GameObject CredentialsPanel;
-        private MainGameManager GameManagerComponent;
+        private ApplicationManager ApplicationManagerComponent;
         [SerializeField]
         private Button ButtonStartGame;
         private MenuButtonSoundEffects ButtonStartGameSoundEffects;
@@ -43,14 +43,14 @@ namespace ITCompanySimulation.UI
 
         private void OnDestroy()
         {
-            GameManagerComponent.ReconnectFailed -= OnGameManagerComponentReconnectFailed;
+            ApplicationManagerComponent.ReconnectFailed -= OnGameManagerComponentReconnectFailed;
         }
 
         private void Awake()
         {
             TextButtonStartGame = ButtonStartGame.GetComponentInChildren<TextMeshProUGUI>();
-            GameManagerComponent = GameObject.FindGameObjectWithTag("GameManager").GetComponent<MainGameManager>();
-            GameManagerComponent.ReconnectFailed += OnGameManagerComponentReconnectFailed;
+            ApplicationManagerComponent = GameObject.FindGameObjectWithTag("ApplicationManager").GetComponent<ApplicationManager>();
+            ApplicationManagerComponent.ReconnectFailed += OnGameManagerComponentReconnectFailed;
             ButtonStartGameSoundEffects = ButtonStartGame.GetComponent<MenuButtonSoundEffects>();
         }
 
@@ -112,14 +112,14 @@ namespace ITCompanySimulation.UI
             ButtonStartGameSoundEffects.AddSoundEffects();
             ButtonStartGame.onClick.AddListener(() =>
             {
-                if (true == GameManagerComponent.UseRoom)
+                if (true == ApplicationManagerComponent.UseRoom)
                 {
                     PanelMainLobby.SetActive(true);
                     PanelMainMenu.SetActive(false);
                 }
                 else
                 {
-                    GameManagerComponent.StartGame();
+                    ApplicationManagerComponent.StartGame();
                     ButtonStartGame.interactable = false;
                 }
             });
@@ -135,7 +135,7 @@ namespace ITCompanySimulation.UI
             ButtonStartGame.onClick.AddListener(() =>
             {
                 ReconnectFailed = false;
-                GameManagerComponent.Connect();
+                ApplicationManagerComponent.Connect();
             });
         }
 

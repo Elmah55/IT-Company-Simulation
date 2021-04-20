@@ -43,7 +43,7 @@ namespace ITCompanySimulation.UI
         [SerializeField]
         private TextMeshProUGUI TextListViewWorkers;
         [SerializeField]
-        private MainSimulationManager SimulationManagerComponent;
+        private SimulationManager SimulationManagerComponent;
         [SerializeField]
         private Tooltip TooltipComponent;
         [SerializeField]

@@ -43,7 +43,7 @@ public class UIDefaultView : MonoBehaviour
     [SerializeField]
     private GameTime GameTimeComponent;
     [SerializeField]
-    private MainSimulationManager SimulationManagerComponent;
+    private SimulationManager SimulationManagerComponent;
     [SerializeField]
     private TMP_Dropdown DropdownNotificationList;
 

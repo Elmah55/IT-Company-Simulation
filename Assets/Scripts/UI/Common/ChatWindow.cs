@@ -51,7 +51,7 @@ namespace ITCompanySimulation.UI
 
         private void Awake()
         {
-            ChatComponent = GameObject.FindGameObjectWithTag("GameManager").GetComponent<ChatManager>();
+            ChatComponent = GameObject.FindGameObjectWithTag("ApplicationManager").GetComponent<ChatManager>();
             ChatComponent.MessageReceived += OnChatMessageReceived;
             ChatComponent.Disconnected += OnChatDisconnected;
             ChatComponent.Connected += OnChatConnected;

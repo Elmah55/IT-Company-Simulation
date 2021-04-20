@@ -13,7 +13,7 @@ namespace ITCompanySimulation.Core
     /// happen during running simulation (like ending game if gameplay
     /// target is reached)
     /// </summary>
-    public class MainSimulationManager : Photon.PunBehaviour
+    public class SimulationManager : Photon.PunBehaviour
     {
         /*Private consts fields*/
 
@@ -26,7 +26,7 @@ namespace ITCompanySimulation.Core
         /// Used for generating IDs of items
         /// </summary>
         private static int m_ID;
-        private MainGameManager GameManagerComponent;
+        private ApplicationManager ApplicationManagerComponent;
 
         /*Public consts fields*/
 
@@ -75,12 +75,12 @@ namespace ITCompanySimulation.Core
         private void Start()
         {
             InfoWindowComponent.Show("Waiting for session start...");
-            GameManagerComponent.SessionStarted += OnGameManagerComponentSessionStarted;
+            ApplicationManagerComponent.SessionStarted += OnGameManagerComponentSessionStarted;
         }
 
         private void Awake()
         {
-            GameManagerComponent = GameObject.FindGameObjectWithTag("GameManager").GetComponent<MainGameManager>();
+            ApplicationManagerComponent = GameObject.FindGameObjectWithTag("ApplicationManager").GetComponent<ApplicationManager>();
             GameTimeComponent = GetComponent<GameTime>();
             NotificatorComponent = new SimulationEventNotificator(GameTimeComponent);
 
@@ -347,8 +347,8 @@ namespace ITCompanySimulation.Core
                 }
 
                 SimulationFinished?.Invoke(winnerPhotonPlayerID, (SimulationFinishReason)finishReason);
-                GameManagerComponent.FinishSession();
-                InfoWindowComponent.ShowOk(finishSimulationInfoMsg, () => GameManagerComponent.LoadScene(SceneIndex.Menu));
+                ApplicationManagerComponent.FinishSession();
+                InfoWindowComponent.ShowOk(finishSimulationInfoMsg, () => ApplicationManagerComponent.LoadScene(SceneIndex.Menu));
             }
         }
 

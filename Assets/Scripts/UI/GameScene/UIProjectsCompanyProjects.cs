@@ -16,7 +16,7 @@ namespace ITCompanySimulation.UI
         /*Private fields*/
 
         [SerializeField]
-        private MainSimulationManager SimulationManagerComponent;
+        private SimulationManager SimulationManagerComponent;
         [SerializeField]
         private GameTime GameTimeComponent;
         [SerializeField]

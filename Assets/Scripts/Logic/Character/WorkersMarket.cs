@@ -113,7 +113,7 @@ public class WorkersMarket : Photon.PunBehaviour, IDataReceiver
         newMarketWorker.Abilites = CreateWorkerAbilities();
         newMarketWorker.ExperienceTime = CalculateWorkerExpierience(newMarketWorker);
         newMarketWorker.Salary = CalculateWorkerSalary(newMarketWorker);
-        newMarketWorker.ID = MainSimulationManager.GenerateID();
+        newMarketWorker.ID = SimulationManager.GenerateID();
         int avatarIndex;
         newMarketWorker.Avatar = CreateWorkerAvatar(newMarketWorker, out avatarIndex);
         newMarketWorker.AvatarIndex = avatarIndex;

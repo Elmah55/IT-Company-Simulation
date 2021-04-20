@@ -23,7 +23,7 @@ namespace ITCompanySimulation.UI
         [SerializeField]
         private ControlListView ListViewCompanyWorkers;
         [SerializeField]
-        private MainSimulationManager SimulationManagerComponent;
+        private SimulationManager SimulationManagerComponent;
         [SerializeField]
         private WorkersMarket WorkersMarketComponent;
         [SerializeField]

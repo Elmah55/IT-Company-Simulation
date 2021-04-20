@@ -11,7 +11,7 @@ public class UIGameSceneMenu : MonoBehaviour
 
     [SerializeField]
     private InfoWindow InfoWindowComponent;
-    private MainGameManager GameManagerComponent;
+    private ApplicationManager ApplicationManagerComponent;
 
     /*Public consts fields*/
 
@@ -21,7 +21,7 @@ public class UIGameSceneMenu : MonoBehaviour
 
     private void Start()
     {
-        GameManagerComponent = GameObject.FindGameObjectWithTag("GameManager").GetComponent<MainGameManager>();
+        ApplicationManagerComponent = GameObject.FindGameObjectWithTag("ApplicationManager").GetComponent<ApplicationManager>();
     }
 
     /*Public methods*/
@@ -32,8 +32,8 @@ public class UIGameSceneMenu : MonoBehaviour
 
         UnityAction okAction = () =>
         {
-            GameManagerComponent.FinishSession();
-            GameManagerComponent.LoadScene(SceneIndex.Menu);
+            ApplicationManagerComponent.FinishSession();
+            ApplicationManagerComponent.LoadScene(SceneIndex.Menu);
         };
 
         InfoWindowComponent.ShowOkCancel(infoWindowText, okAction, null);

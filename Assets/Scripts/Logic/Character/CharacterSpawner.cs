@@ -31,7 +31,7 @@ namespace ITCompanySimulation.Character
         };
         [SerializeField]
         private GameObject CharacterPrefab;
-        private MainSimulationManager SimulationManagerComponent;
+        private SimulationManager SimulationManagerComponent;
         private List<SharedWorker> SpawnedCharacters = new List<SharedWorker>();
         [SerializeField]
         private Transform[] SpawnPoints;
@@ -118,7 +118,7 @@ namespace ITCompanySimulation.Character
 
         private void Start()
         {
-            this.SimulationManagerComponent = GetComponent<MainSimulationManager>();
+            this.SimulationManagerComponent = GetComponent<SimulationManager>();
             SimulationManagerComponent.ControlledCompany.WorkerAdded += OnControlledCompanyWorkerAdded;
             SimulationManagerComponent.ControlledCompany.WorkerRemoved += OnControlledCompanyWorkerRemoved;
         }

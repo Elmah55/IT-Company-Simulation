@@ -13,8 +13,8 @@ GameObject:
   - component: {fileID: 3765739074144711040}
   - component: {fileID: -6147280442597107564}
   m_Layer: 0
-  m_Name: GameManager
-  m_TagString: GameManager
+  m_Name: ApplicationManager
+  m_TagString: ApplicationManager
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -45,7 +45,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 41e3bc83c727c534b96b346c0bdc1d45, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  InitialCompanyBalance: 0
+  InitialCompanyBalance: 320000
   TargetCompanyBalance: 330000
   MinimalCompanyBalance: -10000000
   OfflineMode: 0

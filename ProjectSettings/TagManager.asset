@@ -7,9 +7,9 @@ TagManager:
   - Fire
   - Canvas
   - InfoWindow
-  - GameManager
   - ScriptsGameObject
   - SoundEffects
+  - ApplicationManager
   layers:
   - Default
   - TransparentFX

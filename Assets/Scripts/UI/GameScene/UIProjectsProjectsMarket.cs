@@ -24,7 +24,7 @@ namespace ITCompanySimulation.UI
         [Tooltip("Color of project's list view element after being completed")]
         private Color CompletedProjectListViewElementColors;
         [SerializeField]
-        private MainSimulationManager SimulationManagerComponent;
+        private SimulationManager SimulationManagerComponent;
         [SerializeField]
         private TextMeshProUGUI TextMarketProjects;
         [SerializeField]

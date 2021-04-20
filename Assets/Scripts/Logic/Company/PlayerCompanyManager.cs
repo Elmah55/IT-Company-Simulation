@@ -31,7 +31,7 @@ public class PlayerCompanyManager : MonoBehaviour
     /*Private fields*/
 
     private GameTime GameTimeComponent;
-    private MainSimulationManager SimulationManagerComponent;
+    private SimulationManager SimulationManagerComponent;
     private int TotalMonthlyExpenses;
     /// <summary>
     /// This list hold reference to workers whom satifaction level fell below
@@ -298,7 +298,7 @@ public class PlayerCompanyManager : MonoBehaviour
     private void Start()
     {
         GameTimeComponent = GetComponent<GameTime>();
-        SimulationManagerComponent = GetComponent<MainSimulationManager>();
+        SimulationManagerComponent = GetComponent<SimulationManager>();
 
         GameTimeComponent.MonthChanged += HandleCompanyExpenses;
         GameTimeComponent.DayChanged += UpdateWorkersState;
