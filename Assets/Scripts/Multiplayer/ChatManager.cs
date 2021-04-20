@@ -2,6 +2,7 @@
 using Photon.Chat;
 using UnityEngine;
 using System.Linq;
+using UnityEngine.Events;
 
 namespace ITCompanySimulation.Multiplayer
 {
@@ -22,8 +23,10 @@ namespace ITCompanySimulation.Multiplayer
 
         /*Public fields*/
 
-        public bool Connected { get; private set; }
+        public bool IsConnected { get; private set; }
         public event PhotonChatMessageAction MessageReceived;
+        public event UnityAction Connected;
+        public event UnityAction Disconnected;
 
         /*Private methods*/
 
@@ -71,7 +74,8 @@ namespace ITCompanySimulation.Multiplayer
 
         public void OnConnected()
         {
-            Connected = true;
+            IsConnected = true;
+            Connected?.Invoke();
 
 #if DEVELOPMENT_BUILD || UNITY_EDITOR
             Debug.LogFormat("[{0}] Connected",
@@ -81,7 +85,8 @@ namespace ITCompanySimulation.Multiplayer
 
         public void OnDisconnected()
         {
-            Connected = false;
+            IsConnected = false;
+            Disconnected?.Invoke();
 
 #if DEVELOPMENT_BUILD || UNITY_EDITOR
             Debug.LogFormat("[{0}] Disconencted",

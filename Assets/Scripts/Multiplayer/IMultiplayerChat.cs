@@ -1,4 +1,6 @@
-﻿namespace ITCompanySimulation.Multiplayer
+﻿using UnityEngine.Events;
+
+namespace ITCompanySimulation.Multiplayer
 {
     public interface IMultiplayerChat
     {
@@ -14,7 +16,9 @@
         /// Invoked when message from other client is received
         /// </summary>
         event PhotonChatMessageAction MessageReceived;
-        bool Connected { get; }
+        event UnityAction Connected;
+        event UnityAction Disconnected;
+        bool IsConnected { get; }
 
         /*Private methods*/
 

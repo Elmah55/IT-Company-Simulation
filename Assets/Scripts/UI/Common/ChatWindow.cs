@@ -44,13 +44,32 @@ namespace ITCompanySimulation.UI
 
         private void OnDestroy()
         {
-            ChatComponent.MessageReceived -= OnMessageReceived;
+            ChatComponent.MessageReceived -= OnChatMessageReceived;
+            ChatComponent.Disconnected -= OnChatDisconnected;
+            ChatComponent.Connected -= OnChatConnected;
         }
 
         private void Awake()
         {
             ChatComponent = GameObject.FindGameObjectWithTag("GameManager").GetComponent<ChatManager>();
-            ChatComponent.MessageReceived += OnMessageReceived;
+            ChatComponent.MessageReceived += OnChatMessageReceived;
+            ChatComponent.Disconnected += OnChatDisconnected;
+            ChatComponent.Connected += OnChatConnected;
+
+            if (false == ChatComponent.IsConnected)
+            {
+                OnChatConnectionFailed();
+            }
+        }
+
+        private void OnChatConnected()
+        {
+            this.gameObject.SetActive(true);
+        }
+
+        private void OnChatDisconnected()
+        {
+            OnChatConnectionFailed();
         }
 
         private void Update()
@@ -69,12 +88,18 @@ namespace ITCompanySimulation.UI
             }
         }
 
-        private void OnMessageReceived(string senderNickname, string message)
+        private void OnChatMessageReceived(string senderNickname, string message)
         {
             string displayedMessage = string.Format("{0}: {1}\n",
                                                     senderNickname,
                                                     message);
             TextChatDisplay.text += displayedMessage;
+        }
+
+        private void OnChatConnectionFailed()
+        {
+            //Disable this UI element if chat connection failed
+            this.gameObject.SetActive(false);
         }
 
         /*Public methods*/
