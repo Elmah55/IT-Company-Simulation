@@ -1710,6 +1710,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: TextChatDisplay
       objectReference: {fileID: 0}
+    - target: {fileID: 1514465755172770400, guid: 6ceea165fd3fc9a409ee5316021cebfc,
+        type: 3}
+      propertyPath: m_Layer
+      value: 10
+      objectReference: {fileID: 0}
     - target: {fileID: 1514465755172770414, guid: 6ceea165fd3fc9a409ee5316021cebfc,
         type: 3}
       propertyPath: m_textInfo.characterCount
@@ -3801,9 +3806,8 @@ MonoBehaviour:
   CameraMovementSmoothness: 8
   CameraZoomSpeed: 3.77
   CameraZoomSmoothness: 6
-  CameraPostionBounds:
-    m_Center: {x: 1.5, y: -0.5, z: 0}
-    m_Extent: {x: 3, y: 3, z: 0}
+  CameraCenterPoint: {x: 1.5, y: -1}
+  CameraDistanceLimit: 1.5
 --- !u!20 &519420031
 Camera:
   m_ObjectHideFlags: 0
@@ -19897,7 +19901,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 746701995}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 558.4515, y: 309.08658, z: -247.68915}
+  m_LocalPosition: {x: 1.78, y: -0.91, z: -247.68915}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
@@ -65959,7 +65963,7 @@ GameObject:
   - component: {fileID: 8200255380796948684}
   - component: {fileID: 4344304527838762995}
   - component: {fileID: 7168802431873136527}
-  m_Layer: 5
+  m_Layer: 10
   m_Name: Text
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -66617,7 +66621,7 @@ GameObject:
   - component: {fileID: 2585466783899408675}
   - component: {fileID: 4964612021702152169}
   - component: {fileID: 2560104246890227189}
-  m_Layer: 5
+  m_Layer: 10
   m_Name: InputFieldMessage
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -67096,7 +67100,7 @@ GameObject:
   m_Component:
   - component: {fileID: 964622639735862626}
   - component: {fileID: 955565490519598972}
-  m_Layer: 5
+  m_Layer: 10
   m_Name: Text Area
   m_TagString: Untagged
   m_Icon: {fileID: 0}

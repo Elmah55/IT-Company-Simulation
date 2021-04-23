@@ -1,4 +1,6 @@
-﻿namespace ITCompanySimulation.Utilities
+﻿using UnityEngine;
+
+namespace ITCompanySimulation.Utilities
 {
     public class Utils
     {
@@ -26,6 +28,17 @@
         public static float MapRange(float input, float inputMin, float inputMax, float outputMin, float outputMax)
         {
             return outputMin + ((outputMax - outputMin) / (inputMax - inputMin)) * (input - inputMin);
+        }
+
+        /// <summary>
+        /// Checks if mouse pointer is inside screen bounds
+        /// </summary>
+        /// <returns>True if pointer is inside screen bounds, false otherwise</returns>
+        public static bool MouseInsideScreen()
+        {
+            Rect screenRect = new Rect(0f, 0f, Screen.width, Screen.height);
+            bool result = screenRect.Contains(Input.mousePosition);
+            return result;
         }
     } 
 }

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using ITCompanySimulation.Utilities;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
@@ -49,24 +50,41 @@ public class CameraController : MonoBehaviour
     public float CameraZoomSpeed;
     [Range(0f, 10f)]
     public float CameraZoomSmoothness;
-    /// <summary>
-    /// Bounds defining possible camera movment
-    /// </summary>
-    public Bounds CameraPostionBounds;
+    [Tooltip("Camera distance limit will be measured from this point")]
+    public Vector2 CameraCenterPoint;
+    [Tooltip("Indicates how far camera can move from center point")]
+    public float CameraDistanceLimit;
 
     /*Private methods*/
 
     /// <summary>
-    /// Checks for camera position position and if it exceeded defined bounds moves it inside bounds
+    /// Checks for camera position position and returns amount by how much limit distance was exceeded.
+    /// Returns 0 if distance limit was not exceeded, otherwise returns amount that limit was exceeded by.
     /// </summary>
-    private void CheckCameraBounds()
+    private float CheckCameraDistanceLimit()
     {
+        float result = 0f;
         Vector2 camerPos = CameraComponent.transform.position;
-        //Take zoom into consideration when calculating bounds. The bigger the zoom is the bigger bounds should be
-        float zoomBoundFactor = 3f / CameraComponent.orthographicSize;
-        camerPos.x = Mathf.Clamp(camerPos.x, CameraPostionBounds.min.x * zoomBoundFactor, CameraPostionBounds.max.x * zoomBoundFactor);
-        camerPos.y = Mathf.Clamp(camerPos.y, CameraPostionBounds.min.y * zoomBoundFactor, CameraPostionBounds.max.y * zoomBoundFactor);
-        CameraComponent.transform.position = camerPos;
+        /// <summary>
+        /// Value used to calcute distance limit based on camera zoom.
+        /// Used camera is ortographic. That means when zoom of camera
+        /// changes size of tilemap and sprites will change but distance
+        /// between unity game objects will remain the same. To have same
+        /// distance limit regardless of zoom this value needs to be taking
+        /// into consideration.
+        /// </summary>
+        float zoomFactor = CAMERA_MIN_ZOOM / CameraComponent.orthographicSize;
+        float distanceFromCenterPoint = Vector2.Distance(CameraCenterPoint, camerPos);
+
+        if (distanceFromCenterPoint > CameraDistanceLimit * zoomFactor)
+        {
+            //Vector from camera position to center point
+            Vector2 centerPointVector = CameraCenterPoint - camerPos;
+            result = centerPointVector.magnitude - CameraDistanceLimit;
+            result /= zoomFactor;
+        }
+
+        return result;
     }
 
     /// <summary>
@@ -74,6 +92,8 @@ public class CameraController : MonoBehaviour
     /// </summary>
     private void SetCameraPosition()
     {
+        float overLimitAmount = CheckCameraDistanceLimit();
+
         if (0f != CameraMovementSmoothness)
         {
             LastCameraDirectionMovementFactor -= (2f / CameraMovementSmoothness) * Time.unscaledDeltaTime;
@@ -82,24 +102,28 @@ public class CameraController : MonoBehaviour
             CameraComponent.transform.Translate(LastCameraDirection);
         }
 
-        CheckCameraBounds();
-
-        if (true == Input.GetMouseButton(RIGHT_MOUSE_BUTTON))
+        if (true == Input.GetMouseButton(RIGHT_MOUSE_BUTTON) && true == Utils.MouseInsideScreen())
         {
             Vector2 mouseMovement = (Vector2)Input.mousePosition - LastMousePosition;
             mouseMovement *= (CameraMovementSpeed / 100f) * CameraComponent.orthographicSize;
             LastCameraDirection = -mouseMovement * Time.unscaledDeltaTime * (1f / CanvasComponent.scaleFactor);
-            LastCameraDirectionMovementFactor = 1f;
+            LastCameraDirectionMovementFactor = 1f - (overLimitAmount / 3f);
 
             if (0f == CameraMovementSmoothness)
             {
                 CameraComponent.transform.Translate(LastCameraDirection);
             }
         }
+        else if (overLimitAmount > 0f)
+        {
+            //Vector from camera position to center point
+            Vector2 centerPointVector = CameraCenterPoint - (Vector2)CameraComponent.transform.position;
+            LastCameraDirection = centerPointVector.normalized;
+            LastCameraDirectionMovementFactor = overLimitAmount / 100f;
+        }
 
         if (CameraPreviousZoom != CameraComponent.orthographicSize)
         {
-            CheckCameraBounds();
             CameraPreviousZoom = CameraComponent.orthographicSize;
         }
     }
@@ -123,7 +147,11 @@ public class CameraController : MonoBehaviour
         if (0f != CameraZoomSmoothness)
         {
             float cameraZoomChange = (1f / CameraZoomSmoothness) * Time.unscaledDeltaTime;
-            LastCameraZoom = LastCameraZoom > 0 ? (LastCameraZoom - cameraZoomChange) : (LastCameraZoom + cameraZoomChange);
+
+            if (0f != LastCameraZoom)
+            {
+                LastCameraZoom = LastCameraZoom > 0 ? (LastCameraZoom - cameraZoomChange) : (LastCameraZoom + cameraZoomChange);
+            }
 
             //Take floating point error into consideration
             if (Mathf.Abs(LastCameraZoom) <= 0.02f)
@@ -173,25 +201,14 @@ public class CameraController : MonoBehaviour
 
             //Dont change camera position when mouse is over UI element unless it has
             //specific layer. It is use to prevent situation like zooming when user is scrolling list
-            if (results.Count > 0)
+            foreach (RaycastResult rayResult in results)
             {
-                foreach (RaycastResult rayResult in results)
+                if (rayResult.gameObject.layer != DontDisableCameraControlLayer)
                 {
-                    if (rayResult.gameObject.layer != DontDisableCameraControlLayer)
-                    {
-                        result = false;
-                        break;
-                    }
+                    result = false;
+                    break;
                 }
             }
-            else
-            {
-                result = false;
-            }
-        }
-        else
-        {
-            result = false;
         }
 
         return result;
