@@ -1,4 +1,5 @@
-﻿using ITCompanySimulation.Developing;
+﻿using ITCompanySimulation.Company;
+using ITCompanySimulation.Developing;
 
 namespace ITCompanySimulation.Character
 {

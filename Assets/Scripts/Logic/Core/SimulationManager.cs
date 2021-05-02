@@ -5,6 +5,8 @@ using UnityEngine;
 using ITCompanySimulation.Character;
 using ITCompanySimulation.UI;
 using ITCompanySimulation.Multiplayer;
+using ITCompanySimulation.Company;
+using ITCompanySimulation.Developing;
 
 namespace ITCompanySimulation.Core
 {
@@ -23,9 +25,18 @@ namespace ITCompanySimulation.Core
         [SerializeField]
         private InfoWindow InfoWindowComponent;
         /// <summary>
+        /// Game object of UI element with simulation statistics
+        /// </summary>
+        [SerializeField]
+        private GameObject SimulationStatsUI;
+        /// <summary>
         /// Used for generating IDs of items
         /// </summary>
         private static int m_ID;
+        /// <summary>
+        /// Number of seconds passed from application start to simulation start
+        /// </summary>
+        private float SimulationStartTimestamp;
         private ApplicationManager ApplicationManagerComponent;
 
         /*Public consts fields*/
@@ -35,10 +46,31 @@ namespace ITCompanySimulation.Core
         public PlayerCompany ControlledCompany { get; private set; }
         public SimulationEventNotificator NotificatorComponent { get; private set; }
         /// <summary>
-        /// Invoked when any of player has reached the target balance
-        /// and won game
+        /// This will map ID of photon player to list of player that his company has.
         /// </summary>
-        public event Action<int, SimulationFinishReason> SimulationFinished;
+        public Dictionary<PhotonPlayer, List<SharedWorker>> OtherPlayersWorkers { get; private set; }
+        /// <summary>
+        /// True when any of player has won the game
+        /// </summary>
+        public bool IsSimulationFinished { get; private set; }
+        /// <summary>
+        /// ID of PhotonPlayer object of winner player valid only
+        /// when IsSimulationFinished is true
+        /// </summary>
+        public PhotonPlayer WinnerPlayer { get; private set; }
+        /// <summary>
+        /// Reason of simulation finish. This field is only valid when IsSimulationFinished is
+        /// set to true.
+        /// </summary>
+        public SimulationFinishReason FinishReason { get; private set; }
+        public bool IsSimulationActive { get; private set; }
+        /// <summary>
+        /// Simulation statistics collected during this session
+        /// </summary>
+        public SimulationStats Stats { get; private set; }
+
+        public event SimulationFinishAction SimulationFinished;
+        public event Action SimulationStarted;
         /// <summary>
         /// Called when worker is added to company of other player
         /// present in simulation
@@ -54,21 +86,6 @@ namespace ITCompanySimulation.Core
         /// of simulation
         /// </summary>
         public event PhotonPlayerAction OtherPlayerCompanyMinimalBalanceReached;
-        /// <summary>
-        /// This will map ID of photon player to list of player that his company has.
-        /// </summary>
-        public Dictionary<PhotonPlayer, List<SharedWorker>> OtherPlayersWorkers { get; private set; } = new Dictionary<PhotonPlayer, List<SharedWorker>>();
-        /// <summary>
-        /// True when any of player has won the game
-        /// </summary>
-        public bool IsSimulationFinished { get; private set; }
-        /// <summary>
-        /// ID of PhotonPlayer object of winner player valid only
-        /// when IsSimulationFinished is true
-        /// </summary>
-        public PhotonPlayer WinnerPlayer { get; private set; }
-        public SimulationFinishReason FinishReason { get; private set; }
-        public bool IsSimulationActive { get; private set; }
 
         /*Private methods*/
 
@@ -83,6 +100,8 @@ namespace ITCompanySimulation.Core
             ApplicationManagerComponent = GameObject.FindGameObjectWithTag("ApplicationManager").GetComponent<ApplicationManager>();
             GameTimeComponent = GetComponent<GameTime>();
             NotificatorComponent = new SimulationEventNotificator(GameTimeComponent);
+            OtherPlayersWorkers = new Dictionary<PhotonPlayer, List<SharedWorker>>();
+            Stats = new SimulationStats();
 
             InitPlayersWorkers();
             //TEST
@@ -111,11 +130,38 @@ namespace ITCompanySimulation.Core
             ControlledCompany.WorkerAdded += OnControlledCompanyWorkerAdded;
             ControlledCompany.WorkerRemoved += OnControlledCompanyWorkerRemoved;
             ControlledCompany.BalanceChanged += OnControlledCompanyBalanceChanged;
+            ControlledCompany.ProjectAdded += OnControlledCompanyProjectAdded;
             ControlledCompany.Balance = SimulationSettings.InitialBalance;
         }
 
-        private void OnControlledCompanyBalanceChanged(int newBalance)
+        private void StartSimulation()
         {
+            InfoWindowComponent.Hide();
+            GameTimeComponent.StartTime();
+            IsSimulationActive = true;
+            SimulationStarted?.Invoke();
+            SimulationStartTimestamp = Time.realtimeSinceStartup;
+        }
+
+        private void OnControlledCompanyProjectAdded(Scrum scrumObj)
+        {
+            scrumObj.BindedProject.Completed += (proj) =>
+              {
+                  Stats.ProjectsCompleted++;
+              };
+        }
+
+        private void OnControlledCompanyBalanceChanged(int newBalance, int balanceDelta)
+        {
+            if (balanceDelta >= 0)
+            {
+                Stats.MoneyEarned += balanceDelta;
+            }
+            else
+            {
+                Stats.MoneySpent += Mathf.Abs(balanceDelta);
+            }
+
             if (newBalance >= SimulationSettings.TargetBalance)
             {
                 this.photonView.RPC("FinishSimulationRPC",
@@ -137,9 +183,7 @@ namespace ITCompanySimulation.Core
 
         private void OnGameManagerComponentSessionStarted()
         {
-            InfoWindowComponent.Hide();
-            GameTimeComponent.StartTime();
-            IsSimulationActive = true;
+            StartSimulation();
 
 #if DEVELOPMENT_BUILD || UNITY_EDITOR
             Debug.LogFormat("[{0}] Session started. Starting simulation with time scale {1}",
@@ -157,6 +201,8 @@ namespace ITCompanySimulation.Core
             addedWorker.SalaryChanged += OnCompanyWorkerSalaryChanged;
             addedWorker.AbilityUpdated += OnCompanyWorkerAbilityUpdated;
             addedWorker.ExpierienceTimeChanged += OnCompanyWorkerExpierienceTimeChanged;
+
+            Stats.WorkersHired++;
         }
 
         private void OnControlledCompanyWorkerRemoved(SharedWorker removedWorker)
@@ -166,6 +212,8 @@ namespace ITCompanySimulation.Core
             removedWorker.SalaryChanged -= OnCompanyWorkerSalaryChanged;
             removedWorker.AbilityUpdated -= OnCompanyWorkerAbilityUpdated;
             removedWorker.ExpierienceTimeChanged -= OnCompanyWorkerExpierienceTimeChanged;
+
+            Stats.WorkersLeftCompany++;
         }
 
         private void OnCompanyWorkerExpierienceTimeChanged(SharedWorker companyWorker)
@@ -348,7 +396,11 @@ namespace ITCompanySimulation.Core
 
                 SimulationFinished?.Invoke(winnerPhotonPlayerID, (SimulationFinishReason)finishReason);
                 ApplicationManagerComponent.FinishSession();
-                InfoWindowComponent.ShowOk(finishSimulationInfoMsg, () => ApplicationManagerComponent.LoadScene(SceneIndex.Menu));
+                InfoWindowComponent.ShowOk(finishSimulationInfoMsg, () => SimulationStatsUI.SetActive(true));
+
+                float simulationRunningTime = Time.realtimeSinceStartup - SimulationStartTimestamp;
+                Stats.SimulationRunningTime = TimeSpan.FromSeconds(simulationRunningTime);
+                Stats.DaysSinceStart = GameTimeComponent.DaysSinceStart;
             }
         }
 
@@ -370,6 +422,7 @@ namespace ITCompanySimulation.Core
             hiredWorker.Salary = hiredWorker.HireSalary;
             ControlledCompany.Balance -= hiredWorker.Salary;
             ControlledCompany.AddWorker(hiredWorker);
+            Stats.OtherPlayersWorkersHired++;
         }
 
         public static int GenerateID()

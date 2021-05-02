@@ -1,4 +1,5 @@
 ﻿using ITCompanySimulation.Character;
+using ITCompanySimulation.Company;
 using ITCompanySimulation.Utilities;
 using System.Collections.Generic;
 using System.Linq;

@@ -269,3 +269,18 @@ namespace ITCompanySimulation.Multiplayer
     public delegate void PhotonPlayerAction(PhotonPlayer player);
 }
 
+namespace ITCompanySimulation.Core
+{
+    public delegate void SimulationFinishAction(int winnerPhotonPlayerID, SimulationFinishReason finishReason);
+}
+
+namespace ITCompanySimulation.Company
+{
+    /// <summary>
+    /// Delegate used when company balance is changed
+    /// </summary>
+    /// <param name="newBalance">New comapny's balance</param>
+    /// <param name="balanceDelta">Difference between current and previous balance</param>
+    public delegate void BalanceChangeAction(int newBalance, int balanceDelta);
+}
+

@@ -1,4 +1,5 @@
 ﻿using ITCompanySimulation.Character;
+using ITCompanySimulation.Company;
 using ITCompanySimulation.Core;
 using ITCompanySimulation.UI;
 using ITCompanySimulation.Utilities;
@@ -125,7 +126,7 @@ public class UIDefaultView : MonoBehaviour
         TextWorkersCount.text = GetWorkersCountText(SimulationManagerComponent.ControlledCompany.Workers.Count);
     }
 
-    private void OnControlledCompanyBalanceChanged(int newBalance)
+    private void OnControlledCompanyBalanceChanged(int newBalance, int balanceDelta)
     {
         TextCompanyBalanceCurrent.text = GetCompanyBalanceText(newBalance);
         SetProgressBarBalance(newBalance);
