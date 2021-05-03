@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 7971808970153639038}
   - component: {fileID: 4619193038361617911}
   - component: {fileID: 5190345602227520057}
+  - component: {fileID: 8226057690303175442}
   m_Layer: 5
   m_Name: MenuButton
   m_TagString: Untagged
@@ -105,6 +106,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 06a9a48ba95e1ed43939999217a8903d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &8226057690303175442
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1283056410451971157}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5c3d5d0a427ebdf43802a8b64e5f2713, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Text: {fileID: 5446619144809515245}
+  MatchWidth: 1
+  MatchHeight: 1
 --- !u!1 &4919592432116051609
 GameObject:
   m_ObjectHideFlags: 0
@@ -199,10 +215,10 @@ MonoBehaviour:
   m_outlineColor:
     serializedVersion: 2
     rgba: 4278190080
-  m_fontSize: 150
+  m_fontSize: 85
   m_fontSizeBase: 85
   m_fontWeight: 400
-  m_enableAutoSizing: 1
+  m_enableAutoSizing: 0
   m_fontSizeMin: 18
   m_fontSizeMax: 150
   m_fontStyle: 0

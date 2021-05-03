@@ -48,8 +48,8 @@ MonoBehaviour:
   InitialCompanyBalance: 320000
   TargetCompanyBalance: 330000
   MinimalCompanyBalance: -10000000
-  OfflineMode: 0
-  UseRoom: 1
+  OfflineMode: 1
+  UseRoom: 0
 --- !u!114 &3765739074144711040
 MonoBehaviour:
   m_ObjectHideFlags: 0
