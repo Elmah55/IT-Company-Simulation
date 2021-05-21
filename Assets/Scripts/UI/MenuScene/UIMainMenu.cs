@@ -3,6 +3,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using ITCompanySimulation.Core;
+using ITCompanySimulation.Settings;
 
 namespace ITCompanySimulation.UI
 {

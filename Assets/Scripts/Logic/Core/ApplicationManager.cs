@@ -9,6 +9,8 @@ using UnityEngine.Events;
 using UnityEngine.SceneManagement;
 using System.Linq;
 using System;
+using ITCompanySimulation.Settings;
+using AudioSettings = ITCompanySimulation.Settings.AudioSettings;
 
 #if DEVELOPMENT_BUILD || UNITY_EDITOR
 using System.Reflection;
@@ -122,6 +124,12 @@ namespace ITCompanySimulation.Core
 
             PhotonNetwork.OnEventCall += PhotonNetworkOnEventCall;
             SceneManager.sceneLoaded += OnSceneLoaded;
+        }
+
+        private void Start()
+        {
+            //Init static classes
+            AudioSettings.Load();
         }
 
         private void OnSceneLoaded(Scene loadedScene, LoadSceneMode sceneLoadMode)

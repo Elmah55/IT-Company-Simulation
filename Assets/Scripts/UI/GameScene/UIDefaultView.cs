@@ -1,6 +1,7 @@
 ﻿using ITCompanySimulation.Character;
 using ITCompanySimulation.Company;
 using ITCompanySimulation.Core;
+using ITCompanySimulation.Settings;
 using ITCompanySimulation.UI;
 using ITCompanySimulation.Utilities;
 using System.Collections.Generic;

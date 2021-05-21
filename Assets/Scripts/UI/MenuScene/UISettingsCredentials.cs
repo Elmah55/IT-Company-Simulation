@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using TMPro;
+using ITCompanySimulation.Settings;
 
 namespace ITCompanySimulation.UI
 {

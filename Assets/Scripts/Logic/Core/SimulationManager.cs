@@ -7,6 +7,7 @@ using ITCompanySimulation.UI;
 using ITCompanySimulation.Multiplayer;
 using ITCompanySimulation.Company;
 using ITCompanySimulation.Developing;
+using ITCompanySimulation.Settings;
 
 namespace ITCompanySimulation.Core
 {

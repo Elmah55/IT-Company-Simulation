@@ -5,6 +5,7 @@ using ITCompanySimulation.Multiplayer;
 using ExitGames.Client.Photon;
 using TMPro;
 using ITCompanySimulation.Core;
+using ITCompanySimulation.Settings;
 
 namespace ITCompanySimulation.UI
 {
