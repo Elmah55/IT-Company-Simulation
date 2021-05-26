@@ -402,6 +402,16 @@ namespace ITCompanySimulation.Core
                 float simulationRunningTime = Time.realtimeSinceStartup - SimulationStartTimestamp;
                 Stats.SimulationRunningTime = TimeSpan.FromSeconds(simulationRunningTime);
                 Stats.DaysSinceStart = GameTimeComponent.DaysSinceStart;
+
+#if DEVELOPMENT_BUILD || UNITY_EDITOR
+                Debug.LogFormat("[{0}] Simulation finished\n" +
+                                "Reason: {1}\n" +
+                                "Winner player: {2} (ID {3})",
+                                this.GetType().Name,
+                                this.FinishReason,
+                                WinnerPlayer?.NickName,
+                                WinnerPlayer?.ID);
+#endif
             }
         }
 
