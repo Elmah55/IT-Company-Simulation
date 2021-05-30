@@ -47,9 +47,9 @@ namespace ITCompanySimulation.Core
         public PlayerCompany ControlledCompany { get; private set; }
         public SimulationEventNotificator NotificatorComponent { get; private set; }
         /// <summary>
-        /// This will map ID of photon player to list of player that his company has.
+        /// This will map ID of photon player to dictionary containing his workers with worker ID as key
         /// </summary>
-        public Dictionary<PhotonPlayer, List<SharedWorker>> OtherPlayersWorkers { get; private set; }
+        public Dictionary<int, Dictionary<int, SharedWorker>> OtherPlayersWorkers { get; private set; }
         /// <summary>
         /// True when any of player has won the game
         /// </summary>
@@ -101,7 +101,7 @@ namespace ITCompanySimulation.Core
             ApplicationManagerComponent = GameObject.FindGameObjectWithTag("ApplicationManager").GetComponent<ApplicationManager>();
             GameTimeComponent = GetComponent<GameTime>();
             NotificatorComponent = new SimulationEventNotificator(GameTimeComponent);
-            OtherPlayersWorkers = new Dictionary<PhotonPlayer, List<SharedWorker>>();
+            OtherPlayersWorkers = new Dictionary<int, Dictionary<int, SharedWorker>>();
             Stats = new SimulationStats();
 
             InitPlayersWorkers();
@@ -111,16 +111,10 @@ namespace ITCompanySimulation.Core
 
         private void InitPlayersWorkers()
         {
-            //Init PlayersWorkers
-            foreach (PhotonPlayer player in PhotonNetwork.playerList)
+            //Add dictionary of workers for each player
+            foreach (PhotonPlayer player in PhotonNetwork.otherPlayers)
             {
-                //No need to get list of local player's workers
-                if (PhotonNetwork.player.ID == player.ID)
-                {
-                    continue;
-                }
-
-                OtherPlayersWorkers.Add(player, new List<SharedWorker>());
+                OtherPlayersWorkers.Add(player.ID, new Dictionary<int, SharedWorker>());
             }
         }
 
@@ -254,8 +248,7 @@ namespace ITCompanySimulation.Core
         [PunRPC]
         private void OnOtherPlayerCompanyWorkerAbilityChangedRPC(int photonPlayerID, int workerID, int updatedAbility, float updatedAbilityValue)
         {
-            SharedWorker updatedWorker =
-                OtherPlayersWorkers.First(x => x.Key.ID == photonPlayerID).Value.First(x => x.ID == workerID);
+            SharedWorker updatedWorker = OtherPlayersWorkers[photonPlayerID][workerID];
             ProjectTechnology updatedAbilityEnum = (ProjectTechnology)updatedAbility;
             updatedWorker.UpdateAbility(updatedAbilityEnum, updatedAbilityValue);
         }
@@ -268,8 +261,7 @@ namespace ITCompanySimulation.Core
         private void OnOtherPlayerCompanyWorkerAttirbuteChangedRPC(int photonPlayerID, int workerID, object attributeValue, int changedAttirbute)
         {
             WorkerAttribute attribute = (WorkerAttribute)changedAttirbute;
-            SharedWorker updatedWorker =
-                OtherPlayersWorkers.First(x => x.Key.ID == photonPlayerID).Value.First(x => x.ID == workerID);
+            SharedWorker updatedWorker = OtherPlayersWorkers[photonPlayerID][workerID];
 
             switch (attribute)
             {
@@ -293,17 +285,15 @@ namespace ITCompanySimulation.Core
         [PunRPC]
         private void OnControlledCompanyWorkerRemovedRPC(int removedWorkerID, int photonPlayerID)
         {
-            KeyValuePair<PhotonPlayer, List<SharedWorker>> workerPair = OtherPlayersWorkers.First(x => x.Key.ID == photonPlayerID);
-            List<SharedWorker> workers = workerPair.Value;
-            SharedWorker localRemovedWorker = workers.Find(x => x.ID == removedWorkerID);
-            workers.Remove(localRemovedWorker);
-            OtherPlayerWorkerRemoved?.Invoke(localRemovedWorker, workerPair.Key);
+            SharedWorker localRemovedWorker = OtherPlayersWorkers[photonPlayerID][removedWorkerID];
+            OtherPlayersWorkers[photonPlayerID].Remove(removedWorkerID);
+            PhotonPlayer sourcePlayer = PhotonNetwork.otherPlayers.FirstOrDefault(x => x.ID == photonPlayerID);
+            OtherPlayerWorkerRemoved?.Invoke(localRemovedWorker, sourcePlayer);
 
 #if DEVELOPMENT_BUILD || UNITY_EDITOR
-            string debugInfo = string.Format("[{3}] Received worker update from player {0} (ID: {1}).\n" +
-                "Worker removed (ID: {2}). Local workers collection synchronized",
-                workerPair.Key.NickName, workerPair.Key.ID, removedWorkerID, this.GetType().Name);
-            Debug.Log(debugInfo);
+            Debug.LogFormat("[{3}] Received worker update from player {0} (ID: {1}).\n" +
+                            "Worker removed (ID: {2}). Local workers collection synchronized",
+                            sourcePlayer.NickName, sourcePlayer.ID, removedWorkerID, this.GetType().Name);
 #endif
         }
 
@@ -314,16 +304,14 @@ namespace ITCompanySimulation.Core
         [PunRPC]
         private void OnControlledCompanyWorkerAddedRPC(SharedWorker addedWorker, int photonPlayerID)
         {
-            KeyValuePair<PhotonPlayer, List<SharedWorker>> workerPair = OtherPlayersWorkers.First(x => x.Key.ID == photonPlayerID);
-            List<SharedWorker> workers = workerPair.Value;
-            workers.Add(addedWorker);
-            OtherPlayerWorkerAdded?.Invoke(addedWorker, workerPair.Key);
+            OtherPlayersWorkers[photonPlayerID].Add(addedWorker.ID, addedWorker);
+            PhotonPlayer sourcePlayer = PhotonNetwork.otherPlayers.FirstOrDefault(x => x.ID == photonPlayerID);
+            OtherPlayerWorkerAdded?.Invoke(addedWorker, sourcePlayer);
 
 #if DEVELOPMENT_BUILD || UNITY_EDITOR
-            string debugInfo = string.Format("[{3}] Received worker update from player {0} (ID: {1}).\n" +
-                "Worker added (ID: {2}). Local workers collection synchronized",
-                workerPair.Key.NickName, workerPair.Key.ID, addedWorker.ID, this.GetType().Name);
-            Debug.Log(debugInfo);
+            Debug.LogFormat("[{3}] Received worker update from player {0} (ID: {1}).\n" +
+                            "Worker added (ID: {2}). Local workers collection synchronized",
+                            sourcePlayer.NickName, sourcePlayer.ID, addedWorker.ID, this.GetType().Name);
 #endif
         }
 
@@ -332,8 +320,8 @@ namespace ITCompanySimulation.Core
         [PunRPC]
         private void OnOtherPlayerControlledCompanyMinimalBalanceReachedRPC(int photonPlayerID)
         {
-            KeyValuePair<PhotonPlayer, List<SharedWorker>> workerPair = OtherPlayersWorkers.First(x => x.Key.ID == photonPlayerID);
-            this.OtherPlayerCompanyMinimalBalanceReached?.Invoke(workerPair.Key);
+            PhotonPlayer sourcePlayer = PhotonNetwork.otherPlayers.FirstOrDefault(x => x.ID == photonPlayerID);
+            this.OtherPlayerCompanyMinimalBalanceReached?.Invoke(sourcePlayer);
         }
 
         [PunRPC]
@@ -464,7 +452,7 @@ namespace ITCompanySimulation.Core
             }
             else
             {
-                OtherPlayersWorkers.Remove(otherPlayer);
+                OtherPlayersWorkers.Remove(otherPlayer.ID);
             }
         }
     }
