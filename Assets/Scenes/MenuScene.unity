@@ -267,7 +267,7 @@ PrefabInstance:
     - target: {fileID: 7012958399280334954, guid: 08d755ffebb65094095cb2143b95b20c,
         type: 3}
       propertyPath: m_MaxValue
-      value: 100
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 7012958399280334954, guid: 08d755ffebb65094095cb2143b95b20c,
         type: 3}
@@ -293,6 +293,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_OnValueChanged.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
       value: UnityEngine.Object, UnityEngine
+      objectReference: {fileID: 0}
+    - target: {fileID: 7012958399280334954, guid: 08d755ffebb65094095cb2143b95b20c,
+        type: 3}
+      propertyPath: m_WholeNumbers
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 08d755ffebb65094095cb2143b95b20c, type: 3}
@@ -6062,7 +6067,7 @@ PrefabInstance:
     - target: {fileID: 7012958399280334954, guid: 08d755ffebb65094095cb2143b95b20c,
         type: 3}
       propertyPath: m_MaxValue
-      value: 100
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 7012958399280334954, guid: 08d755ffebb65094095cb2143b95b20c,
         type: 3}
@@ -6088,6 +6093,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_OnValueChanged.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
       value: UnityEngine.Object, UnityEngine
+      objectReference: {fileID: 0}
+    - target: {fileID: 7012958399280334954, guid: 08d755ffebb65094095cb2143b95b20c,
+        type: 3}
+      propertyPath: m_WholeNumbers
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 08d755ffebb65094095cb2143b95b20c, type: 3}
@@ -11205,7 +11215,7 @@ PrefabInstance:
     - target: {fileID: 7012958399280334954, guid: 08d755ffebb65094095cb2143b95b20c,
         type: 3}
       propertyPath: m_MaxValue
-      value: 100
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 7012958399280334954, guid: 08d755ffebb65094095cb2143b95b20c,
         type: 3}
@@ -11231,6 +11241,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_OnValueChanged.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
       value: UnityEngine.Object, UnityEngine
+      objectReference: {fileID: 0}
+    - target: {fileID: 7012958399280334954, guid: 08d755ffebb65094095cb2143b95b20c,
+        type: 3}
+      propertyPath: m_WholeNumbers
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 08d755ffebb65094095cb2143b95b20c, type: 3}

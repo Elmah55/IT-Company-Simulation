@@ -31,6 +31,36 @@ namespace ITCompanySimulation.Utilities
         }
 
         /// <summary>
+        /// Maps linear value to dB log scale
+        /// </summary>
+        /// <param name="value">Linear value (should be greater than 0)</param>
+        /// <returns>Value mapped to dB. If provided input value 
+        /// was out of range (value less or equal to 0) returns float.NaN </returns>
+        public static float MapLinearTodB(float value)
+        {
+            float dBValue = float.NaN;
+
+            if (value > 0f)
+            {
+                dBValue = Mathf.Log10(value) * 20f;
+            }
+
+            return dBValue;
+        }
+
+        /// <summary>
+        /// Maps dB log scale to linear value
+        /// </summary>
+        /// <param name="dBVolume"></param>
+        /// <returns>Value mapped to linear scale (range 0.1 - 1)</returns>
+        public static float MapDbToLinear(float dBVolume)
+        {
+            float linearValue = dBVolume / 20f;
+            linearValue = Mathf.Pow(10f, linearValue);
+            return linearValue;
+        }
+
+        /// <summary>
         /// Checks if mouse pointer is inside screen bounds
         /// </summary>
         /// <returns>True if pointer is inside screen bounds, false otherwise</returns>
@@ -40,5 +70,5 @@ namespace ITCompanySimulation.Utilities
             bool result = screenRect.Contains(Input.mousePosition);
             return result;
         }
-    } 
+    }
 }

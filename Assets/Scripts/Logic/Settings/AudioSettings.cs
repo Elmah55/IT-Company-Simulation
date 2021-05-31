@@ -77,50 +77,14 @@ namespace ITCompanySimulation.Settings
         }
 
         /// <summary>
-        /// Maps value from percent scale to dB scale
-        /// </summary>
-        private static float MapPercentTodB(float percent)
-        {
-            //If percent volume lvl is 0% set minumum possible volume lvl (mute)
-            float percentToDbMappedValue = AUDIO_MIXER_MIN_DB_VOLUME_VALUE;
-
-            if (0f != percent)
-            {
-                //Value mapped from % value of slider to dB value of audio mixer
-                percentToDbMappedValue = Utils.MapRange(percent,
-                                                        0f,
-                                                        100f,
-                                                        MIN_DB_VOLUME_VALUE,
-                                                        MAX_DB_VOLUME_VALUE);
-            }
-
-            return percentToDbMappedValue;
-        }
-
-        /// <summary>
-        /// Maps value from dB scale to percent scale
-        /// </summary>
-        private static float MapDbToPercent(float dB)
-        {
-            //Value mapped from db value of audio mixer to % value of slider
-            float dBtoPercentMappedValue = Utils.MapRange(dB,
-                                                          MIN_DB_VOLUME_VALUE,
-                                                          MAX_DB_VOLUME_VALUE,
-                                                          0f,
-                                                          100f);
-
-            return dBtoPercentMappedValue;
-        }
-
-        /// <summary>
-        /// Checks if percent value is within range (0-100 %)
+        /// Checks if volume value is within range (0-1)
         /// </summary>
         /// <param name="value">Value thath will be checked</param>
-        private static void CheckPercentValue(float value)
+        private static void CheckVolumeValue(float value)
         {
-            if (value > 100f || value < 0f)
+            if (value > 1f || value < 0f)
             {
-                string exceptionMsg = string.Format("Value of percent argument should be in range 0-100. Actual value: {0}",
+                string exceptionMsg = string.Format("Value of percent argument should be in range 0-1. Actual value: {0}",
                                                     value);
                 throw new ArgumentOutOfRangeException(exceptionMsg);
             }
@@ -138,7 +102,7 @@ namespace ITCompanySimulation.Settings
             if (DEFAULT_FLOAT_KEY_VALUE == param)
             {
                 param = GetAudioMixerParam(audioMixerParamName);
-                param = MapDbToPercent(param);
+                param = Utils.MapDbToLinear(param);
             }
 
             return param;
@@ -183,6 +147,17 @@ namespace ITCompanySimulation.Settings
             return param;
         }
 
+        /// <summary>
+        /// Returns volume converted to dB scale
+        /// </summary>
+        /// <returns></returns>
+        private static float GetdBVolume(float volumeLevel)
+        {
+            float dBVolume = Utils.MapLinearTodB(volumeLevel);
+            dBVolume = (dBVolume == float.NaN) ? AUDIO_MIXER_MIN_DB_VOLUME_VALUE : dBVolume;
+            return dBVolume;
+        }
+
         /*Public methods*/
 
         /// <summary>
@@ -194,9 +169,9 @@ namespace ITCompanySimulation.Settings
         /// <param name="preview">If true only level of volume will be changed without saving changes to registry</param>
         public static void Apply(float masterVolumeLevel, float UIVolumeLevel, float musicVolumeLevel, bool preview)
         {
-            CheckPercentValue(masterVolumeLevel);
-            CheckPercentValue(UIVolumeLevel);
-            CheckPercentValue(musicVolumeLevel);
+            CheckVolumeValue(masterVolumeLevel);
+            CheckVolumeValue(UIVolumeLevel);
+            CheckVolumeValue(musicVolumeLevel);
 
             if (false == preview)
             {
@@ -210,11 +185,11 @@ namespace ITCompanySimulation.Settings
             }
 
             //Value mapped from linear scale to dB log scale
-            float masterVolumedBValue = MapPercentTodB(masterVolumeLevel);
+            float masterVolumedBValue = GetdBVolume(masterVolumeLevel);
             SetAudioMixerParam(MASTER_GROUP_VOLUME_PARAMETER_NAME, masterVolumedBValue);
-            float UIVolumedBValue = MapPercentTodB(UIVolumeLevel);
+            float UIVolumedBValue = GetdBVolume(UIVolumeLevel);
             SetAudioMixerParam(UI_GROUP_VOLUME_PARAMETER_NAME, UIVolumedBValue);
-            float musicVolumedBValue = MapPercentTodB(musicVolumeLevel);
+            float musicVolumedBValue = GetdBVolume(musicVolumeLevel);
             SetAudioMixerParam(MUSIC_GROUP_VOLUME_PARAMETER_NAME, musicVolumedBValue);
         }
 
@@ -232,9 +207,9 @@ namespace ITCompanySimulation.Settings
             MasterVolume = CheckDefaultParam(MasterVolume, MASTER_GROUP_VOLUME_PARAMETER_NAME);
 
             //Values of volume levels in dB log scale
-            float musicVolumedB = MapPercentTodB(MusicVolume);
-            float UIVolumedB = MapPercentTodB(UIVolume);
-            float masterVolumedB = MapPercentTodB(MasterVolume);
+            float musicVolumedB = GetdBVolume(MusicVolume);
+            float UIVolumedB = GetdBVolume(UIVolume);
+            float masterVolumedB = GetdBVolume(MasterVolume);
 
             SetAudioMixerParam(MUSIC_GROUP_VOLUME_PARAMETER_NAME, musicVolumedB);
             SetAudioMixerParam(UI_GROUP_VOLUME_PARAMETER_NAME, UIVolumedB);
