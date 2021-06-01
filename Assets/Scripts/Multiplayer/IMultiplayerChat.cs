@@ -27,7 +27,7 @@ namespace ITCompanySimulation.Multiplayer
         /// <summary>
         /// Sends message to other clients that joined chat
         /// </summary>
-        /// <param name="msg"></param>
+        /// <param name="msg">Message that will be sent</param>
         bool SendChatMessage(string msg);
     }
 }

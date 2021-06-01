@@ -1,41 +1,43 @@
 ﻿using UnityEngine;
-using ITCompanySimulation.UI;
 using ITCompanySimulation.Core;
 using UnityEngine.Events;
 
-public class UIGameSceneMenu : MonoBehaviour
+namespace ITCompanySimulation.UI
 {
-    /*Private consts fields*/
-
-    /*Private fields*/
-
-    [SerializeField]
-    private InfoWindow InfoWindowComponent;
-    private ApplicationManager ApplicationManagerComponent;
-
-    /*Public consts fields*/
-
-    /*Public fields*/
-
-    /*Private methods*/
-
-    private void Start()
+    public class UIGameSceneMenu : MonoBehaviour
     {
-        ApplicationManagerComponent = GameObject.FindGameObjectWithTag("ApplicationManager").GetComponent<ApplicationManager>();
-    }
+        /*Private consts fields*/
 
-    /*Public methods*/
+        /*Private fields*/
 
-    public void OnExitToMenuButtonClick()
-    {
-        string infoWindowText = "Do you really want to exit to main menu ?";
+        [SerializeField]
+        private InfoWindow InfoWindowComponent;
+        private ApplicationManager ApplicationManagerComponent;
 
-        UnityAction okAction = () =>
+        /*Public consts fields*/
+
+        /*Public fields*/
+
+        /*Private methods*/
+
+        private void Start()
         {
-            ApplicationManagerComponent.FinishSession();
-            ApplicationManagerComponent.LoadScene(SceneIndex.Menu);
-        };
+            ApplicationManagerComponent = GameObject.FindGameObjectWithTag("ApplicationManager").GetComponent<ApplicationManager>();
+        }
 
-        InfoWindowComponent.ShowOkCancel(infoWindowText, okAction, null);
-    }
+        /*Public methods*/
+
+        public void OnExitToMenuButtonClick()
+        {
+            string infoWindowText = "Do you really want to exit to main menu ?";
+
+            UnityAction okAction = () =>
+            {
+                ApplicationManagerComponent.FinishSession();
+                ApplicationManagerComponent.LoadScene(SceneIndex.Menu);
+            };
+
+            InfoWindowComponent.ShowOkCancel(infoWindowText, okAction, null);
+        }
+    } 
 }

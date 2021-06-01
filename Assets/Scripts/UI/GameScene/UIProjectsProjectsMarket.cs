@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
-using ITCompanySimulation.Developing;
+using ITCompanySimulation.Project;
 using ITCompanySimulation.Utilities;
 using TMPro;
 using ITCompanySimulation.Core;

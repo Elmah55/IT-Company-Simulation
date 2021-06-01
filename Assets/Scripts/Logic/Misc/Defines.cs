@@ -238,7 +238,7 @@ namespace ITCompanySimulation.Multiplayer
 
 /*Delegates*/
 
-namespace ITCompanySimulation.Developing
+namespace ITCompanySimulation.Project
 {
     public delegate void SharedProjectAction(SharedProject proj);
     public delegate void LocalProjectAction(LocalProject proj);

@@ -1,4 +1,4 @@
-﻿using ITCompanySimulation.Developing;
+﻿using ITCompanySimulation.Project;
 
 namespace ITCompanySimulation.UI
 {

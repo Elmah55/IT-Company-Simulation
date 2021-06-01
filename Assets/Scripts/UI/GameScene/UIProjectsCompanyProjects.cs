@@ -3,7 +3,7 @@ using ITCompanySimulation.Character;
 using UnityEngine.UI;
 using TMPro;
 using System.Linq;
-using ITCompanySimulation.Developing;
+using ITCompanySimulation.Project;
 using ITCompanySimulation.Utilities;
 using ITCompanySimulation.Core;
 

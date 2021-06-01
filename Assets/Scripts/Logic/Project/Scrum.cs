@@ -4,7 +4,7 @@ using System;
 using System.Collections;
 using UnityEngine;
 
-namespace ITCompanySimulation.Developing
+namespace ITCompanySimulation.Project
 {
     /// <summary>
     /// This class represents scrum methodology in developing projects.

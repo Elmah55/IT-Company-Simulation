@@ -1,5 +1,5 @@
 ﻿using ITCompanySimulation.Company;
-using ITCompanySimulation.Developing;
+using ITCompanySimulation.Project;
 
 namespace ITCompanySimulation.Character
 {

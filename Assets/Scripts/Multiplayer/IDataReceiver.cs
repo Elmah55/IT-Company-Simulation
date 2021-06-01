@@ -1,6 +1,6 @@
 ﻿using UnityEngine.Events;
 
-namespace ITCompanySimulation.Utilities
+namespace ITCompanySimulation.Multiplayer
 {
     /// <summary>
     /// Component that will receive data from other clients

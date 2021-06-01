@@ -1,8 +1,7 @@
 ﻿using ITCompanySimulation.Character;
-using System;
 using System.Collections.Generic;
 using UnityEngine;
-using ITCompanySimulation.Developing;
+using ITCompanySimulation.Project;
 using ITCompanySimulation.Utilities;
 
 namespace ITCompanySimulation.Company

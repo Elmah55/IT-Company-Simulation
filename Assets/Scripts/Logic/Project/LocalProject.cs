@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace ITCompanySimulation.Developing
+namespace ITCompanySimulation.Project
 {
     /// <summary>
     /// This class represents IT project that company can work on

@@ -1,6 +1,6 @@
 ﻿using ITCompanySimulation.Character;
 using ITCompanySimulation.Core;
-using ITCompanySimulation.Developing;
+using ITCompanySimulation.Project;
 using System.Collections.Generic;
 using UnityEngine;
 

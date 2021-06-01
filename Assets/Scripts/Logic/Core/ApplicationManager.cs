@@ -1,6 +1,6 @@
 ﻿using ExitGames.Client.Photon;
 using ITCompanySimulation.Character;
-using ITCompanySimulation.Developing;
+using ITCompanySimulation.Project;
 using ITCompanySimulation.Multiplayer;
 using ITCompanySimulation.Utilities;
 using System.Collections;
