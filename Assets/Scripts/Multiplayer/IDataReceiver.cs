@@ -3,7 +3,8 @@
 namespace ITCompanySimulation.Multiplayer
 {
     /// <summary>
-    /// Component that will receive data from other clients
+    /// Interface for component that will receive data from other clients.
+    /// This component should not receive data if local clients is master client.
     /// </summary>
     public interface IDataReceiver
     {

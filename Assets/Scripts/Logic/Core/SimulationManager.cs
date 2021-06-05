@@ -8,6 +8,7 @@ using ITCompanySimulation.Multiplayer;
 using ITCompanySimulation.Company;
 using ITCompanySimulation.Project;
 using ITCompanySimulation.Settings;
+using UnityEngine.Events;
 
 namespace ITCompanySimulation.Core
 {
@@ -16,7 +17,7 @@ namespace ITCompanySimulation.Core
     /// happen during running simulation (like ending game if gameplay
     /// target is reached)
     /// </summary>
-    public class SimulationManager : Photon.PunBehaviour
+    public class SimulationManager : Photon.PunBehaviour, IDataReceiver, IMasterClientDataReceiver
     {
         /*Private consts fields*/
 
@@ -69,6 +70,7 @@ namespace ITCompanySimulation.Core
         /// Simulation statistics collected during this session
         /// </summary>
         public SimulationStats Stats { get; private set; }
+        public bool IsDataReceived { get; private set; }
 
         public event SimulationFinishAction SimulationFinished;
         public event Action SimulationStarted;
@@ -87,6 +89,7 @@ namespace ITCompanySimulation.Core
         /// of simulation
         /// </summary>
         public event PhotonPlayerAction OtherPlayerCompanyMinimalBalanceReached;
+        public event UnityAction DataReceived;
 
         /*Private methods*/
 
@@ -94,6 +97,11 @@ namespace ITCompanySimulation.Core
         {
             InfoWindowComponent.Show("Waiting for session start...");
             ApplicationManagerComponent.SessionStarted += OnGameManagerComponentSessionStarted;
+            this.photonView.RPC("SendPlayerDataRPC",
+                                PhotonTargets.Others,
+                                PhotonNetwork.player.ID,
+                                this.ControlledCompany.Name,
+                                this.ControlledCompany.Balance);
         }
 
         private void Awake()
@@ -401,6 +409,14 @@ namespace ITCompanySimulation.Core
                                 WinnerPlayer?.ID);
 #endif
             }
+        }
+
+        [PunRPC]
+        private void SendPlayerDataRPC(int photonPlayerID, string companyName, int companyBalance)
+        {
+            IsDataReceived = true;
+            DataReceived?.Invoke();
+            //TODO: Store received player information
         }
 
         /*Public methods*/

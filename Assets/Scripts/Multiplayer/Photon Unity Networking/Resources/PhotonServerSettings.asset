@@ -56,4 +56,6 @@ MonoBehaviour:
   - TruncateWorkersRPC
   - StartSessionRPC
   - SetTimeRPC
+  - StartGameInternalRPC
+  - SendPlayerDataRPC
   DisableAutoOpenWizard: 1
