@@ -312,8 +312,7 @@ namespace ITCompanySimulation.Core
                 RoomOptions options = new RoomOptions() { MaxPlayers = MAX_NUMBER_OF_PLAYERS_PER_ROOM };
                 PhotonNetwork.JoinOrCreateRoom("Default", options, PhotonNetwork.lobby);
             }
-
-            if (true == PhotonNetwork.isMasterClient)
+            else if (true == PhotonNetwork.isMasterClient)
             {
                 PhotonNetwork.room.IsOpen = false;
                 //Start game for all clients in the room
@@ -368,6 +367,18 @@ namespace ITCompanySimulation.Core
 #endif
         }
 
+        public override void OnLeftLobby()
+        {
+            //TODO: Fix re-joining lobby when offline mode
+            //is off and room is not used. After finished session
+            //photon network does not call OnLeftRoom.
+#if DEVELOPMENT_BUILD || UNITY_EDITOR
+            string msg = string.Format("[{0}] Left lobby",
+                                       this.GetType().Name);
+            Debug.Log(msg);
+#endif
+        }
+
         public override void OnJoinedRoom()
         {
             base.OnJoinedRoom();
@@ -375,6 +386,8 @@ namespace ITCompanySimulation.Core
             //Game will be started in online mode but only with one player in room
             if (false == UseRoom && false == PhotonNetwork.offlineMode)
             {
+                PhotonNetwork.room.IsOpen = false;
+                PhotonNetwork.room.IsVisible = false;
                 StartGameInternalRPC();
             }
 
