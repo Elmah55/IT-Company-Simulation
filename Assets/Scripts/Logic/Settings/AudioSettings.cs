@@ -31,17 +31,9 @@ namespace ITCompanySimulation.Settings
         private const string UI_GROUP_VOLUME_PARAMETER_NAME = "UIVolume";
         private const string MASTER_GROUP_VOLUME_PARAMETER_NAME = "MasterVolume";
 
-        //Values used to convert from linear scale (%) to dB log scale.
-        //That means MIN_DB_VOLUME_VALUE is log value when linear value is 0%
-        //and MAX_DB_VOLUME_VALUE is log value when linear value is 100%.
-        //This is used as volume settings will be probably controlled by slider
-        //which has linear values
-        private const float MIN_DB_VOLUME_VALUE = -50f;
-        private const float MAX_DB_VOLUME_VALUE = 3f;
-
         /// <summary>
         /// Minimum possible volume level that can be assigned to AudioMixer group.
-        /// This will be used to mute group when linear value is 0%
+        /// This will be used to mute group when linear value is 0.
         /// </summary>
         private const float AUDIO_MIXER_MIN_DB_VOLUME_VALUE = -80f;
 
@@ -154,7 +146,12 @@ namespace ITCompanySimulation.Settings
         private static float GetdBVolume(float volumeLevel)
         {
             float dBVolume = Utils.MapLinearTodB(volumeLevel);
-            dBVolume = (dBVolume == float.NaN) ? AUDIO_MIXER_MIN_DB_VOLUME_VALUE : dBVolume;
+
+            if (true == float.IsNaN(dBVolume))
+            {
+                dBVolume = AUDIO_MIXER_MIN_DB_VOLUME_VALUE;
+            }
+
             return dBVolume;
         }
 

@@ -35,7 +35,7 @@ namespace ITCompanySimulation.Utilities
         /// </summary>
         /// <param name="value">Linear value (should be greater than 0)</param>
         /// <returns>Value mapped to dB. If provided input value 
-        /// was out of range (value less or equal to 0) returns float.NaN </returns>
+        /// was out of range (value less or equal to 0) returns float.NaN</returns>
         public static float MapLinearTodB(float value)
         {
             float dBValue = float.NaN;

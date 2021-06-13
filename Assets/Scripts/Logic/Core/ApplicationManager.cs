@@ -111,6 +111,9 @@ namespace ITCompanySimulation.Core
             PhotonPeer.RegisterType(typeof(LocalWorker), NetworkingData.LOCAL_WORKER_BYTE_CODE, SharedWorker.Serialize, SharedWorker.Deserialize);
             PhotonPeer.RegisterType(typeof(SharedWorker), NetworkingData.SHARED_WORKER_BYTE_CODE, SharedWorker.Serialize, SharedWorker.Deserialize);
 
+            //Init static classes that need to be loaded before other components
+            PlayerInfoSettings.Load();
+
             DontDestroyOnLoad(this.gameObject);
             PhotonNetwork.offlineMode = this.OfflineMode;
             this.photonView.viewID = 1;
@@ -130,9 +133,8 @@ namespace ITCompanySimulation.Core
 
         private void Start()
         {
-            //Init static classes
+            //Init other static classes
             AudioSettings.Load();
-            PlayerInfoSettings.Load();
         }
 
         private void OnSceneLoaded(Scene loadedScene, LoadSceneMode sceneLoadMode)
