@@ -4,6 +4,7 @@ namespace ITCompanySimulation.Utilities
 {
     /// <summary>
     /// This script prevents duplicate creation of game objects with "DontDestroyOnLoad" enabled.
+    /// All scripts that should not be destroyed on load should be instatiated thorugh this script.
     /// </summary>
     public class DontDestroyOnLoadManager : MonoBehaviour
     {
@@ -14,6 +15,7 @@ namespace ITCompanySimulation.Utilities
         [SerializeField]
         [Tooltip("Object that will be not destroyed on scene load")]
         private GameObject[] ObjectsPrefabs;
+        private static bool ObjectsInstantiated = false;
 
         /*Public consts fields*/
 
@@ -23,20 +25,17 @@ namespace ITCompanySimulation.Utilities
 
         private void Awake()
         {
-            if (null != ObjectsPrefabs)
+            if (null != ObjectsPrefabs && false == ObjectsInstantiated)
             {
                 foreach (GameObject obj in ObjectsPrefabs)
                 {
-                    GameObject foundObject = GameObject.FindGameObjectWithTag(obj.tag);
-
-                    if (null == foundObject)
-                    {
-                        GameObject.Instantiate(obj);
-                    }
+                    GameObject.Instantiate(obj);
                 }
+
+                ObjectsInstantiated = true;
             }
         }
 
         /*Public methods*/
-    } 
+    }
 }
