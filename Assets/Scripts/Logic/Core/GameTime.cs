@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections;
 using UnityEngine;
-using UnityEngine.Events;
-using ITCompanySimulation.Core;
 using ITCompanySimulation.Multiplayer;
+using UnityEngine.Events;
 
 namespace ITCompanySimulation.Core
 {

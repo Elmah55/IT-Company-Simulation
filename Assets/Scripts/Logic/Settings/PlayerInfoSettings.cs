@@ -7,7 +7,7 @@ namespace ITCompanySimulation.Settings
     /// This class hold player defined preferences like nickname
     /// and company name that will be used during game
     /// </summary>
-    public static class PlayerInfo
+    public static class PlayerInfoSettings
     {
         /*Private consts fields*/
 

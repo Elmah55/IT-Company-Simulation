@@ -34,10 +34,10 @@ namespace ITCompanySimulation.UI
 
         private void Start()
         {
-            InputFieldCompanyName.text = PlayerInfo.CompanyName;
-            InputFieldCompanyName.characterLimit = PlayerInfo.COMPANY_NAME_MAX_LENGHT;
-            InputFieldPlayerNickName.text = PlayerInfo.Nickname;
-            InputFieldPlayerNickName.characterLimit = PlayerInfo.PLAYER_NICKNAME_MAX_LENGTH;
+            InputFieldCompanyName.text = PlayerInfoSettings.CompanyName;
+            InputFieldCompanyName.characterLimit = PlayerInfoSettings.COMPANY_NAME_MAX_LENGHT;
+            InputFieldPlayerNickName.text = PlayerInfoSettings.Nickname;
+            InputFieldPlayerNickName.characterLimit = PlayerInfoSettings.PLAYER_NICKNAME_MAX_LENGTH;
             TextCredentialsSaved.gameObject.SetActive(false);
         }
 
@@ -63,7 +63,7 @@ namespace ITCompanySimulation.UI
 
         public void OnButtonSaveCliked()
         {
-            PlayerInfo.Apply(InputFieldCompanyName.text, InputFieldPlayerNickName.text);
+            PlayerInfoSettings.Apply(InputFieldCompanyName.text, InputFieldPlayerNickName.text);
             TextCredentialsSaved.gameObject.SetActive(true);
             TextCredentialsSavedActiveTime = 0f;
         }

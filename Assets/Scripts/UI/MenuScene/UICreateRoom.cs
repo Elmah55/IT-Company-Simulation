@@ -86,7 +86,7 @@ namespace ITCompanySimulation.UI
 
         private void Start()
         {
-            InputFieldRoomName.characterLimit = PlayerInfo.COMPANY_NAME_MAX_LENGHT;
+            InputFieldRoomName.characterLimit = PlayerInfoSettings.COMPANY_NAME_MAX_LENGHT;
             InputFieldNormalColor = InputFieldRoomName.GetComponent<Image>().color;
 
             SliderTargetBalance.minValue = SimulationSettings.MIN_TARGET_BALANCE;
@@ -162,9 +162,9 @@ namespace ITCompanySimulation.UI
 
                 ButtonCreateRoom.interactable = false;
             }
-            else if (InputFieldRoomName.text.Length <= PlayerInfo.COMPANY_NAME_MAX_LENGHT)
+            else if (InputFieldRoomName.text.Length <= PlayerInfoSettings.COMPANY_NAME_MAX_LENGHT)
             {
-                int charactersLeft = PlayerInfo.COMPANY_NAME_MAX_LENGHT - InputFieldRoomName.text.Length;
+                int charactersLeft = PlayerInfoSettings.COMPANY_NAME_MAX_LENGHT - InputFieldRoomName.text.Length;
                 string msg = string.Format("Room name ({0} characters left)", charactersLeft);
                 TextRoomName.text = msg;
                 result = true;

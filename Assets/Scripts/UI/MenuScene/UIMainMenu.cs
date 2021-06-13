@@ -68,7 +68,7 @@ namespace ITCompanySimulation.UI
             //Always "connected" while in offline mode
             if (true == PhotonNetwork.insideLobby || true == PhotonNetwork.offlineMode)
             {
-                if (false == PlayerInfo.CredentialsCompleted)
+                if (false == PlayerInfoSettings.CredentialsCompleted)
                 {
                     ButtonStartGameStateMissingCredentials();
                 }
@@ -155,7 +155,7 @@ namespace ITCompanySimulation.UI
         {
             base.OnJoinedLobby();
 
-            if (true == PlayerInfo.CredentialsCompleted)
+            if (true == PlayerInfoSettings.CredentialsCompleted)
             {
                 ButtonStartGameStateConnected();
             }
