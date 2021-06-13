@@ -11,6 +11,14 @@ namespace ITCompanySimulation.Core
 
         /*Private fields*/
 
+        /// <summary>
+        /// Flag to not count earned money when it is set
+        /// for the first time (when initial company's balance
+        /// is set)
+        /// </summary>
+        private bool MoneyEarnedSet = false;
+        private int m_MoneyEarned = 0;
+
         /*Public consts fields*/
 
         /*Public fields*/
@@ -29,7 +37,26 @@ namespace ITCompanySimulation.Core
         /// TODO: Fix counting this. First time initial
         /// company balance is set it is counted as money earned
         /// </summary>
-        public int MoneyEarned { get; set; }
+        public int MoneyEarned
+        {
+            get
+            {
+                return m_MoneyEarned;
+            }
+
+            set
+            {
+                if (true == MoneyEarnedSet)
+                {
+                    m_MoneyEarned = value;
+                }
+
+                if (false == MoneyEarnedSet)
+                {
+                    MoneyEarnedSet = true;
+                }
+            }
+        }
         /// <summary>
         /// How much money has player's company spent
         /// </summary>
