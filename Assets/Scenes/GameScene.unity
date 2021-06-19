@@ -20790,8 +20790,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 04da2893f82575a429cbd9d1a590bcd7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  CharacterPrefab: {fileID: 7488450129138211252, guid: 73269513e30e29a48af6dada8ce121fb,
-    type: 3}
+  MaleCharactersPrefabs:
+  - {fileID: 6873336820985552269, guid: 41c994df776699c47a6d54ee4db8c7c0, type: 3}
+  - {fileID: 128503503046292707, guid: 21e416e75d5752543a2259211683ed89, type: 3}
+  FemaleCharactersPrefabs:
+  - {fileID: 8811602619934787721, guid: 10c308f86243e6841b0f09324767bc20, type: 3}
+  - {fileID: 24739840850327769, guid: e66fe37d7e2fd974aa2db7f40db2def1, type: 3}
   SpawnPoints:
   - {fileID: 605897409}
   - {fileID: 1730180932}

@@ -40,10 +40,10 @@ namespace ITCompanySimulation.Character
         /// </summary>
         private static Dictionary<CharacterMovement, Vector2> DirectionToVector = new Dictionary<CharacterMovement, Vector2>()
         {
-            {CharacterMovement.RunN,(Vector2.up+Vector2.left).normalized},
-            {CharacterMovement.RunS,(Vector2.down+Vector2.right).normalized},
-            {CharacterMovement.RunE,(Vector2.up+Vector2.right).normalized},
-            {CharacterMovement.RunW,(Vector2.down+Vector2.left).normalized},
+            {CharacterMovement.WalkN,(Vector2.up+Vector2.left).normalized},
+            {CharacterMovement.WalkS,(Vector2.down+Vector2.right).normalized},
+            {CharacterMovement.WalkE,(Vector2.up+Vector2.right).normalized},
+            {CharacterMovement.WalkW,(Vector2.down+Vector2.left).normalized},
             {CharacterMovement.StandE,Vector2.zero },
             {CharacterMovement.StandN,Vector2.zero },
             {CharacterMovement.StandS,Vector2.zero },
@@ -115,7 +115,7 @@ namespace ITCompanySimulation.Character
             //direction with longest possible movement without colliding will be
             //found and character will start moving that direction
             float longestDistance = float.MinValue;
-            CharacterMovement bestDirection = CharacterMovement.RunE;
+            CharacterMovement bestDirection = CharacterMovement.WalkE;
 
             for (int i = 0; i < 4; i++)
             {

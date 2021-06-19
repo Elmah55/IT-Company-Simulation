@@ -76,12 +76,16 @@ public enum SimulationEventNotificationPriority
 
 namespace ITCompanySimulation.Character
 {
+    /// <summary>
+    /// This class defines possible movement of character. Animation names
+    /// should match names in this enum.
+    /// </summary>
     public enum CharacterMovement
     {
-        RunS,
-        RunW,
-        RunE,
-        RunN,
+        WalkS,
+        WalkW,
+        WalkE,
+        WalkN,
         StandS,
         StandW,
         StandE,

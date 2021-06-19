@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using UnityEngine;
-using ITCompanySimulation.Utilities;
+﻿using UnityEngine;
 using ITCompanySimulation.UI;
 using ITCompanySimulation.Core;
 
@@ -22,20 +20,15 @@ namespace ITCompanySimulation.Character
 
         /*Private fields*/
 
-        private Rect SpawnBounds = new Rect()
-        {
-            xMin = -4f,
-            xMax = 1f,
-            yMax = 2.8f,
-            yMin = 1.8f
-        };
+        [Tooltip("Male characters prefabs that will be spawn onto game world")]
         [SerializeField]
-        private GameObject CharacterPrefab;
+        private GameObject[] MaleCharactersPrefabs;
+        [Tooltip("Female characters prefabs that will be spawn onto game world")]
+        [SerializeField]
+        private GameObject[] FemaleCharactersPrefabs;
         private SimulationManager SimulationManagerComponent;
-        private List<SharedWorker> SpawnedCharacters = new List<SharedWorker>();
         [SerializeField]
         private Transform[] SpawnPoints;
-        private IObjectPool<GameObject> CharactersPool;
 
         /*Public consts fields*/
 
@@ -53,57 +46,42 @@ namespace ITCompanySimulation.Character
             SpawnCharacter(companyWorker);
         }
 
-        private void RemoveCharacter(SharedWorker companyWorker)
+        private void RemoveCharacter(LocalWorker companyWorker)
         {
-            SharedWorker removedChar = SpawnedCharacters.Find(x => x == companyWorker);
-
-            if (null == CharactersPool)
-            {
-                CharactersPool = new ObjectPool<GameObject>();
-            }
-
-            removedChar.PhysicalCharacter.gameObject.SetActive(false);
-            CharactersPool.AddObject(companyWorker.PhysicalCharacter);
-            removedChar.PhysicalCharacter = null;
+            companyWorker.AbsenceStarted -= OnWorkerAbsenceStarted;
+            companyWorker.AbsenceFinished -= OnWorkerAbsenceFinished;
+            GameObject.Destroy(companyWorker.PhysicalCharacter);
+            companyWorker.PhysicalCharacter = null;
         }
 
         private void SpawnCharacter(LocalWorker companyWorker)
         {
-            if (SpawnPoints != null && SpawnPoints.Length > 0)
+            int randomIndex = Random.Range(0, SpawnPoints.Length);
+            Transform randomTransform = SpawnPoints[randomIndex];
+            Vector2 spawnPos = randomTransform.position;
+            GameObject[] characterPrefabs = null;
+
+            switch (companyWorker.Gender)
             {
-                int randomIndex = Random.Range(0, SpawnPoints.Length);
-                Transform randomTransform = SpawnPoints[randomIndex];
-                Vector2 spawnPos = randomTransform.position;
-                GameObject newCharacter = null;
-
-                if (null != CharactersPool)
-                {
-                    newCharacter = CharactersPool.GetObject();
-                }
-
-                if (null == newCharacter)
-                {
-                    newCharacter = GameObject.Instantiate(CharacterPrefab, spawnPos, Quaternion.identity);
-                }
-
-                newCharacter.gameObject.SetActive(true);
-                CharacterText textComponent = newCharacter.GetComponentInChildren<CharacterText>();
-                textComponent.Text = string.Format("{0} {1}", companyWorker.Name, companyWorker.Surename);
-                companyWorker.AbsenceStarted += OnWorkerAbsenceStarted;
-                companyWorker.AbsenceFinished += OnWorkerAbsenceFinished;
-                companyWorker.PhysicalCharacter = newCharacter;
-                SpawnedCharacters.Add(companyWorker);
+                case Gender.Male:
+                    characterPrefabs = MaleCharactersPrefabs;
+                    break;
+                case Gender.Female:
+                    characterPrefabs = FemaleCharactersPrefabs;
+                    break;
+                default:
+                    break;
             }
-#if DEVELOPMENT_BUILD || UNITY_EDITOR
-            else
-            {
-                string debugInfo =
-                    string.Format("[{0}] Failed to spawn character in game world (no spawn points defined)",
-                                  this.GetType().Name,
-                                  MAX_SPAWN_RETRIES);
-                Debug.Log(debugInfo);
-            }
-#endif
+
+            randomIndex = Random.Range(0, characterPrefabs.Length);
+            GameObject newCharacter = GameObject.Instantiate(characterPrefabs[randomIndex], spawnPos, Quaternion.identity);
+
+            CharacterText textComponent = newCharacter.GetComponentInChildren<CharacterText>();
+            textComponent.Text = string.Format("{0} {1}", companyWorker.Name, companyWorker.Surename);
+
+            companyWorker.AbsenceStarted += OnWorkerAbsenceStarted;
+            companyWorker.AbsenceFinished += OnWorkerAbsenceFinished;
+            companyWorker.PhysicalCharacter = newCharacter;
         }
 
         private void OnWorkerAbsenceStarted(LocalWorker worker)
