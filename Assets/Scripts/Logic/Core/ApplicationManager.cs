@@ -312,7 +312,8 @@ namespace ITCompanySimulation.Core
                 RoomOptions options = new RoomOptions() { MaxPlayers = MAX_NUMBER_OF_PLAYERS_PER_ROOM };
                 PhotonNetwork.JoinOrCreateRoom("Default", options, PhotonNetwork.lobby);
             }
-            else if (true == PhotonNetwork.isMasterClient)
+
+            if (true == PhotonNetwork.isMasterClient)
             {
                 PhotonNetwork.room.IsOpen = false;
                 //Start game for all clients in the room
