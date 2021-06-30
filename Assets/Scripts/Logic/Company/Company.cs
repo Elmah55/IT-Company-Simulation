@@ -19,9 +19,9 @@
 
         /*Public methods*/
 
-        public Company(string name)
+        public Company(string companyName)
         {
-            this.Name = Name;
+            this.Name = companyName;
         }
     } 
 }

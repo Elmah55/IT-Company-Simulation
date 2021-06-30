@@ -79,7 +79,7 @@ namespace ITCompanySimulation.UI
 
                 if (null != SelectedPlayer)
                 {
-                    playerWorkers = SimulationManagerComponent.OtherPlayersWorkers[SelectedPlayer.ID];
+                    playerWorkers = SimulationManagerComponent.PlayerDataMap[SelectedPlayer.ID].Workers;
                     foreach (var workerPair in playerWorkers)
                     {
                         RemoveWorkerListViewElement(workerPair.Value, ListViewOtherPlayersWorkers);
@@ -88,7 +88,7 @@ namespace ITCompanySimulation.UI
 
                 SelectedPlayer = PhotonNetwork.otherPlayers[index];
                 SelectedWorker = null;
-                playerWorkers = SimulationManagerComponent.OtherPlayersWorkers[SelectedPlayer.ID];
+                playerWorkers = SimulationManagerComponent.PlayerDataMap[SelectedPlayer.ID].Workers;
                 SetTextListViewOtherPlayersWorkers();
 
                 foreach (var workerPair in playerWorkers)
@@ -219,7 +219,7 @@ namespace ITCompanySimulation.UI
             {
                 TextListViewOtherPlayersWorkers.text = string.Format("{0}'s workers ({1}/{2})",
                     SelectedPlayer.NickName,
-                    SimulationManagerComponent.OtherPlayersWorkers[SelectedPlayer.ID].Count,
+                    SimulationManagerComponent.PlayerDataMap[SelectedPlayer.ID].Workers.Count,
                     PlayerCompany.MAX_WORKERS_PER_COMPANY);
             }
             else
@@ -287,9 +287,9 @@ namespace ITCompanySimulation.UI
                 OnControlledCompanyWorkerAdded(worker);
             }
 
-            foreach (var playerWorkers in SimulationManagerComponent.OtherPlayersWorkers)
+            foreach (var playerWorkers in SimulationManagerComponent.PlayerDataMap)
             {
-                foreach (var worker in playerWorkers.Value)
+                foreach (var worker in playerWorkers.Value.Workers)
                 {
                     SubscribeToWorkerEvents(worker.Value);
                 }
@@ -302,7 +302,7 @@ namespace ITCompanySimulation.UI
 
         private void AddListViewPlayersWorkersElements(PhotonPlayer otherPlayer)
         {
-            Dictionary<int, SharedWorker> playerWorkers = SimulationManagerComponent.OtherPlayersWorkers[otherPlayer.ID];
+            Dictionary<int, SharedWorker> playerWorkers = SimulationManagerComponent.PlayerDataMap[otherPlayer.ID].Workers;
 
             foreach (var workerPair in playerWorkers)
             {

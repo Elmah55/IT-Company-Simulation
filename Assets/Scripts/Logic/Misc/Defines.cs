@@ -218,6 +218,7 @@ namespace ITCompanySimulation.Multiplayer
         public const byte LOCAL_WORKER_BYTE_CODE = 1;
         public const byte PROJECT_BYTE_CODE = 2;
         public const byte SIMULATION_SETTINGS_BYTE_CODE = 3;
+        public const byte PLAYER_DATA_BYTE_CODE = 4;
     }
 
     /// <summary>

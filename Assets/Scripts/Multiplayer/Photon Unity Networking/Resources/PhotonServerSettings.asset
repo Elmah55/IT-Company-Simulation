@@ -58,4 +58,5 @@ MonoBehaviour:
   - SetTimeRPC
   - StartGameInternalRPC
   - SendPlayerDataRPC
+  - OnOtherPlayerDataSentRPC
   DisableAutoOpenWizard: 1

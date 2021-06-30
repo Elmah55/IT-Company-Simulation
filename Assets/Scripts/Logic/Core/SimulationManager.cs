@@ -41,6 +41,7 @@ namespace ITCompanySimulation.Core
         private float SimulationStartTimestamp;
         private ApplicationManager ApplicationManagerComponent;
 
+
         /*Public consts fields*/
 
         /*Public fields*/
@@ -48,9 +49,10 @@ namespace ITCompanySimulation.Core
         public PlayerCompany ControlledCompany { get; private set; }
         public SimulationEventNotificator NotificatorComponent { get; private set; }
         /// <summary>
-        /// This will map ID of photon player to dictionary containing his workers with worker ID as key
+        /// This will map ID of photon player to dictionary containing player's data
         /// </summary>
-        public Dictionary<int, Dictionary<int, SharedWorker>> OtherPlayersWorkers { get; private set; }
+        public Dictionary<int, PlayerData> PlayerDataMap { get; private set; }
+            = new Dictionary<int, PlayerData>();
         /// <summary>
         /// True when any of player has won the game
         /// </summary>
@@ -97,11 +99,12 @@ namespace ITCompanySimulation.Core
         {
             InfoWindowComponent.Show("Waiting for session start...");
             ApplicationManagerComponent.SessionStarted += OnGameManagerComponentSessionStarted;
-            this.photonView.RPC("SendPlayerDataRPC",
+
+            PlayerData data = new PlayerData(ControlledCompany.Name, ControlledCompany.Balance);
+            this.photonView.RPC("OnOtherPlayerDataSentRPC",
                                 PhotonTargets.Others,
                                 PhotonNetwork.player.ID,
-                                this.ControlledCompany.Name,
-                                this.ControlledCompany.Balance);
+                                data);
         }
 
         private void Awake()
@@ -109,26 +112,14 @@ namespace ITCompanySimulation.Core
             ApplicationManagerComponent = GameObject.FindGameObjectWithTag("ApplicationManager").GetComponent<ApplicationManager>();
             GameTimeComponent = GetComponent<GameTime>();
             NotificatorComponent = new SimulationEventNotificator(GameTimeComponent);
-            OtherPlayersWorkers = new Dictionary<int, Dictionary<int, SharedWorker>>();
             Stats = new SimulationStats();
 
-            InitPlayersWorkers();
-            //TEST
             CreateCompany();
-        }
-
-        private void InitPlayersWorkers()
-        {
-            //Add dictionary of workers for each player
-            foreach (PhotonPlayer player in PhotonNetwork.otherPlayers)
-            {
-                OtherPlayersWorkers.Add(player.ID, new Dictionary<int, SharedWorker>());
-            }
         }
 
         private void CreateCompany()
         {
-            ControlledCompany = new PlayerCompany("", gameObject);
+            ControlledCompany = new PlayerCompany(PlayerInfoSettings.CompanyName, gameObject);
 
             ControlledCompany.WorkerAdded += OnControlledCompanyWorkerAdded;
             ControlledCompany.WorkerRemoved += OnControlledCompanyWorkerRemoved;
@@ -194,60 +185,7 @@ namespace ITCompanySimulation.Core
 #endif
         }
 
-        #region Workers events
-
-        private void OnControlledCompanyWorkerAdded(SharedWorker addedWorker)
-        {
-            this.photonView.RPC(
-                "OnControlledCompanyWorkerAddedRPC", PhotonTargets.Others, addedWorker, PhotonNetwork.player.ID);
-
-            addedWorker.SalaryChanged += OnCompanyWorkerSalaryChanged;
-            addedWorker.AbilityUpdated += OnCompanyWorkerAbilityUpdated;
-            addedWorker.ExpierienceTimeChanged += OnCompanyWorkerExpierienceTimeChanged;
-
-            Stats.WorkersHired++;
-        }
-
-        private void OnControlledCompanyWorkerRemoved(SharedWorker removedWorker)
-        {
-            this.photonView.RPC(
-                "OnControlledCompanyWorkerRemovedRPC", PhotonTargets.Others, removedWorker.ID, PhotonNetwork.player.ID);
-            removedWorker.SalaryChanged -= OnCompanyWorkerSalaryChanged;
-            removedWorker.AbilityUpdated -= OnCompanyWorkerAbilityUpdated;
-            removedWorker.ExpierienceTimeChanged -= OnCompanyWorkerExpierienceTimeChanged;
-
-            Stats.WorkersLeftCompany++;
-        }
-
-        private void OnCompanyWorkerExpierienceTimeChanged(SharedWorker companyWorker)
-        {
-            this.photonView.RPC("OnOtherPlayerCompanyWorkerAttirbuteChangedRPC",
-                    PhotonTargets.Others,
-                    PhotonNetwork.player.ID,
-                    companyWorker.ID,
-                    companyWorker.ExperienceTime,
-                    (int)WorkerAttribute.ExpierienceTime);
-        }
-
-        private void OnCompanyWorkerAbilityUpdated(SharedWorker companyWorker, ProjectTechnology workerAbility, float workerAbilityValue)
-        {
-            this.photonView.RPC("OnOtherPlayerCompanyWorkerAbilityChangedRPC",
-                                PhotonTargets.Others,
-                                PhotonNetwork.player.ID,
-                                companyWorker.ID,
-                                (int)workerAbility,
-                                workerAbilityValue);
-        }
-
-        private void OnCompanyWorkerSalaryChanged(SharedWorker companyWorker)
-        {
-            this.photonView.RPC("OnOtherPlayerCompanyWorkerAttirbuteChangedRPC",
-                                PhotonTargets.Others,
-                                PhotonNetwork.player.ID,
-                                companyWorker.ID,
-                                companyWorker.Salary,
-                                (int)WorkerAttribute.Salary);
-        }
+        #region RPC events
 
         /// <summary>
         /// This method is called when ability of worker of other player is updated so it can be
@@ -256,7 +194,7 @@ namespace ITCompanySimulation.Core
         [PunRPC]
         private void OnOtherPlayerCompanyWorkerAbilityChangedRPC(int photonPlayerID, int workerID, int updatedAbility, float updatedAbilityValue)
         {
-            SharedWorker updatedWorker = OtherPlayersWorkers[photonPlayerID][workerID];
+            SharedWorker updatedWorker = PlayerDataMap[photonPlayerID].Workers[workerID];
             ProjectTechnology updatedAbilityEnum = (ProjectTechnology)updatedAbility;
             updatedWorker.UpdateAbility(updatedAbilityEnum, updatedAbilityValue);
         }
@@ -269,7 +207,7 @@ namespace ITCompanySimulation.Core
         private void OnOtherPlayerCompanyWorkerAttirbuteChangedRPC(int photonPlayerID, int workerID, object attributeValue, int changedAttirbute)
         {
             WorkerAttribute attribute = (WorkerAttribute)changedAttirbute;
-            SharedWorker updatedWorker = OtherPlayersWorkers[photonPlayerID][workerID];
+            SharedWorker updatedWorker = PlayerDataMap[photonPlayerID].Workers[workerID];
 
             switch (attribute)
             {
@@ -293,8 +231,8 @@ namespace ITCompanySimulation.Core
         [PunRPC]
         private void OnControlledCompanyWorkerRemovedRPC(int removedWorkerID, int photonPlayerID)
         {
-            SharedWorker localRemovedWorker = OtherPlayersWorkers[photonPlayerID][removedWorkerID];
-            OtherPlayersWorkers[photonPlayerID].Remove(removedWorkerID);
+            SharedWorker localRemovedWorker = PlayerDataMap[photonPlayerID].Workers[removedWorkerID];
+            PlayerDataMap[photonPlayerID].Workers.Remove(removedWorkerID);
             PhotonPlayer sourcePlayer = PhotonNetwork.otherPlayers.FirstOrDefault(x => x.ID == photonPlayerID);
             OtherPlayerWorkerRemoved?.Invoke(localRemovedWorker, sourcePlayer);
 
@@ -312,7 +250,7 @@ namespace ITCompanySimulation.Core
         [PunRPC]
         private void OnControlledCompanyWorkerAddedRPC(SharedWorker addedWorker, int photonPlayerID)
         {
-            OtherPlayersWorkers[photonPlayerID].Add(addedWorker.ID, addedWorker);
+            PlayerDataMap[photonPlayerID].Workers.Add(addedWorker.ID, addedWorker);
             PhotonPlayer sourcePlayer = PhotonNetwork.otherPlayers.FirstOrDefault(x => x.ID == photonPlayerID);
             OtherPlayerWorkerAdded?.Invoke(addedWorker, sourcePlayer);
 
@@ -321,15 +259,6 @@ namespace ITCompanySimulation.Core
                             "Worker added (ID: {2}). Local workers collection synchronized",
                             sourcePlayer.NickName, sourcePlayer.ID, addedWorker.ID, this.GetType().Name);
 #endif
-        }
-
-        #endregion
-
-        [PunRPC]
-        private void OnOtherPlayerControlledCompanyMinimalBalanceReachedRPC(int photonPlayerID)
-        {
-            PhotonPlayer sourcePlayer = PhotonNetwork.otherPlayers.FirstOrDefault(x => x.ID == photonPlayerID);
-            this.OtherPlayerCompanyMinimalBalanceReached?.Invoke(sourcePlayer);
         }
 
         [PunRPC]
@@ -350,6 +279,13 @@ namespace ITCompanySimulation.Core
                 sender.NickName, sender.ID, workerToRemove.ID, this.GetType().Name);
             Debug.Log(debugInfo);
 #endif
+        }
+
+        [PunRPC]
+        private void OnOtherPlayerControlledCompanyMinimalBalanceReachedRPC(int photonPlayerID)
+        {
+            PhotonPlayer sourcePlayer = PhotonNetwork.otherPlayers.FirstOrDefault(x => x.ID == photonPlayerID);
+            this.OtherPlayerCompanyMinimalBalanceReached?.Invoke(sourcePlayer);
         }
 
         [PunRPC]
@@ -411,12 +347,72 @@ namespace ITCompanySimulation.Core
             }
         }
 
+        /// <summary>
+        /// Called by client that wants to send its data to master client
+        /// </summary>
         [PunRPC]
-        private void SendPlayerDataRPC(int photonPlayerID, string companyName, int companyBalance)
+        private void OnOtherPlayerDataSentRPC(int photonPlayerID, PlayerData data)
         {
             IsDataReceived = true;
             DataReceived?.Invoke();
-            //TODO: Store received player information
+            PhotonPlayer sourcePlayer = PhotonNetwork.playerList.FirstOrDefault(player => player.ID == photonPlayerID);
+            data.Player = sourcePlayer;
+            PlayerDataMap.Add(photonPlayerID, data);
+        }
+
+        #endregion
+
+        private void OnControlledCompanyWorkerAdded(SharedWorker addedWorker)
+        {
+            this.photonView.RPC(
+                "OnControlledCompanyWorkerAddedRPC", PhotonTargets.Others, addedWorker, PhotonNetwork.player.ID);
+
+            addedWorker.SalaryChanged += OnCompanyWorkerSalaryChanged;
+            addedWorker.AbilityUpdated += OnCompanyWorkerAbilityUpdated;
+            addedWorker.ExpierienceTimeChanged += OnCompanyWorkerExpierienceTimeChanged;
+
+            Stats.WorkersHired++;
+        }
+
+        private void OnControlledCompanyWorkerRemoved(SharedWorker removedWorker)
+        {
+            this.photonView.RPC(
+                "OnControlledCompanyWorkerRemovedRPC", PhotonTargets.Others, removedWorker.ID, PhotonNetwork.player.ID);
+            removedWorker.SalaryChanged -= OnCompanyWorkerSalaryChanged;
+            removedWorker.AbilityUpdated -= OnCompanyWorkerAbilityUpdated;
+            removedWorker.ExpierienceTimeChanged -= OnCompanyWorkerExpierienceTimeChanged;
+
+            Stats.WorkersLeftCompany++;
+        }
+
+        private void OnCompanyWorkerExpierienceTimeChanged(SharedWorker companyWorker)
+        {
+            this.photonView.RPC("OnOtherPlayerCompanyWorkerAttirbuteChangedRPC",
+                    PhotonTargets.Others,
+                    PhotonNetwork.player.ID,
+                    companyWorker.ID,
+                    companyWorker.ExperienceTime,
+                    (int)WorkerAttribute.ExpierienceTime);
+        }
+
+        private void OnCompanyWorkerAbilityUpdated(SharedWorker companyWorker, ProjectTechnology workerAbility, float workerAbilityValue)
+        {
+            this.photonView.RPC("OnOtherPlayerCompanyWorkerAbilityChangedRPC",
+                                PhotonTargets.Others,
+                                PhotonNetwork.player.ID,
+                                companyWorker.ID,
+                                (int)workerAbility,
+                                workerAbilityValue);
+        }
+
+        private void OnCompanyWorkerSalaryChanged(SharedWorker companyWorker)
+        {
+            this.photonView.RPC("OnOtherPlayerCompanyWorkerAttirbuteChangedRPC",
+                                PhotonTargets.Others,
+                                PhotonNetwork.player.ID,
+                                companyWorker.ID,
+                                companyWorker.Salary,
+                                (int)WorkerAttribute.Salary);
         }
 
         /*Public methods*/
@@ -468,7 +464,7 @@ namespace ITCompanySimulation.Core
             }
             else
             {
-                OtherPlayersWorkers.Remove(otherPlayer.ID);
+                PlayerDataMap.Remove(otherPlayer.ID);
             }
         }
     }
