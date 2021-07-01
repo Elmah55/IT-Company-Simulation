@@ -95,7 +95,8 @@ namespace ITCompanySimulation.Character
     public enum WorkerAttribute
     {
         Salary,
-        ExpierienceTime
+        ExpierienceTime,
+        ProjectTechnology
     }
 
     /// <summary>

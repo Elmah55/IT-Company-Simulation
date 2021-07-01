@@ -4004,6 +4004,11 @@ PrefabInstance:
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
       value: OnFireWorkerButtonClicked
       objectReference: {fileID: 0}
+    - target: {fileID: 4586327220578573055, guid: 625c1efbbf5bad243a1b57331f08f4d6,
+        type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_CallState
+      value: 2
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 625c1efbbf5bad243a1b57331f08f4d6, type: 3}
 --- !u!114 &449108249 stripped
@@ -4332,6 +4337,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4586327220578573055, guid: 625c1efbbf5bad243a1b57331f08f4d6,
         type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4586327220578573055, guid: 625c1efbbf5bad243a1b57331f08f4d6,
+        type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
       objectReference: {fileID: 614546519}
@@ -4339,6 +4349,21 @@ PrefabInstance:
         type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
       value: OnButtonHireWorkerClick
+      objectReference: {fileID: 0}
+    - target: {fileID: 4586327220578573055, guid: 625c1efbbf5bad243a1b57331f08f4d6,
+        type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Mode
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4586327220578573055, guid: 625c1efbbf5bad243a1b57331f08f4d6,
+        type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_CallState
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 4586327220578573055, guid: 625c1efbbf5bad243a1b57331f08f4d6,
+        type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
+      value: UnityEngine.Object, UnityEngine
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 625c1efbbf5bad243a1b57331f08f4d6, type: 3}
@@ -54634,6 +54659,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4586327220578573055, guid: 625c1efbbf5bad243a1b57331f08f4d6,
         type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4586327220578573055, guid: 625c1efbbf5bad243a1b57331f08f4d6,
+        type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
       objectReference: {fileID: 2040867395}
@@ -54641,6 +54671,21 @@ PrefabInstance:
         type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
       value: OnHireWorkerButtonClicked
+      objectReference: {fileID: 0}
+    - target: {fileID: 4586327220578573055, guid: 625c1efbbf5bad243a1b57331f08f4d6,
+        type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Mode
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4586327220578573055, guid: 625c1efbbf5bad243a1b57331f08f4d6,
+        type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_CallState
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 4586327220578573055, guid: 625c1efbbf5bad243a1b57331f08f4d6,
+        type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
+      value: UnityEngine.Object, UnityEngine
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 625c1efbbf5bad243a1b57331f08f4d6, type: 3}

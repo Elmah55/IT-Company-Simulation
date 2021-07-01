@@ -253,7 +253,7 @@ namespace ITCompanySimulation.Character
 
             foreach (SharedWorker singleWorker in Workers)
             {
-                this.photonView.RPC("AddWorkerInternalRPC", PhotonTargets.Others, singleWorker);
+                this.photonView.RPC("OnWorkerAddedRPC", PhotonTargets.Others, singleWorker);
             }
         }
 
@@ -272,11 +272,12 @@ namespace ITCompanySimulation.Character
         }
 
         [PunRPC]
-        public void AddWorkerInternalRPC(object workerToAdd)
+        public void OnWorkerAddedRPC(SharedWorker workerToAdd)
         {
-            SharedWorker workerObject = (SharedWorker)workerToAdd;
-            this.Workers.Add(workerObject);
-            this.WorkerAdded?.Invoke(workerObject);
+            //TODO: Investigate issue. When array of workers is passed
+            //as argument here photon network issue occurs
+            this.Workers.Add(workerToAdd);
+            this.WorkerAdded?.Invoke(workerToAdd);
 
             if (false == PhotonNetwork.isMasterClient && false == IsDataReceived)
             {
@@ -289,7 +290,7 @@ namespace ITCompanySimulation.Character
         }
 
         [PunRPC]
-        private void RemoveWorkerInternalRPC(int workerID)
+        private void OnWorkerRemovedRPC(int workerID)
         {
             SharedWorker workerToRemove = null;
 
@@ -336,25 +337,12 @@ namespace ITCompanySimulation.Character
 
         public void RemoveWorker(SharedWorker workerToRemove)
         {
-            this.photonView.RPC("RemoveWorkerInternalRPC", PhotonTargets.All, workerToRemove.ID);
+            this.photonView.RPC("OnWorkerRemovedRPC", PhotonTargets.All, workerToRemove.ID);
         }
 
         public void AddWorker(SharedWorker workerToAdd)
         {
-            this.photonView.RPC("AddWorkerInternalRPC", PhotonTargets.All, workerToAdd);
-        }
-
-        public override void OnPhotonPlayerConnected(PhotonPlayer newPlayer)
-        {
-            base.OnPhotonPlayerConnected(newPlayer);
-
-            if (true == PhotonNetwork.isMasterClient)
-            {
-                foreach (SharedWorker singleWorker in Workers)
-                {
-                    this.photonView.RPC("AddWorkerInternalRPC", newPlayer, singleWorker);
-                }
-            }
+            this.photonView.RPC("OnWorkerAddedRPC", PhotonTargets.All, workerToAdd);
         }
 
         public override void OnPhotonPlayerDisconnected(PhotonPlayer otherPlayer)

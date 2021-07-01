@@ -28,35 +28,31 @@ MonoBehaviour:
   NetworkLogging: 0
   RunInBackground: 1
   RpcList:
-  - AddProjectRPC
-  - AddWorkerInternalRPC
   - Chat
   - DestroyRpc
   - FinishSimulationRPC
   - InstantiateRpc
   - OnControlledCompanyWorkerAddedRPC
   - OnControlledCompanyWorkerRemovedRPC
-  - OnOtherPlayerCompanyWorkerAbilityChangedRPC
   - OnOtherPlayerCompanyWorkerAttirbuteChangedRPC
   - OnOtherPlayerControlledCompanyMinimalBalanceReachedRPC
+  - OnOtherPlayerDataSentRPC
+  - OnProjectAddedRPC
+  - OnProjectRemovedRPC
+  - OnWorkerAddedRPC
+  - OnWorkerRemovedRPC
   - PickupItemInit
   - PunPickup
   - PunPickupSimple
   - PunRespawn
   - RemoveControlledCompanyWorkerRPC
-  - RemoveProjectInternalRPC
-  - RemoveWorkerInternalRPC
   - RequestForPickupItems
   - RequestForPickupTimes
   - SetMaxProjectsOnMarketRPC
   - SetMaxWorkersOnMarketRPC
-  - StartGameInternal
-  - StartTime
-  - TruncateProjectsRPC
-  - TruncateWorkersRPC
-  - StartSessionRPC
   - SetTimeRPC
   - StartGameInternalRPC
-  - SendPlayerDataRPC
-  - OnOtherPlayerDataSentRPC
+  - StartSessionRPC
+  - TruncateProjectsRPC
+  - TruncateWorkersRPC
   DisableAutoOpenWizard: 1

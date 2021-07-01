@@ -188,18 +188,6 @@ namespace ITCompanySimulation.Core
         #region RPC events
 
         /// <summary>
-        /// This method is called when ability of worker of other player is updated so it can be
-        /// also updated in this client's list of other player's workers
-        /// </summary>
-        [PunRPC]
-        private void OnOtherPlayerCompanyWorkerAbilityChangedRPC(int photonPlayerID, int workerID, int updatedAbility, float updatedAbilityValue)
-        {
-            SharedWorker updatedWorker = PlayerDataMap[photonPlayerID].Workers[workerID];
-            ProjectTechnology updatedAbilityEnum = (ProjectTechnology)updatedAbility;
-            updatedWorker.UpdateAbility(updatedAbilityEnum, updatedAbilityValue);
-        }
-
-        /// <summary>
         /// This method is called when salary of worker of other player is updated so it can be
         /// also updated in this client's list of other player's workers
         /// </summary>
@@ -218,6 +206,11 @@ namespace ITCompanySimulation.Core
                 case WorkerAttribute.ExpierienceTime:
                     int newExpierienceTime = (int)attributeValue;
                     updatedWorker.ExperienceTime = newExpierienceTime;
+                    break;
+                case WorkerAttribute.ProjectTechnology:
+                    //index 0 - technology type index 1 - attribute value
+                    object[] attributes = (object[])attributeValue;
+                    updatedWorker.UpdateAbility((ProjectTechnology)attributes[0], (float)attributes[1]);
                     break;
                 default:
                     break;
@@ -397,12 +390,14 @@ namespace ITCompanySimulation.Core
 
         private void OnCompanyWorkerAbilityUpdated(SharedWorker companyWorker, ProjectTechnology workerAbility, float workerAbilityValue)
         {
-            this.photonView.RPC("OnOtherPlayerCompanyWorkerAbilityChangedRPC",
+            //Contains ability type and ability value
+            object[] attributes = { workerAbility, workerAbilityValue };
+            this.photonView.RPC("OnOtherPlayerCompanyWorkerAttirbuteChangedRPC",
                                 PhotonTargets.Others,
                                 PhotonNetwork.player.ID,
                                 companyWorker.ID,
-                                (int)workerAbility,
-                                workerAbilityValue);
+                                attributes,
+                                (int)WorkerAttribute.ProjectTechnology);
         }
 
         private void OnCompanyWorkerSalaryChanged(SharedWorker companyWorker)

@@ -88,7 +88,7 @@ namespace ITCompanySimulation.Project
                 if (randomNumber <= PROJECT_ADD_PROBABILITY_DAILY)
                 {
                     SharedProject newProject = GenerateSingleProject();
-                    this.photonView.RPC("AddProjectRPC", PhotonTargets.All, newProject);
+                    this.photonView.RPC("OnProjectAddedRPC", PhotonTargets.All, newProject);
                 }
             }
         }
@@ -157,7 +157,7 @@ namespace ITCompanySimulation.Project
             while (MaxProjectsOnMarket > Projects.Count)
             {
                 SharedProject newProject = GenerateSingleProject();
-                this.photonView.RPC("AddProjectRPC", PhotonTargets.All, newProject);
+                this.photonView.RPC("OnProjectAddedRPC", PhotonTargets.All, newProject);
             }
 
 #if DEVELOPMENT_BUILD || UNITY_EDITOR
@@ -187,7 +187,7 @@ namespace ITCompanySimulation.Project
         }
 
         [PunRPC]
-        private void AddProjectRPC(SharedProject projectToAdd)
+        private void OnProjectAddedRPC(SharedProject projectToAdd)
         {
             Projects.Add(projectToAdd);
             ProjectAdded?.Invoke(projectToAdd);
@@ -203,7 +203,7 @@ namespace ITCompanySimulation.Project
         }
 
         [PunRPC]
-        private void RemoveProjectInternalRPC(int projectToRemoveID)
+        private void OnProjectRemovedRPC(int projectToRemoveID)
         {
             SharedProject removedProject = null;
 
@@ -262,7 +262,7 @@ namespace ITCompanySimulation.Project
 
         public void RemoveProject(SharedProject projectToRemove)
         {
-            this.photonView.RPC("RemoveProjectInternalRPC", PhotonTargets.All, projectToRemove.ID);
+            this.photonView.RPC("OnProjectRemovedRPC", PhotonTargets.All, projectToRemove.ID);
         }
 
         public override void OnPhotonPlayerDisconnected(PhotonPlayer otherPlayer)

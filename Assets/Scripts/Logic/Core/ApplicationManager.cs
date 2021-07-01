@@ -128,7 +128,7 @@ namespace ITCompanySimulation.Core
                 PhotonNetwork.ConnectUsingSettings(GAME_VERSION);
             }
 
-            PhotonNetwork.OnEventCall += PhotonNetworkOnEventCall;
+            PhotonNetwork.OnEventCall += OnPhotonNetworkEventCall;
             SceneManager.sceneLoaded += OnSceneLoaded;
         }
 
@@ -194,7 +194,7 @@ namespace ITCompanySimulation.Core
             }
         }
 
-        private void PhotonNetworkOnEventCall(byte eventCode, object content, int senderId)
+        private void OnPhotonNetworkEventCall(byte eventCode, object content, int senderId)
         {
             switch (eventCode)
             {
