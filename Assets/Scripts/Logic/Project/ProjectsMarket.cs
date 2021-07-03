@@ -65,6 +65,7 @@ namespace ITCompanySimulation.Project
         [SerializeField]
         private int NumberOfProjectsGeneratedInOfflineMode;
         private ResourceHolder ResourceHolderComponent;
+        private SimulationManager SimulationManagerComponent;
 
         /*Public consts fields*/
 
@@ -74,7 +75,10 @@ namespace ITCompanySimulation.Project
         public event SharedProjectAction ProjectAdded;
         public event UnityAction DataReceived;
 
-        public List<SharedProject> Projects { get; private set; } = new List<SharedProject>();
+        /// <summary>
+        /// Map containing all projects in market with project id as key and project as value.
+        /// </summary>
+        public Dictionary<int, SharedProject> Projects { get; private set; } = new Dictionary<int, SharedProject>();
         public bool IsDataReceived { get; private set; }
 
         /*Private methods*/
@@ -189,7 +193,7 @@ namespace ITCompanySimulation.Project
         [PunRPC]
         private void OnProjectAddedRPC(SharedProject projectToAdd)
         {
-            Projects.Add(projectToAdd);
+            Projects.Add(projectToAdd.ID, projectToAdd);
             ProjectAdded?.Invoke(projectToAdd);
 
             if (false == PhotonNetwork.isMasterClient && false == IsDataReceived)
@@ -202,21 +206,57 @@ namespace ITCompanySimulation.Project
             }
         }
 
+        /// <summary>
+        /// Called by client that request project from market.
+        /// </summary>
+        /// <param name="requestedProject">Requested project instance</param>
+        /// <param name="photonPlayerID">Id of photon player that sends request</param>
+        [PunRPC]
+        private void OnProjectRequestRPC(int requestedProjectID, int photonPlayerID)
+        {
+            //Concept of requesting project is introduced so master client can decide
+            //which client should receive project in case two RPCs from different clients
+            //arrive in short time
+
+            PhotonPlayer targetPlayer = Utils.PhotonPlayerFromID(photonPlayerID);
+
+            //Check if project wasn't removed before by another request
+            if (true == Projects.ContainsKey(requestedProjectID))
+            {
+                SharedProject requestedProject = Projects[requestedProjectID];
+                this.photonView.RPC("OnProjectRequestCfmRPC", targetPlayer, requestedProjectID);
+                this.photonView.RPC("OnProjectRemovedRPC", PhotonTargets.All, requestedProjectID);
+            }
+#if DEVELOPMENT_BUILD || UNITY_EDITOR
+            else
+            {
+                Debug.LogWarningFormat("[{0}] Project (ID {1}) requested from Player: {2} (ID {3}) but project" +
+                                        "does not exists in market anymore",
+                                        this.GetType().Name,
+                                        requestedProjectID,
+                                        targetPlayer.NickName,
+                                        targetPlayer.ID);
+            }
+#endif
+        }
+
+        /// <summary>
+        /// Called when project requested through OnProjectRequestRPC is given to this client.
+        /// </summary>
+        /// <param name="requestedProjectID">ID of given project</param>
+        [PunRPC]
+        private void OnProjectRequestCfmRPC(int requestedProjectID)
+        {
+            SharedProject requestedProject = Projects[requestedProjectID];
+            LocalProject requestedLocalProject = new LocalProject(requestedProject);
+            SimulationManagerComponent.ControlledCompany.AddProject(requestedLocalProject);
+        }
+
         [PunRPC]
         private void OnProjectRemovedRPC(int projectToRemoveID)
         {
-            SharedProject removedProject = null;
-
-            for (int i = 0; i < Projects.Count; i++)
-            {
-                if (projectToRemoveID == Projects[i].ID)
-                {
-                    removedProject = Projects[i];
-                    Projects.RemoveAt(i);
-                    break;
-                }
-            }
-
+            SharedProject removedProject = Projects[projectToRemoveID];
+            Projects.Remove(removedProject.ID);
             ProjectRemoved?.Invoke(removedProject);
         }
 
@@ -227,24 +267,18 @@ namespace ITCompanySimulation.Project
         }
 
         /// <summary>
-        /// Truncates projects list so its length matches provided parameter
-        /// Does nothing if provided parameter is equal or greater than number of projects
+        /// Removes all projects from Projects dictionary.
         /// </summary>
         [PunRPC]
-        private void TruncateProjectsRPC(int count)
+        private void ClearProjectsRPC()
         {
-            if (count < this.Projects.Count)
-            {
-                while (this.Projects.Count != count)
-                {
-                    this.Projects.RemoveAt(this.Projects.Count - 1);
-                }
-            }
+            Projects.Clear();
         }
 
         private void Start()
         {
             ResourceHolderComponent = GetComponent<ResourceHolder>();
+            SimulationManagerComponent = GetComponent<SimulationManager>();
 
             //Master client will generate all the workers on market
             //then send it to other clients
@@ -260,9 +294,18 @@ namespace ITCompanySimulation.Project
 
         /*Public methods*/
 
-        public void RemoveProject(SharedProject projectToRemove)
+        /// <summary>
+        /// Sends request to master client to remove project from market
+        /// and give it to player that requests it. This client will receive
+        /// RPC call when reuqest is confirmed (might not be confirmed due to
+        /// other client reuest being honored).
+        /// </summary>
+        public void RequestProject(SharedProject requestedProject)
         {
-            this.photonView.RPC("OnProjectRemovedRPC", PhotonTargets.All, projectToRemove.ID);
+            this.photonView.RPC("OnProjectRequestRPC", 
+                                PhotonNetwork.masterClient, 
+                                requestedProject.ID,
+                                PhotonNetwork.player.ID);
         }
 
         public override void OnPhotonPlayerDisconnected(PhotonPlayer otherPlayer)
@@ -280,9 +323,9 @@ namespace ITCompanySimulation.Project
             {
                 MaxProjectsOnMarket = CalculateMaxProjectsOnMarket();
                 this.photonView.RPC("SetMaxProjectsOnMarketRPC", PhotonTargets.Others, MaxProjectsOnMarket);
-                this.photonView.RPC("TruncateProjectsRPC", PhotonTargets.Others, MaxProjectsOnMarket);
+                this.photonView.RPC("ClearProjectsRPC", PhotonTargets.All);
                 GenerateAndSendProjects();
             }
         }
-    } 
+    }
 }

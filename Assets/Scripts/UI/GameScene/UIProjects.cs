@@ -116,6 +116,7 @@ namespace ITCompanySimulation.UI
                 SubscribeToMouseEventPointers(events, proj, TooltipComponent);
             }
 
+            newElement.FrontImage.sprite = proj.Icon;
             newElement.Project = proj;
             newElement.gameObject.SetActive(true);
 

@@ -55,4 +55,7 @@ MonoBehaviour:
   - StartSessionRPC
   - TruncateProjectsRPC
   - TruncateWorkersRPC
+  - ClearProjectsRPC
+  - OnProjectRequestCfmRPC
+  - OnProjectRequestRPC
   DisableAutoOpenWizard: 1

@@ -1,8 +1,9 @@
 ﻿using UnityEngine;
+using System.Linq;
 
 namespace ITCompanySimulation.Utilities
 {
-    public class Utils
+    public static class Utils
     {
         /*Private consts fields*/
 
@@ -69,6 +70,15 @@ namespace ITCompanySimulation.Utilities
             Rect screenRect = new Rect(0f, 0f, Screen.width, Screen.height);
             bool result = screenRect.Contains(Input.mousePosition);
             return result;
+        }
+
+        /// <summary>
+        /// Returns photon player from photon player ID. If player with given ID does
+        /// not exists returns null.
+        /// </summary>
+        public static PhotonPlayer PhotonPlayerFromID(int playerID)
+        {
+            return PhotonNetwork.playerList?.FirstOrDefault(player => player.ID == playerID);
         }
     }
 }

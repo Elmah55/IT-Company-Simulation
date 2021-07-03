@@ -57,9 +57,9 @@ namespace ITCompanySimulation.UI
         {
             ButtonSelectorProjects = new ButtonSelector(ListViewElementSelectedColors);
 
-            foreach (SharedProject proj in ProjectsMarketComponent.Projects)
+            foreach (var proj in ProjectsMarketComponent.Projects)
             {
-                OnProjectsMarketProjectAdded(proj);
+                OnProjectsMarketProjectAdded(proj.Value);
             }
 
             foreach (Scrum scm in SimulationManagerComponent.ControlledCompany.ScrumProcesses)
@@ -218,9 +218,7 @@ namespace ITCompanySimulation.UI
 
         public void OnButtonTakeProjectClicked()
         {
-            LocalProject proj = new LocalProject(SelectedProject);
-            ProjectsMarketComponent.RemoveProject(SelectedProject);
-            SimulationManagerComponent.ControlledCompany.AddProject(proj);
+            ProjectsMarketComponent.RequestProject(SelectedProject);
         }
     }
 }
