@@ -6,6 +6,7 @@ using UnityEngine.Events;
 using ITCompanySimulation.UI;
 using ITCompanySimulation.Core;
 using ITCompanySimulation.Multiplayer;
+using System.Linq;
 
 namespace ITCompanySimulation.Character
 {
@@ -44,6 +45,8 @@ namespace ITCompanySimulation.Character
         private int MaxWorkersOnMarket;
         private GameTime GameTimeComponent;
         private ResourceHolder Resources;
+        private ApplicationManager ApplicationManagerComponent;
+        private SimulationManager SimulationManagerComponent;
 
         /*Public consts fields*/
 
@@ -51,14 +54,14 @@ namespace ITCompanySimulation.Character
 
         /// <summary>
         /// How many workers should be generated in market
-        /// when simulation is run in offline mode
+        /// when simulation is run in offline mode.
         /// </summary>
         [Range(1.0f, 1000.0f)]
         public int NumberOfWorkersGeneratedInOfflineMode;
         /// <summary>
-        /// Workers available on market
+        /// Workers available on market. Key is ID of worker and value is SharedWoker instance.
         /// </summary>
-        public List<SharedWorker> Workers { get; private set; } = new List<SharedWorker>();
+        public Dictionary<int, SharedWorker> Workers { get; private set; } = new Dictionary<int, SharedWorker>();
         public bool IsDataReceived { get; private set; }
 
         public event SharedWorkerAction WorkerAdded;
@@ -88,7 +91,7 @@ namespace ITCompanySimulation.Character
             while (Workers.Count != MaxWorkersOnMarket)
             {
                 SharedWorker newWorker = GenerateSingleWorker();
-                Workers.Add(newWorker);
+                Workers.Add(newWorker.ID, newWorker);
             }
 
 #if DEVELOPMENT_BUILD || UNITY_EDITOR
@@ -236,6 +239,9 @@ namespace ITCompanySimulation.Character
             GameTimeComponent = GetComponent<GameTime>();
             GameTimeComponent.DayChanged += OnGameTimeDayChanged;
             Resources = GetComponent<ResourceHolder>();
+            ApplicationManagerComponent =
+                GameObject.FindGameObjectWithTag("ApplicationManager").GetComponent<ApplicationManager>();
+            SimulationManagerComponent = GetComponent<SimulationManager>();
 
             //Master client will generate all the workers on market
             //then send it to other clients
@@ -251,9 +257,9 @@ namespace ITCompanySimulation.Character
         {
             GenerateWorkers();
 
-            foreach (SharedWorker singleWorker in Workers)
+            foreach (var worker in Workers)
             {
-                this.photonView.RPC("OnWorkerAddedRPC", PhotonTargets.Others, singleWorker);
+                this.photonView.RPC("OnWorkerAddedRPC", PhotonTargets.Others, worker.Value);
             }
         }
 
@@ -276,7 +282,7 @@ namespace ITCompanySimulation.Character
         {
             //TODO: Investigate issue. When array of workers is passed
             //as argument here photon network issue occurs
-            this.Workers.Add(workerToAdd);
+            this.Workers.Add(workerToAdd.ID, workerToAdd);
             this.WorkerAdded?.Invoke(workerToAdd);
 
             if (false == PhotonNetwork.isMasterClient && false == IsDataReceived)
@@ -292,34 +298,68 @@ namespace ITCompanySimulation.Character
         [PunRPC]
         private void OnWorkerRemovedRPC(int workerID)
         {
-            SharedWorker workerToRemove = null;
-
-            for (int i = 0; i < Workers.Count; i++)
-            {
-                if (workerID == Workers[i].ID)
-                {
-                    workerToRemove = Workers[i];
-                    Workers.RemoveAt(i);
-                    break;
-                }
-            }
-
+            SharedWorker workerToRemove = Workers[workerID];
+            Workers.Remove(workerID);
             this.WorkerRemoved?.Invoke(workerToRemove);
         }
 
         /// <summary>
-        /// Truncates workers list so its length matches provided parameter
-        /// Does nothing if provided parameter is equal or greater than number of workers
+        /// Called by client that requested worker from market.
+        /// </summary>
+        /// <param name="requestedWorkerID">ID of requested worker</param>
+        /// <param name="photonPlayerID">ID of photon player that is requesting worker</param>
+        [PunRPC]
+        private void OnWorkerRequestRPC(int requestedWorkerID, int photonPlayerID)
+        {
+            //Concept of requesting worker is introduced so master client can decide
+            //which client should receive worker in case two RPCs from different clients
+            //arrive in short time
+
+            PhotonPlayer targetPlayer = Utils.PhotonPlayerFromID(photonPlayerID);
+
+            if (true == Workers.ContainsKey(requestedWorkerID))
+            {
+                SharedWorker requestedWorker = Workers[requestedWorkerID];
+                this.photonView.RPC("OnWorkerRequestCfmRPC", targetPlayer, requestedWorkerID);
+                this.photonView.RPC("OnWorkerRemovedRPC", PhotonTargets.All, requestedWorkerID);
+            }
+#if DEVELOPMENT_BUILD || UNITY_EDITOR
+            else
+            {
+                Debug.LogWarningFormat("[{0}] Worker (ID {1}) requested from Player: {2} (ID {3}) but worker" +
+                                        "does not exists in market anymore",
+                                        this.GetType().Name,
+                                        requestedWorkerID,
+                                        targetPlayer.NickName,
+                                        targetPlayer.ID);
+            }
+#endif
+        }
+
+        /// <summary>
+        /// Called when this client request for worker is confirmed.
+        /// </summary>
+        /// <param name="requestedWorkerID">ID of requested worker</param>
+        [PunRPC]
+        private void OnWorkerRequestCfmRPC(int requestedWorkerID)
+        {
+            SharedWorker requestedWorker = Workers[requestedWorkerID];
+            LocalWorker requestedLocalWorker = new LocalWorker(requestedWorker);
+            SimulationManagerComponent.ControlledCompany.AddWorker(requestedLocalWorker);
+        }
+
+        /// <summary>
+        /// Removes all workers from market
         /// </summary>
         [PunRPC]
-        private void TruncateWorkersRPC(int count)
+        private void ClearWorkersRPC()
         {
-            if (count < this.Workers.Count)
+            SharedWorker[] removedWorkers = Workers.Values.ToArray();
+            Workers.Clear();
+
+            foreach (SharedWorker worker in removedWorkers)
             {
-                while (this.Workers.Count != count)
-                {
-                    this.Workers.RemoveAt(this.Workers.Count - 1);
-                }
+                WorkerRemoved?.Invoke(worker);
             }
         }
 
@@ -335,9 +375,17 @@ namespace ITCompanySimulation.Character
 
         /*Public methods*/
 
-        public void RemoveWorker(SharedWorker workerToRemove)
+        /// <summary>
+        /// Request worker from master client. If request was granted to this client
+        /// RPC with confirmation will be called
+        /// </summary>
+        /// <param name="workerToRemove">Requested worker</param>
+        public void RequestWorker(SharedWorker workerToRemove)
         {
-            this.photonView.RPC("OnWorkerRemovedRPC", PhotonTargets.All, workerToRemove.ID);
+            this.photonView.RPC("OnWorkerRequestRPC",
+                                PhotonNetwork.masterClient,
+                                workerToRemove.ID,
+                                PhotonNetwork.player.ID);
         }
 
         public void AddWorker(SharedWorker workerToAdd)
@@ -356,24 +404,19 @@ namespace ITCompanySimulation.Character
         {
             base.OnMasterClientSwitched(newMasterClient);
 
-            //If master client was switcher during sending data, generate ramining workers and
-            //send to other players
             if (true == PhotonNetwork.isMasterClient && 0 != PhotonNetwork.otherPlayers.Length)
             {
                 //Number of players might have changed, recalculate max workers on market
-                MaxWorkersOnMarket = CalculateMaxWorkersOnMarket();
-                //Remove workers from other clients that this client might have not received so all clients'
-                //workers are synchronized
-                this.photonView.RPC("TruncateWorkersRPC", PhotonTargets.Others, this.Workers.Count);
-                this.photonView.RPC("SetMaxWorkersOnMarketRPC", PhotonTargets.Others, MaxWorkersOnMarket);
+                int maxWorkers = CalculateMaxWorkersOnMarket();
+                this.photonView.RPC("SetMaxWorkersOnMarketRPC", PhotonTargets.All, maxWorkers);
 
-                //Remove excessive workers. If there are not enough workers, generate more
-                if (this.Workers.Count > MaxWorkersOnMarket)
+                //If master client was switched during sending data, generate and send
+                //workers again
+                if (false == ApplicationManagerComponent.IsSessionActive)
                 {
-                    TruncateWorkersRPC(MaxWorkersOnMarket);
-                }
-                else
-                {
+                    //Remove workers from other clients that this client might have not received so all clients'
+                    //workers are synchronized
+                    this.photonView.RPC("ClearWorkersRPC", PhotonTargets.All);
                     GenerateAndSendWorkers();
                 }
             }

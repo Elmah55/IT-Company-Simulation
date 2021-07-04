@@ -261,8 +261,10 @@ namespace ITCompanySimulation.UI
 
         private void Start()
         {
-            InitializeWorkersListView(ListViewMarketWorkers, WorkersMarketComponent.Workers);
-            InitializeWorkersListView(ListViewCompanyWorkers, SimulationManagerComponent.ControlledCompany.Workers.Cast<SharedWorker>().ToList());
+            List<SharedWorker> marketWorkers = WorkersMarketComponent.Workers.Values.ToList();
+            InitializeWorkersListView(ListViewMarketWorkers, marketWorkers);
+            marketWorkers = SimulationManagerComponent.ControlledCompany.Workers.Cast<SharedWorker>().ToList();
+            InitializeWorkersListView(ListViewCompanyWorkers, marketWorkers);
 
             SimulationManagerComponent.ControlledCompany.WorkerAdded += OnCompanyWorkerAdded;
             SimulationManagerComponent.ControlledCompany.WorkerRemoved += OnCompanyWorkerRemoved;
@@ -287,16 +289,7 @@ namespace ITCompanySimulation.UI
 
         public void OnHireWorkerButtonClicked()
         {
-            WorkersMarketComponent.RemoveWorker(SelectedWorker);
-
-            LocalWorker newLocalWorker = SelectedWorker as LocalWorker;
-
-            if (null == newLocalWorker)
-            {
-                newLocalWorker = new LocalWorker(SelectedWorker);
-            }
-
-            SimulationManagerComponent.ControlledCompany.AddWorker(newLocalWorker);
+            WorkersMarketComponent.RequestWorker(SelectedWorker);
         }
 
         public void OnFireWorkerButtonClicked()

@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
+using System.Linq;
 
 namespace ITCompanySimulation.Project
 {
@@ -66,6 +67,7 @@ namespace ITCompanySimulation.Project
         private int NumberOfProjectsGeneratedInOfflineMode;
         private ResourceHolder ResourceHolderComponent;
         private SimulationManager SimulationManagerComponent;
+        private ApplicationManager ApplicationManagerComponent;
 
         /*Public consts fields*/
 
@@ -207,9 +209,9 @@ namespace ITCompanySimulation.Project
         }
 
         /// <summary>
-        /// Called by client that request project from market.
+        /// Called by client that requested project from market.
         /// </summary>
-        /// <param name="requestedProject">Requested project instance</param>
+        /// <param name="requestedProjectID">ID of requested project</param>
         /// <param name="photonPlayerID">Id of photon player that sends request</param>
         [PunRPC]
         private void OnProjectRequestRPC(int requestedProjectID, int photonPlayerID)
@@ -272,13 +274,21 @@ namespace ITCompanySimulation.Project
         [PunRPC]
         private void ClearProjectsRPC()
         {
+            SharedProject[] removedProjects = Projects.Values.ToArray();
             Projects.Clear();
+
+            foreach (SharedProject project in removedProjects)
+            {
+                ProjectRemoved?.Invoke(project);
+            }
         }
 
         private void Start()
         {
             ResourceHolderComponent = GetComponent<ResourceHolder>();
             SimulationManagerComponent = GetComponent<SimulationManager>();
+            ApplicationManagerComponent =
+                GameObject.FindGameObjectWithTag("ApplicationManager").GetComponent<ApplicationManager>();
 
             //Master client will generate all the workers on market
             //then send it to other clients
@@ -302,8 +312,8 @@ namespace ITCompanySimulation.Project
         /// </summary>
         public void RequestProject(SharedProject requestedProject)
         {
-            this.photonView.RPC("OnProjectRequestRPC", 
-                                PhotonNetwork.masterClient, 
+            this.photonView.RPC("OnProjectRequestRPC",
+                                PhotonNetwork.masterClient,
                                 requestedProject.ID,
                                 PhotonNetwork.player.ID);
         }
@@ -321,10 +331,16 @@ namespace ITCompanySimulation.Project
 
             if (true == PhotonNetwork.isMasterClient && 0 != PhotonNetwork.otherPlayers.Length)
             {
-                MaxProjectsOnMarket = CalculateMaxProjectsOnMarket();
-                this.photonView.RPC("SetMaxProjectsOnMarketRPC", PhotonTargets.Others, MaxProjectsOnMarket);
-                this.photonView.RPC("ClearProjectsRPC", PhotonTargets.All);
-                GenerateAndSendProjects();
+                int maxProjects = CalculateMaxProjectsOnMarket();
+                this.photonView.RPC("SetMaxProjectsOnMarketRPC", PhotonTargets.All, MaxProjectsOnMarket);
+                GameTimeComponent = GetComponent<GameTime>();
+                GameTimeComponent.DayChanged += OnGameTimeDayChanged;
+
+                if (false == ApplicationManagerComponent.IsSessionActive)
+                {
+                    this.photonView.RPC("ClearProjectsRPC", PhotonTargets.All);
+                    GenerateAndSendProjects();
+                }
             }
         }
     }
