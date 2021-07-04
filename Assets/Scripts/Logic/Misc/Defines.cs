@@ -65,6 +65,7 @@ public enum SimulationFinishReason
     PlayerCompanyReachedTargetBalance,
     PlayerCompanyReachedMinimalBalance,
     OnePlayerInRoom,
+    ForcedByMasterClient,
     Disconnected
 }
 

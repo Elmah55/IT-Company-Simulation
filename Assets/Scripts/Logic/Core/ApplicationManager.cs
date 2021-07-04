@@ -146,6 +146,7 @@ namespace ITCompanySimulation.Core
                 SessionStarted = null;
                 NumberOfClientsWithDataReceived = 0;
                 NumberOfCompletedDataTransfers = 0;
+                NumberOfMasterClientCompletedDataTransfers = 0;
 
                 if (false == PhotonNetwork.offlineMode && true == UseRoom)
                 {

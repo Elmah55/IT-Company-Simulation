@@ -9,6 +9,7 @@ using ITCompanySimulation.Company;
 using ITCompanySimulation.Project;
 using ITCompanySimulation.Settings;
 using UnityEngine.Events;
+using ITCompanySimulation.Utilities;
 
 namespace ITCompanySimulation.Core
 {
@@ -116,6 +117,29 @@ namespace ITCompanySimulation.Core
 
             CreateCompany();
         }
+
+#if DEVELOPMENT_BUILD || UNITY_EDITOR
+        private void OnGUI()
+        {
+            Event currentEvent = Event.current;
+
+            if (true == PhotonNetwork.isMasterClient && true == currentEvent.isKey)
+            {
+                bool combinationPressed = (currentEvent.modifiers & EventModifiers.Control) != 0;
+                combinationPressed = combinationPressed && (currentEvent.keyCode == KeyCode.F);
+
+                //Finish simulation when proper key combination is pressed (Ctrl + F). This should be used only for
+                //debug purposes
+                if (true == IsSimulationActive && true == combinationPressed)
+                {
+                    this.photonView.RPC("FinishSimulationRPC",
+                                        PhotonTargets.All,
+                                        PhotonNetwork.player.ID,
+                                        (int)SimulationFinishReason.ForcedByMasterClient);
+                }
+            }
+        }
+#endif
 
         private void CreateCompany()
         {
@@ -292,7 +316,7 @@ namespace ITCompanySimulation.Core
                 GameTimeComponent.StopTime();
                 IsSimulationFinished = true;
                 IsSimulationActive = false;
-                this.WinnerPlayer = PhotonNetwork.playerList.FirstOrDefault(x => x.ID == winnerPhotonPlayerID);
+                this.WinnerPlayer = Utils.PhotonPlayerFromID(winnerPhotonPlayerID);
                 this.FinishReason = (SimulationFinishReason)finishReason;
                 string finishSimulationInfoMsg = "Game finished";
 
@@ -314,6 +338,9 @@ namespace ITCompanySimulation.Core
                             break;
                         case SimulationFinishReason.Disconnected:
                             finishSimulationInfoMsg = "You have been disconnected from server";
+                            break;
+                        case SimulationFinishReason.ForcedByMasterClient:
+                            finishSimulationInfoMsg = "Simulation has been forcefully finished by master client";
                             break;
                         default:
                             break;
