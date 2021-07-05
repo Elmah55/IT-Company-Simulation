@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using UnityEngine.Rendering;
 
 namespace ITCompanySimulation.Character
 {
@@ -15,7 +14,7 @@ namespace ITCompanySimulation.Character
 
         private Animator CharacterAnimator;
         private int[] AnimationClipHash;
-        private SortingGroup CharacterSortingGroup;
+        private SpriteRenderer Renderer;
 
         /*Public consts fields*/
 
@@ -26,7 +25,7 @@ namespace ITCompanySimulation.Character
         private void Start()
         {
             CharacterAnimator = GetComponent<Animator>();
-            CharacterSortingGroup = GetComponent<SortingGroup>();
+            Renderer = GetComponent<SpriteRenderer>();
             AnimationClipHash = new int[CharacterAnimator.runtimeAnimatorController.animationClips.Length];
 
             for (int i = 0; i < CharacterAnimator.runtimeAnimatorController.animationClips.Length; i++)
@@ -38,7 +37,7 @@ namespace ITCompanySimulation.Character
         private void Update()
         {
             int sortingOrder = Mathf.RoundToInt(transform.position.y * (-100f));
-            CharacterSortingGroup.sortingOrder = sortingOrder;
+            Renderer.sortingOrder = sortingOrder;
         }
 
         /*Public methods*/
