@@ -59,15 +59,6 @@ namespace ITCompanySimulation.Core
         /// </summary>
         private IMasterClientDataReceiver[] MasterClientDataReceiverComponents;
         /// <summary>
-        /// Below values can be used to set balance when game creation through room is not used
-        /// </summary>
-        [SerializeField]
-        private int InitialCompanyBalance;
-        [SerializeField]
-        private int TargetCompanyBalance;
-        [SerializeField]
-        private int MinimalCompanyBalance;
-        /// <summary>
         /// When this is set to true simulation will be run in
         /// Offline Mode. It means that this client won't be connected
         /// to server and simulation will be run in local environment.
@@ -76,9 +67,12 @@ namespace ITCompanySimulation.Core
         /// Value of this variable will be also set in PhotonNetwork.offlineMode
         /// https://doc.photonengine.com/en-us/pun/current/gameplay/offlinemode
         /// </summary>
-        [SerializeField]
         private bool OfflineMode;
         private int ReconnectRetries = 0;
+        /// <summary>
+        /// Settings set in inspector
+        /// </summary>
+        private SettingsObject Settings;
 
         /*Public consts fields*/
 
@@ -92,7 +86,7 @@ namespace ITCompanySimulation.Core
         /// define simulation settings. If false game will start without need to create
         /// room and default room and simulation settings will be set
         /// </summary>
-        public bool UseRoom;
+        public bool UseRoom { get; private set; }
         /// <summary>
         /// True when session has started and is active
         /// </summary>
@@ -104,6 +98,8 @@ namespace ITCompanySimulation.Core
 
         private void Awake()
         {
+            Settings = Resources.Load<SettingsObject>("Settings");
+
             //Register custom classes that will be sent between clients
             PhotonPeer.RegisterType(typeof(SharedProject), NetworkingData.PROJECT_BYTE_CODE, SharedProject.Serialize, SharedProject.Deserialize);
             PhotonPeer.RegisterType(typeof(PlayerData), NetworkingData.PLAYER_DATA_BYTE_CODE, PlayerData.Serialize, PlayerData.Deserialize);
@@ -114,6 +110,10 @@ namespace ITCompanySimulation.Core
 
             //Init static classes that need to be loaded before other components
             PlayerInfoSettings.Load();
+
+            //Fetch settings
+            UseRoom = Settings.UseRoom;
+            OfflineMode = Settings.OfflineMode;
 
             DontDestroyOnLoad(this.gameObject);
             PhotonNetwork.offlineMode = this.OfflineMode;
@@ -308,9 +308,9 @@ namespace ITCompanySimulation.Core
             if (false == UseRoom)
             {
                 //Create room with default settings and join it
-                SimulationSettings.InitialBalance = this.InitialCompanyBalance;
-                SimulationSettings.TargetBalance = this.TargetCompanyBalance;
-                SimulationSettings.MinimalBalance = this.MinimalCompanyBalance;
+                SimulationSettings.InitialBalance = Settings.InitialBalance;
+                SimulationSettings.TargetBalance = Settings.TargetBalance;
+                SimulationSettings.MinimalBalance = Settings.MinimalBalance;
                 RoomOptions options = new RoomOptions() { MaxPlayers = MAX_NUMBER_OF_PLAYERS_PER_ROOM };
                 PhotonNetwork.JoinOrCreateRoom("Default", options, PhotonNetwork.lobby);
             }
