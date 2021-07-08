@@ -28,10 +28,6 @@ namespace ITCompanySimulation.Character
         /*Public fields*/
 
         /// <summary>
-        /// Unique ID of worker
-        /// </summary>
-        public int ID { get; set; }
-        /// <summary>
         /// Shows how much of time of experience working in project worker has.
         /// This values is days in game time
         /// </summary>

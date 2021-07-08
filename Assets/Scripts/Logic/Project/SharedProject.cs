@@ -2,10 +2,11 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using ITCompanySimulation.Core;
 
 namespace ITCompanySimulation.Project
 {
-    public class SharedProject
+    public class SharedProject : IdentifiableObject
     {
         /*Private consts fields*/
 
@@ -19,10 +20,6 @@ namespace ITCompanySimulation.Project
         /*Public fields*/
 
         public string Name { get; set; }
-        /// <summary>
-        /// Used to assing unique ID for each project
-        /// </summary>
-        public int ID { get; set; }
         /// <summary>
         /// How much money company will receive after finishing project
         /// </summary>
@@ -164,7 +161,7 @@ namespace ITCompanySimulation.Project
             deserializedProject.CompletionTime = completionTime;
             deserializedProject.IconIndex = iconIndex;
             deserializedProject.Icon = ResourceHolderComponent.ProjectsIcons[iconIndex];
-;
+            ;
             return deserializedProject;
         }
 

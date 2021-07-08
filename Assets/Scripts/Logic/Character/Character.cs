@@ -1,9 +1,11 @@
-﻿namespace ITCompanySimulation.Character
+﻿using ITCompanySimulation.Core;
+
+namespace ITCompanySimulation.Character
 {
     /// <summary>
     /// Represents character in simulation world
     /// </summary>
-    public abstract class Character
+    public abstract class Character : IdentifiableObject
     {
         /*Private consts fields*/
 
