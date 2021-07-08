@@ -10,6 +10,8 @@ using System.Linq;
 using System;
 using ITCompanySimulation.Settings;
 using AudioSettings = ITCompanySimulation.Settings.AudioSettings;
+using System.Threading;
+using System.Globalization;
 
 #if DEVELOPMENT_BUILD || UNITY_EDITOR
 using System.Reflection;
@@ -98,6 +100,9 @@ namespace ITCompanySimulation.Core
 
         private void Awake()
         {
+            //Display info in US format regardless of culture set on windows
+            Thread.CurrentThread.CurrentCulture = new CultureInfo("en-US");
+
             Settings = Resources.Load<SettingsObject>("Settings");
 
             //Register custom classes that will be sent between clients
