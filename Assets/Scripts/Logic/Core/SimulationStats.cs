@@ -33,9 +33,7 @@ namespace ITCompanySimulation.Core
         /// </summary>
         public int DaysSinceStart { get; set; }
         /// <summary>
-        /// How much money has player's company earned
-        /// TODO: Fix counting this. First time initial
-        /// company balance is set it is counted as money earned
+        /// Amount of money that player's company has earned
         /// </summary>
         public int MoneyEarned
         {

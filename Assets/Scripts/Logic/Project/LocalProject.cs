@@ -50,7 +50,7 @@ namespace ITCompanySimulation.Project
                     if (m_Progress >= 100.0f)
                     {
                         m_Progress = Mathf.Clamp(m_Progress, 0.0f, 100.0f);
-                        Active = false;
+                        IsActive = false;
                         Completed?.Invoke(this);
                     }
 
@@ -71,7 +71,7 @@ namespace ITCompanySimulation.Project
         /// <summary>
         /// Is project active and its state can be updated (project in progress)
         /// </summary>
-        public bool Active { get; set; }
+        public bool IsActive { get; set; }
         /// <summary>
         /// True if project was started at least once (started for the first time)
         /// </summary>
@@ -120,10 +120,10 @@ namespace ITCompanySimulation.Project
 
         public void Start()
         {
-            if (false == Active)
+            if (false == IsActive)
             {
                 StartedOnce = true;
-                this.Active = true;
+                this.IsActive = true;
                 this.Started?.Invoke(this);
 
 #if DEVELOPMENT_BUILD || UNITY_EDITOR
@@ -137,9 +137,9 @@ namespace ITCompanySimulation.Project
 
         public void Stop()
         {
-            if (true == Active)
+            if (true == IsActive)
             {
-                this.Active = false;
+                this.IsActive = false;
                 this.Stopped?.Invoke(this);
 
 #if DEVELOPMENT_BUILD || UNITY_EDITOR

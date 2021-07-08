@@ -1,6 +1,7 @@
 ﻿using ITCompanySimulation.Character;
 using ITCompanySimulation.Core;
 using ITCompanySimulation.Project;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -8,7 +9,7 @@ namespace ITCompanySimulation.Company
 {
     /// <summary>
     /// This class handles updating state of company. It includes updating company's workers
-    /// state, charging money for company's expenses, etc.
+    /// state, scrum processes, charging money for company's expenses, etc.
     /// </summary>
     public class PlayerCompanyManager : MonoBehaviour
     {
@@ -42,6 +43,12 @@ namespace ITCompanySimulation.Company
         private List<LocalWorker> WorkersSatisfactionNotificationSent = new List<LocalWorker>();
 
         /*Public consts fields*/
+
+        /// <summary>
+        /// How often binded project should be updated.
+        /// This time is seconds in game time (scaled time)
+        /// </summary>
+        public const float PROJECT_UPDATE_FREQUENCY = 10f;
 
         /*Public fields*/
 
@@ -272,19 +279,34 @@ namespace ITCompanySimulation.Company
         private void OnCompanyWorkerSalaryChanged(SharedWorker worker)
         {
             LocalWorker companyWorker = (LocalWorker)worker;
-            CalculateSatisfactionSalaryRaise(companyWorker);
+            float satisfactionChange = CalculateSatisfactionSalaryRaise(companyWorker);
+            companyWorker.Satiscation += satisfactionChange;
+            //Satisfaction is percent value
+            companyWorker.Satiscation = Mathf.Clamp(companyWorker.Satiscation, 0f, 100f);
         }
 
         /// <summary>
         /// Calculates satisfaction based on salary change amount
         /// </summary>
-        private static void CalculateSatisfactionSalaryRaise(LocalWorker companyWorker)
+        private float CalculateSatisfactionSalaryRaise(LocalWorker companyWorker)
         {
+            //The greater is last salary change compared to overall salary of worker the greater is satisfaction level
             float satisfactionChange = companyWorker.LastSalaryChange / (float)(companyWorker.Salary - companyWorker.LastSalaryChange);
             satisfactionChange *= 100.0f;
-            companyWorker.Satiscation += satisfactionChange;
-            //Satisfaction is percent value
-            companyWorker.Satiscation = Mathf.Clamp(companyWorker.Satiscation, 0.0f, 100.0f);
+            return satisfactionChange;
+        }
+
+        private IEnumerator UpdateCompanyProjectsCoroutine()
+        {
+            while (true == SimulationManagerComponent.IsSimulationActive)
+            {
+                yield return new WaitForSeconds(PROJECT_UPDATE_FREQUENCY);
+
+                foreach (Scrum scrumInstance in SimulationManagerComponent.ControlledCompany.ScrumProcesses)
+                {
+                    scrumInstance.UpdateProgress();
+                }
+            }
         }
 
         private void OnCompanyWorkerRemoved(LocalWorker removedWorker)
@@ -314,8 +336,10 @@ namespace ITCompanySimulation.Company
             {
                 companyWorker.SalaryChanged += OnCompanyWorkerSalaryChanged;
             }
+
+            SimulationManagerComponent.SimulationStarted += () => { StartCoroutine(UpdateCompanyProjectsCoroutine()); };
         }
 
         /*Public methods*/
-    } 
+    }
 }

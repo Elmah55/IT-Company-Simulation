@@ -16,11 +16,6 @@ namespace ITCompanySimulation.Company
 
         /*Private fields*/
 
-        /// <summary>
-        /// Game object that is used as placeholder for
-        /// scripts used in game
-        /// </summary>
-        private GameObject ScriptsGameObject;
         private SafeInt m_Balance;
 
         /*Public consts fields*/
@@ -74,20 +69,17 @@ namespace ITCompanySimulation.Company
 
         /*Public methods*/
 
-        public PlayerCompany(string name, GameObject scriptsGameObject) : base(name)
+        public PlayerCompany(string name) : base(name)
         {
             Workers = new List<LocalWorker>();
             ScrumProcesses = new List<Scrum>();
-            this.ScriptsGameObject = scriptsGameObject;
         }
 
         public void AddProject(LocalProject projectToAdd)
         {
-            //Scrum instance for project that will be added
-            Scrum projectScrum = (Scrum)ScriptsGameObject.AddComponent(typeof(Scrum));
-            projectScrum.BindedProject = projectToAdd;
-            ScrumProcesses.Add(projectScrum);
-            ProjectAdded?.Invoke(projectScrum);
+            Scrum newScrum = new Scrum(projectToAdd);
+            ScrumProcesses.Add(newScrum);
+            ProjectAdded?.Invoke(newScrum);
 
 #if DEVELOPMENT_BUILD || UNITY_EDITOR
             string debugInfo = string.Format("[{3}] Project added to company\nName {0}\nID {1}\nComplete bonus {2}",

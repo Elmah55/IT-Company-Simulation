@@ -114,7 +114,6 @@ namespace ITCompanySimulation.Core
             GameTimeComponent = GetComponent<GameTime>();
             NotificatorComponent = new SimulationEventNotificator(GameTimeComponent);
             Stats = new SimulationStats();
-
             CreateCompany();
         }
 
@@ -143,7 +142,7 @@ namespace ITCompanySimulation.Core
 
         private void CreateCompany()
         {
-            ControlledCompany = new PlayerCompany(PlayerInfoSettings.CompanyName, gameObject);
+            ControlledCompany = new PlayerCompany(PlayerInfoSettings.CompanyName);
 
             ControlledCompany.WorkerAdded += OnControlledCompanyWorkerAdded;
             ControlledCompany.WorkerRemoved += OnControlledCompanyWorkerRemoved;

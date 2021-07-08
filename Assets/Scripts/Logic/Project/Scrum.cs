@@ -1,7 +1,7 @@
 ﻿using ITCompanySimulation.Character;
+using ITCompanySimulation.Company;
 using ITCompanySimulation.Core;
 using System;
-using System.Collections;
 using UnityEngine;
 
 namespace ITCompanySimulation.Project
@@ -11,15 +11,10 @@ namespace ITCompanySimulation.Project
     /// It takes care of updating the binded project as the simulation is ongoing
     /// as well as keeping track of scrum statistics
     /// </summary>
-    public class Scrum : MonoBehaviour
+    public class Scrum
     {
         /*Private consts fields*/
 
-        /// <summary>
-        /// How often binded project should be updated.
-        /// This time is seconds in game time (scaled time)
-        /// </summary>
-        private const float PROJECT_UPDATE_FREQUENCY = 10.0f;
         /// <summary>
         /// How much ability value should be added to worker during
         /// one update
@@ -35,7 +30,6 @@ namespace ITCompanySimulation.Project
         /// How many days since start of current sprint
         /// </summary>
         private int CurrentSprintDays;
-        private Coroutine ProjectUpdateCoroutine;
         private SprintStage m_CurrentSprintStage;
         private int m_SprintNumber = 1;
         private LocalProject m_BindedProject;
@@ -47,33 +41,7 @@ namespace ITCompanySimulation.Project
         /// <summary>
         /// Project binded to this instance of scrum
         /// </summary>
-        public LocalProject BindedProject
-        {
-            get
-            {
-                return m_BindedProject;
-            }
-
-            set
-            {
-                if (value != m_BindedProject)
-                {
-                    if (null != m_BindedProject)
-                    {
-                        throw new InvalidOperationException("Project can be assigned only once");
-                    }
-
-                    m_BindedProject = value;
-                    BindedProject.Completed += OnProjectFinished;
-                    BindedProject.TimeOfStart = GameTimeComponent.CurrentTime;
-                    BindedProject.WorkerRemoved += OnBindedProjectWorkerRemoved;
-                    BindedProject.WorkerAdded += OnBindedProjectWorkerAdded;
-                    GameTimeComponent.DayChanged += OnGameTimeDayChanged;
-                }
-            }
-        }
-
-
+        public LocalProject BindedProject { get; private set; }
         /// <summary>
         /// Number of sprint sprint is currently in progress
         /// </summary>
@@ -167,21 +135,8 @@ namespace ITCompanySimulation.Project
             BindedProject.Progress += CalculateProjectProgress();
         }
 
-        private IEnumerator UpdateProject()
-        {
-            while (true)
-            {
-                yield return new WaitForSeconds(PROJECT_UPDATE_FREQUENCY);
-
-                UpdateProjectWorkersAbilites();
-                UpdateBindedProject();
-            }
-        }
-
         private void OnProjectFinished(LocalProject finishedProject)
         {
-            StopCoroutine(ProjectUpdateCoroutine);
-
             for (int i = BindedProject.Workers.Count - 1; i >= 0; i--)
             {
                 BindedProject.RemoveWorker(BindedProject.Workers[i]);
@@ -198,15 +153,9 @@ namespace ITCompanySimulation.Project
 #endif
         }
 
-        private void Awake()
-        {
-            GameTimeComponent = GetComponent<GameTime>();
-            SimulationManagerComponent = GetComponent<SimulationManager>();
-        }
-
         private void OnBindedProjectWorkerAdded(SharedWorker worker)
         {
-            if (BindedProject.Workers.Count > 0 && false == BindedProject.Active && false == BindedProject.IsCompleted)
+            if (BindedProject.Workers.Count > 0 && false == BindedProject.IsActive && false == BindedProject.IsCompleted)
             {
                 StartProject();
             }
@@ -214,7 +163,7 @@ namespace ITCompanySimulation.Project
 
         private void OnBindedProjectWorkerRemoved(SharedWorker worker)
         {
-            if (0 == BindedProject.Workers.Count && true == BindedProject.Active)
+            if (0 == BindedProject.Workers.Count && true == BindedProject.IsActive)
             {
                 StopProject();
             }
@@ -268,7 +217,7 @@ namespace ITCompanySimulation.Project
                 BindedProject.DaysSinceStart++;
             }
 
-            if (true == BindedProject.Active)
+            if (true == BindedProject.IsActive)
             {
                 UpdateProjectWorkersExpierience();
                 UpdateSprint();
@@ -278,6 +227,31 @@ namespace ITCompanySimulation.Project
         }
 
         /*Public methods*/
+
+        /// <param name="bindedProject">Instance of project associated with this scrum instance</param>
+        public Scrum(LocalProject bindedProject)
+        {
+            //Game object containing scripts
+            GameObject scriptsObject = GameObject.FindGameObjectWithTag("ScriptsGameObject");
+            SimulationManagerComponent = scriptsObject.GetComponent<SimulationManager>();
+            GameTimeComponent = scriptsObject.GetComponent<GameTime>();
+
+            this.BindedProject = bindedProject;
+            this.BindedProject.Completed += OnProjectFinished;
+            this.BindedProject.TimeOfStart = GameTimeComponent.CurrentTime;
+            this.BindedProject.WorkerRemoved += OnBindedProjectWorkerRemoved;
+            this.BindedProject.WorkerAdded += OnBindedProjectWorkerAdded;
+            GameTimeComponent.DayChanged += OnGameTimeDayChanged;
+        }
+
+        public void UpdateProgress()
+        {
+            if (true == BindedProject.IsActive)
+            {
+                UpdateProjectWorkersAbilites();
+                UpdateBindedProject();
+            }
+        }
 
         public void StartProject()
         {
@@ -292,18 +266,16 @@ namespace ITCompanySimulation.Project
             }
 
             BindedProject.Start();
-            ProjectUpdateCoroutine = StartCoroutine(UpdateProject());
         }
 
         public void StopProject()
         {
             BindedProject.Stop();
-            StopCoroutine(ProjectUpdateCoroutine);
         }
 
         /// <summary>
-        /// Returns number of estimated days (game time) needed to complete binded project
-        /// Returns -1 if estimated time is infinity
+        /// Returns number of estimated days (game time) needed to complete binded project.
+        /// Returns -1 if estimated time is infinity.
         /// </summary>
         public int GetProjectEstimatedCompletionTime()
         {
@@ -315,14 +287,13 @@ namespace ITCompanySimulation.Project
             if (0 != projSingleUpdateProgress)
             {
                 secondsToCompletion /= projSingleUpdateProgress;
-                secondsToCompletion *= PROJECT_UPDATE_FREQUENCY;
+                secondsToCompletion *= PlayerCompanyManager.PROJECT_UPDATE_FREQUENCY;
                 daysToCompletionGameTime = Mathf.RoundToInt(secondsToCompletion / GameTime.SecondsInDay);
             }
             else
             {
                 daysToCompletionGameTime = -1;
             }
-
 
             return daysToCompletionGameTime;
         }
