@@ -320,6 +320,16 @@ namespace ITCompanySimulation.Core
                 PhotonNetwork.JoinOrCreateRoom("Default", options, PhotonNetwork.lobby);
             }
 
+#if DEVELOPMENT_BUILD || UNITY_EDITOR
+            if (SimulationSettings.InitialBalance <= SimulationSettings.MinimalBalance)
+            {
+                Debug.LogWarningFormat("[{0}] Initial balance ({1} $) is smaller than or equal to minimal balance ({2} $)",
+                                       this.GetType().Name,
+                                       SimulationSettings.InitialBalance,
+                                       SimulationSettings.MinimalBalance);
+            }
+#endif
+
             if (true == PhotonNetwork.isMasterClient)
             {
                 PhotonNetwork.room.IsOpen = false;

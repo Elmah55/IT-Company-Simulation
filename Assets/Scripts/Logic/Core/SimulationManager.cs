@@ -179,22 +179,25 @@ namespace ITCompanySimulation.Core
                 Stats.MoneySpent += Mathf.Abs(balanceDelta);
             }
 
-            if (newBalance >= SimulationSettings.TargetBalance)
+            if (true == IsSimulationActive)
             {
-                this.photonView.RPC("FinishSimulationRPC",
-                                    PhotonTargets.All,
-                                    PhotonNetwork.player.ID,
-                                    (int)SimulationFinishReason.PlayerCompanyReachedTargetBalance);
-            }
-            else if (newBalance <= SimulationSettings.MinimalBalance)
-            {
-                SimulationFinishReason finishReason = SimulationFinishReason.PlayerCompanyReachedMinimalBalance;
+                if (newBalance >= SimulationSettings.TargetBalance)
+                {
+                    this.photonView.RPC("FinishSimulationRPC",
+                                        PhotonTargets.AllViaServer,
+                                        PhotonNetwork.player.ID,
+                                        (int)SimulationFinishReason.PlayerCompanyReachedTargetBalance);
+                }
+                else if (newBalance <= SimulationSettings.MinimalBalance)
+                {
+                    SimulationFinishReason finishReason = SimulationFinishReason.PlayerCompanyReachedMinimalBalance;
 
-                this.photonView.RPC("OnOtherPlayerControlledCompanyMinimalBalanceReachedRPC",
-                                    PhotonTargets.Others,
-                                    PhotonNetwork.player.ID);
+                    this.photonView.RPC("OnOtherPlayerControlledCompanyMinimalBalanceReachedRPC",
+                                        PhotonTargets.Others,
+                                        PhotonNetwork.player.ID);
 
-                FinishSimulationRPC(PhotonNetwork.player.ID, (int)finishReason);
+                    FinishSimulationRPC(PhotonNetwork.player.ID, (int)finishReason);
+                }
             }
         }
 
