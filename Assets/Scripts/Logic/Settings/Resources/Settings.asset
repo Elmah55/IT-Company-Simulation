@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5e1b584f59524f348a7bd833162069d6, type: 3}
   m_Name: Settings
   m_EditorClassIdentifier: 
-  UseRoom: 0
+  UseRoom: 1
   OfflineMode: 0
   TargetBalance: 618025
-  InitialBalance: 20000
-  MinimalBalance: 43686
+  InitialBalance: 153588
+  MinimalBalance: 279237
