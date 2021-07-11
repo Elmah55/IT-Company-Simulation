@@ -6,6 +6,7 @@ namespace ITCompanySimulation.UI
     /// <summary>
     /// Resizes control to match text size
     /// </summary>
+    [ExecuteAlways]
     public class ControlTextFitter : MonoBehaviour
     {
         /*Private consts fields*/
