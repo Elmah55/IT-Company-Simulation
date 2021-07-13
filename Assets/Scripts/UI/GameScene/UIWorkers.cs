@@ -35,16 +35,16 @@ namespace ITCompanySimulation.UI
             {
                 MousePointerEvents mousePtrEvt = element.gameObject.AddComponent<MousePointerEvents>();
 
-                mousePtrEvt.PointerEntered += () =>
-                {
-                    tooltipComponent.gameObject.SetActive(true);
-                    tooltipComponent.Text = GetWorkerAbilitiesString(worker);
-                };
+                mousePtrEvt.PointerEntered.AddListener(() =>
+               {
+                   tooltipComponent.gameObject.SetActive(true);
+                   tooltipComponent.Text = GetWorkerAbilitiesString(worker);
+               });
 
-                mousePtrEvt.PointerExited += () =>
-                {
-                    tooltipComponent.gameObject.SetActive(false);
-                };
+                mousePtrEvt.PointerExited.AddListener(() =>
+               {
+                   tooltipComponent.gameObject.SetActive(false);
+               });
             }
 
             element.Text.text = GetWorkerListViewElementText(worker);

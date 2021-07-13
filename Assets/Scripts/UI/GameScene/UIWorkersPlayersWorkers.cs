@@ -243,13 +243,13 @@ namespace ITCompanySimulation.UI
             if (listView == ListViewOtherPlayersWorkers)
             {
                 MousePointerEvents mouseEvts = element.GetComponent<MousePointerEvents>();
-                mouseEvts.PointerDoubleClick += () =>
-                {
-                    if (true == SimulationManagerComponent.ControlledCompany.CanHireWorker)
-                    {
-                        OnButtonHireWorkerClick();
-                    }
-                };
+                mouseEvts.PointerDoubleClick.AddListener(() =>
+               {
+                   if (true == SimulationManagerComponent.ControlledCompany.CanHireWorker)
+                   {
+                       OnButtonHireWorkerClick();
+                   }
+               });
             }
 
             WorkerListViewMap.Add(playerWorker, element);

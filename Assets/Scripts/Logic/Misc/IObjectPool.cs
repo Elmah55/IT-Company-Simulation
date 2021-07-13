@@ -21,9 +21,9 @@ namespace ITCompanySimulation.Utilities
         /*Public methods*/
 
         /// <summary>
-        /// Gets object from pool
+        /// Gets object from pool. Returns object if at least one object is in the pool.
+        /// Returns null if there are no objects in pool.
         /// </summary>
-        /// <returns>Object if at least one object is in the pool. Null if there are no objects in pool</returns>
         T GetObject();
         /// <summary>
         /// Adds object to the pool

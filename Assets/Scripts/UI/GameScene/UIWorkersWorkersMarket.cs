@@ -228,14 +228,14 @@ namespace ITCompanySimulation.UI
             Button buttonComponent = element.GetComponent<Button>();
             MousePointerEvents mousePtrEvts = element.GetComponent<MousePointerEvents>();
 
-            mousePtrEvts.PointerDoubleClick += () =>
-                {
-                    if (listView == ListViewMarketWorkers
-                          && true == SimulationManagerComponent.ControlledCompany.CanHireWorker)
-                    {
-                        OnHireWorkerButtonClicked();
-                    }
-                };
+            mousePtrEvts.PointerDoubleClick.AddListener(() =>
+               {
+                   if (listView == ListViewMarketWorkers
+                         && true == SimulationManagerComponent.ControlledCompany.CanHireWorker)
+                   {
+                       OnHireWorkerButtonClicked();
+                   }
+               });
 
             if (null == WorkerListViewMap)
             {

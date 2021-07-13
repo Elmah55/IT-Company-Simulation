@@ -152,10 +152,10 @@ namespace ITCompanySimulation.UI
             ListViewElementProject newElement = CreateListViewElement(proj);
             MousePointerEvents mousePtrEvts = newElement.GetComponent<MousePointerEvents>();
 
-            mousePtrEvts.PointerDoubleClick += () =>
-              {
-                  OnButtonTakeProjectClicked();
-              };
+            mousePtrEvts.PointerDoubleClick.AddListener(() =>
+             {
+                 OnButtonTakeProjectClicked();
+             });
 
             ButtonSelectorProjects.AddButton(newElement.Button);
             ListViewMarketProjects.AddControl(newElement.gameObject);

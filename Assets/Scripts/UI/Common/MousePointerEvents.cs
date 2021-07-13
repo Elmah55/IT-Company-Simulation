@@ -20,39 +20,29 @@ namespace ITCompanySimulation.UI
 
         /*Public fields*/
 
-        public event UnityAction PointerEntered;
-        public event UnityAction PointerExited;
-        public event UnityAction PointerDoubleClick;
+        public UnityEvent PointerEntered = new UnityEvent();
+        public UnityEvent PointerExited = new UnityEvent();
+        public UnityEvent PointerDoubleClick = new UnityEvent();
 
         /*Private methods*/
 
         /*Public methods*/
 
-        /// <summary>
-        /// Removes all listeners of all events
-        /// </summary>
-        public void RemoveAllListeners()
-        {
-            PointerEntered = null;
-            PointerExited = null;
-            PointerDoubleClick = null;
-        }
-
         public void OnPointerEnter(PointerEventData eventData)
         {
-            PointerEntered?.Invoke();
+            PointerEntered.Invoke();
         }
 
         public void OnPointerExit(PointerEventData eventData)
         {
-            PointerExited?.Invoke();
+            PointerExited.Invoke();
         }
 
         public void OnPointerClick(PointerEventData eventData)
         {
             if (2 == eventData.clickCount)
             {
-                PointerDoubleClick?.Invoke();
+                PointerDoubleClick.Invoke();
             }
         }
     }

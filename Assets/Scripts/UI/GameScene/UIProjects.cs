@@ -80,18 +80,18 @@ namespace ITCompanySimulation.UI
         /// </summary>
         protected void SubscribeToMouseEventPointers(MousePointerEvents events, SharedProject proj, Tooltip tooltipComponent)
         {
-            events.PointerEntered += () =>
-            {
-                tooltipComponent.gameObject.SetActive(true);
-                string tooltipText = string.Format("Used technologies:\n{0}",
-                    GetProjectTechnologiesString(proj));
-                tooltipComponent.Text = tooltipText;
-            };
+            events.PointerEntered.AddListener(() =>
+           {
+               tooltipComponent.gameObject.SetActive(true);
+               string tooltipText = string.Format("Used technologies:\n{0}",
+                   GetProjectTechnologiesString(proj));
+               tooltipComponent.Text = tooltipText;
+           });
 
-            events.PointerExited += () =>
+            events.PointerExited.AddListener(() =>
             {
                 tooltipComponent.gameObject.SetActive(false);
-            };
+            });
         }
 
         protected ListViewElementProject CreateListViewElement(SharedProject proj)
@@ -112,7 +112,8 @@ namespace ITCompanySimulation.UI
             else
             {
                 MousePointerEvents events = newElement.GetComponent<MousePointerEvents>();
-                events.RemoveAllListeners();
+                events.PointerEntered.RemoveAllListeners();
+                events.PointerExited.RemoveAllListeners();
                 SubscribeToMouseEventPointers(events, proj, TooltipComponent);
             }
 
