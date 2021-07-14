@@ -102,7 +102,7 @@ public class CameraController : MonoBehaviour
             CameraComponent.transform.Translate(LastCameraDirection);
         }
 
-        if (true == Input.GetMouseButton(RIGHT_MOUSE_BUTTON) && true == Utils.MouseInsideScreen())
+        if (true == Input.GetMouseButton(RIGHT_MOUSE_BUTTON))
         {
             Vector2 mouseMovement = (Vector2)Input.mousePosition - LastMousePosition;
             mouseMovement *= (CameraMovementSpeed / 100f) * CameraComponent.orthographicSize;
@@ -190,9 +190,9 @@ public class CameraController : MonoBehaviour
     /// </summary>
     private bool GetCameraControlActive()
     {
-        bool result = true;
+        bool result = Utils.MouseInsideScreen();
 
-        if (-1 != DontDisableCameraControlLayer)
+        if (-1 != DontDisableCameraControlLayer && true == result)
         {
             PointerEventData data = new PointerEventData(EventSystem.current);
             data.position = Input.mousePosition;
