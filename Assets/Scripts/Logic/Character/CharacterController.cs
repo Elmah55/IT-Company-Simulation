@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using ITCompanySimulation.Render;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace ITCompanySimulation.Character

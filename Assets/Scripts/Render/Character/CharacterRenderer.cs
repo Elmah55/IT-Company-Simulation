@@ -1,6 +1,7 @@
-﻿using UnityEngine;
+﻿using ITCompanySimulation.Character;
+using UnityEngine;
 
-namespace ITCompanySimulation.Character
+namespace ITCompanySimulation.Render
 {
     /// <summary>
     /// Renders character in the game world
