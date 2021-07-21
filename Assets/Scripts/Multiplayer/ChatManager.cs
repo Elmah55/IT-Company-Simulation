@@ -25,6 +25,7 @@ namespace ITCompanySimulation.Multiplayer
 
         public bool IsConnected { get; private set; }
         public event PhotonChatMessageAction MessageReceived;
+        public event PhotonChatMessageAction PrivateMessageReceived;
         public event UnityAction Connected;
         public event UnityAction Disconnected;
 
@@ -63,6 +64,28 @@ namespace ITCompanySimulation.Multiplayer
                                  Channel);
                 }
 #endif
+            }
+
+            return result;
+        }
+
+        public bool SendPrivateChatMessage(string targetPlayerNickname, string msg)
+        {
+            bool result = false;
+
+            if (null != Client)
+            {
+                result = Client.SendPrivateMessage(targetPlayerNickname, msg);
+
+#if DEVELOPMENT_BUILD || UNITY_EDITOR
+                if (false == result)
+                {
+                    Debug.LogErrorFormat("[{0}] Failed to send private message. Channel: {1} Target player: {2}",
+                                         this.GetType().Name,
+                                         Channel,
+                                         targetPlayerNickname);
+                }
+#endif 
             }
 
             return result;
@@ -118,8 +141,7 @@ namespace ITCompanySimulation.Multiplayer
 
         public void OnPrivateMessage(string sender, object message, string channelName)
         {
-            //TODO: Implement private messeage trough using commands in chat
-            //Example: /msg Player123 Hello!
+            PrivateMessageReceived?.Invoke(sender, message.ToString());
         }
 
         public void OnStatusUpdate(string user, int status, bool gotMessage, object message) { }
