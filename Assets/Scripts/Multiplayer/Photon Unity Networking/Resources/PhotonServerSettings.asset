@@ -29,6 +29,8 @@ MonoBehaviour:
   RunInBackground: 1
   RpcList:
   - Chat
+  - ClearProjectsRPC
+  - ClearWorkersRPC
   - DestroyRpc
   - FinishSimulationRPC
   - InstantiateRpc
@@ -39,8 +41,14 @@ MonoBehaviour:
   - OnOtherPlayerDataSentRPC
   - OnProjectAddedRPC
   - OnProjectRemovedRPC
+  - OnProjectRequestCfmRPC
+  - OnProjectRequestRPC
+  - OnProjectsGeneratedRPC
   - OnWorkerAddedRPC
   - OnWorkerRemovedRPC
+  - OnWorkerRequestCfmRPC
+  - OnWorkerRequestRPC
+  - OnWorkersGeneratedRPC
   - PickupItemInit
   - PunPickup
   - PunPickupSimple
@@ -53,12 +61,4 @@ MonoBehaviour:
   - SetTimeRPC
   - StartGameInternalRPC
   - StartSessionRPC
-  - TruncateProjectsRPC
-  - TruncateWorkersRPC
-  - ClearProjectsRPC
-  - OnProjectRequestCfmRPC
-  - OnProjectRequestRPC
-  - ClearWorkersRPC
-  - OnWorkerRequestCfmRPC
-  - OnWorkerRequestRPC
   DisableAutoOpenWizard: 1

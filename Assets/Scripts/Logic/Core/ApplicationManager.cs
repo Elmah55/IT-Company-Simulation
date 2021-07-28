@@ -105,11 +105,11 @@ namespace ITCompanySimulation.Core
 
             Settings = Resources.Load<SettingsObject>("Settings");
 
-            //Register custom classes that will be sent between clients
+            //Register custom classes that will be sent between clients.
             PhotonPeer.RegisterType(typeof(SharedProject), NetworkingData.PROJECT_BYTE_CODE, SharedProject.Serialize, SharedProject.Deserialize);
             PhotonPeer.RegisterType(typeof(PlayerData), NetworkingData.PLAYER_DATA_BYTE_CODE, PlayerData.Serialize, PlayerData.Deserialize);
             //Needed to register both base and derived class of worker because photon API requires
-            //derived class to be register event when using base class argument in method
+            //derived class to be registered even when using base class as argument in method.
             PhotonPeer.RegisterType(typeof(LocalWorker), NetworkingData.LOCAL_WORKER_BYTE_CODE, SharedWorker.Serialize, SharedWorker.Deserialize);
             PhotonPeer.RegisterType(typeof(SharedWorker), NetworkingData.SHARED_WORKER_BYTE_CODE, SharedWorker.Serialize, SharedWorker.Deserialize);
 

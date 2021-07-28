@@ -256,11 +256,8 @@ namespace ITCompanySimulation.Character
         private void GenerateAndSendWorkers()
         {
             GenerateWorkers();
-
-            foreach (var worker in Workers)
-            {
-                this.photonView.RPC("OnWorkerAddedRPC", PhotonTargets.Others, worker.Value);
-            }
+            SharedWorker[] generatedWorkers = Workers.Values.ToArray();
+            this.photonView.RPC("OnWorkersGeneratedRPC", PhotonTargets.Others, generatedWorkers);
         }
 
         private void OnGameTimeDayChanged()
@@ -277,13 +274,18 @@ namespace ITCompanySimulation.Character
             }
         }
 
+        /// <summary>
+        /// Called when master client has generated workers in the market
+        /// at the beggining of simulation.
+        /// </summary>
         [PunRPC]
-        public void OnWorkerAddedRPC(SharedWorker workerToAdd)
+        public void OnWorkersGeneratedRPC(SharedWorker[] generatedWorkers)
         {
-            //TODO: Investigate issue. When array of workers is passed
-            //as argument here photon network issue occurs
-            this.Workers.Add(workerToAdd.ID, workerToAdd);
-            this.WorkerAdded?.Invoke(workerToAdd);
+            foreach (SharedWorker worker in generatedWorkers)
+            {
+                this.Workers.Add(worker.ID, worker);
+                this.WorkerAdded?.Invoke(worker);
+            }
 
             if (false == PhotonNetwork.isMasterClient && false == IsDataReceived)
             {
@@ -293,6 +295,13 @@ namespace ITCompanySimulation.Character
                     DataReceived?.Invoke();
                 }
             }
+        }
+
+        [PunRPC]
+        public void OnWorkerAddedRPC(SharedWorker workerToAdd)
+        {
+            this.Workers.Add(workerToAdd.ID, workerToAdd);
+            this.WorkerAdded?.Invoke(workerToAdd);
         }
 
         [PunRPC]

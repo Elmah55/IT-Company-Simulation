@@ -159,12 +159,14 @@ namespace ITCompanySimulation.Project
                 className, MaxProjectsOnMarket - Projects.Count);
             Debug.Log(debugInfo);
 #endif
+            SharedProject[] generatedProjects = new SharedProject[MaxProjectsOnMarket];
 
-            while (MaxProjectsOnMarket > Projects.Count)
+            for (int i = 0; i < MaxProjectsOnMarket; i++)
             {
-                SharedProject newProject = GenerateSingleProject();
-                this.photonView.RPC("OnProjectAddedRPC", PhotonTargets.All, newProject);
+                generatedProjects[i] = GenerateSingleProject();
             }
+
+            this.photonView.RPC("OnProjectsGeneratedRPC", PhotonTargets.All, generatedProjects);
 
 #if DEVELOPMENT_BUILD || UNITY_EDITOR
             debugInfo = string.Format("[{0}] generated {1} projects",
@@ -192,11 +194,18 @@ namespace ITCompanySimulation.Project
             return projectTechnologies;
         }
 
+        /// <summary>
+        /// Called when master client has generated projects in market at the
+        /// beggining of simulation.
+        /// </summary>
         [PunRPC]
-        private void OnProjectAddedRPC(SharedProject projectToAdd)
+        private void OnProjectsGeneratedRPC(SharedProject[] generatedProjects)
         {
-            Projects.Add(projectToAdd.ID, projectToAdd);
-            ProjectAdded?.Invoke(projectToAdd);
+            foreach (SharedProject proj in generatedProjects)
+            {
+                Projects.Add(proj.ID, proj);
+                ProjectAdded?.Invoke(proj);
+            }
 
             if (false == PhotonNetwork.isMasterClient && false == IsDataReceived)
             {
@@ -206,6 +215,13 @@ namespace ITCompanySimulation.Project
                     DataReceived?.Invoke();
                 }
             }
+        }
+
+        [PunRPC]
+        private void OnProjectAddedRPC(SharedProject projectToAdd)
+        {
+            Projects.Add(projectToAdd.ID, projectToAdd);
+            ProjectAdded?.Invoke(projectToAdd);
         }
 
         /// <summary>
