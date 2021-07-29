@@ -3,7 +3,7 @@
     /// <summary>
     /// Object that can be identified by unique ID
     /// </summary>
-    public class IdentifiableObject
+    public abstract class IdentifiableObject
     {
         /*Private consts fields*/
 

@@ -72,6 +72,8 @@ namespace ITCompanySimulation.UI
             ProjectsMarketComponent.ProjectRemoved += OnProjectsMarketProjectRemoved;
             ButtonSelectorProjects.SelectedButtonChanged += OnButtonSelectorProjectsSelectedButtonChanged;
 
+            ButtonTakeProject.interactable = false;
+
             SetProjectInfoText(SelectedProject);
         }
 
@@ -95,7 +97,14 @@ namespace ITCompanySimulation.UI
 
         private void SetProjectMarketButton()
         {
-            ButtonTakeProject.interactable = SelectedProject is SharedProject;
+            if (null != SelectedProject)
+            {
+                ButtonTakeProject.interactable = (false == (SelectedProject is LocalProject));
+            }
+            else
+            {
+                ButtonTakeProject.interactable = false;
+            }
         }
 
         private void SetListViewMarketProjectsText()
