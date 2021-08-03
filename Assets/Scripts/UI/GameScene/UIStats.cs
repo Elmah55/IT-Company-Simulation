@@ -1,65 +1,147 @@
 ﻿using UnityEngine;
-using ITCompanySimulation.Core;
 using TMPro;
+using ITCompanySimulation.Core;
+using ITCompanySimulation.UI;
+using UnityEngine.UI;
 
-namespace ITCompanySimulation.UI
+public class UIStats : Photon.PunBehaviour
 {
-    public class UIStats : MonoBehaviour
+    /*Private consts fields*/
+
+    /*Private fields*/
+
+    [SerializeField]
+    private TextMeshProUGUI TextOtherPlayerStats;
+    [SerializeField]
+    private TextMeshProUGUI TextThisPlayerStats;
+    [SerializeField]
+    private TextMeshProUGUI TextOtherPlayerStatsTitle;
+    [SerializeField]
+    private ListViewElementPhotonPlayer PlayerListListViewElementPrefab;
+    [SerializeField]
+    private ControlListView PlayerListListView;
+    private SimulationManager SimulationManagerComponent;
+    private IButtonSelector ButtonSelectorPlayerList = new ButtonSelector();
+    /// <summary>
+    /// Player that is currently selected form players' list view.
+    /// Null if none player is selected.
+    /// </summary>
+    private PhotonPlayer SelectedPlayer;
+
+    /*Public consts fields*/
+
+    /*Public fields*/
+
+    /*Private methods*/
+
+    /// <summary>
+    /// Returns string with simulation statistics listed.
+    /// </summary>
+    private string GetStatsTxt(SharedSimulationStats stats)
     {
-        /*Private consts fields*/
+        string statsTxt = string.Format(
+                            "Money earned: {0} $\n" +
+                            "Money spent: {1} $\n" +
+                            "Workers hired: {2}\n" +
+                            "Other players' workers hired: {3}\n" +
+                            "Workers that left company: {4}\n" +
+                            "Projects completed: {5}\n" +
+                            "Balance: {6} $",
+                            stats.MoneyEarned,
+                            stats.MoneySpent,
+                            stats.WorkersHired,
+                            stats.OtherPlayersWorkersHired,
+                            stats.WorkersLeftCompany,
+                            stats.ProjectsCompleted,
+                            stats.CompanyBalance);
 
-        /*Private fields*/
+        return statsTxt;
+    }
 
-        private ApplicationManager ApplicationManagerComponent;
-        [SerializeField]
-        private SimulationManager SimulationManagerComponent;
-        [SerializeField]
-        private InfoWindow InfoWindowComponent;
-        [SerializeField]
-        private TextMeshProUGUI TextStats;
+    /// <summary>
+    /// Called when stats of local player are updated.
+    /// </summary>
+    private void OnThisPlayerStatsUpdated()
+    {
+        TextThisPlayerStats.text = GetStatsTxt(SimulationManagerComponent.Stats);
+    }
 
-        /*Public consts fields*/
-
-        /*Public fields*/
-
-        /*Private methods*/
-
-        private void Awake()
+    /// <summary>
+    /// Called when stats of other player are updated.
+    /// </summary>
+    /// <param name="otherPlayer"></param>
+    private void OnOtherPlayerStatsUpdated(PhotonPlayer otherPlayer)
+    {
+        if (null != SelectedPlayer && SelectedPlayer.ID == otherPlayer.ID)
         {
-            ApplicationManagerComponent =
-                GameObject.FindGameObjectWithTag("ApplicationManager").GetComponent<ApplicationManager>();
-        }
-
-        private void OnEnable()
-        {
-            string statsString = string.Format(
-                "Simulation running time: {0}h {1}m\n" +
-                "Days since start: {2}\n" +
-                "Money earned: {3} $\n" +
-                "Money spent: {4} $\n" +
-                "Workers hired: {5}\n" +
-                "Other players' workers hired: {6}\n" +
-                "Workers that left company: {7}\n" +
-                "Projects completed: {8}",
-                SimulationManagerComponent.Stats.SimulationRunningTime.Hours,
-                SimulationManagerComponent.Stats.SimulationRunningTime.Minutes,
-                SimulationManagerComponent.Stats.DaysSinceStart,
-                SimulationManagerComponent.Stats.MoneyEarned,
-                SimulationManagerComponent.Stats.MoneySpent,
-                SimulationManagerComponent.Stats.WorkersHired,
-                SimulationManagerComponent.Stats.OtherPlayersWorkersHired,
-                SimulationManagerComponent.Stats.WorkersLeftCompany,
-                SimulationManagerComponent.Stats.ProjectsCompleted);
-
-            TextStats.text = statsString;
-        }
-
-        /*Public methods*/
-
-        public void OnContinueButtonClicked()
-        {
-            ApplicationManagerComponent.LoadScene(SceneIndex.Menu);
+            TextOtherPlayerStats.text =
+                GetStatsTxt(SimulationManagerComponent.PlayerDataMap[otherPlayer.ID].Stats);
+            TextOtherPlayerStatsTitle.text = string.Format("{0}'s stats", otherPlayer.NickName);
         }
     }
 
+    private void Awake()
+    {
+        SimulationManagerComponent =
+            GameObject.FindGameObjectWithTag("ScriptsGameObject").GetComponent<SimulationManager>();
+    }
+
+    private void Start()
+    {
+        SimulationManagerComponent.Stats.StatsUpdated += OnThisPlayerStatsUpdated;
+        ButtonSelectorPlayerList.SelectedButtonChanged += OnPlayerListSelectedButtonChanged;
+
+        foreach (var data in SimulationManagerComponent.PlayerDataMap)
+        {
+            data.Value.StatsUpdated += OnOtherPlayerStatsUpdated;
+        }
+
+        foreach (PhotonPlayer player in PhotonNetwork.otherPlayers)
+        {
+            ListViewElementPhotonPlayer newListViewElement =
+                GameObject.Instantiate(PlayerListListViewElementPrefab);
+            newListViewElement.Player = player;
+            newListViewElement.Text.text = player.NickName;
+            ButtonSelectorPlayerList.AddButton(newListViewElement.Button);
+            PlayerListListView.AddControl(newListViewElement.gameObject);
+        }
+
+        TextOtherPlayerStatsTitle.text = "Other player's stats";
+        //Init stats text so stats are displayed without waiting
+        //for update
+        OnThisPlayerStatsUpdated();
+    }
+
+    private void OnPlayerListSelectedButtonChanged(Button btn)
+    {
+        if (null != btn)
+        {
+            ListViewElementPhotonPlayer listViewElement = btn.GetComponent<ListViewElementPhotonPlayer>();
+            SelectedPlayer = listViewElement.Player;
+            OnOtherPlayerStatsUpdated(SelectedPlayer);
+        }
+        else
+        {
+            SelectedPlayer = null;
+        }
+    }
+
+    /*Public methods*/
+
+    public override void OnPhotonPlayerDisconnected(PhotonPlayer otherPlayer)
+    {
+        base.OnPhotonPlayerDisconnected(otherPlayer);
+
+        foreach (GameObject obj in PlayerListListView.Controls)
+        {
+            ListViewElementPhotonPlayer listViewElement =
+                obj.GetComponent<ListViewElementPhotonPlayer>();
+
+            if (listViewElement.Player.ID == otherPlayer.ID)
+            {
+                PlayerListListView.RemoveControl(obj);
+                break;
+            }
+        }
+    }
 }

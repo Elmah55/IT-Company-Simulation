@@ -38,12 +38,13 @@ MonoBehaviour:
   - OnControlledCompanyWorkerRemovedRPC
   - OnOtherPlayerCompanyWorkerAttirbuteChangedRPC
   - OnOtherPlayerControlledCompanyMinimalBalanceReachedRPC
-  - OnOtherPlayerDataSentRPC
+  - OnOtherPlayerDataReceivedRPC
   - OnProjectAddedRPC
   - OnProjectRemovedRPC
   - OnProjectRequestCfmRPC
   - OnProjectRequestRPC
   - OnProjectsGeneratedRPC
+  - OnSimulationStatsUpdateRPC
   - OnWorkerAddedRPC
   - OnWorkerRemovedRPC
   - OnWorkerRequestCfmRPC
