@@ -33,6 +33,13 @@ namespace ITCompanySimulation.Utilities
             private int CollectionNumberOfElements;
             private int LastElementIndex;
             private int FirstElementIndex;
+            public object Current
+            {
+                get
+                {
+                    return Collection[CurrentIndex];
+                }
+            }
 
             public Enumerator(T[] arr, int arrNumOfElements, int arrFirstElementIndex, int arrLastElementIndex)
             {
@@ -41,13 +48,6 @@ namespace ITCompanySimulation.Utilities
                 this.FirstElementIndex = arrFirstElementIndex;
                 this.CollectionNumberOfElements = arrNumOfElements;
 
-            }
-            public object Current
-            {
-                get
-                {
-                    return Collection[CurrentIndex];
-                }
             }
 
             public bool MoveNext()
@@ -105,7 +105,6 @@ namespace ITCompanySimulation.Utilities
                 return Size == InnerBuffer.Length;
             }
         }
-
         /// <summary>
         /// Number of elements in buffer.
         /// </summary>
@@ -181,6 +180,5 @@ namespace ITCompanySimulation.Utilities
         {
             return new Enumerator<T>(InnerBuffer, Size, FirstElementIndex, LastElementIndex);
         }
-
     }
 }

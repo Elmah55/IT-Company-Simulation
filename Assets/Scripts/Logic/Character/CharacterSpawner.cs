@@ -74,7 +74,7 @@ namespace ITCompanySimulation.Character
             }
 
             randomIndex = Random.Range(0, characterPrefabs.Length);
-            GameObject newCharacter = GameObject.Instantiate(characterPrefabs[randomIndex], spawnPos, Quaternion.identity);
+            GameObject newCharacter = GameObject.Instantiate(characterPrefabs[randomIndex], spawnPos, Quaternion.identity, transform);
 
             CharacterText textComponent = newCharacter.GetComponentInChildren<CharacterText>();
             textComponent.Text = string.Format("{0} {1}", companyWorker.Name, companyWorker.Surename);
@@ -94,9 +94,13 @@ namespace ITCompanySimulation.Character
             worker.PhysicalCharacter.gameObject.SetActive(true);
         }
 
-        private void Start()
+        private void Awake()
         {
             this.SimulationManagerComponent = GetComponent<SimulationManager>();
+        }
+
+        private void Start()
+        {
             SimulationManagerComponent.ControlledCompany.WorkerAdded += OnControlledCompanyWorkerAdded;
             SimulationManagerComponent.ControlledCompany.WorkerRemoved += OnControlledCompanyWorkerRemoved;
         }

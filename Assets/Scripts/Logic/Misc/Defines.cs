@@ -30,8 +30,9 @@ public enum ProjectTechnology
 /// </summary>
 public enum SceneIndex
 {
-    Menu = 0,
-    Game = 1
+    Base = 0,
+    Menu = 1,
+    Game = 2
 }
 
 /// <summary>

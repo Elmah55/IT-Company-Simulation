@@ -12,6 +12,7 @@ using ITCompanySimulation.Settings;
 using AudioSettings = ITCompanySimulation.Settings.AudioSettings;
 using System.Threading;
 using System.Globalization;
+using System.Collections.Generic;
 
 #if DEVELOPMENT_BUILD || UNITY_EDITOR
 using System.Reflection;
@@ -75,6 +76,7 @@ namespace ITCompanySimulation.Core
         /// Settings set in inspector
         /// </summary>
         private SettingsObject Settings;
+        private List<AsyncOperation> SceneLoadingOperations = new List<AsyncOperation>();
 
         /*Public consts fields*/
 
@@ -93,8 +95,12 @@ namespace ITCompanySimulation.Core
         /// True when session has started and is active
         /// </summary>
         public bool IsSessionActive { get; private set; }
+        public float SceneLoadingProgress { get; private set; }
         public event UnityAction ReconnectFailed;
         public event UnityAction SessionStarted;
+        public event UnityAction<Scene> SceneStartedLoading;
+        public event UnityAction<Scene> SceneFinishedLoading;
+        public event UnityAction<float> SceneLoadingProgressChanged;
 
         /*Private methods*/
 
@@ -121,7 +127,6 @@ namespace ITCompanySimulation.Core
             UseRoom = Settings.UseRoom;
             OfflineMode = Settings.OfflineMode;
 
-            DontDestroyOnLoad(this.gameObject);
             PhotonNetwork.offlineMode = this.OfflineMode;
             this.photonView.viewID = 1;
             //In PUN Classic, if the client does not set a UserId,
@@ -142,10 +147,14 @@ namespace ITCompanySimulation.Core
         {
             //Init other static classes
             AudioSettings.Load();
+
+            LoadScene(SceneIndex.Menu);
         }
 
         private void OnSceneLoaded(Scene loadedScene, LoadSceneMode sceneLoadMode)
         {
+            SceneFinishedLoading?.Invoke(loadedScene);
+
             if ((int)SceneIndex.Game == loadedScene.buildIndex)
             {
                 //Clear event listeners to avoid problems when game scene is loaded again
@@ -307,6 +316,35 @@ namespace ITCompanySimulation.Core
             TryStartSession();
         }
 
+        private IEnumerator LoadSceneAsync()
+        {
+            foreach (AsyncOperation operation in SceneLoadingOperations)
+            {
+                while (false == operation.isDone)
+                {
+                    float loadingProgress = 0f;
+
+                    foreach (AsyncOperation asyncOperation in SceneLoadingOperations)
+                    {
+                        loadingProgress += asyncOperation.progress;
+                    }
+
+                    loadingProgress /= SceneLoadingOperations.Count;
+                    loadingProgress *= 100f;
+
+                    if (loadingProgress != SceneLoadingProgress)
+                    {
+                        SceneLoadingProgress = loadingProgress;
+                        SceneLoadingProgressChanged?.Invoke(SceneLoadingProgress);
+                    }
+
+                    yield return null;
+                }
+            }
+
+            SceneLoadingOperations.Clear();
+        }
+
         /*Public methods*/
 
         public void StartGame()
@@ -353,9 +391,23 @@ namespace ITCompanySimulation.Core
 
         public void LoadScene(SceneIndex index)
         {
-            if (SceneManager.GetActiveScene().buildIndex != (int)index)
+            int intIndex = (int)index;
+            Scene activeScene = SceneManager.GetActiveScene();
+
+            if (activeScene.buildIndex != intIndex)
             {
-                SceneManager.LoadScene((int)index);
+                SceneLoadingProgress = 0f;
+                SceneStartedLoading?.Invoke(activeScene);
+
+                //Do not try to unload previous scene at application start when no previous scene was loaded
+                if (SceneManager.sceneCount > 1)
+                {
+                    SceneIndex sceneToUnload = (SceneIndex.Menu == index) ? SceneIndex.Game : SceneIndex.Menu;
+                    SceneLoadingOperations.Add(SceneManager.UnloadSceneAsync((int)sceneToUnload));
+                }
+
+                SceneLoadingOperations.Add(SceneManager.LoadSceneAsync(intIndex, LoadSceneMode.Additive));
+                StartCoroutine(LoadSceneAsync());
             }
         }
 
