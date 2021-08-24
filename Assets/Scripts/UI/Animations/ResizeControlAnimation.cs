@@ -62,7 +62,7 @@ namespace ITCompanySimulation.UI
                 float newScaleX = OrignalSize.x * (1f + resizePercentValue);
                 float newScaleY = OrignalSize.y * (1f + resizePercentValue);
                 Vector2 newScale = new Vector2(newScaleX, newScaleY);
-                LeanTween.scale(LocalTransform, newScale, ResizeTime);
+                LeanTween.scale(LocalTransform, newScale, ResizeTime).setIgnoreTimeScale(true);
             }
         }
 
@@ -71,7 +71,7 @@ namespace ITCompanySimulation.UI
         /// </summary>
         public void RestoreOriginalSize()
         {
-            LeanTween.scale(LocalTransform, OrignalSize, ResizeTime);
+            LeanTween.scale(LocalTransform, OrignalSize, ResizeTime).setIgnoreTimeScale(true);
         }
     }
 }
