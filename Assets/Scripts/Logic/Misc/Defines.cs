@@ -85,13 +85,21 @@ namespace ITCompanySimulation.Character
     public enum CharacterMovement
     {
         WalkS,
+        WalkSW,
+        WalkSE,
         WalkW,
         WalkE,
         WalkN,
+        WalkNW,
+        WalkNE,
         StandS,
+        StandSW,
+        StandSE,
         StandW,
         StandE,
-        StandN
+        StandN,
+        StandNE,
+        StandNW
     }
 
     public enum WorkerAttribute

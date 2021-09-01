@@ -1,6 +1,7 @@
-﻿using ITCompanySimulation.Render;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
+using Pathfinding;
+using System;
 
 namespace ITCompanySimulation.Character
 {
@@ -8,219 +9,170 @@ namespace ITCompanySimulation.Character
     /// This class controls character in game world. None of characters
     /// will be controlled by player, all characters will be controlled by script
     /// </summary>
-    [RequireComponent(typeof(Rigidbody2D))]
-    [RequireComponent(typeof(CharacterRenderer))]
     public class CharacterController : MonoBehaviour
     {
         /*Private consts fields*/
 
         /*Private fields*/
 
-        private Rigidbody2D CharRigidbody;
-        private CharacterRenderer CharRenderer;
-
-        #region Character movement related variables 
-
         /// <summary>
-        /// This dicitonary maps direction in game world to 2D vector. Since only 4 vector movements will be allowed
-        /// (no diagonal movement) and X and Y vector are diagonal, result vector will be sum of X and Y vector. Sum vector
-        /// is considered straight vector in game world coordinates (front, back, rigth and left of character point of view)
-        /// 
-        ///                                   X                    Sum
-        /// 
-        ///                                    ^                   /
-        ///                                    |                /
-        ///                                    |             /
-        ///                                    |          /
-        ///                                    |       /
-        ///                                    |    /
-        ///                                    | /
-        ///                                    |---------------------> Y
-        ///                                    
-        /// TODO: Calculate these vector based on tilemap tile's postion (vector between 2 tiles positon)
+        /// Scripts that controls object towards target destination.
         /// </summary>
-        private static Dictionary<CharacterMovement, Vector2> DirectionToVector = new Dictionary<CharacterMovement, Vector2>()
+        private AIPath PathWalker;
+        private AIDestinationSetter DestinationSetter;
+        /// <summary>
+        /// Game object that AI will move to.
+        /// </summary>
+        private GameObject TargetObject;
+        /// <summary>
+        /// Last time when character reached target object.
+        /// </summary>
+        private float TimeTargetObjectReached;
+        /// <summary>
+        /// Time (in seconds) until character will obtain new target
+        /// and start moving towards it. This time will be counted from
+        /// the moment previous target was reached. Sequence will look
+        /// like that:
+        /// [Move towards target] -> [Wait TimeUntilNewTarget seconds] -> [Move towards next target]
+        /// </summary>
+        private float TimeUntilNewTarget;
+        [SerializeField]
+        private GameObject TargetObjectPrefab;
+        /// <summary>
+        /// Number of all possible character movements.
+        /// </summary>
+        private int NumberOfCharacterMovements = Enum.GetValues(typeof(CharacterMovement)).Length;
+        /// <summary>
+        /// This dicitonary maps vector to character movement. Current character direction may not match perfectly
+        /// vectors defined here so best matching vector will be found and character movement will be fetched passing
+        /// best matching vector as key value.
+        /// </summary>
+        private static Dictionary<Vector2, CharacterMovement> VectorToDirection = new Dictionary<Vector2, CharacterMovement>()
         {
-            {CharacterMovement.WalkN,(Vector2.up+Vector2.left).normalized},
-            {CharacterMovement.WalkS,(Vector2.down+Vector2.right).normalized},
-            {CharacterMovement.WalkE,(Vector2.up+Vector2.right).normalized},
-            {CharacterMovement.WalkW,(Vector2.down+Vector2.left).normalized},
-            {CharacterMovement.StandE,Vector2.zero },
-            {CharacterMovement.StandN,Vector2.zero },
-            {CharacterMovement.StandS,Vector2.zero },
-            {CharacterMovement.StandW,Vector2.zero }
+            {(Vector2.up+Vector2.left).normalized,CharacterMovement.WalkN},
+            {(Vector2.down+Vector2.right).normalized,CharacterMovement.WalkS},
+            {(Vector2.up+Vector2.right).normalized,CharacterMovement.WalkE},
+            {(Vector2.down+Vector2.left).normalized,CharacterMovement.WalkW},
+            {Vector2.up,CharacterMovement.WalkNE},
+            {Vector2.left,CharacterMovement.WalkNW},
+            {Vector2.down,CharacterMovement.WalkSW},
+            {Vector2.right,CharacterMovement.WalkSE}
         };
         /// <summary>
-        /// Vector that will be applied to character's rigidbody
+        /// Indicates whether character movement is moving at the moment.
         /// </summary>
-        private Vector2 CurrentMovementVector;
-        /// <summary>
-        /// Current's postion of character's rigidbody
-        /// </summary>
-        private Vector2 CurrentPosition;
-        [SerializeField]
-        [Range(0.1f, 10f)]
-        private float MovementSpeed = 5f;
-        /// <summary>
-        /// Whether character should not move
-        /// </summary>
-        private bool Moving;
-        /// <summary>
-        /// Time (in seconds) for how long character should not move
-        /// </summary>
-        private float NotMovingTime;
-        /// <summary>
-        /// After this time from 'LastNotMovingStop' character should 
-        /// start not moving for 'NotMovingTime' amount of time
-        /// </summary>
-        private float StartNotMovingTime;
-        /// <summary>
-        /// Seconds since game start when character started not moving last time
-        /// </summary>
-        private float LastNotMovingStart;
-        /// <summary>
-        /// Seconds since game start when character stopped not moving last time
-        /// </summary>
-        private float LastNotMovingStop;
-        /// <summary>
-        /// How long ago (in seconds) character changed his direction
-        /// </summary>
-        private float LastChangeOfDirectionTime;
-        /// <summary>
-        /// How many seconds should pass from 'LastChangeOfDirectionTime' to character
-        /// change direction
-        /// </summary>
-        private float ChangeOfDirectionTime;
-        /// <summary>
-        /// The direction that character should face when standing
-        /// </summary>
-        private CharacterMovement CharacterLastDirection;
-        private Vector2 CharacterLastVector;
-
-        #endregion
+        private bool IsMoving;
 
         /*Public consts fields*/
 
         /*Public fields*/
 
+        /// <summary>
+        /// Current direction of character.
+        /// </summary>
+        public CharacterMovement CharacterDirection { get; private set; }
+        [Tooltip("Bounds that define possible coordinates for character's target object.")]
+        public Bounds TargetObjectPositionBounds;
+
         /*Private methods*/
 
-        private void OnCollisionEnter2D(Collision2D collision)
+        private void Update()
         {
-            //TODO: Improve avoiding obstacles. Right now character
-            //sometimes get stuck or walks into the obstacle
+            CharacterDirection = GetCharacterMovement();
 
-            //This variable will hold longest distance to collider hit by ray.
-            //Raycast will be executed in every direction except the one that
-            //character is facing currently. When characters hits collider, 
-            //direction with longest possible movement without colliding will be
-            //found and character will start moving that direction
-            float longestDistance = float.MinValue;
-            CharacterMovement bestDirection = CharacterMovement.WalkE;
-
-            for (int i = 0; i < 4; i++)
+            if (((Time.time - TimeTargetObjectReached) >= TimeUntilNewTarget) && (false == IsMoving))
             {
-                CharacterMovement direction = (CharacterMovement)i;
+                Vector2 newTargetPosition = GenerateTargetPosition();
+                TargetObject.transform.position = newTargetPosition;
+                DestinationSetter.target = TargetObject.transform;
+                PathWalker.canSearch = true;
+            }
+        }
 
-                if (CharacterLastDirection == direction)
+        private CharacterMovement GetCharacterMovement()
+        {
+            Vector2 currentDirection = PathWalker.desiredVelocity;
+            //If character is standing do not change direction
+            CharacterMovement movement = IsMoving ? CharacterMovement.StandN : CharacterDirection;
+
+            if (currentDirection.magnitude >= 0.1f)
+            {
+                //Predefined vector whose direction best matches
+                //current direction of object (has most similar direction).
+                //Each predefined vector will be checked to find best
+                //matching one so proper character movement can be found
+                //(see CharacterMovement enum and VectorToDirection dictionary)
+                Vector2 currentDirectionBestMatchVector = (Vector2.up + Vector2.left);
+                float bestMatchDotProduct = 0f;
+
+                foreach (var direction in VectorToDirection)
                 {
-                    continue;
+                    float dotProduct = Vector2.Dot(direction.Key, currentDirection);
+
+                    if (dotProduct > bestMatchDotProduct)
+                    {
+                        bestMatchDotProduct = dotProduct;
+                        currentDirectionBestMatchVector = direction.Key;
+                    }
                 }
 
-                ContactPoint2D contact = collision.GetContact(0);
-                Vector2 rayDirection = DirectionToVector[direction];
-
-                RaycastHit2D hit = Physics2D.Raycast(contact.point, rayDirection);
-
-                if (hit.distance >= longestDistance)
-                {
-                    longestDistance = hit.distance;
-                    bestDirection = direction;
-                }
+                movement = VectorToDirection[currentDirectionBestMatchVector];
+                IsMoving = true;
             }
-
-            ChangeDirection(bestDirection);
-        }
-
-        private void FixedUpdate()
-        {
-            if (true == Moving)
+            else if (true == IsMoving)
             {
-                HandleMovementMoving();
-            }
-            else
-            {
-                HandleMovementNotMoving();
-            }
-        }
-
-        private void HandleMovementNotMoving()
-        {
-            //If not moving time is exceeded its time to move
-            if ((Time.time - LastNotMovingStart) >= NotMovingTime)
-            {
-                LastNotMovingStop = Time.time;
-                StartNotMovingTime = Random.Range(4f, 9f);
-                Moving = true;
-            }
-        }
-
-        private void HandleMovementMoving()
-        {
-            //Its time to stand for a while
-            if ((Time.time - LastNotMovingStop) >= StartNotMovingTime)
-            {
-                StopMoving();
+                //Movement vector magnitude is small enough to assume character
+                //is not moving. In this case character will stand facing random
+                //direction.
+                movement = GetRandomStangindMovement();
+                IsMoving = false;
             }
 
-            //Time to change direction
-            if ((Time.time - LastChangeOfDirectionTime) >= ChangeOfDirectionTime)
-            {
-                ChangeDirectionRandom();
-            }
-
-            CurrentPosition = CharRigidbody.position;
-            Vector2 movementVec = DirectionToVector[CharacterLastDirection];
-            CharacterLastVector = CurrentPosition + movementVec * MovementSpeed * Time.fixedDeltaTime;
-            CharRenderer.SetCharaterDirection(CharacterLastDirection);
-            CharRigidbody.MovePosition(CharacterLastVector);
+            return movement;
         }
 
-        /// <summary>
-        /// Changes character's to specified direction
-        /// </summary>
-        private void ChangeDirection(CharacterMovement dir)
+        private void OnReachedTargetObject()
         {
-            ChangeOfDirectionTime = Random.Range(3f, 5f);
-            CharacterLastDirection = dir;
-            LastChangeOfDirectionTime = Time.time;
+            TimeTargetObjectReached = Time.time;
+            TimeUntilNewTarget = UnityEngine.Random.Range(5f, 30f);
+            PathWalker.canSearch = false;
         }
 
-        /// <summary>
-        /// Changes character's direction to random direction
-        /// </summary>
-        private void ChangeDirectionRandom()
+        private CharacterMovement GetRandomStangindMovement()
         {
-            int randomDirectionIndex = Random.Range(0, 4);
-            CharacterMovement randomDirection = (CharacterMovement)randomDirectionIndex;
-            ChangeDirection(randomDirection);
+            //8 last enum values are standing movements
+            return (CharacterMovement)UnityEngine.Random.Range(NumberOfCharacterMovements - 8,
+                                                               NumberOfCharacterMovements - 1);
         }
 
-        private void StopMoving()
+        private Vector2 GenerateTargetPosition()
         {
-            Moving = false;
-            NotMovingTime = Random.Range(4f, 7f);
-            LastNotMovingStart = Time.time;
-            //+4 is offset to get standing movement of given direction i.e (RunW + 4) -> StandW
-            CharacterMovement standingDirection = (CharacterMovement)((int)CharacterLastDirection + 4);
-            CharRenderer.SetCharaterDirection(standingDirection);
+            float targetX = 
+                UnityEngine.Random.Range(TargetObjectPositionBounds.min.x, TargetObjectPositionBounds.max.x);
+            float targetY = 
+                UnityEngine.Random.Range(TargetObjectPositionBounds.min.y, TargetObjectPositionBounds.max.y);
+            Vector2 targetPosition = new Vector2(targetX, targetY);
+            return targetPosition;
+        }
+
+        private void Awake()
+        {
+            DestinationSetter = GetComponent<AIDestinationSetter>();
+            PathWalker = GetComponent<AIPath>();
+            GameObject scriptsObject = GameObject.FindGameObjectWithTag("ScriptsGameObject");
+            TargetObject = GameObject.Instantiate(TargetObjectPrefab, scriptsObject.transform);
+            CharacterDirection = GetRandomStangindMovement();
+        }
+
+        private void OnDestroy()
+        {
+            GameObject.Destroy(TargetObject);
         }
 
         private void Start()
         {
-            CharRigidbody = GetComponent<Rigidbody2D>();
-            CharRenderer = GetComponent<CharacterRenderer>();
-            CharRenderer.SetCharaterDirection(CharacterMovement.StandN);
+            OnReachedTargetObject();
+            PathWalker.DestinationTargetReached += OnReachedTargetObject;
         }
 
         /*Public methods*/

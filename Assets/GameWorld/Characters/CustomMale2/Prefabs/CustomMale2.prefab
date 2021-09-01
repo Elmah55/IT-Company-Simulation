@@ -12,6 +12,22 @@ PrefabInstance:
       propertyPath: m_Name
       value: CustomMale2
       objectReference: {fileID: 0}
+    - target: {fileID: 2693001125416181734, guid: e8a7cc9c3c3d541438b69eacdab11d25,
+        type: 3}
+      propertyPath: m_Controller
+      value: 
+      objectReference: {fileID: 9100000, guid: 4502a31fb3869d244ae4b8fd2e0afc0e, type: 2}
+    - target: {fileID: 2693001125416181735, guid: e8a7cc9c3c3d541438b69eacdab11d25,
+        type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 8477346632773310364, guid: 5769bcbb2618f6a4abd222b066a2ede3,
+        type: 3}
+    - target: {fileID: 2693001125416181735, guid: e8a7cc9c3c3d541438b69eacdab11d25,
+        type: 3}
+      propertyPath: m_WasSpriteAssigned
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 2693001125416181736, guid: e8a7cc9c3c3d541438b69eacdab11d25,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -67,19 +83,7 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 2693001125416181735, guid: e8a7cc9c3c3d541438b69eacdab11d25,
-        type: 3}
-      propertyPath: m_Sprite
-      value: 
-      objectReference: {fileID: 8477346632773310364, guid: 5769bcbb2618f6a4abd222b066a2ede3,
-        type: 3}
-    - target: {fileID: 2693001125416181735, guid: e8a7cc9c3c3d541438b69eacdab11d25,
-        type: 3}
-      propertyPath: m_WasSpriteAssigned
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 2693001125416181734, guid: e8a7cc9c3c3d541438b69eacdab11d25,
-        type: 3}
+    - target: {fileID: 1887419323, guid: e8a7cc9c3c3d541438b69eacdab11d25, type: 3}
       propertyPath: m_Controller
       value: 
       objectReference: {fileID: 9100000, guid: 4502a31fb3869d244ae4b8fd2e0afc0e, type: 2}

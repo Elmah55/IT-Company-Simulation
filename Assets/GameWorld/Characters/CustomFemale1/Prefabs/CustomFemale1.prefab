@@ -10,7 +10,23 @@ PrefabInstance:
     - target: {fileID: 2693001125416181733, guid: e8a7cc9c3c3d541438b69eacdab11d25,
         type: 3}
       propertyPath: m_Name
-      value: CustomFemale1 p
+      value: CustomFemale1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2693001125416181734, guid: e8a7cc9c3c3d541438b69eacdab11d25,
+        type: 3}
+      propertyPath: m_Controller
+      value: 
+      objectReference: {fileID: 9100000, guid: f706ee07648376c49844ff1b1205e800, type: 2}
+    - target: {fileID: 2693001125416181735, guid: e8a7cc9c3c3d541438b69eacdab11d25,
+        type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 257744905594837530, guid: 28f7c81f4b5294acc88fdda0a0430361,
+        type: 3}
+    - target: {fileID: 2693001125416181735, guid: e8a7cc9c3c3d541438b69eacdab11d25,
+        type: 3}
+      propertyPath: m_WasSpriteAssigned
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 2693001125416181736, guid: e8a7cc9c3c3d541438b69eacdab11d25,
         type: 3}
@@ -67,19 +83,7 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 2693001125416181735, guid: e8a7cc9c3c3d541438b69eacdab11d25,
-        type: 3}
-      propertyPath: m_Sprite
-      value: 
-      objectReference: {fileID: 257744905594837530, guid: 28f7c81f4b5294acc88fdda0a0430361,
-        type: 3}
-    - target: {fileID: 2693001125416181735, guid: e8a7cc9c3c3d541438b69eacdab11d25,
-        type: 3}
-      propertyPath: m_WasSpriteAssigned
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 2693001125416181734, guid: e8a7cc9c3c3d541438b69eacdab11d25,
-        type: 3}
+    - target: {fileID: 1887419323, guid: e8a7cc9c3c3d541438b69eacdab11d25, type: 3}
       propertyPath: m_Controller
       value: 
       objectReference: {fileID: 9100000, guid: f706ee07648376c49844ff1b1205e800, type: 2}
