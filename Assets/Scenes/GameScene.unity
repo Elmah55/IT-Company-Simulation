@@ -5456,8 +5456,7 @@ MonoBehaviour:
   MinimumValue: 0
   MaximumValue: 100
   Value: 100
-  BackgroundImage: {fileID: 630123269}
-  ForegroundImage: {fileID: 1282688355}
+  ProgressBarImage: {fileID: 1282688355}
 --- !u!1 &605897408
 GameObject:
   m_ObjectHideFlags: 0

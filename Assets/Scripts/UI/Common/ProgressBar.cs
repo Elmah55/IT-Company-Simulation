@@ -20,30 +20,44 @@ namespace ITCompanySimulation.UI
         public float MinimumValue;
         public float MaximumValue;
         public float Value;
-        public Image BackgroundImage;
-        public Image ForegroundImage;
+        [Tooltip("Image that will be updated when progress bar's value changes")]
+        [SerializeField]
+        private Image ProgressBarImage;
 
         /*Private methods*/
 
         private void Start()
         {
-            ForegroundImageTransform = ForegroundImage.gameObject.GetComponent<RectTransform>();
+            if (Image.Type.Sliced == ProgressBarImage.type)
+            {
+                ForegroundImageTransform = ProgressBarImage.gameObject.GetComponent<RectTransform>();
+            }
         }
 
         private void Update()
         {
             Value = Mathf.Clamp(Value, MinimumValue, MaximumValue);
-            CalculateForegroundImageSize();
+            CalculateProgressBarImageSize();
         }
 
-        private void CalculateForegroundImageSize()
+        private void CalculateProgressBarImageSize()
         {
             //Map values range to rect transform size range
             float transformScaleX = Utils.MapRange(Value, MinimumValue, MaximumValue, 0f, 1f);
             //When min and max values are 0 map range will return NaN
             transformScaleX = (true == float.IsNaN(transformScaleX)) ? 0f : transformScaleX;
-            Vector3 newScale = new Vector3(transformScaleX, 1f, 1f);
-            ForegroundImageTransform.localScale = newScale;
+
+            //For normal progress bar update image scale,
+            //for radial progress bar usage image fill property
+            if (Image.Type.Sliced == ProgressBarImage.type)
+            {
+                Vector3 newScale = new Vector3(transformScaleX, 1f, 1f);
+                ForegroundImageTransform.localScale = newScale;
+            }
+            else if (Image.Type.Filled == ProgressBarImage.type)
+            {
+                ProgressBarImage.fillAmount = transformScaleX;
+            }
         }
 
         /*Public methods*/

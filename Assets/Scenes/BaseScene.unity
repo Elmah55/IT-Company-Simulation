@@ -224,6 +224,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7f0db9c9180bcdc42a3e9c3bcce150d8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &143107797 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 4125274841691323942, guid: 2ca5fb2d28aaba341a92e36ea0bbdd0a,
+    type: 3}
+  m_PrefabInstance: {fileID: 1508874263}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!114 &188078409 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 1514465755172770414, guid: 6ceea165fd3fc9a409ee5316021cebfc,
@@ -717,6 +729,31 @@ PrefabInstance:
       propertyPath: m_Pivot.y
       value: 0.5
       objectReference: {fileID: 0}
+    - target: {fileID: 4125274841428777329, guid: 2ca5fb2d28aaba341a92e36ea0bbdd0a,
+        type: 3}
+      propertyPath: Value
+      value: 33.9
+      objectReference: {fileID: 0}
+    - target: {fileID: 4125274841428777329, guid: 2ca5fb2d28aaba341a92e36ea0bbdd0a,
+        type: 3}
+      propertyPath: ProgressBarImage
+      value: 
+      objectReference: {fileID: 143107797}
+    - target: {fileID: 4125274841691323943, guid: 2ca5fb2d28aaba341a92e36ea0bbdd0a,
+        type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4125274841691323943, guid: 2ca5fb2d28aaba341a92e36ea0bbdd0a,
+        type: 3}
+      propertyPath: m_LocalScale.x
+      value: 0.33900002
+      objectReference: {fileID: 0}
+    - target: {fileID: 4125274841691323943, guid: 2ca5fb2d28aaba341a92e36ea0bbdd0a,
+        type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 4125274841691323942, guid: 2ca5fb2d28aaba341a92e36ea0bbdd0a,
         type: 3}
       propertyPath: m_Color.r
@@ -731,11 +768,6 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Color.b
       value: 0.6509804
-      objectReference: {fileID: 0}
-    - target: {fileID: 4125274841691323943, guid: 2ca5fb2d28aaba341a92e36ea0bbdd0a,
-        type: 3}
-      propertyPath: m_AnchoredPosition.x
-      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 2ca5fb2d28aaba341a92e36ea0bbdd0a, type: 3}
