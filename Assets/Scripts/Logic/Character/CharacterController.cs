@@ -171,7 +171,6 @@ namespace ITCompanySimulation.Character
 
         private void Start()
         {
-            OnReachedTargetObject();
             PathWalker.DestinationTargetReached += OnReachedTargetObject;
         }
 
