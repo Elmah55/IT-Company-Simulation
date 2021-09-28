@@ -20,21 +20,37 @@ namespace ITCompanySimulation.UI
 
         /*Public fields*/
 
+
+        /// <summary>
+        /// True if mouse pointer is over game object.
+        /// </summary>
+        public bool IsMousePointerEntered { get; private set; }
+
         public UnityEvent PointerEntered = new UnityEvent();
         public UnityEvent PointerExited = new UnityEvent();
         public UnityEvent PointerDoubleClick = new UnityEvent();
 
         /*Private methods*/
 
+        private void OnDisable()
+        {
+            if (true == IsMousePointerEntered)
+            {
+                OnPointerExit(null);
+            }
+        }
+
         /*Public methods*/
 
         public void OnPointerEnter(PointerEventData eventData)
         {
+            IsMousePointerEntered = true;
             PointerEntered.Invoke();
         }
 
         public void OnPointerExit(PointerEventData eventData)
         {
+            IsMousePointerEntered = false;
             PointerExited.Invoke();
         }
 

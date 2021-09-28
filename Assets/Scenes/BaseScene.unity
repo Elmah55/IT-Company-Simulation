@@ -624,6 +624,16 @@ PrefabInstance:
       propertyPath: m_Name
       value: ProgressBarSceneLoading
       objectReference: {fileID: 0}
+    - target: {fileID: 4125274841428777329, guid: 2ca5fb2d28aaba341a92e36ea0bbdd0a,
+        type: 3}
+      propertyPath: Value
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4125274841428777329, guid: 2ca5fb2d28aaba341a92e36ea0bbdd0a,
+        type: 3}
+      propertyPath: ProgressBarImage
+      value: 
+      objectReference: {fileID: 143107797}
     - target: {fileID: 4125274841428777330, guid: 2ca5fb2d28aaba341a92e36ea0bbdd0a,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -729,31 +739,6 @@ PrefabInstance:
       propertyPath: m_Pivot.y
       value: 0.5
       objectReference: {fileID: 0}
-    - target: {fileID: 4125274841428777329, guid: 2ca5fb2d28aaba341a92e36ea0bbdd0a,
-        type: 3}
-      propertyPath: Value
-      value: 33.9
-      objectReference: {fileID: 0}
-    - target: {fileID: 4125274841428777329, guid: 2ca5fb2d28aaba341a92e36ea0bbdd0a,
-        type: 3}
-      propertyPath: ProgressBarImage
-      value: 
-      objectReference: {fileID: 143107797}
-    - target: {fileID: 4125274841691323943, guid: 2ca5fb2d28aaba341a92e36ea0bbdd0a,
-        type: 3}
-      propertyPath: m_AnchoredPosition.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4125274841691323943, guid: 2ca5fb2d28aaba341a92e36ea0bbdd0a,
-        type: 3}
-      propertyPath: m_LocalScale.x
-      value: 0.33900002
-      objectReference: {fileID: 0}
-    - target: {fileID: 4125274841691323943, guid: 2ca5fb2d28aaba341a92e36ea0bbdd0a,
-        type: 3}
-      propertyPath: m_AnchoredPosition.y
-      value: 0
-      objectReference: {fileID: 0}
     - target: {fileID: 4125274841691323942, guid: 2ca5fb2d28aaba341a92e36ea0bbdd0a,
         type: 3}
       propertyPath: m_Color.r
@@ -768,6 +753,36 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Color.b
       value: 0.6509804
+      objectReference: {fileID: 0}
+    - target: {fileID: 4125274841691323943, guid: 2ca5fb2d28aaba341a92e36ea0bbdd0a,
+        type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4125274841691323943, guid: 2ca5fb2d28aaba341a92e36ea0bbdd0a,
+        type: 3}
+      propertyPath: m_LocalScale.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4125274841691323943, guid: 2ca5fb2d28aaba341a92e36ea0bbdd0a,
+        type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4125274841241350069, guid: 2ca5fb2d28aaba341a92e36ea0bbdd0a,
+        type: 3}
+      propertyPath: m_Color.r
+      value: 0.7214311
+      objectReference: {fileID: 0}
+    - target: {fileID: 4125274841241350069, guid: 2ca5fb2d28aaba341a92e36ea0bbdd0a,
+        type: 3}
+      propertyPath: m_Color.g
+      value: 0.73563546
+      objectReference: {fileID: 0}
+    - target: {fileID: 4125274841241350069, guid: 2ca5fb2d28aaba341a92e36ea0bbdd0a,
+        type: 3}
+      propertyPath: m_Color.b
+      value: 0.7924528
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 2ca5fb2d28aaba341a92e36ea0bbdd0a, type: 3}

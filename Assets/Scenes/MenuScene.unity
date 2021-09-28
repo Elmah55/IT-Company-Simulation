@@ -1837,7 +1837,7 @@ PrefabInstance:
     - target: {fileID: 3138206809936201029, guid: 36fe06df9a4265e4292bd2e45922effc,
         type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -209.65
+      value: -209.67
       objectReference: {fileID: 0}
     - target: {fileID: 3138206809936201029, guid: 36fe06df9a4265e4292bd2e45922effc,
         type: 3}
@@ -1847,7 +1847,7 @@ PrefabInstance:
     - target: {fileID: 3138206809936201029, guid: 36fe06df9a4265e4292bd2e45922effc,
         type: 3}
       propertyPath: m_SizeDelta.y
-      value: 100
+      value: 99.96
       objectReference: {fileID: 0}
     - target: {fileID: 3138206809936201029, guid: 36fe06df9a4265e4292bd2e45922effc,
         type: 3}
@@ -1968,6 +1968,10 @@ PrefabInstance:
         type: 3}
       propertyPath: m_text
       value: Video
+      objectReference: {fileID: 0}
+    - target: {fileID: 1402988362, guid: 36fe06df9a4265e4292bd2e45922effc, type: 3}
+      propertyPath: AnimationTime
+      value: 0.2
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 36fe06df9a4265e4292bd2e45922effc, type: 3}
@@ -3888,6 +3892,10 @@ PrefabInstance:
       propertyPath: m_fontSize
       value: 89.25
       objectReference: {fileID: 0}
+    - target: {fileID: 1402988362, guid: 36fe06df9a4265e4292bd2e45922effc, type: 3}
+      propertyPath: AnimationTime
+      value: 0.2
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 36fe06df9a4265e4292bd2e45922effc, type: 3}
 --- !u!224 &334789801 stripped
@@ -4247,7 +4255,7 @@ PrefabInstance:
     - target: {fileID: 3138206809936201029, guid: 36fe06df9a4265e4292bd2e45922effc,
         type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -509.65
+      value: -509.59
       objectReference: {fileID: 0}
     - target: {fileID: 3138206809936201029, guid: 36fe06df9a4265e4292bd2e45922effc,
         type: 3}
@@ -4257,7 +4265,7 @@ PrefabInstance:
     - target: {fileID: 3138206809936201029, guid: 36fe06df9a4265e4292bd2e45922effc,
         type: 3}
       propertyPath: m_SizeDelta.y
-      value: 100
+      value: 99.96
       objectReference: {fileID: 0}
     - target: {fileID: 3138206809936201029, guid: 36fe06df9a4265e4292bd2e45922effc,
         type: 3}
@@ -4378,6 +4386,10 @@ PrefabInstance:
         type: 3}
       propertyPath: m_text
       value: Back
+      objectReference: {fileID: 0}
+    - target: {fileID: 1402988362, guid: 36fe06df9a4265e4292bd2e45922effc, type: 3}
+      propertyPath: AnimationTime
+      value: 0.2
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 36fe06df9a4265e4292bd2e45922effc, type: 3}
@@ -8376,7 +8388,7 @@ PrefabInstance:
     - target: {fileID: 3138206809936201029, guid: 36fe06df9a4265e4292bd2e45922effc,
         type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -359.65
+      value: -359.63
       objectReference: {fileID: 0}
     - target: {fileID: 3138206809936201029, guid: 36fe06df9a4265e4292bd2e45922effc,
         type: 3}
@@ -8386,7 +8398,7 @@ PrefabInstance:
     - target: {fileID: 3138206809936201029, guid: 36fe06df9a4265e4292bd2e45922effc,
         type: 3}
       propertyPath: m_SizeDelta.y
-      value: 100
+      value: 99.96
       objectReference: {fileID: 0}
     - target: {fileID: 3138206809936201029, guid: 36fe06df9a4265e4292bd2e45922effc,
         type: 3}
@@ -8507,6 +8519,10 @@ PrefabInstance:
         type: 3}
       propertyPath: m_fontSize
       value: 89.25
+      objectReference: {fileID: 0}
+    - target: {fileID: 1402988362, guid: 36fe06df9a4265e4292bd2e45922effc, type: 3}
+      propertyPath: AnimationTime
+      value: 0.2
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 36fe06df9a4265e4292bd2e45922effc, type: 3}
@@ -11094,6 +11110,10 @@ PrefabInstance:
       propertyPath: PointerExited.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
       value: UnityEngine.Object, UnityEngine
       objectReference: {fileID: 0}
+    - target: {fileID: 1402988362, guid: 36fe06df9a4265e4292bd2e45922effc, type: 3}
+      propertyPath: AnimationTime
+      value: 0.2
+      objectReference: {fileID: 0}
     m_RemovedComponents:
     - {fileID: 0}
   m_SourcePrefab: {fileID: 100100000, guid: 36fe06df9a4265e4292bd2e45922effc, type: 3}
@@ -12620,6 +12640,10 @@ PrefabInstance:
         type: 3}
       propertyPath: m_enableAutoSizing
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1402988362, guid: 36fe06df9a4265e4292bd2e45922effc, type: 3}
+      propertyPath: AnimationTime
+      value: 0.2
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 36fe06df9a4265e4292bd2e45922effc, type: 3}
@@ -14863,7 +14887,7 @@ PrefabInstance:
     - target: {fileID: 3138206809936201029, guid: 36fe06df9a4265e4292bd2e45922effc,
         type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -59.649994
+      value: -59.71001
       objectReference: {fileID: 0}
     - target: {fileID: 3138206809936201029, guid: 36fe06df9a4265e4292bd2e45922effc,
         type: 3}
@@ -14873,7 +14897,7 @@ PrefabInstance:
     - target: {fileID: 3138206809936201029, guid: 36fe06df9a4265e4292bd2e45922effc,
         type: 3}
       propertyPath: m_SizeDelta.y
-      value: 100
+      value: 99.96
       objectReference: {fileID: 0}
     - target: {fileID: 3138206809936201029, guid: 36fe06df9a4265e4292bd2e45922effc,
         type: 3}
@@ -14994,6 +15018,10 @@ PrefabInstance:
         type: 3}
       propertyPath: m_fontSize
       value: 89.25
+      objectReference: {fileID: 0}
+    - target: {fileID: 1402988362, guid: 36fe06df9a4265e4292bd2e45922effc, type: 3}
+      propertyPath: AnimationTime
+      value: 0.2
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 36fe06df9a4265e4292bd2e45922effc, type: 3}
