@@ -17,7 +17,7 @@ namespace ITCompanySimulation.UI
         /// <summary>
         /// Used to map button in workers list to appriopriate worker
         /// </summary>
-        private Dictionary<SharedWorker, ListViewElementWorker> WorkerListViewMap;
+        private Dictionary<SharedWorker, ListViewElement> WorkerListViewMap;
         [SerializeField]
         private ControlListView ListViewMarketWorkers;
         [SerializeField]
@@ -149,7 +149,7 @@ namespace ITCompanySimulation.UI
 
         private void OnWorkerSalaryChanged(SharedWorker companyWorker)
         {
-            ListViewElementWorker el = WorkerListViewMap[companyWorker];
+            ListViewElement el = WorkerListViewMap[companyWorker];
             el.Text.text = UIWorkers.GetWorkerListViewElementText(companyWorker);
         }
 
@@ -200,7 +200,7 @@ namespace ITCompanySimulation.UI
         {
             if (null != WorkerListViewMap)
             {
-                foreach (KeyValuePair<SharedWorker, ListViewElementWorker> pair in WorkerListViewMap)
+                foreach (KeyValuePair<SharedWorker, ListViewElement> pair in WorkerListViewMap)
                 {
                     pair.Value.Text.text = UIWorkers.GetWorkerListViewElementText(pair.Key);
                 }
@@ -223,7 +223,7 @@ namespace ITCompanySimulation.UI
 
         private void AddWorkerListViewElement(SharedWorker worker, ControlListView listView)
         {
-            ListViewElementWorker element = UIWorkers.CreateWorkerListViewElement(worker, WorkerListViewElementPrefab, TooltipComponent);
+            ListViewElement element = UIWorkers.CreateWorkerListViewElement(worker, WorkerListViewElementPrefab, TooltipComponent);
 
             Button buttonComponent = element.GetComponent<Button>();
             MousePointerEvents mousePtrEvts = element.GetComponent<MousePointerEvents>();
@@ -239,7 +239,7 @@ namespace ITCompanySimulation.UI
 
             if (null == WorkerListViewMap)
             {
-                WorkerListViewMap = new Dictionary<SharedWorker, ListViewElementWorker>();
+                WorkerListViewMap = new Dictionary<SharedWorker, ListViewElement>();
             }
 
             listView.AddControl(element.gameObject);
@@ -250,7 +250,7 @@ namespace ITCompanySimulation.UI
 
         private void RemoveWorkerListViewElement(SharedWorker worker, ControlListView listView)
         {
-            ListViewElementWorker element = WorkerListViewMap.First(x => x.Key == worker).Value;
+            ListViewElement element = WorkerListViewMap.First(x => x.Key == worker).Value;
             Button buttonComponent = element.GetComponent<Button>();
 
             listView.RemoveControl(element.gameObject);

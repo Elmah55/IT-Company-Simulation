@@ -302,9 +302,9 @@ namespace ITCompanySimulation.Company
             {
                 yield return new WaitForSeconds(PROJECT_UPDATE_FREQUENCY);
 
-                foreach (Scrum scrumInstance in SimulationManagerComponent.ControlledCompany.ScrumProcesses)
+                for (int i = 0; i < SimulationManagerComponent.ControlledCompany.ScrumProcesses.Count; i++)
                 {
-                    scrumInstance.UpdateProgress();
+                    SimulationManagerComponent.ControlledCompany.ScrumProcesses[i].UpdateProgress();
                 }
             }
         }

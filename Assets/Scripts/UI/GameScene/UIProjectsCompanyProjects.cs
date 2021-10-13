@@ -4,7 +4,6 @@ using UnityEngine.UI;
 using TMPro;
 using System.Linq;
 using ITCompanySimulation.Project;
-using ITCompanySimulation.Utilities;
 using ITCompanySimulation.Core;
 
 namespace ITCompanySimulation.UI
@@ -15,20 +14,15 @@ namespace ITCompanySimulation.UI
 
         /*Private fields*/
 
-        [SerializeField]
         private SimulationManager SimulationManagerComponent;
-        [SerializeField]
         private GameTime GameTimeComponent;
         [SerializeField]
-        private ListViewElementWorker ListViewWorkerElementPrefab;
+        private ListViewElement ListViewWorkerElementPrefab;
         /// <summary>
         /// Colors that will be applied to selected button component of list view element.
         /// </summary>
         [SerializeField]
         private ColorBlock ListViewElementSelectedColors;
-        [SerializeField]
-        [Tooltip("Color of project's list view element after being completed")]
-        private Color CompletedProjectListViewElementColors;
         [SerializeField]
         private ControlListView ListViewCompanyProjects;
         [SerializeField]
@@ -36,13 +30,7 @@ namespace ITCompanySimulation.UI
         [SerializeField]
         private ControlListViewDrop ListViewAssignedWorkers;
         [SerializeField]
-        private TextMeshProUGUI TextProjectName;
-        [SerializeField]
-        private TextMeshProUGUI TextProjectTechnologies;
-        [SerializeField]
         private TextMeshProUGUI TextProjectEstimatedCompletionTime;
-        [SerializeField]
-        private TextMeshProUGUI TextProjectCompletionBonus;
         [SerializeField]
         private TextMeshProUGUI TextListViewCompanyProjects;
         [SerializeField]
@@ -53,12 +41,16 @@ namespace ITCompanySimulation.UI
         private TextMeshProUGUI TextProgressBarProject;
         [SerializeField]
         private ProgressBar ProgressBarProject;
-        private RectTransform TransformComponent;
+        [SerializeField]
+        private GameObject PanelAssignWorkers;
+        [SerializeField]
+        private Button ButtonAssignWorkers;
+        [SerializeField]
+        private Button ButtonCancelProject;
         /// <summary>
         /// Scrum object of project that is currently selected
         /// </summary>
         private Scrum SelectedScrum;
-        private IObjectPool<ListViewElementWorker> WorkerListViewElementsPool;
 
         /*Public consts fields*/
 
@@ -66,10 +58,16 @@ namespace ITCompanySimulation.UI
 
         /*Private methods*/
 
+        private void Awake()
+        {
+            GameObject scriptsObject = GameObject.FindGameObjectWithTag("ScriptsGameObject");
+            SimulationManagerComponent = scriptsObject.GetComponent<SimulationManager>();
+            GameTimeComponent = scriptsObject.GetComponent<GameTime>();
+        }
+
         private void Start()
         {
             ButtonSelectorProjects = new ButtonSelector(ListViewElementSelectedColors);
-            TransformComponent = GetComponent<RectTransform>();
 
             //Add workers that were in company before of start of this script
             foreach (LocalWorker worker in SimulationManagerComponent.ControlledCompany.Workers)
@@ -100,12 +98,18 @@ namespace ITCompanySimulation.UI
             ProgressBarProject.Value = ProgressBarProject.MinimumValue;
         }
 
+        private void OnDisable()
+        {
+            PanelAssignWorkers.SetActive(false);
+        }
+
         #region Events callbacks
 
         private void OnProjectProgressUpdated(LocalProject proj)
         {
-            ListViewElementProject element = GetProjectListViewElement(ListViewCompanyProjects, proj);
+            ListViewElement element = ListViewCompanyProjects.FindElement(proj);
             element.Text.text = GetProjectListViewElementText(proj);
+            SetListViewElementProgressBar(proj);
 
             if (null != SelectedScrum
                 && SelectedScrum.BindedProject == proj)
@@ -116,12 +120,6 @@ namespace ITCompanySimulation.UI
             }
         }
 
-        private void OnProjectCompleted(LocalProject proj)
-        {
-            ListViewElementProject element = GetProjectListViewElement(ListViewCompanyProjects, proj);
-            element.BackgroundImage.color = CompletedProjectListViewElementColors;
-        }
-
         //On control removed from list view check will be peformed to check
         //if control was removed because worker was removed from project.
         //If player moved worker's control to other list if condition will be true.
@@ -129,18 +127,18 @@ namespace ITCompanySimulation.UI
         //below threshold) if condition will be false
         private void OnListViewAssignedWorkersControlRemoved(GameObject ctrl)
         {
-            SharedWorker worker = ctrl.GetComponent<ListViewElementWorker>().Worker;
+            LocalWorker worker = (LocalWorker)ctrl.GetComponent<ListViewElement>().RepresentedObject;
 
             if (true == SelectedScrum.BindedProject.Workers.Contains(worker))
             {
-                SelectedScrum.BindedProject.RemoveWorker((LocalWorker)worker);
+                SelectedScrum.BindedProject.RemoveWorker(worker);
             }
         }
 
         private void OnListViewAssignedWorkersControlAdded(GameObject ctrl)
         {
-            SharedWorker worker = ctrl.GetComponent<ListViewElementWorker>().Worker;
-            SelectedScrum.BindedProject.AddWorker((LocalWorker)worker);
+            LocalWorker worker = (LocalWorker)ctrl.GetComponent<ListViewElement>().RepresentedObject;
+            SelectedScrum.BindedProject.AddWorker(worker);
         }
 
         private void OnControlledCompanyWorkerRemoved(SharedWorker companyWorker)
@@ -151,46 +149,50 @@ namespace ITCompanySimulation.UI
 
         private void OnControlledCompanyWorkerAdded(LocalWorker companyWorker)
         {
-            ListViewElementWorker newElement = CreateWorkerListViewElement(companyWorker);
+            ListViewElement newElement = CreateWorkerListViewElement(companyWorker);
             ListViewAvailableWorkers.AddControl(newElement.gameObject);
             SetListViewAvailableWorkersText();
         }
 
-        private ListViewElementWorker CreateWorkerListViewElement(LocalWorker companyWorker)
+        private ListViewElement CreateWorkerListViewElement(LocalWorker companyWorker)
         {
-            ListViewElementWorker newElement = null;
-
-            if (null != WorkerListViewElementsPool)
-            {
-                newElement = WorkerListViewElementsPool.GetObject();
-            }
-
-            if (null == newElement)
-            {
-                newElement = UIWorkers.CreateWorkerListViewElement(companyWorker, ListViewWorkerElementPrefab, TooltipComponent);
-                UIElementDrag drag = newElement.GetComponent<UIElementDrag>();
-                drag.DragParentTransform = gameObject.GetComponent<RectTransform>();
-            }
+            ListViewElement newElement = UIWorkers.CreateWorkerListViewElement(companyWorker, ListViewWorkerElementPrefab, TooltipComponent);
+            UIElementDrag drag = newElement.GetComponent<UIElementDrag>();
+            drag.DragParentTransform = gameObject.GetComponent<RectTransform>();
 
             newElement.gameObject.SetActive(true);
             newElement.Text.text = GetWorkerListViewElementText(companyWorker);
-            newElement.Worker = companyWorker;
+            newElement.RepresentedObject = companyWorker;
 
             return newElement;
         }
 
         private void OnControlledCompanyProjectAdded(Scrum scrumObj)
         {
-            ListViewElementProject newElement = CreateListViewElement(scrumObj.BindedProject);
-            newElement.Text.text = GetProjectListViewElementText(scrumObj.BindedProject);
-            newElement.FrontImage.sprite = scrumObj.BindedProject.Icon;
-            ButtonSelectorProjects.AddButton(newElement.Button);
+            if (false == scrumObj.BindedProject.IsCompleted)
+            {
+                ListViewElement newElement = CreateListViewElement(scrumObj.BindedProject);
+                newElement.Text.text = GetProjectListViewElementText(scrumObj.BindedProject);
+                newElement.FrontImage.sprite = scrumObj.BindedProject.Icon;
+                ButtonSelectorProjects.AddButton(newElement.Button);
+                ProgressBar listViewElementProgressBar = newElement.GetComponentInChildren<ProgressBar>();
+                listViewElementProgressBar.Value = scrumObj.BindedProject.Progress;
 
-            ListViewCompanyProjects.AddControl(newElement.gameObject);
+                ListViewCompanyProjects.AddControl(newElement.gameObject);
 
-            scrumObj.BindedProject.ProgressUpdated += OnProjectProgressUpdated;
-            scrumObj.BindedProject.Completed += OnProjectCompleted;
-            scrumObj.BindedProject.WorkerRemoved += OnProjectWorkerRemoved;
+                scrumObj.BindedProject.ProgressUpdated += OnProjectProgressUpdated;
+                scrumObj.BindedProject.WorkerRemoved += OnProjectWorkerRemoved;
+                scrumObj.BindedProject.Completed += OnProjectCompleted;
+                SetListViewCompanyProjectsText();
+            }
+        }
+
+        private void OnProjectCompleted(LocalProject proj)
+        {
+            ListViewElement projectListViewElement = ListViewCompanyProjects.FindElement(proj);
+            Button listViewElementButton = projectListViewElement.GetComponent<Button>();
+            ButtonSelectorProjects.RemoveButton(listViewElementButton);
+            ListViewCompanyProjects.RemoveControl(projectListViewElement.gameObject);
             SetListViewCompanyProjectsText();
         }
 
@@ -202,35 +204,39 @@ namespace ITCompanySimulation.UI
 
                 foreach (LocalWorker worker in SelectedScrum.BindedProject.Workers)
                 {
-                    ListViewElementWorker element = UIWorkers.GetWorkerListViewElement(worker, ListViewAssignedWorkers);
+                    ListViewElement element = ListViewAssignedWorkers.FindElement(worker);
                     element.gameObject.SetActive(false);
                 }
             }
 
             if (null != btn)
             {
-                ListViewElementProject element = btn.GetComponent<ListViewElementProject>();
+                ListViewElement element = btn.GetComponent<ListViewElement>();
                 SelectedScrum = SimulationManagerComponent.ControlledCompany.ScrumProcesses.Find(x =>
                 {
-                    return element.Project == x.BindedProject;
+                    return element.RepresentedObject == x.BindedProject;
                 });
 
                 SetProjectInfo();
                 SubscribeProjectEvents();
                 SetListViewAssignedWorkersText();
-                ListViewAssignedWorkers.transform.parent.gameObject.SetActive(true);
 
                 foreach (LocalWorker worker in SelectedScrum.BindedProject.Workers)
                 {
-                    ListViewElementWorker elem = UIWorkers.GetWorkerListViewElement(worker, ListViewAssignedWorkers);
+                    ListViewElement elem = ListViewAssignedWorkers.FindElement(worker);
                     elem.gameObject.SetActive(true);
                 }
+
+                ButtonAssignWorkers.interactable = true;
+                ButtonCancelProject.interactable = true;
             }
             else
             {
+                ButtonAssignWorkers.interactable = false;
+                ButtonCancelProject.interactable = false;
                 SelectedScrum = null;
                 SetProjectInfo();
-                ListViewAssignedWorkers.transform.parent.gameObject.SetActive(false);
+                PanelAssignWorkers.SetActive(false);
             }
         }
 
@@ -239,20 +245,19 @@ namespace ITCompanySimulation.UI
         //in correct list view, no need to add it
         private void OnSelectedProjectWorkerAdded(SharedWorker companyWorker)
         {
-            SetListViewAssignedWorkersText();
             SetListViewAvailableWorkersText();
-            SetProjectInfo();
+            SetListViewAssignedWorkersText();
         }
 
         private void OnProjectWorkerRemoved(SharedWorker companyWorker)
         {
-            ListViewElementWorker element = UIWorkers.GetWorkerListViewElement(companyWorker, ListViewAssignedWorkers);
+            ListViewElement element = ListViewAssignedWorkers.FindElement(companyWorker);
 
             //Check if list view element was dragged to other list view
             if (null != element)
             {
                 RemoveWorkerListViewElement(element, ListViewAssignedWorkers);
-                ListViewElementWorker newElement = CreateWorkerListViewElement((LocalWorker)companyWorker);
+                ListViewElement newElement = CreateWorkerListViewElement((LocalWorker)companyWorker);
                 ListViewAvailableWorkers.AddControl(newElement.gameObject);
             }
 
@@ -265,20 +270,20 @@ namespace ITCompanySimulation.UI
         {
             foreach (GameObject listViewObject in ListViewAssignedWorkers.Controls)
             {
-                ListViewElementWorker element = listViewObject.GetComponent<ListViewElementWorker>();
-                element.Text.text = GetWorkerListViewElementText((LocalWorker)element.Worker);
+                ListViewElement element = listViewObject.GetComponent<ListViewElement>();
+                element.Text.text = GetWorkerListViewElementText((LocalWorker)element.RepresentedObject);
             }
 
             foreach (GameObject listViewObject in ListViewAvailableWorkers.Controls)
             {
-                ListViewElementWorker element = listViewObject.GetComponent<ListViewElementWorker>();
-                element.Text.text = GetWorkerListViewElementText((LocalWorker)element.Worker);
+                ListViewElement element = listViewObject.GetComponent<ListViewElement>();
+                element.Text.text = GetWorkerListViewElementText((LocalWorker)element.RepresentedObject);
             }
         }
 
         private void OnSelectedProjectCompletionTimeUpdated(SharedProject proj)
         {
-            ListViewElementProject element = GetProjectListViewElement(ListViewCompanyProjects, proj);
+            ListViewElement element = ListViewCompanyProjects.FindElement(proj);
             element.Text.text = GetProjectListViewElementText((LocalProject)proj);
         }
 
@@ -298,47 +303,72 @@ namespace ITCompanySimulation.UI
             }
         }
 
-        private void SetProjectInfo()
+        /// <summary>
+        /// Sets progress bar located on list view element
+        /// </summary>
+        private void SetListViewElementProgressBar(LocalProject proj)
         {
-            if (null != SelectedScrum)
+            //Progress bar located on list view element
+            ProgressBar listViewProgressBar = ListViewCompanyProjects.FindElement(proj).GetComponentInChildren<ProgressBar>();
+
+            if (null != proj)
             {
-                TextProjectName.text = SelectedScrum.BindedProject.Name;
-                TextProjectCompletionBonus.text =
-                    string.Format("{0} $", SelectedScrum.BindedProject.CompletionBonus);
-                TextProjectTechnologies.text = GetProjectTechnologiesString(SelectedScrum.BindedProject);
-                int estimatedCompletionTime = SelectedScrum.GetProjectEstimatedCompletionTime();
-                TextProjectEstimatedCompletionTime.text = GetEstimatedCompletionTimeText(estimatedCompletionTime);
+                listViewProgressBar.Value = proj.Progress;
+            }
+        }
+
+        private void SetProjectInfoText(LocalProject proj)
+        {
+            if (null != proj)
+            {
+                TextProjectName.text = string.Format("Project name: {0}", proj.Name);
+                TextCompleteBonus.text = string.Format("Completion bonus: <color=#4CD137>+ {0} $</color>", proj.CompletionBonus);
+                TextPenalty.text = string.Format("Exceeding completion time penalty: <color=#E84118>- {0} $</color>", proj.CompletionTimeExceededPenalty);
+                TextUsedTechnologies.text = string.Format("Used technologies: {0}", GetProjectTechnologiesString(proj));
+                TextCompletionTime.text = string.Format("Time for completion: {0} days", proj.CompletionTime);
+                TextProjectEstimatedCompletionTime.text = GetEstimatedCompletionTimeText(SelectedScrum.GetProjectEstimatedCompletionTime());
             }
             else
             {
                 TextProjectName.text = string.Empty;
-                TextProjectCompletionBonus.text = string.Empty;
-                TextProjectTechnologies.text = string.Empty;
+                TextCompleteBonus.text = string.Empty;
+                TextUsedTechnologies.text = string.Empty;
+                TextCompletionTime.text = string.Empty;
+                TextPenalty.text = string.Empty;
                 TextProjectEstimatedCompletionTime.text = string.Empty;
             }
+        }
 
+        private void SetProjectInfo()
+        {
+            SetProjectInfoText(SelectedScrum?.BindedProject);
             SetProjectProgressBar(SelectedScrum?.BindedProject);
         }
 
-        private void RemoveWorkerListViewElement(ListViewElementWorker element, ControlListView listView)
+        private void RemoveWorkerListViewElement(ListViewElement element, ControlListView listView)
         {
-            listView.RemoveControl(element.gameObject, false);
-            element.gameObject.SetActive(false);
-
-            if (null == WorkerListViewElementsPool)
-            {
-                WorkerListViewElementsPool = new ObjectPool<ListViewElementWorker>();
-            }
-
-            WorkerListViewElementsPool.AddObject(element);
+            listView.RemoveControl(element.gameObject);
         }
 
         private void RemoveWorkerListViewElement(SharedWorker companyWorker)
         {
             LocalWorker worker = (LocalWorker)companyWorker;
             ControlListViewDrop workerListView = (null == worker.AssignedProject) ? ListViewAvailableWorkers : ListViewAssignedWorkers;
-            ListViewElementWorker listViewElement = UIWorkers.GetWorkerListViewElement(companyWorker, workerListView);
+            ListViewElement listViewElement = workerListView.FindElement(companyWorker);
             RemoveWorkerListViewElement(listViewElement, workerListView);
+        }
+
+        private string GetEstimatedCompletionTimeText(int days)
+        {
+            string estimatedCompletionStr = "Estimated completion time: ";
+
+            if (-1 != days)
+            {
+                estimatedCompletionStr = string.Format("Estimated completion time: {0} days",
+                                                       days);
+            }
+
+            return estimatedCompletionStr;
         }
 
         private string GetWorkerListViewElementText(LocalWorker worker)
@@ -407,15 +437,5 @@ namespace ITCompanySimulation.UI
         }
 
         /*Public methods*/
-
-        public void OnButtonStartProjectClicked()
-        {
-            SelectedScrum.StartProject();
-        }
-
-        public void OnButtonStopProjectClicked()
-        {
-            SelectedScrum.StopProject();
-        }
     }
 }

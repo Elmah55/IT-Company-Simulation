@@ -1,7 +1,6 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 using ITCompanySimulation.Project;
-using ITCompanySimulation.Utilities;
 using TMPro;
 using ITCompanySimulation.Core;
 
@@ -13,35 +12,16 @@ namespace ITCompanySimulation.UI
 
         /*Private fields*/
 
-        [SerializeField]
-        private ListViewElementProject ListViewProjectElementPrefab;
         /// <summary>
         /// Colors that will be applied to selected button component of list view element.
         /// </summary>
         [SerializeField]
         private ColorBlock ListViewElementSelectedColors;
-        [SerializeField]
-        [Tooltip("Color of project's list view element after being completed")]
-        private Color CompletedProjectListViewElementColors;
-        [SerializeField]
         private SimulationManager SimulationManagerComponent;
         [SerializeField]
         private TextMeshProUGUI TextMarketProjects;
         [SerializeField]
-        private TextMeshProUGUI TextCompanyProjects;
-        [SerializeField]
-        private TextMeshProUGUI TextProjectName;
-        [SerializeField]
-        private TextMeshProUGUI TextCompleteBonus;
-        [SerializeField]
-        private TextMeshProUGUI TextUsedTechnologies;
-        [SerializeField]
-        private TextMeshProUGUI TextCompletionTime;
-        [SerializeField]
         private ControlListView ListViewMarketProjects;
-        [SerializeField]
-        private ControlListView ListViewCompanyProjects;
-        [SerializeField]
         private ProjectsMarket ProjectsMarketComponent;
         [SerializeField]
         private Button ButtonTakeProject;
@@ -53,6 +33,13 @@ namespace ITCompanySimulation.UI
 
         /*Private methods*/
 
+        private void Awake()
+        {
+            GameObject scriptsGameObject = GameObject.FindGameObjectWithTag("ScriptsGameObject");
+            SimulationManagerComponent = scriptsGameObject.GetComponent<SimulationManager>();
+            ProjectsMarketComponent = scriptsGameObject.GetComponent<ProjectsMarket>();
+        }
+
         private void Start()
         {
             ButtonSelectorProjects = new ButtonSelector(ListViewElementSelectedColors);
@@ -62,29 +49,23 @@ namespace ITCompanySimulation.UI
                 OnProjectsMarketProjectAdded(proj.Value);
             }
 
-            foreach (Scrum scm in SimulationManagerComponent.ControlledCompany.ScrumProcesses)
-            {
-                OnControlledCompanyProjectAdded(scm);
-            }
-
-            SimulationManagerComponent.ControlledCompany.ProjectAdded += OnControlledCompanyProjectAdded;
             ProjectsMarketComponent.ProjectAdded += OnProjectsMarketProjectAdded;
             ProjectsMarketComponent.ProjectRemoved += OnProjectsMarketProjectRemoved;
             ButtonSelectorProjects.SelectedButtonChanged += OnButtonSelectorProjectsSelectedButtonChanged;
 
             ButtonTakeProject.interactable = false;
-
-            SetProjectInfoText(SelectedProject);
+            SetProjectInfoText(null);
         }
 
         private void SetProjectInfoText(SharedProject proj)
         {
             if (null != proj)
             {
-                TextProjectName.text = proj.Name;
-                TextCompleteBonus.text = string.Format("{0} $", proj.CompletionBonus);
-                TextUsedTechnologies.text = string.Format("{0}", GetProjectTechnologiesString(proj));
-                TextCompletionTime.text = string.Format("{0} days", proj.CompletionTime);
+                TextProjectName.text = string.Format("Project name: {0}", proj.Name);
+                TextCompleteBonus.text = string.Format("Completion bonus: <color=#4CD137>+ {0} $</color>", proj.CompletionBonus);
+                TextPenalty.text = string.Format("Exceeding completion time penalty: <color=#E84118>- {0} $</color>", proj.CompletionTimeExceededPenalty);
+                TextUsedTechnologies.text = string.Format("Used technologies: {0}", GetProjectTechnologiesString(proj));
+                TextCompletionTime.text = string.Format("Time for completion: {0} days", proj.CompletionTime);
             }
             else
             {
@@ -92,6 +73,7 @@ namespace ITCompanySimulation.UI
                 TextCompleteBonus.text = string.Empty;
                 TextUsedTechnologies.text = string.Empty;
                 TextCompletionTime.text = string.Empty;
+                TextPenalty.text = string.Empty;
             }
         }
 
@@ -113,21 +95,14 @@ namespace ITCompanySimulation.UI
                 ProjectsMarketComponent.Projects.Count);
         }
 
-        private void SetListViewCompanyProjectsText()
-        {
-            TextCompanyProjects.text = string.Format(
-                "Company projects ({0})",
-                SimulationManagerComponent.ControlledCompany.ScrumProcesses.Count);
-        }
-
         #region Events callbacks
 
         private void OnButtonSelectorProjectsSelectedButtonChanged(Button btn)
         {
             if (null != btn)
             {
-                ListViewElementProject el = btn.GetComponent<ListViewElementProject>();
-                SelectedProject = el.Project;
+                ListViewElement el = btn.GetComponent<ListViewElement>();
+                SelectedProject = (SharedProject)el.RepresentedObject;
             }
             else
             {
@@ -140,17 +115,11 @@ namespace ITCompanySimulation.UI
 
         private void OnProjectsMarketProjectRemoved(SharedProject proj)
         {
-            ListViewElementProject element = GetProjectListViewElement(ListViewMarketProjects, proj);
-
-            if (null == ListViewElementPool)
-            {
-                ListViewElementPool = new ObjectPool<ListViewElementProject>();
-            }
+            ListViewElement element = ListViewMarketProjects.FindElement(proj);
 
             element.gameObject.SetActive(false);
             ListViewMarketProjects.RemoveControl(element.gameObject, false);
             ButtonSelectorProjects.RemoveButton(element.Button);
-            ListViewElementPool.AddObject(element);
             SetListViewMarketProjectsText();
 
             proj.CompletionTimeUpdated -= OnMarketProjectCompletionTimeUpdated;
@@ -158,7 +127,7 @@ namespace ITCompanySimulation.UI
 
         private void OnProjectsMarketProjectAdded(SharedProject proj)
         {
-            ListViewElementProject newElement = CreateListViewElement(proj);
+            ListViewElement newElement = CreateListViewElement(proj);
             MousePointerEvents mousePtrEvts = newElement.GetComponent<MousePointerEvents>();
 
             mousePtrEvts.PointerDoubleClick.AddListener(() =>
@@ -175,42 +144,10 @@ namespace ITCompanySimulation.UI
             proj.CompletionTimeUpdated += OnMarketProjectCompletionTimeUpdated;
         }
 
-        private void OnCompanyProjectCompletionTimeUpdated(SharedProject proj)
-        {
-            ListViewElementProject element = GetProjectListViewElement(ListViewCompanyProjects, proj);
-            element.Text.text = base.GetProjectListViewElementText((LocalProject)proj);
-        }
-
         private void OnMarketProjectCompletionTimeUpdated(SharedProject proj)
         {
-            ListViewElementProject element = GetProjectListViewElement(ListViewMarketProjects, proj);
+            ListViewElement element = ListViewMarketProjects.FindElement(proj);
             element.Text.text = GetProjectListViewElementText(proj);
-        }
-
-        private void OnControlledCompanyProjectAdded(Scrum scrumObj)
-        {
-            ListViewElementProject newElement = CreateListViewElement(scrumObj.BindedProject);
-            ButtonSelectorProjects.AddButton(newElement.GetComponent<Button>());
-            ListViewCompanyProjects.AddControl(newElement.gameObject);
-            newElement.Text.text = base.GetProjectListViewElementText(scrumObj.BindedProject);
-
-            scrumObj.BindedProject.ProgressUpdated += OnProjectProgressUpdated;
-            scrumObj.BindedProject.Completed += OnProjectCompleted;
-            scrumObj.BindedProject.CompletionTimeUpdated += OnCompanyProjectCompletionTimeUpdated;
-
-            SetListViewCompanyProjectsText();
-        }
-
-        private void OnProjectCompleted(LocalProject proj)
-        {
-            ListViewElementProject element = GetProjectListViewElement(ListViewCompanyProjects, proj);
-            element.BackgroundImage.color = CompletedProjectListViewElementColors;
-        }
-
-        private void OnProjectProgressUpdated(LocalProject proj)
-        {
-            ListViewElementProject element = GetProjectListViewElement(ListViewCompanyProjects, proj);
-            element.Text.text = base.GetProjectListViewElementText(proj);
         }
 
         private string GetProjectListViewElementText(SharedProject proj)

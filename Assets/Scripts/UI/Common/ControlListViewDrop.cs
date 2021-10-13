@@ -45,12 +45,12 @@ namespace ITCompanySimulation.UI
 
         public void OnDrop(PointerEventData eventData)
         {
-            ListViewElementWorker e = eventData.pointerDrag.GetComponent<ListViewElementWorker>();
+            UIElementDrag drag = eventData.pointerDrag.GetComponent<UIElementDrag>();
             //Element might be dropped in list view that it was dragged from
             //For some reason sometimes Unity UI system call this even when
             //dropping at same object it was dragged from
             if (false == Controls.Contains(eventData.pointerDrag)
-                && e != null)
+                && drag != null)
             {
                 AddControl(eventData.pointerDrag);
             }

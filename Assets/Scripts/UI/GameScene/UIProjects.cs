@@ -1,6 +1,6 @@
 ﻿using ITCompanySimulation.Project;
-using ITCompanySimulation.Utilities;
 using System.Text;
+using TMPro;
 using UnityEngine;
 
 namespace ITCompanySimulation.UI
@@ -14,15 +14,23 @@ namespace ITCompanySimulation.UI
         protected IButtonSelector ButtonSelectorProjects;
         private static StringBuilder StrBuilder = new StringBuilder();
         [SerializeField]
-        private ListViewElementProject ListViewElementPrefab;
+        private ListViewElement ListViewElementPrefab;
         [SerializeField]
         protected Tooltip TooltipComponent;
+        [SerializeField]
+        protected TextMeshProUGUI TextProjectName;
+        [SerializeField]
+        protected TextMeshProUGUI TextCompleteBonus;
+        [SerializeField]
+        protected TextMeshProUGUI TextPenalty;
+        [SerializeField]
+        protected TextMeshProUGUI TextUsedTechnologies;
+        [SerializeField]
+        protected TextMeshProUGUI TextCompletionTime;
 
         /*Public consts fields*/
 
         /*Public fields*/
-
-        protected static IObjectPool<ListViewElementProject> ListViewElementPool;
 
         /*Private methods*/
 
@@ -54,28 +62,6 @@ namespace ITCompanySimulation.UI
         }
 
         /// <summary>
-        /// Returns list view element associated with given project
-        /// </summary>
-        /// <param name="listView">List view element will be searched in this list view</param>
-        protected ListViewElementProject GetProjectListViewElement(ControlListView listView, SharedProject proj)
-        {
-            GameObject elementObject = null;
-            ListViewElementProject element = null;
-
-            elementObject = listView.Controls.Find(x =>
-            {
-                return x.GetComponent<ListViewElementProject>().Project == proj;
-            });
-
-            if (null != elementObject)
-            {
-                element = elementObject.GetComponent<ListViewElementProject>();
-            }
-
-            return element;
-        }
-
-        /// <summary>
         /// Used to display text in tooltip component
         /// </summary>
         protected void SubscribeToMouseEventPointers(MousePointerEvents events, SharedProject proj, Tooltip tooltipComponent)
@@ -94,47 +80,17 @@ namespace ITCompanySimulation.UI
             });
         }
 
-        protected ListViewElementProject CreateListViewElement(SharedProject proj)
+        protected ListViewElement CreateListViewElement(SharedProject proj)
         {
-            ListViewElementProject newElement = null;
-
-            if (null != ListViewElementPool)
-            {
-                newElement = ListViewElementPool.GetObject();
-            }
-
-            if (null == newElement)
-            {
-                newElement = GameObject.Instantiate<ListViewElementProject>(ListViewElementPrefab);
-                MousePointerEvents events = newElement.GetComponent<MousePointerEvents>();
-                SubscribeToMouseEventPointers(events, proj, TooltipComponent);
-            }
-            else
-            {
-                MousePointerEvents events = newElement.GetComponent<MousePointerEvents>();
-                events.PointerEntered.RemoveAllListeners();
-                events.PointerExited.RemoveAllListeners();
-                SubscribeToMouseEventPointers(events, proj, TooltipComponent);
-            }
+            ListViewElement newElement = GameObject.Instantiate(ListViewElementPrefab);
+            MousePointerEvents events = newElement.GetComponent<MousePointerEvents>();
+            SubscribeToMouseEventPointers(events, proj, TooltipComponent);
 
             newElement.FrontImage.sprite = proj.Icon;
-            newElement.Project = proj;
+            newElement.RepresentedObject = proj;
             newElement.gameObject.SetActive(true);
 
             return newElement;
-        }
-
-        protected string GetEstimatedCompletionTimeText(int days)
-        {
-            string estimatedCompletionStr = string.Empty;
-
-            if (-1 != days)
-            {
-                estimatedCompletionStr = string.Format("{0} days",
-                                                       days);
-            }
-
-            return estimatedCompletionStr;
         }
 
         /*Public methods*/

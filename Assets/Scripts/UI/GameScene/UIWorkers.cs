@@ -27,9 +27,9 @@ namespace ITCompanySimulation.UI
 
         /*Public methods*/
 
-        public static ListViewElementWorker CreateWorkerListViewElement(SharedWorker worker, ListViewElementWorker prefab, Tooltip tooltipComponent = null)
+        public static ListViewElement CreateWorkerListViewElement(SharedWorker worker, ListViewElement prefab, Tooltip tooltipComponent = null)
         {
-            ListViewElementWorker element = GameObject.Instantiate<ListViewElementWorker>(prefab);
+            ListViewElement element = GameObject.Instantiate<ListViewElement>(prefab);
 
             if (null != tooltipComponent)
             {
@@ -48,7 +48,7 @@ namespace ITCompanySimulation.UI
             }
 
             element.Text.text = GetWorkerListViewElementText(worker);
-            element.Worker = worker;
+            element.RepresentedObject = worker;
             element.FrontImage.sprite = worker.Avatar;
 
             return element;
@@ -111,23 +111,6 @@ namespace ITCompanySimulation.UI
             return string.Format("Company workers ({0} / {1})",
                 company.Workers.Count,
                 PlayerCompany.MAX_WORKERS_PER_COMPANY);
-        }
-
-        /// <summary>
-        /// Returns list view element representing worker
-        /// </summary>
-        public static ListViewElementWorker GetWorkerListViewElement(SharedWorker worker, ControlListView listView)
-        {
-            GameObject elementGameObject = listView.Controls.Find(
-                x => x.GetComponent<ListViewElementWorker>().Worker == worker);
-            ListViewElementWorker element = null;
-
-            if (null != elementGameObject)
-            {
-                element = elementGameObject.GetComponent<ListViewElementWorker>();
-            }
-
-            return element;
         }
     }
 }

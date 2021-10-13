@@ -83,9 +83,9 @@ namespace ITCompanySimulation.UI
                 worker.Name, worker.Surename, worker.Satiscation.ToString("0.00"), worker.Salary);
         }
 
-        private ListViewElementWorker CreateWorkerListViewElement(LocalWorker companyWorker)
+        private ListViewElement CreateWorkerListViewElement(LocalWorker companyWorker)
         {
-            ListViewElementWorker element =
+            ListViewElement element =
                 UIWorkers.CreateWorkerListViewElement(companyWorker, WorkerListViewElementPrefab, TooltipComponent);
             element.Text.text = GetWorkerListViewElementText(companyWorker);
             Button buttonComponent = element.GetComponent<Button>();
@@ -139,7 +139,7 @@ namespace ITCompanySimulation.UI
 
         private void RemoveWorkerListViewElement(LocalWorker worker, ControlListView listView)
         {
-            ListViewElementWorker element = UIWorkers.GetWorkerListViewElement(worker, listView);
+            ListViewElement element = listView.FindElement(worker);
             Button buttonComponent = element.GetComponent<Button>();
             WorkersButtonsSelector.RemoveButton(buttonComponent);
             ListViewWorkers.RemoveControl(element.gameObject);
@@ -203,7 +203,7 @@ namespace ITCompanySimulation.UI
 
         private void OnWorkerSatisfactionChanged(SharedWorker companyWorker)
         {
-            ListViewElementWorker element = UIWorkers.GetWorkerListViewElement(companyWorker, ListViewWorkers);
+            ListViewElement element = ListViewWorkers.FindElement(companyWorker);
             element.Text.text = GetWorkerListViewElementText((LocalWorker)companyWorker);
         }
 
@@ -281,8 +281,8 @@ namespace ITCompanySimulation.UI
         public void OnButtonFireWorkerClicked()
         {
             Button selectedButton = WorkersButtonsSelector.GetSelectedButton();
-            ListViewElementWorker element = selectedButton.GetComponent<ListViewElementWorker>();
-            LocalWorker workerToRemove = (LocalWorker)element.Worker;
+            ListViewElement element = selectedButton.GetComponent<ListViewElement>();
+            LocalWorker workerToRemove = (LocalWorker)element.RepresentedObject;
 
             string infoWindowMsg = string.Format("Do you really want to fire {0} {1} ?",
                                                  workerToRemove.Name,
@@ -296,8 +296,8 @@ namespace ITCompanySimulation.UI
         {
             int salaryRaiseAmount = (int)SliderSalaryRaiseAmount.value;
             Button selectedButton = WorkersButtonsSelector.GetSelectedButton();
-            ListViewElementWorker element = selectedButton.GetComponent<ListViewElementWorker>();
-            LocalWorker companyWorker = (LocalWorker)element.Worker;
+            ListViewElement element = selectedButton.GetComponent<ListViewElement>();
+            LocalWorker companyWorker = (LocalWorker)element.RepresentedObject;
             companyWorker.Salary = companyWorker.Salary + salaryRaiseAmount;
         }
 

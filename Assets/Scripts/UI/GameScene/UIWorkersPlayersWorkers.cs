@@ -55,7 +55,7 @@ namespace ITCompanySimulation.UI
         /// <summary>
         /// Maps button in players list view to its coresponding worker
         /// </summary>
-        private Dictionary<SharedWorker, ListViewElementWorker> WorkerListViewMap;
+        private Dictionary<SharedWorker, ListViewElement> WorkerListViewMap;
         /// <summary>
         /// Maps photon player to its index in players dropdown
         /// </summary>
@@ -165,15 +165,15 @@ namespace ITCompanySimulation.UI
                 TextSalary.text = UIWorkers.GetWorkerSalaryString(companyWorker);
             }
 
-            ListViewElementWorker elem = null;
+            ListViewElement elem = null;
 
             if (companyWorker is LocalWorker)
             {
-                elem = UIWorkers.GetWorkerListViewElement(companyWorker, ListViewCompanyWorkers);
+                elem = ListViewCompanyWorkers.FindElement(companyWorker);
             }
             else
             {
-                elem = UIWorkers.GetWorkerListViewElement(companyWorker, ListViewOtherPlayersWorkers);
+                elem = ListViewOtherPlayersWorkers.FindElement(companyWorker);
             }
 
             elem.Text.text = UIWorkers.GetWorkerListViewElementText(companyWorker);
@@ -230,14 +230,14 @@ namespace ITCompanySimulation.UI
 
         private void AddWorkerListViewElement(SharedWorker playerWorker, ControlListView listView)
         {
-            ListViewElementWorker element =
+            ListViewElement element =
                 UIWorkers.CreateWorkerListViewElement(playerWorker, WorkerListViewElementPrefab, TooltipComponent);
 
             Button buttonComponent = element.GetComponent<Button>();
 
             if (null == WorkerListViewMap)
             {
-                WorkerListViewMap = new Dictionary<SharedWorker, ListViewElementWorker>();
+                WorkerListViewMap = new Dictionary<SharedWorker, ListViewElement>();
             }
 
             if (listView == ListViewOtherPlayersWorkers)
@@ -261,7 +261,7 @@ namespace ITCompanySimulation.UI
         {
             if (null != WorkerListViewMap)
             {
-                ListViewElementWorker element = WorkerListViewMap[worker];
+                ListViewElement element = WorkerListViewMap[worker];
                 Button buttonComponent = element.Button;
 
                 WorkerListViewMap.Remove(worker);

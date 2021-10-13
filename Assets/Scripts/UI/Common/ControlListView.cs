@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
-using UnityEngine.EventSystems;
-
 
 /// <summary>
 /// This is class for handling list view of UI controls.
@@ -76,5 +74,26 @@ public class ControlListView : MonoBehaviour
         {
             RemoveControlAt(i, destroyGameObjects);
         }
+    }
+
+    /// <summary>
+    /// Returns list view element that respresents object passed as argument.
+    /// </summary>
+    public ListViewElement FindElement(object representedObject)
+    {
+        ListViewElement result = null;
+
+        foreach (var control in Controls)
+        {
+            ListViewElement elem = control.GetComponent<ListViewElement>();
+
+            if (null != elem && elem.RepresentedObject == representedObject)
+            {
+                result = elem;
+                break;
+            }
+        }
+
+        return result;
     }
 }

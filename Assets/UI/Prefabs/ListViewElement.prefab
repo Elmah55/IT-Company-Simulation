@@ -408,5 +408,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_BackgroundImage: {fileID: 3112297472103586629}
+  m_FrontImage: {fileID: 0}
   m_Text: {fileID: 6476591121585805272}
   m_Button: {fileID: 4564011957279802767}

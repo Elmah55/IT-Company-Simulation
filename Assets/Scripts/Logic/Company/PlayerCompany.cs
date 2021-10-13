@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using ITCompanySimulation.Project;
 using ITCompanySimulation.Utilities;
+using ITCompanySimulation.Core;
 
 namespace ITCompanySimulation.Company
 {
@@ -17,6 +18,7 @@ namespace ITCompanySimulation.Company
         /*Private fields*/
 
         private SafeInt m_Balance;
+        private SimulationManager SimulationManagerComponent;
 
         /*Public consts fields*/
 
@@ -53,13 +55,12 @@ namespace ITCompanySimulation.Company
                 return result;
             }
         }
-        public List<LocalWorker> Workers { get; private set; }
+        public List<LocalWorker> Workers { get; private set; } = new List<LocalWorker>();
         /// <summary>
         /// List of scrum processes for this company. Every project
         /// has its own scrum instance
         /// </summary>
-        public List<Scrum> ScrumProcesses { get; private set; }
-        public List<LocalProject> CompletedProjects { get; private set; }
+        public List<Scrum> ScrumProcesses { get; private set; } = new List<Scrum>();
         public event LocalWorkerAction WorkerAdded;
         public event LocalWorkerAction WorkerRemoved;
         public event ScrumAtion ProjectAdded;
@@ -67,12 +68,30 @@ namespace ITCompanySimulation.Company
 
         /*Private methods*/
 
+        private void OnProjectAdded(Scrum projectScrum)
+        {
+            SimulationManagerComponent.NotificatorComponent.Notify("Project added to company");
+            projectScrum.BindedProject.Completed += OnProjectCompleted;
+        }
+
+        private void OnProjectCompleted(LocalProject proj)
+        {
+            for (int i = 0; i < ScrumProcesses.Count; i++)
+            {
+                if (ScrumProcesses[i].BindedProject == proj)
+                {
+                    ScrumProcesses.RemoveAt(i);
+                    break;
+                }
+            }
+        }
+
         /*Public methods*/
 
         public PlayerCompany(string name) : base(name)
         {
-            Workers = new List<LocalWorker>();
-            ScrumProcesses = new List<Scrum>();
+            SimulationManagerComponent = GameObject.FindGameObjectWithTag("ScriptsGameObject").GetComponent<SimulationManager>();
+            ProjectAdded += OnProjectAdded;
         }
 
         public void AddProject(LocalProject projectToAdd)

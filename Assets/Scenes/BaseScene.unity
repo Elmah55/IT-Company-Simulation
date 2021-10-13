@@ -624,16 +624,6 @@ PrefabInstance:
       propertyPath: m_Name
       value: ProgressBarSceneLoading
       objectReference: {fileID: 0}
-    - target: {fileID: 4125274841428777329, guid: 2ca5fb2d28aaba341a92e36ea0bbdd0a,
-        type: 3}
-      propertyPath: Value
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4125274841428777329, guid: 2ca5fb2d28aaba341a92e36ea0bbdd0a,
-        type: 3}
-      propertyPath: ProgressBarImage
-      value: 
-      objectReference: {fileID: 143107797}
     - target: {fileID: 4125274841428777330, guid: 2ca5fb2d28aaba341a92e36ea0bbdd0a,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -739,6 +729,16 @@ PrefabInstance:
       propertyPath: m_Pivot.y
       value: 0.5
       objectReference: {fileID: 0}
+    - target: {fileID: 4125274841428777329, guid: 2ca5fb2d28aaba341a92e36ea0bbdd0a,
+        type: 3}
+      propertyPath: Value
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4125274841428777329, guid: 2ca5fb2d28aaba341a92e36ea0bbdd0a,
+        type: 3}
+      propertyPath: ProgressBarImage
+      value: 
+      objectReference: {fileID: 143107797}
     - target: {fileID: 4125274841691323942, guid: 2ca5fb2d28aaba341a92e36ea0bbdd0a,
         type: 3}
       propertyPath: m_Color.r

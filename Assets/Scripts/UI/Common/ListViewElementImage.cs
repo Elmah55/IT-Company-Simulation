@@ -10,7 +10,7 @@ namespace ITCompanySimulation.UI
         /*Private fields*/
 
         [SerializeField]
-        private Image m_FrontImage;
+        private Image m_FrontImagee;
 
         /*Public consts fields*/
 
@@ -20,12 +20,12 @@ namespace ITCompanySimulation.UI
         {
             get
             {
-                return m_FrontImage;
+                return m_FrontImagee;
             }
 
             set
             {
-                m_FrontImage = value;
+                m_FrontImagee = value;
             }
         }
 

@@ -46,6 +46,7 @@ namespace ITCompanySimulation.Project
                 if (m_Progress != value)
                 {
                     m_Progress = value;
+                    ProgressUpdated?.Invoke(this);
 
                     if (m_Progress >= 100.0f)
                     {
@@ -53,8 +54,6 @@ namespace ITCompanySimulation.Project
                         IsActive = false;
                         Completed?.Invoke(this);
                     }
-
-                    ProgressUpdated?.Invoke(this);
                 }
             }
         }
