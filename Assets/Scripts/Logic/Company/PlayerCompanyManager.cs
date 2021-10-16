@@ -269,6 +269,29 @@ namespace ITCompanySimulation.Company
             scrumObj.BindedProject.Completed += OnCompanyProjectCompleted;
         }
 
+        private void OnCompanyProjectRemoved(Scrum scrumObj)
+        {
+            //Project removed before being completed (project canceled). Company should be charged penalty
+            if (false == scrumObj.BindedProject.IsCompleted)
+            {
+                LocalProject canceledProject = scrumObj.BindedProject;
+                SimulationManagerComponent.ControlledCompany.Balance -= canceledProject.CompletionTimeExceededPenalty;
+                string notificationTxt = string.Format("Project {0} canceled, {1} $ penalty has been charged",
+                                                       canceledProject.Name,
+                                                       canceledProject.CompletionTimeExceededPenalty);
+                SimulationManagerComponent.NotificatorComponent.Notify(notificationTxt);
+
+#if DEVELOPMENT_BUILD || UNITY_EDITOR
+                string debugInfo = string.Format("[{3}] Project canceled\nName: {0}\nID: {1}\nPenalty: {2}",
+                                                 canceledProject.Name,
+                                                 canceledProject.ID,
+                                                 canceledProject.CompletionTimeExceededPenalty,
+                                                 this.GetType().Name);
+                Debug.Log(debugInfo);
+#endif
+            }
+        }
+
         private void OnCompanyProjectCompleted(LocalProject newProject)
         {
             SimulationManagerComponent.ControlledCompany.Balance +=
@@ -329,6 +352,7 @@ namespace ITCompanySimulation.Company
             GameTimeComponent.YearChanged += HandleWorkerHolidayLimits;
 
             SimulationManagerComponent.ControlledCompany.ProjectAdded += OnCompanyProjectAdded;
+            SimulationManagerComponent.ControlledCompany.ProjectRemoved += OnCompanyProjectRemoved;
             SimulationManagerComponent.ControlledCompany.WorkerRemoved += OnCompanyWorkerRemoved;
             SimulationManagerComponent.ControlledCompany.WorkerAdded += OnCompanyWorkerAdded;
 

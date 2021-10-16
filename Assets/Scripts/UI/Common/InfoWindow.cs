@@ -23,17 +23,22 @@ namespace ITCompanySimulation.UI
         [SerializeField]
         private Button CancelButton;
         /// <summary>
-        /// Invoked when player clicks "Ok" button in this window
+        /// Game object displaying contents of info window.
+        /// </summary>
+        [SerializeField]
+        private GameObject DisplayDataObject;
+        /// <summary>
+        /// Invoked when player clicks "Ok" button in this window.
         /// </summary>
         private UnityAction ConfirmButtonClicked;
         /// <summary>
-        /// Invoked when player clicks "Cancel" button in this window
+        /// Invoked when player clicks "Cancel" button in this window.
         /// </summary>
         private UnityAction CancelButtonClicked;
         /// <summary>
-        /// Info window actions will be queued here in case showing window is called when info window is already visible
+        /// Info window actions will be queued here in case showing window is called when info window is already visible.
         /// </summary>
-        private Queue<InfoWindowData> InfoWindowActions;
+        private Queue<InfoWindowData> InfoWindowActions = new Queue<InfoWindowData>();
         private struct InfoWindowData
         {
             public string Text;
@@ -87,13 +92,10 @@ namespace ITCompanySimulation.UI
 
         private void Show(string text, UnityAction onConfirmAction, UnityAction onCancelAction, InfoWindowType type)
         {
-            if (true == gameObject.GetActive())
+            if (true == DisplayDataObject.GetActive())
             {
-                //Info window is already active, store show action so it can be displayed after user closes window
-                if (null == InfoWindowActions)
-                {
-                    InfoWindowActions = new Queue<InfoWindowData>();
-                }
+                //Info window is already active and is displaying other data,
+                //store data so it can be displayed after user closes window
 
                 InfoWindowData data = new InfoWindowData();
                 data.Text = text;
@@ -126,7 +128,7 @@ namespace ITCompanySimulation.UI
                 this.Text = text;
                 ConfirmButtonClicked = onConfirmAction;
                 CancelButtonClicked = onCancelAction;
-                gameObject.SetActive(true);
+                DisplayDataObject.SetActive(true);
             }
         }
 
@@ -172,13 +174,15 @@ namespace ITCompanySimulation.UI
         /// </summary>
         public void Hide()
         {
-            gameObject.SetActive(false);
-
-            if (null != InfoWindowActions && InfoWindowActions.Count > 0)
+            if (InfoWindowActions.Count > 0)
             {
                 //Show next data
                 InfoWindowData data = InfoWindowActions.Dequeue();
                 Show(data.Text, data.OnConfirmAction, data.OnCancelAction, data.Type);
+            }
+            else
+            {
+                DisplayDataObject.SetActive(false);
             }
         }
     }

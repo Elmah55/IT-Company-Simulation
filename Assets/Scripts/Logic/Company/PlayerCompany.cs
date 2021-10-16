@@ -64,6 +64,7 @@ namespace ITCompanySimulation.Company
         public event LocalWorkerAction WorkerAdded;
         public event LocalWorkerAction WorkerRemoved;
         public event ScrumAtion ProjectAdded;
+        public event ScrumAtion ProjectRemoved;
         public event BalanceChangeAction BalanceChanged;
 
         /*Private methods*/
@@ -76,14 +77,7 @@ namespace ITCompanySimulation.Company
 
         private void OnProjectCompleted(LocalProject proj)
         {
-            for (int i = 0; i < ScrumProcesses.Count; i++)
-            {
-                if (ScrumProcesses[i].BindedProject == proj)
-                {
-                    ScrumProcesses.RemoveAt(i);
-                    break;
-                }
-            }
+            RemoveProject(proj);
         }
 
         /*Public methods*/
@@ -101,8 +95,28 @@ namespace ITCompanySimulation.Company
             ProjectAdded?.Invoke(newScrum);
 
 #if DEVELOPMENT_BUILD || UNITY_EDITOR
-            string debugInfo = string.Format("[{3}] Project added to company\nName {0}\nID {1}\nComplete bonus {2}",
+            string debugInfo = string.Format("[{3}] Project added to company\nName: {0}\nID {1}\nComplete bonus: {2}",
                 projectToAdd.Name, projectToAdd.ID, projectToAdd.CompletionBonus, this.GetType().Name);
+            Debug.Log(debugInfo);
+#endif
+        }
+
+        public void RemoveProject(LocalProject projectToRemove)
+        {
+            for (int i = 0; i < ScrumProcesses.Count; i++)
+            {
+                if (ScrumProcesses[i].BindedProject == projectToRemove)
+                {
+                    Scrum projectScrum = ScrumProcesses[i];
+                    ScrumProcesses.RemoveAt(i);
+                    ProjectRemoved?.Invoke(projectScrum);
+                    break;
+                }
+            }
+
+#if DEVELOPMENT_BUILD || UNITY_EDITOR
+            string debugInfo = string.Format("[{2}] Project removed from company\nName: {0}\nID {1}",
+                projectToRemove.Name, projectToRemove.ID, this.GetType().Name);
             Debug.Log(debugInfo);
 #endif
         }
@@ -115,7 +129,7 @@ namespace ITCompanySimulation.Company
             WorkerAdded?.Invoke(workerToAdd);
 
 #if DEVELOPMENT_BUILD || UNITY_EDITOR
-            string debugInfo = string.Format("[{3}] Worker added to company\nName {0} {1}\nID {2}\n",
+            string debugInfo = string.Format("[{3}] Worker added to company\nName: {0} {1}\nID: {2}\n",
                 workerToAdd.Name, workerToAdd.Surename, workerToAdd.ID, this.GetType().Name);
             Debug.Log(debugInfo);
 #endif

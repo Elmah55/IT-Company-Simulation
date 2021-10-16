@@ -5,6 +5,7 @@ using TMPro;
 using System.Linq;
 using ITCompanySimulation.Project;
 using ITCompanySimulation.Core;
+using UnityEngine.Events;
 
 namespace ITCompanySimulation.UI
 {
@@ -47,6 +48,7 @@ namespace ITCompanySimulation.UI
         private Button ButtonAssignWorkers;
         [SerializeField]
         private Button ButtonCancelProject;
+        private InfoWindow InfoWindowComponent;
         /// <summary>
         /// Scrum object of project that is currently selected
         /// </summary>
@@ -61,6 +63,7 @@ namespace ITCompanySimulation.UI
         private void Awake()
         {
             GameObject scriptsObject = GameObject.FindGameObjectWithTag("ScriptsGameObject");
+            InfoWindowComponent = GameObject.FindGameObjectWithTag("InfoWindow").GetComponent<InfoWindow>();
             SimulationManagerComponent = scriptsObject.GetComponent<SimulationManager>();
             GameTimeComponent = scriptsObject.GetComponent<GameTime>();
         }
@@ -84,6 +87,7 @@ namespace ITCompanySimulation.UI
             SimulationManagerComponent.ControlledCompany.WorkerAdded += OnControlledCompanyWorkerAdded;
             SimulationManagerComponent.ControlledCompany.WorkerRemoved += OnControlledCompanyWorkerRemoved;
             SimulationManagerComponent.ControlledCompany.ProjectAdded += OnControlledCompanyProjectAdded;
+            SimulationManagerComponent.ControlledCompany.ProjectRemoved += OnControlledCompanyProjectRemoved;
             ButtonSelectorProjects.SelectedButtonChanged += OnProjectListViewSelectedElementChanged;
             ListViewAssignedWorkers.ControlAdded += OnListViewAssignedWorkersControlAdded;
             ListViewAssignedWorkers.ControlRemoved += OnListViewAssignedWorkersControlRemoved;
@@ -182,14 +186,13 @@ namespace ITCompanySimulation.UI
 
                 scrumObj.BindedProject.ProgressUpdated += OnProjectProgressUpdated;
                 scrumObj.BindedProject.WorkerRemoved += OnProjectWorkerRemoved;
-                scrumObj.BindedProject.Completed += OnProjectCompleted;
                 SetListViewCompanyProjectsText();
             }
         }
 
-        private void OnProjectCompleted(LocalProject proj)
+        private void OnControlledCompanyProjectRemoved(Scrum scrumObj)
         {
-            ListViewElement projectListViewElement = ListViewCompanyProjects.FindElement(proj);
+            ListViewElement projectListViewElement = ListViewCompanyProjects.FindElement(scrumObj.BindedProject);
             Button listViewElementButton = projectListViewElement.GetComponent<Button>();
             ButtonSelectorProjects.RemoveButton(listViewElementButton);
             ListViewCompanyProjects.RemoveControl(projectListViewElement.gameObject);
@@ -437,5 +440,19 @@ namespace ITCompanySimulation.UI
         }
 
         /*Public methods*/
+
+        public void OnButtonCancelProjectClicked()
+        {
+            string infoWindowTxt = string.Format("Do you really want to cancel project {0} ? " +
+                                                 "Your company will be charged {1} $ of penalty.",
+                                                 SelectedScrum.BindedProject.Name,
+                                                 SelectedScrum.BindedProject.CompletionTimeExceededPenalty);
+            UnityAction okAction = () =>
+              {
+                  SimulationManagerComponent.ControlledCompany.RemoveProject(SelectedScrum.BindedProject);
+              };
+
+            InfoWindowComponent.ShowOkCancel(infoWindowTxt, okAction, null);
+        }
     }
 }
