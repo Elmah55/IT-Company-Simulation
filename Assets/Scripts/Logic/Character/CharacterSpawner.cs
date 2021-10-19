@@ -76,8 +76,9 @@ namespace ITCompanySimulation.Character
             randomIndex = Random.Range(0, characterPrefabs.Length);
             GameObject newCharacter = GameObject.Instantiate(characterPrefabs[randomIndex], spawnPos, Quaternion.identity, transform);
 
-            CharacterText textComponent = newCharacter.GetComponentInChildren<CharacterText>();
+            WorkerText textComponent = newCharacter.GetComponentInChildren<WorkerText>();
             textComponent.Text = string.Format("{0} {1}", companyWorker.Name, companyWorker.Surename);
+            textComponent.Worker = companyWorker;
 
             companyWorker.AbsenceStarted += OnWorkerAbsenceStarted;
             companyWorker.AbsenceFinished += OnWorkerAbsenceFinished;
