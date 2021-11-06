@@ -1,6 +1,5 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
-using ITCompanySimulation.Utilities;
 using ITCompanySimulation.Multiplayer;
 using ExitGames.Client.Photon;
 using TMPro;
@@ -32,18 +31,16 @@ namespace ITCompanySimulation.UI
         [SerializeField]
         private TextMeshProUGUI TextButtonReady;
         [SerializeField]
-        private ListViewElementPhotonPlayer ListViewElementPrefab;
+        private ListViewElement ListViewElementPlayerPrefab;
         /// <summary>
         /// Will hold buttons displaying info about players in
         /// current room
         /// </summary>
         [SerializeField]
         private ControlListView ListViewPlayers;
-        [SerializeField]
         private ApplicationManager ApplicationManagerComponent;
         [SerializeField]
         private GameObject PanelMainLobby;
-        private IObjectPool<ListViewElementPhotonPlayer> ListViewElementPool;
         [SerializeField]
         TextMeshProUGUI TextListViewPlayers;
         [SerializeField]
@@ -87,12 +84,7 @@ namespace ITCompanySimulation.UI
 
         private void OnDisable()
         {
-            for (int i = ListViewPlayers.Controls.Count - 1; i >= 0; i--)
-            {
-                ListViewElementPhotonPlayer element =
-                    ListViewPlayers.Controls[i].GetComponent<ListViewElementPhotonPlayer>();
-                DisablePlayerListViewElement(element);
-            }
+            ListViewPlayers.RemoveAllControls();
         }
 
         private void AddPlayersListViewElements()
@@ -101,18 +93,6 @@ namespace ITCompanySimulation.UI
             {
                 AddPlayerListViewElement(player);
             }
-        }
-
-        /// <summary>
-        /// Returns list view element associated with given photon player
-        /// </summary>
-        /// <param name="listView">List view element will be searched in this list view</param>
-        private ListViewElementPhotonPlayer GetPhotonPlayerListViewElement(ControlListView listView, PhotonPlayer player)
-        {
-            return listView.Controls.Find((x) =>
-            {
-                return x.GetComponent<ListViewElementPhotonPlayer>().Player.ID == player.ID;
-            }).GetComponent<ListViewElementPhotonPlayer>();
         }
 
         /// <summary>
@@ -171,7 +151,7 @@ namespace ITCompanySimulation.UI
         /// <summary>
         /// Sets color if image according to player state
         /// </summary>
-        private void SetListViewElementImageColor(ListViewElementPhotonPlayer element, RoomLobbyPlayerState state)
+        private void SetListViewElementImageColor(ListViewElement element, RoomLobbyPlayerState state)
         {
             switch (state)
             {
@@ -188,27 +168,14 @@ namespace ITCompanySimulation.UI
 
         private void AddPlayerListViewElement(PhotonPlayer player)
         {
-            ListViewElementPhotonPlayer element = null;
-
-            if (null != ListViewElementPool)
-            {
-                element = ListViewElementPool.GetObject();
-            }
-
-            if (null == element)
-            {
-                element = GameObject.Instantiate<ListViewElementPhotonPlayer>(ListViewElementPrefab);
-            }
-            else
-            {
-                element.gameObject.SetActive(true);
-            }
-
-            ListViewPlayers.AddControl(element.gameObject);
+            ListViewElement element =
+                GameObject.Instantiate<ListViewElement>(ListViewElementPlayerPrefab);
 
             string buttonText = GetPlayerListViewElementText(player);
             element.Text.text = buttonText;
-            element.Player = player;
+            element.RepresentedObject = player;
+
+            ListViewPlayers.AddControl(element.gameObject);
 
             if (false == PhotonNetwork.offlineMode)
             {
@@ -217,23 +184,6 @@ namespace ITCompanySimulation.UI
                 SetListViewElementImageColor(element, playerState);
             }
 
-        }
-
-        /// <summary>
-        /// Disables list view element and returns it back to pool
-        /// </summary>
-        /// <param name="element"></param>
-        private void DisablePlayerListViewElement(ListViewElementPhotonPlayer element)
-        {
-            ListViewPlayers.RemoveControl(element.gameObject, false);
-
-            if (null == ListViewElementPool)
-            {
-                ListViewElementPool = new ObjectPool<ListViewElementPhotonPlayer>();
-            }
-
-            element.gameObject.SetActive(false);
-            ListViewElementPool.AddObject(element);
         }
 
         private void SetStartButtonState()
@@ -305,10 +255,8 @@ namespace ITCompanySimulation.UI
         {
             base.OnPhotonPlayerDisconnected(disconnectedPlayer);
 
-            ListViewElementPhotonPlayer playerElement =
-                GetPhotonPlayerListViewElement(ListViewPlayers, disconnectedPlayer);
-
-            DisablePlayerListViewElement(playerElement);
+            ListViewElement playerElement = ListViewPlayers.FindElement(disconnectedPlayer);
+            ListViewPlayers.RemoveControl(playerElement.gameObject);
 
             SetStartButtonState();
             SetListViewPlayersText();
@@ -318,7 +266,7 @@ namespace ITCompanySimulation.UI
         {
             base.OnMasterClientSwitched(newMasterClient);
 
-            ListViewElementPhotonPlayer newMasterClientElement = GetPhotonPlayerListViewElement(ListViewPlayers, newMasterClient);
+            ListViewElement newMasterClientElement = ListViewPlayers.FindElement(newMasterClient);
             newMasterClientElement.Text.text = GetPlayerListViewElementText(newMasterClient);
 
             if (true == PhotonNetwork.isMasterClient)
@@ -338,7 +286,7 @@ namespace ITCompanySimulation.UI
             PhotonPlayer player = (PhotonPlayer)playerAndUpdatedProps[0];
             Hashtable customProperties = (Hashtable)playerAndUpdatedProps[1];
 
-            ListViewElementPhotonPlayer playerElement = GetPhotonPlayerListViewElement(ListViewPlayers, player);
+            ListViewElement playerElement = ListViewPlayers.FindElement(player);
             RoomLobbyPlayerState state =
                 (RoomLobbyPlayerState)customProperties[PlayerCustomPropertiesKey.RoomLobbyPlayerState.ToString()];
             SetListViewElementImageColor(playerElement, state);

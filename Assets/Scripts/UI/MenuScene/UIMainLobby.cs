@@ -28,12 +28,11 @@ namespace ITCompanySimulation.UI
         /// Prefab to be used in rooms list view
         /// </summary>
         [SerializeField]
-        private ListViewElementRoom ListViewElementPrefab;
+        private ListViewElement ListViewElementPrefab;
         [SerializeField]
         private Button ButtonJoinRoom;
         [SerializeField]
         private InfoWindow InfoWindowComponent;
-        private Queue<ListViewElementRoom> ListViewElementPool;
         private RoomInfo SelectedRoom;
 
         /*Public consts fields*/
@@ -47,7 +46,7 @@ namespace ITCompanySimulation.UI
             if (null != selectedButton)
             {
                 SelectedRoom =
-                    RoomButtonSelector.GetSelectedButton().GetComponent<ListViewElementRoom>().Room;
+                    (RoomInfo)selectedButton.GetComponent<ListViewElement>().RepresentedObject;
                 ButtonJoinRoom.interactable = SelectedRoom.IsOpen
                     && SelectedRoom.PlayerCount <= SelectedRoom.MaxPlayers;
             }
@@ -62,19 +61,8 @@ namespace ITCompanySimulation.UI
         {
             foreach (RoomInfo room in PhotonNetwork.GetRoomList())
             {
-                ListViewElementRoom element;
-
-                if (null != ListViewElementPool && ListViewElementPool.Count > 0)
-                {
-                    element = ListViewElementPool.Dequeue();
-                    element.gameObject.SetActive(true);
-                }
-                else
-                {
-                    element = GameObject.Instantiate<ListViewElementRoom>(ListViewElementPrefab);
-                }
-
-                element.Room = room;
+                ListViewElement element = GameObject.Instantiate<ListViewElement>(ListViewElementPrefab);
+                element.RepresentedObject = room;
                 Button buttonComponent = element.GetComponent<Button>();
 
                 string roomStatusText = room.IsOpen ? "In lobby" : "In progress";
@@ -103,19 +91,7 @@ namespace ITCompanySimulation.UI
 
         private void RefreshRoomList()
         {
-            if (ListViewRooms.Controls.Count > 0 && null == ListViewElementPool)
-            {
-                ListViewElementPool = new Queue<ListViewElementRoom>();
-            }
-
-            foreach (GameObject obj in ListViewRooms.Controls)
-            {
-                ListViewElementRoom elem = obj.GetComponent<ListViewElementRoom>();
-                elem.gameObject.SetActive(false);
-                ListViewElementPool.Enqueue(elem);
-            }
-
-            ListViewRooms.RemoveAllControls(false);
+            ListViewRooms.RemoveAllControls();
             RoomButtonSelector.RemoveAllButtons();
             AddLobbbyRoomsButtons();
             ButtonJoinRoom.interactable = false;
@@ -165,5 +141,5 @@ namespace ITCompanySimulation.UI
 
             InfoWindowComponent.ShowOk(codeAndMsg[1].ToString(), RefreshRoomList);
         }
-    } 
+    }
 }

@@ -12259,10 +12259,9 @@ MonoBehaviour:
   ButtonStartGame: {fileID: 1187996982}
   ButtonReady: {fileID: 1670898186}
   TextButtonReady: {fileID: 1761067008}
-  ListViewElementPrefab: {fileID: 1576907716044222264, guid: e20a4233070de994d8f16ab5e4a98fe1,
+  ListViewElementPlayerPrefab: {fileID: 4646888631135907256, guid: e41c8d3ebf947a84db7d99aaca559e6c,
     type: 3}
   ListViewPlayers: {fileID: 1929416853}
-  ApplicationManagerComponent: {fileID: 0}
   PanelMainLobby: {fileID: 1570264024}
   TextListViewPlayers: {fileID: 1833662251}
   TextRoomName: {fileID: 468523297}
@@ -12425,7 +12424,7 @@ MonoBehaviour:
   PanelRoomLobby: {fileID: 1560261269}
   ListViewRooms: {fileID: 1372241920}
   TextRoomList: {fileID: 190689842}
-  ListViewElementPrefab: {fileID: 2856125452965984952, guid: e41c8d3ebf947a84db7d99aaca559e6c,
+  ListViewElementPrefab: {fileID: 4646888631135907256, guid: e41c8d3ebf947a84db7d99aaca559e6c,
     type: 3}
   ButtonJoinRoom: {fileID: 435496526}
   InfoWindowComponent: {fileID: 2013029160}
