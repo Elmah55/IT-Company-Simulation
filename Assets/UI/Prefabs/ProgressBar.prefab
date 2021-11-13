@@ -128,7 +128,8 @@ MonoBehaviour:
   MinimumValue: 0
   MaximumValue: 100
   Value: 46.7
-  ProgressBarImage: {fileID: 4125274841691323942}
+  ProgressImage: {fileID: 4125274841691323942}
+  Text: {fileID: 0}
 --- !u!1 &4125274841691323944
 GameObject:
   m_ObjectHideFlags: 0

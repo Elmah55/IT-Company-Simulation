@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 using ITCompanySimulation.Utilities;
+using TMPro;
 
 namespace ITCompanySimulation.UI
 {
@@ -20,17 +21,18 @@ namespace ITCompanySimulation.UI
         public float MinimumValue;
         public float MaximumValue;
         public float Value;
-        [Tooltip("Image that will be updated when progress bar's value changes")]
-        [SerializeField]
-        private Image ProgressBarImage;
+        [Tooltip("Image that will be updated when progress bar's value changes.")]
+        public Image ProgressImage;
+        [Tooltip("Text displayed on progress bar.")]
+        public TextMeshProUGUI Text;
 
         /*Private methods*/
 
         private void Start()
         {
-            if (Image.Type.Sliced == ProgressBarImage.type)
+            if (Image.Type.Sliced == ProgressImage.type)
             {
-                ForegroundImageTransform = ProgressBarImage.gameObject.GetComponent<RectTransform>();
+                ForegroundImageTransform = ProgressImage.gameObject.GetComponent<RectTransform>();
             }
         }
 
@@ -49,14 +51,14 @@ namespace ITCompanySimulation.UI
 
             //For normal progress bar update image scale,
             //for radial progress bar usage image fill property
-            if (Image.Type.Sliced == ProgressBarImage.type)
+            if (Image.Type.Sliced == ProgressImage.type)
             {
                 Vector3 newScale = new Vector3(transformScaleX, 1f, 1f);
                 ForegroundImageTransform.localScale = newScale;
             }
-            else if (Image.Type.Filled == ProgressBarImage.type)
+            else if (Image.Type.Filled == ProgressImage.type)
             {
-                ProgressBarImage.fillAmount = transformScaleX;
+                ProgressImage.fillAmount = transformScaleX;
             }
         }
 

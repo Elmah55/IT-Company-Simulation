@@ -17,9 +17,9 @@ namespace ITCompanySimulation.UI
         [SerializeField]
         private IButtonSelector WorkersButtonsSelector = new ButtonSelector();
         [SerializeField]
-        private ListViewElementWorker WorkerListViewElementPrefab;
+        private ListViewElement WorkerListViewElementPrefab;
         [SerializeField]
-        private ControlListView ListViewWorkers;
+        private ControlListView ListViewCompanyWorkers;
         [SerializeField]
         private Button ButtonFireWorker;
         [SerializeField]
@@ -31,18 +31,17 @@ namespace ITCompanySimulation.UI
         [SerializeField]
         private TextMeshProUGUI TextName;
         [SerializeField]
-        private TextMeshProUGUI TextAbilities;
-        [SerializeField]
         private TextMeshProUGUI TextSalary;
         [SerializeField]
         private TextMeshProUGUI TextDaysInCompany;
         [SerializeField]
         private TextMeshProUGUI TextExpierience;
         [SerializeField]
-        private TextMeshProUGUI TextSatisfaction;
-        [SerializeField]
         private TextMeshProUGUI TextListViewWorkers;
         [SerializeField]
+        private ProgressBar ProgressBarSatisfaction;
+        [SerializeField]
+        private WorkerAbilitiesDisplay AbilitiesDisplay;
         private SimulationManager SimulationManagerComponent;
         [SerializeField]
         private Tooltip TooltipComponent;
@@ -57,24 +56,17 @@ namespace ITCompanySimulation.UI
         /*Private methods*/
 
         /// <summary>
-        /// Set values of text component with information about worker
+        /// Set values in components displaying information about worker.
         /// </summary>
-        private void SetWorkerText()
+        private void SetWorkerInfo()
         {
             TextName.text = UIWorkers.GetWorkerNameString(SelectedWorker);
-            SetWorkerAbilitiesText();
             TextSalary.text = UIWorkers.GetWorkerSalaryString(SelectedWorker);
             TextExpierience.text = UIWorkers.GetWorkerExpierienceString(SelectedWorker);
             TextDaysInCompany.text = UIWorkers.GetWorkerDaysInCompanyString(SelectedWorker);
-            TextSatisfaction.text = UIWorkers.GetWorkerSatisfactionString(SelectedWorker);
-        }
-
-        private void SetWorkerAbilitiesText()
-        {
-            TextAbilities.text = UIWorkers.GetWorkerAbilitiesString(SelectedWorker);
-            RectTransform transform = TextAbilities.transform.parent.GetComponent<RectTransform>();
-            Vector2 newSize = new Vector2(transform.rect.width, TextAbilities.preferredHeight);
-            transform.sizeDelta = newSize;
+            ProgressBarSatisfaction.Text.text = UIWorkers.GetWorkerSatisfactionString(SelectedWorker);
+            ProgressBarSatisfaction.Value = SelectedWorker.Satiscation;
+            AbilitiesDisplay.DisplayWorkerAbilities(SelectedWorker);
         }
 
         private string GetWorkerListViewElementText(LocalWorker worker)
@@ -91,7 +83,7 @@ namespace ITCompanySimulation.UI
             Button buttonComponent = element.GetComponent<Button>();
 
             WorkersButtonsSelector.AddButton(buttonComponent);
-            ListViewWorkers.AddControl(element.gameObject);
+            ListViewCompanyWorkers.AddControl(element.gameObject);
 
             //List view element contains information about satisfaction so it should be updated whenever it changes
             companyWorker.SatisfactionChanged += OnWorkerSatisfactionChanged;
@@ -108,14 +100,16 @@ namespace ITCompanySimulation.UI
 
             //This is called to update all UI elements associated with this slider
             OnSalaryRaiseAmountSliderValueChanged(SliderSalaryRaiseAmount.value);
-            ToggleWorkerInfoText(false);
+            ToggleWorkerInfo(false);
             ButtonGiveSalaryRaise.interactable = false;
             SliderSalaryRaiseAmount.interactable = false;
+            ProgressBarSatisfaction.MinimumValue = 0f;
+            ProgressBarSatisfaction.MaximumValue = 100f;
+            ProgressBarSatisfaction.Value = 0f;
         }
 
         private void SubscribeToWorkerEvents(LocalWorker companyWorker)
         {
-            companyWorker.AbilityUpdated += OnCompanyWorkerAbilityUpdated;
             companyWorker.SatisfactionChanged += OnCompanyWorkerSatisfactionChanged;
             companyWorker.DaysInCompanyChanged += OnCompanyWorkerDaysInCompanyChanged;
             companyWorker.SalaryChanged += OnCompanyWorkerSalaryChanged;
@@ -124,17 +118,10 @@ namespace ITCompanySimulation.UI
 
         private void UnsubscribeFromWorkerEvents(LocalWorker companyWorker)
         {
-            companyWorker.AbilityUpdated -= OnCompanyWorkerAbilityUpdated;
             companyWorker.SatisfactionChanged -= OnCompanyWorkerSatisfactionChanged;
             companyWorker.DaysInCompanyChanged -= OnCompanyWorkerDaysInCompanyChanged;
             companyWorker.SalaryChanged -= OnCompanyWorkerSalaryChanged;
             companyWorker.ExpierienceTimeChanged -= OnCompanyWorkerExpierienceTimeChanged;
-        }
-
-        private void OnCompanyWorkerAbilityUpdated(SharedWorker worker, ProjectTechnology workerAbility, float workerAbilityValue)
-        {
-            LocalWorker companyWorker = (LocalWorker)worker;
-            SetWorkerAbilitiesText();
         }
 
         private void RemoveWorkerListViewElement(LocalWorker worker, ControlListView listView)
@@ -142,7 +129,7 @@ namespace ITCompanySimulation.UI
             ListViewElement element = listView.FindElement(worker);
             Button buttonComponent = element.GetComponent<Button>();
             WorkersButtonsSelector.RemoveButton(buttonComponent);
-            ListViewWorkers.RemoveControl(element.gameObject);
+            ListViewCompanyWorkers.RemoveControl(element.gameObject);
             worker.SatisfactionChanged -= OnWorkerSatisfactionChanged;
         }
 
@@ -174,6 +161,12 @@ namespace ITCompanySimulation.UI
             return workerInfo;
         }
 
+        private void Awake()
+        {
+            GameObject scripts = GameObject.FindGameObjectWithTag("ScriptsGameObject");
+            SimulationManagerComponent = scripts.GetComponent<SimulationManager>();
+        }
+
         private void Start()
         {
             SliderSalaryRaiseAmount.onValueChanged.AddListener(OnSalaryRaiseAmountSliderValueChanged);
@@ -185,26 +178,28 @@ namespace ITCompanySimulation.UI
         }
 
         /// <summary>
-        /// Toggles worker info text on/off
+        /// Toggles worker info on/off
         /// </summary>
         /// <param name="on">True to toggle on, false to toggle off</param>
-        private void ToggleWorkerInfoText(bool on)
+        private void ToggleWorkerInfo(bool on)
         {
             TextName.gameObject.SetActive(on);
-            TextAbilities.gameObject.SetActive(on);
             TextSalary.gameObject.SetActive(on);
             TextExpierience.gameObject.SetActive(on);
             TextDaysInCompany.gameObject.SetActive(on);
             TextName.gameObject.SetActive(on);
-            TextSatisfaction.gameObject.SetActive(on);
+            ProgressBarSatisfaction.Text.gameObject.SetActive(on);
+            ProgressBarSatisfaction.Value = on ? ProgressBarSatisfaction.Value : 0f;
         }
 
         #region Event callbacks
 
         private void OnWorkerSatisfactionChanged(SharedWorker companyWorker)
         {
-            ListViewElement element = ListViewWorkers.FindElement(companyWorker);
-            element.Text.text = GetWorkerListViewElementText((LocalWorker)companyWorker);
+            LocalWorker localCompanyWorker = (LocalWorker)companyWorker;
+            ListViewElement element = ListViewCompanyWorkers.FindElement(companyWorker);
+            element.Text.text = GetWorkerListViewElementText(localCompanyWorker);
+            ProgressBarSatisfaction.Value = localCompanyWorker.Satiscation;
         }
 
         private void OnWorkersButtonsSelectorSelectedButtonChanged(Button btn)
@@ -216,14 +211,15 @@ namespace ITCompanySimulation.UI
 
             if (null != btn)
             {
-                ListViewElementWorker element = btn.GetComponent<ListViewElementWorker>();
-                SelectedWorker = (LocalWorker)element.Worker;
+                ListViewElement element = btn.GetComponent<ListViewElement>();
+                SelectedWorker = (LocalWorker)element.RepresentedObject;
                 SubscribeToWorkerEvents(SelectedWorker);
                 ButtonFireWorker.interactable = true;
                 ButtonGiveSalaryRaise.interactable = true;
                 SliderSalaryRaiseAmount.interactable = true;
-                SetWorkerText();
-                ToggleWorkerInfoText(true);
+                SetWorkerInfo();
+                ToggleWorkerInfo(true);
+                AbilitiesDisplay.DisplayWorkerAbilities(SelectedWorker);
             }
             else
             {
@@ -236,19 +232,20 @@ namespace ITCompanySimulation.UI
                 ButtonFireWorker.interactable = false;
                 ButtonGiveSalaryRaise.interactable = false;
                 SliderSalaryRaiseAmount.interactable = false;
-                ToggleWorkerInfoText(false);
+                ToggleWorkerInfo(false);
+                AbilitiesDisplay.DisplayWorkerAbilities(null);
             }
         }
 
         private void OnCompanyWorkerSatisfactionChanged(SharedWorker worker)
         {
-            TextSatisfaction.text = UIWorkers.GetWorkerSatisfactionString((LocalWorker)worker);
+            ProgressBarSatisfaction.Text.text = UIWorkers.GetWorkerSatisfactionString((LocalWorker)worker);
         }
 
         private void OnControlledCompanyWorkerRemoved(SharedWorker worker)
         {
             LocalWorker companyWorker = (LocalWorker)worker;
-            RemoveWorkerListViewElement(companyWorker, ListViewWorkers);
+            RemoveWorkerListViewElement(companyWorker, ListViewCompanyWorkers);
             SetTextListViewWorkers();
         }
 

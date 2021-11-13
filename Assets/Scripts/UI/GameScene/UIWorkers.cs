@@ -78,25 +78,25 @@ namespace ITCompanySimulation.UI
 
         public static string GetWorkerNameString(SharedWorker worker)
         {
-            return string.Format("{0} {1}",
+            return string.Format("Name: {0} {1}",
                 worker.Name, worker.Surename);
         }
 
         public static string GetWorkerExpierienceString(SharedWorker worker)
         {
-            return string.Format("{0} days",
+            return string.Format("Expierience: {0} days",
                 worker.ExperienceTime);
         }
 
         public static string GetWorkerSalaryString(SharedWorker worker)
         {
-            return string.Format("{0} $",
+            return string.Format("Salary: {0} $",
                 worker.Salary);
         }
 
         public static string GetWorkerSatisfactionString(LocalWorker worker)
         {
-            return string.Format("{0} %",
+            return string.Format("Satisfaction: {0} %",
                  worker.Satiscation.ToString("0.00"));
         }
 

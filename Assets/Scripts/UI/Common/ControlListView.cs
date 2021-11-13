@@ -14,6 +14,11 @@ public class ControlListView : MonoBehaviour
 
     /*Private fields*/
 
+    /// <summary>
+    /// Maps object that list view element represents to ListViewElement component.
+    /// </summary>
+    private Dictionary<object, ListViewElement> ControlsMap = new Dictionary<object, ListViewElement>();
+
     /*Public consts fields*/
 
     /*Public fields*/
@@ -39,6 +44,13 @@ public class ControlListView : MonoBehaviour
     {
         control.transform.SetParent(Layout.transform, false);
         Controls.Add(control);
+        ListViewElement elem = control.GetComponent<ListViewElement>();
+
+        if (null != elem)
+        {
+            ControlsMap.Add(elem.RepresentedObject, elem);
+        }
+
         ControlAdded?.Invoke(control);
     }
 
@@ -48,6 +60,13 @@ public class ControlListView : MonoBehaviour
     /// <param name="destroyGameObject">If true game object of list view control will be destroyed</param>
     public void RemoveControl(GameObject control, bool destroyGameObject = true)
     {
+        ListViewElement elem = control.GetComponent<ListViewElement>();
+
+        if (null != elem)
+        {
+            ControlsMap.Remove(elem.RepresentedObject);
+        }
+
         if (true == destroyGameObject)
         {
             GameObject.Destroy(control);
@@ -58,7 +77,7 @@ public class ControlListView : MonoBehaviour
     }
 
     /// <summary>
-    /// Removes control with given controls collection index
+    /// Removes control with given controls collection index.
     /// </summary>
     public void RemoveControlAt(int index, bool destroyGameObject = true)
     {
@@ -66,13 +85,17 @@ public class ControlListView : MonoBehaviour
     }
 
     /// <summary>
-    /// Removes all control in this list view
+    /// Removes all control in this list view.
     /// </summary>
     public void RemoveAllControls(bool destroyGameObjects = true)
     {
-        for (int i = Controls.Count - 1; i >= 0; i--)
+        List<GameObject> removedControls = new List<GameObject>(Controls);
+        Controls.Clear();
+        ControlsMap.Clear();
+
+        foreach (GameObject control in removedControls)
         {
-            RemoveControlAt(i, destroyGameObjects);
+            ControlRemoved?.Invoke(control);
         }
     }
 
@@ -83,15 +106,9 @@ public class ControlListView : MonoBehaviour
     {
         ListViewElement result = null;
 
-        foreach (var control in Controls)
+        if (true == ControlsMap.ContainsKey(representedObject))
         {
-            ListViewElement elem = control.GetComponent<ListViewElement>();
-
-            if (null != elem && elem.RepresentedObject == representedObject)
-            {
-                result = elem;
-                break;
-            }
+            result = ControlsMap[representedObject];
         }
 
         return result;
