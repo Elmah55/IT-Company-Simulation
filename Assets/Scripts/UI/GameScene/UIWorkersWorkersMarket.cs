@@ -174,7 +174,6 @@ namespace ITCompanySimulation.UI
             SimulationManagerComponent = scriptsObject.GetComponent<SimulationManager>();
             GameTimeComponent = scriptsObject.GetComponent<GameTime>();
             WorkersMarketComponent = scriptsObject.GetComponent<WorkersMarket>();
-            InfoWindowComponent = GameObject.FindGameObjectWithTag("InfoWindow").GetComponent<InfoWindow>();
         }
 
         private void Start()

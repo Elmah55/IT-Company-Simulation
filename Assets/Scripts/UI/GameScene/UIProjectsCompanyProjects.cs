@@ -48,6 +48,7 @@ namespace ITCompanySimulation.UI
         private Button ButtonAssignWorkers;
         [SerializeField]
         private Button ButtonCancelProject;
+        [SerializeField]
         private InfoWindow InfoWindowComponent;
         /// <summary>
         /// Scrum object of project that is currently selected
@@ -63,7 +64,6 @@ namespace ITCompanySimulation.UI
         private void Awake()
         {
             GameObject scriptsObject = GameObject.FindGameObjectWithTag("ScriptsGameObject");
-            InfoWindowComponent = GameObject.FindGameObjectWithTag("InfoWindow").GetComponent<InfoWindow>();
             SimulationManagerComponent = scriptsObject.GetComponent<SimulationManager>();
             GameTimeComponent = scriptsObject.GetComponent<GameTime>();
         }

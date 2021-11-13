@@ -23,11 +23,6 @@ namespace ITCompanySimulation.UI
         [SerializeField]
         private Button CancelButton;
         /// <summary>
-        /// Game object displaying contents of info window.
-        /// </summary>
-        [SerializeField]
-        private GameObject DisplayDataObject;
-        /// <summary>
         /// Invoked when player clicks "Ok" button in this window.
         /// </summary>
         private UnityAction ConfirmButtonClicked;
@@ -92,7 +87,7 @@ namespace ITCompanySimulation.UI
 
         private void Show(string text, UnityAction onConfirmAction, UnityAction onCancelAction, InfoWindowType type)
         {
-            if (true == DisplayDataObject.GetActive())
+            if (true == gameObject.GetActive())
             {
                 //Info window is already active and is displaying other data,
                 //store data so it can be displayed after user closes window
@@ -128,7 +123,7 @@ namespace ITCompanySimulation.UI
                 this.Text = text;
                 ConfirmButtonClicked = onConfirmAction;
                 CancelButtonClicked = onCancelAction;
-                DisplayDataObject.SetActive(true);
+                gameObject.SetActive(true);
             }
         }
 
@@ -174,15 +169,13 @@ namespace ITCompanySimulation.UI
         /// </summary>
         public void Hide()
         {
+            gameObject.SetActive(false);
+
             if (InfoWindowActions.Count > 0)
             {
                 //Show next data
                 InfoWindowData data = InfoWindowActions.Dequeue();
                 Show(data.Text, data.OnConfirmAction, data.OnCancelAction, data.Type);
-            }
-            else
-            {
-                DisplayDataObject.SetActive(false);
             }
         }
     }
