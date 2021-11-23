@@ -286,24 +286,61 @@ namespace ITCompanySimulation.Core
 #endif
         }
 
+        /// <summary>
+        /// Called by client that wants to request worker from this client. This is called when player
+        /// wants to hire worker from other company (worker will be removed from this company and added
+        /// to company of player that sent request).
+        /// </summary>
+        /// <param name="workerID">ID of worker that is requested</param>
+        /// <param name="senderID">ID of player that is sending request</param>
         [PunRPC]
-        private void RemoveControlledCompanyWorkerRPC(int workerID, int senderID)
+        private void OnOtherPlayerWorkerRequestRPC(int workerID, int senderID)
         {
-            LocalWorker workerToRemove = this.ControlledCompany.Workers.First(x => x.ID == workerID);
-            this.ControlledCompany.RemoveWorker(workerToRemove);
+            LocalWorker workerToRemove = this.ControlledCompany.Workers.Find(x => x.ID == workerID);
+            PhotonPlayer sender = Utils.PhotonPlayerFromID(senderID);
 
-            PhotonPlayer sender = PhotonNetwork.playerList.FirstOrDefault(x => x.ID == senderID);
-            string notification;
-            notification = string.Format("Player {0} hired your worker !",
-                //Check if player didnt disconnect since sending RPC
-                default(PhotonPlayer) == sender ? string.Empty : sender.NickName);
-            NotificatorComponent.Notify(notification);
+            if (null != workerToRemove)
+            {
+                //Worker can be granted to client that requested it. Send request confirmation RPC.
+                photonView.RPC("OnOtherPlayerWorkerRequestCfmRPC", sender, workerToRemove.ID, PhotonNetwork.player.ID);
+                this.ControlledCompany.RemoveWorker(workerToRemove);
+                string notification;
+                notification = string.Format("Player {0} hired your worker !",
+                                             sender?.NickName); //Check if player didnt disconnect since sending RPC
+                NotificatorComponent.Notify(notification);
 
 #if DEVELOPMENT_BUILD || UNITY_EDITOR
-            string debugInfo = string.Format("[{3}] Player {0} (ID: {1}) removed worker ID: {2} from your company",
-                sender.NickName, sender.ID, workerToRemove.ID, this.GetType().Name);
-            Debug.Log(debugInfo);
+                string debugInfo = string.Format("[{3}] Player {0} (ID: {1}) removed worker ID: {2} from your company",
+                    sender.NickName, sender.ID, workerToRemove.ID, this.GetType().Name);
+                Debug.Log(debugInfo);
 #endif
+            }
+#if DEVELOPMENT_BUILD || UNITY_EDITOR
+            else
+            {
+                Debug.LogWarningFormat("Worker (ID {0}) requested from player {1} (ID {2}) " +
+                                       "was not found in local workers collection",
+                                       workerID,
+                                       sender?.NickName,
+                                       sender?.ID);
+            }
+#endif
+        }
+
+        /// <summary>
+        /// Called when worker that was requested is granted to this client.
+        /// </summary>
+        /// <param name="requestedWorkerID">ID of requested worker</param>
+        /// <param name="playerID">ID of player that was target of request</param>
+        [PunRPC]
+        private void OnOtherPlayerWorkerRequestCfmRPC(int requestedWorkerID, int playerID)
+        {
+            SharedWorker requestedWorker = PlayerDataMap[playerID].Workers[requestedWorkerID];
+            LocalWorker hiredWorker = new LocalWorker(requestedWorker);
+            hiredWorker.Salary = hiredWorker.HireSalary;
+            ControlledCompany.Balance -= hiredWorker.Salary;
+            ControlledCompany.AddWorker(hiredWorker);
+            Stats.OtherPlayersWorkersHired++;
         }
 
         [PunRPC]
@@ -472,23 +509,9 @@ namespace ITCompanySimulation.Core
 
         /*Public methods*/
 
-        /// <summary>
-        /// Removes worker with given ID from company of target PhotonPlayer
-        /// </summary>
-        public void RemoveOtherPlayerControlledCompanyWorker(PhotonPlayer target, SharedWorker worker)
-        {
-            this.photonView.RPC(
-                "RemoveControlledCompanyWorkerRPC", target, worker.ID, PhotonNetwork.player.ID);
-        }
-
         public void HireOtherPlayerWorker(PhotonPlayer otherPlayer, SharedWorker worker)
         {
-            RemoveOtherPlayerControlledCompanyWorker(otherPlayer, worker);
-            LocalWorker hiredWorker = new LocalWorker(worker);
-            hiredWorker.Salary = hiredWorker.HireSalary;
-            ControlledCompany.Balance -= hiredWorker.Salary;
-            ControlledCompany.AddWorker(hiredWorker);
-            Stats.OtherPlayersWorkersHired++;
+            photonView.RPC("OnOtherPlayerWorkerRequestRPC", otherPlayer, worker.ID, PhotonNetwork.player.ID);
         }
 
         public static int GenerateID()

@@ -62,4 +62,6 @@ MonoBehaviour:
   - SetTimeRPC
   - StartGameInternalRPC
   - StartSessionRPC
+  - OnOtherPlayerWorkerRequestCfmRPC
+  - OnOtherPlayerWorkerRequestRPC
   DisableAutoOpenWizard: 1
