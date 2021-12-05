@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.Events;
 
 /// <summary>
-/// This is class for handling list view of UI controls.
+/// This is class for handling UI controls list view.
 /// Added controls will be ordered and placed according to
 /// attached layout component
 /// </summary>
@@ -89,12 +89,19 @@ public class ControlListView : MonoBehaviour
     /// </summary>
     public void RemoveAllControls(bool destroyGameObjects = true)
     {
+        //Copy collection so controls are not present in Controls list when 
+        //ControlRemoved event is inovked
         List<GameObject> removedControls = new List<GameObject>(Controls);
         Controls.Clear();
         ControlsMap.Clear();
 
         foreach (GameObject control in removedControls)
         {
+            if (true == destroyGameObjects)
+            {
+                GameObject.Destroy(control);
+            }
+
             ControlRemoved?.Invoke(control);
         }
     }
