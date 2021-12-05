@@ -13,8 +13,8 @@ GameObject:
   - component: {fileID: 6879790372170168606}
   - component: {fileID: 75983288005096398}
   - component: {fileID: 4309139018275601280}
-  - component: {fileID: 1576907716044222264}
   - component: {fileID: 3679912272742017336}
+  - component: {fileID: 6835030115325026502}
   m_Layer: 5
   m_Name: ListViewElementPhotonPlayer
   m_TagString: Untagged
@@ -112,21 +112,6 @@ CanvasGroup:
   m_Interactable: 1
   m_BlocksRaycasts: 1
   m_IgnoreParentGroups: 0
---- !u!114 &1576907716044222264
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4820382828908731109}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8efce265fd108d544b2aaac425b125a3, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_BackgroundImage: {fileID: 6879790372170168606}
-  m_Text: {fileID: 7302845433803109093}
-  m_Button: {fileID: 3679912272742017336}
 --- !u!114 &3679912272742017336
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -172,6 +157,22 @@ MonoBehaviour:
       m_Calls: []
     m_TypeName: UnityEngine.UI.Button+ButtonClickedEvent, UnityEngine.UI, Version=1.0.0.0,
       Culture=neutral, PublicKeyToken=null
+--- !u!114 &6835030115325026502
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4820382828908731109}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3417c89b70ed3354ba8ad23fbc00f158, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_BackgroundImage: {fileID: 6879790372170168606}
+  m_FrontImage: {fileID: 0}
+  m_Text: {fileID: 7302845433803109093}
+  m_Button: {fileID: 3679912272742017336}
 --- !u!1 &6544582755841506376
 GameObject:
   m_ObjectHideFlags: 0
