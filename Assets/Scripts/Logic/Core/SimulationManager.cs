@@ -124,19 +124,30 @@ namespace ITCompanySimulation.Core
         {
             Event currentEvent = Event.current;
 
-            if (true == PhotonNetwork.isMasterClient && true == currentEvent.isKey)
+            if (true == currentEvent.isKey)
             {
-                bool combinationPressed = (currentEvent.modifiers & EventModifiers.Control) != 0;
-                combinationPressed = combinationPressed && (currentEvent.keyCode == KeyCode.F);
+                KeyCode requiredKey = KeyCode.F;
+                bool keyPressed = (currentEvent.modifiers & EventModifiers.Control) != 0;
+                keyPressed = keyPressed && (requiredKey == currentEvent.keyCode);
 
                 //Finish simulation when proper key combination is pressed (Ctrl + F). This should be used only for
                 //debug purposes
-                if (true == IsSimulationActive && true == combinationPressed)
+                if (true == keyPressed && true == PhotonNetwork.isMasterClient &&
+                    true == IsSimulationActive && true == Input.GetKeyDown(requiredKey))
                 {
                     this.photonView.RPC("FinishSimulationRPC",
                                         PhotonTargets.All,
                                         PhotonNetwork.player.ID,
                                         (int)SimulationFinishReason.ForcedByMasterClient);
+                }
+
+                requiredKey = KeyCode.N;
+                keyPressed = (currentEvent.modifiers & EventModifiers.Control) != 0;
+                keyPressed = keyPressed && (requiredKey == currentEvent.keyCode);
+
+                if (true == keyPressed && true == Input.GetKeyDown(requiredKey))
+                {
+                    NotificatorComponent.Notify("TEST NOTIFICATION");
                 }
             }
         }

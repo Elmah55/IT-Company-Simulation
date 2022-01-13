@@ -3,7 +3,6 @@ using ITCompanySimulation.Company;
 using ITCompanySimulation.Core;
 using ITCompanySimulation.Settings;
 using ITCompanySimulation.Utilities;
-using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -17,12 +16,6 @@ namespace ITCompanySimulation.UI
     public class UIDefaultView : MonoBehaviour
     {
         /*Private consts fields*/
-
-        /// <summary>
-        /// Determines how long notification should be displayed after
-        /// receiving it. This is unscaled time.
-        /// </summary>
-        private const float PANEL_NOTIFICATIONS_DISPLAY_TIME = 5f;
 
         /*Private fields*/
 
@@ -50,8 +43,6 @@ namespace ITCompanySimulation.UI
         private GameTime GameTimeComponent;
         [SerializeField]
         private SimulationManager SimulationManagerComponent;
-        [SerializeField]
-        private TMP_Dropdown DropdownNotificationList;
         /// <summary>
         /// Panel containing buttons that open other UI panels
         /// </summary>
@@ -67,11 +58,6 @@ namespace ITCompanySimulation.UI
         [SerializeField]
         private Image ImagePanelNotification;
         /// <summary>
-        /// Timestamp indicating when notification panel was made visible.
-        /// </summary>
-        private float TimeSincePanelNotificationsVisible;
-        private bool IsPanelNotificationsVisible;
-        /// <summary>
         /// Image displayed in notification panel when notification priority
         /// is normal.
         /// </summary>
@@ -83,6 +69,10 @@ namespace ITCompanySimulation.UI
         /// </summary>
         [SerializeField]
         private Sprite SpriteNotificationPriorityHigh;
+        [SerializeField]
+        private NotificationDisplay ButtonActivityLogNotificationDisplay;
+        [SerializeField]
+        private UIActivityLog UIActivityLogComponent;
 
 
         /*Public consts fields*/
@@ -106,24 +96,9 @@ namespace ITCompanySimulation.UI
             SetBalanceTexts();
             TextWorkersCount.text = GetWorkersCountText(SimulationManagerComponent.ControlledCompany.Workers.Count);
             SetProgressBarBalance(SimulationManagerComponent.ControlledCompany.Balance);
-        }
 
-        private void Update()
-        {
-            //Hide notifications panel if it was visible for specified period of time
-            if (false == LeanTween.isTweening(PanelNotifications) && true == IsPanelNotificationsVisible)
-            {
-                if ((Time.unscaledTime - TimeSincePanelNotificationsVisible) >= PANEL_NOTIFICATIONS_DISPLAY_TIME)
-                {
-                    Vector2 panelNewLocation = new Vector2(0f, 580f);
-                    LeanTween.moveLocal(PanelNotifications, panelNewLocation, 1f)
-                        .setIgnoreTimeScale(true)
-                        .setOnComplete(() =>
-                        {
-                            IsPanelNotificationsVisible = false;
-                        });
-                }
-            }
+            //Initialization for UI components that are inactive when scene is loaded
+            UIActivityLogComponent.Initialize();
         }
 
         private void SetBalanceTexts()
@@ -134,19 +109,15 @@ namespace ITCompanySimulation.UI
 
         private void OnNotificationReceived(SimulationEventNotification notification)
         {
-            List<TMP_Dropdown.OptionData> dropdownOptions = new List<TMP_Dropdown.OptionData>();
-            string option = string.Format("{0}.{1}.{2} {3}",
-                                          notification.Timestamp.Day,
-                                          notification.Timestamp.Month,
-                                          notification.Timestamp.Year,
-                                          notification.Text);
-            dropdownOptions.Add(new TMP_Dropdown.OptionData(option));
-            dropdownOptions.AddRange(DropdownNotificationList.options);
-            DropdownNotificationList.options = dropdownOptions;
+            //No need to set notification on button when activity log UI is active
+            if (false == UIActivityLogComponent.gameObject.activeSelf)
+            {
+                ButtonActivityLogNotificationDisplay.Notify();
+            }
 
             //Run animation to display notification on a dedicated panel for PANEL_NOTIFICATIONS_DISPLAY_TIME
             //period of time
-            if (false == LeanTween.isTweening(PanelNotifications) && false == IsPanelNotificationsVisible)
+            if (false == LeanTween.isTweening(PanelNotifications))
             {
                 switch (notification.Priority)
                 {
@@ -167,8 +138,11 @@ namespace ITCompanySimulation.UI
                     .setIgnoreTimeScale(true)
                     .setOnComplete(() =>
                     {
-                        IsPanelNotificationsVisible = true;
-                        TimeSincePanelNotificationsVisible = Time.unscaledTime;
+                        //After delay time start animation that hides notification
+                        panelNewLocation = new Vector2(0f, 580f);
+                        LeanTween.moveLocal(PanelNotifications, panelNewLocation, 1f)
+                        .setIgnoreTimeScale(true)
+                        .setDelay(5f);
                     });
             }
         }
