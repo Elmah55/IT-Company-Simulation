@@ -63,6 +63,10 @@ namespace ITCompanySimulation.UI
         /// Index of input that is being fetched currently.
         /// </summary>
         private int StoredInputsCurrentIndex = 0;
+        /// <summary>
+        /// Indicates whether this component has been initialized by calling Init() method.
+        /// </summary>
+        private bool IsInitialized;
 
         /*Public consts fields*/
 
@@ -72,8 +76,22 @@ namespace ITCompanySimulation.UI
 
         private void OnEnable()
         {
-            InputFieldMessage.text = string.Empty;
-            TextChatDisplay.text = string.Empty;
+            if (true == InputFieldMessage.enabled)
+            {
+                InputFieldMessage.text = string.Empty;
+                InputFieldMessage.ActivateInputField();
+            }
+        }
+
+        private void Start()
+        {
+            //In game scene chat will be initialized by diffrent script
+            //but in menu scene there is no need for this so "Start()" method
+            //can be used
+            if (false == IsInitialized)
+            {
+                Init();
+            }
         }
 
         private void OnDestroy()
@@ -84,23 +102,10 @@ namespace ITCompanySimulation.UI
             ChatComponent.Connected -= OnChatConnected;
         }
 
-        private void Awake()
-        {
-            ChatComponent = GameObject.FindGameObjectWithTag("ApplicationManager").GetComponent<ChatManager>();
-            ChatComponent.MessageReceived += OnChatMessageReceived;
-            ChatComponent.PrivateMessageReceived += OnChatPrivateMessageReceived;
-            ChatComponent.Disconnected += OnChatDisconnected;
-            ChatComponent.Connected += OnChatConnected;
-
-            if (false == ChatComponent.IsConnected)
-            {
-                OnChatConnectionFailed();
-            }
-        }
-
         private void OnChatConnected()
         {
-            this.gameObject.SetActive(true);
+            InputFieldMessage.text = string.Empty;
+            InputFieldMessage.enabled = true;
         }
 
         private void OnChatDisconnected()
@@ -187,7 +192,7 @@ namespace ITCompanySimulation.UI
                 {
                     StoredInputsCurrentIndex++;
 
-                    //No newer element rest input field
+                    //No newer element, clear input field
                     if (StoredInputs.Size == StoredInputsCurrentIndex)
                     {
                         ClearInput();
@@ -240,10 +245,26 @@ namespace ITCompanySimulation.UI
 
         private void OnChatConnectionFailed()
         {
-            //Disable this UI element if chat connection failed
-            this.gameObject.SetActive(false);
+            InputFieldMessage.text = "Chat offline";
+            InputFieldMessage.enabled = false;
         }
 
         /*Public methods*/
+
+        public void Init()
+        {
+            ChatComponent = GameObject.FindGameObjectWithTag("ApplicationManager").GetComponent<ChatManager>();
+            ChatComponent.MessageReceived += OnChatMessageReceived;
+            ChatComponent.PrivateMessageReceived += OnChatPrivateMessageReceived;
+            ChatComponent.Disconnected += OnChatDisconnected;
+            ChatComponent.Connected += OnChatConnected;
+
+            if (false == ChatComponent.IsConnected)
+            {
+                OnChatConnectionFailed();
+            }
+
+            IsInitialized = true;
+        }
     }
 }

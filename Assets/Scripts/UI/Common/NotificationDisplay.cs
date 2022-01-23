@@ -16,7 +16,7 @@ namespace ITCompanySimulation.UI
                  "When there is one pending notification \"1\" will be displayed next to the UI element. " +
                  "If there are ten or more notifications \"9+\" will be displayed.")]
         [SerializeField]
-        public TextMeshProUGUI NotificationText;
+        private TextMeshProUGUI NotificationText;
         [Tooltip("Game object that is activated when notification appears " +
                  "or is deactivated when there is no pending notifications.")]
         [SerializeField]

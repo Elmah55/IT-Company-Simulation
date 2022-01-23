@@ -27,7 +27,7 @@ namespace ITCompanySimulation.UI
 
         /*Public methods*/
 
-        public void Initialize()
+        public void Init()
         {
             SimulationManagerComponent =
                 GameObject.FindGameObjectWithTag("ScriptsGameObject").GetComponent<SimulationManager>();
