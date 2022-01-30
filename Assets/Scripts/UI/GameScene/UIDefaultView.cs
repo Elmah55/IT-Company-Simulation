@@ -161,14 +161,16 @@ namespace ITCompanySimulation.UI
                 }
 
                 TextPanelNotification.text = notification.Text;
-                Vector2 panelNewLocation = new Vector2(0f, 510f);
-                LeanTween.moveLocal(PanelNotifications, panelNewLocation, 1f)
+                RectTransform notificationPanelTransform = (RectTransform)PanelNotifications.transform;
+                float panelOldLocationY = notificationPanelTransform.localPosition.y;
+                //Move panel along Y axis based on panel's height so whole panel can be visible in canvas
+                float panelNewLocationY = notificationPanelTransform.localPosition.y - notificationPanelTransform.sizeDelta.y;
+                LeanTween.moveLocalY(PanelNotifications, panelNewLocationY, 1f)
                     .setIgnoreTimeScale(true)
                     .setOnComplete(() =>
                     {
                         //After delay time start animation that hides notification
-                        panelNewLocation = new Vector2(0f, 580f);
-                        LeanTween.moveLocal(PanelNotifications, panelNewLocation, 1f)
+                        LeanTween.moveLocalY(PanelNotifications, panelOldLocationY, 1f)
                         .setIgnoreTimeScale(true)
                         .setDelay(5f);
                     });
