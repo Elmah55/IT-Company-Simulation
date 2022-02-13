@@ -5,6 +5,7 @@ using ITCompanySimulation.Utilities;
 using ITCompanySimulation.Character;
 using Random = UnityEngine.Random;
 using System.Collections;
+using ITCompanySimulation.Project;
 
 namespace ITCompanySimulation.UI
 {
@@ -230,7 +231,7 @@ namespace ITCompanySimulation.UI
         {
             if (false == AbilityTextAnimationActive)
             {
-                TextWorkerAbility.text = "+ " + EnumToString.ProjectTechnologiesStrings[workerAbility];
+                TextWorkerAbility.text = "+ " + EnumToString.GetString(workerAbility);
                 StartCoroutine(AbilityTextAnimation());
             }
         }

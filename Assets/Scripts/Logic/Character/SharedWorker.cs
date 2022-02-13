@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using ITCompanySimulation.UI;
 using ITCompanySimulation.Utilities;
+using ITCompanySimulation.Project;
 
 namespace ITCompanySimulation.Character
 {

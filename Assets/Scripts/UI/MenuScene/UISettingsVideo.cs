@@ -79,7 +79,7 @@ namespace ITCompanySimulation.UI
         {
             for (int i = 0; i < Enum.GetValues(typeof(FullScreenMode)).Length; i++)
             {
-                string dropdownOptionText = EnumToString.FullScreenModeStrings[(FullScreenMode)i];
+                string dropdownOptionText = EnumToString.GetString((FullScreenMode)i);
                 TMP_Dropdown.OptionData data = new TMP_Dropdown.OptionData(dropdownOptionText);
                 DropdownFullscreenMode.options.Add(data);
             }
@@ -178,5 +178,5 @@ namespace ITCompanySimulation.UI
                 Application.targetFrameRate = targetFrameRate;
             }
         }
-    } 
+    }
 }

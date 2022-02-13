@@ -41,7 +41,7 @@ namespace ITCompanySimulation.UI
             for (int i = 0; i < proj.UsedTechnologies.Count; i++)
             {
                 ProjectTechnology pt = proj.UsedTechnologies[i];
-                StrBuilder.Append(EnumToString.ProjectTechnologiesStrings[pt]);
+                StrBuilder.Append(EnumToString.GetString(pt));
 
                 if (i != proj.UsedTechnologies.Count - 1)
                 {

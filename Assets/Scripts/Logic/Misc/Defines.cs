@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
+using ITCompanySimulation.Project;
 
 /// <summary>
 /// This file contains definitons of enum and types used
@@ -9,19 +10,33 @@ using UnityEngine;
 
 /*Enums*/
 
-/// <summary>
-/// This enum defines technologies that can be used in a single
-/// project 
-/// </summary>
-public enum ProjectTechnology
+namespace ITCompanySimulation.Project
 {
-    C,
-    Cpp,
-    CSharp,
-    JavaScript,
-    PHP,
-    Python,
-    Java
+    /// <summary>
+    /// This enum defines technologies that can be used in a single
+    /// project 
+    /// </summary>
+    public enum ProjectTechnology
+    {
+        C,
+        Cpp,
+        CSharp,
+        JavaScript,
+        PHP,
+        Python,
+        Java
+    }
+
+    /// <summary>
+    /// This enum defines different sprint stages. Stages change
+    /// as sprint progresses.
+    /// </summary>
+    public enum SprintStage
+    {
+        Planning,
+        Developing,
+        Retrospective
+    } 
 }
 
 /// <summary>
@@ -52,13 +67,6 @@ public enum RoomLobbyPlayerState
 {
     Ready,
     NotReady
-}
-
-public enum SprintStage
-{
-    Planning,
-    Developing,
-    Retrospective
 }
 
 public enum SimulationFinishReason
@@ -129,11 +137,29 @@ namespace ITCompanySimulation.Character
 /*Classes*/
 
 /// <summary>
-/// This class maps enums to strings
+/// This class maps enums to strings.
 /// </summary>
-public class EnumToString
+public static class EnumToString
 {
-    public static IReadOnlyDictionary<ProjectTechnology, string> ProjectTechnologiesStrings = new Dictionary<ProjectTechnology, string>()
+    /// <summary>
+    /// Converts ProjectTechnology enum to string.
+    /// </summary>
+    /// <param name="enumInput">Enum to be converted to string.</param>
+    public static string GetString(ProjectTechnology enumInput)
+    {
+        return ProjectTechnologiesStrings[enumInput];
+    }
+
+    /// <summary>
+    /// Converts FullScreenMode enum to string.
+    /// </summary>
+    /// <param name="enumInput">Enum to be converted to string.</param>
+    public static string GetString(FullScreenMode enumInput)
+    {
+        return FullScreenModeStrings[enumInput];
+    }
+
+    private static IReadOnlyDictionary<ProjectTechnology, string> ProjectTechnologiesStrings = new Dictionary<ProjectTechnology, string>()
     {
         { ProjectTechnology.C,"C" },
         { ProjectTechnology.Cpp,"C++" },
@@ -144,7 +170,7 @@ public class EnumToString
         { ProjectTechnology.Java,"Java" }
     };
 
-    public static IReadOnlyDictionary<FullScreenMode, string> FullScreenModeStrings = new Dictionary<FullScreenMode, string>()
+    private static IReadOnlyDictionary<FullScreenMode, string> FullScreenModeStrings = new Dictionary<FullScreenMode, string>()
     {
         { FullScreenMode.ExclusiveFullScreen,"Exclusive fullscreen" },
         { FullScreenMode.FullScreenWindow,"Fullscreen window" },

@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using UnityEngine;
+using ITCompanySimulation.Project;
 
 namespace ITCompanySimulation.UI
 {
@@ -69,7 +70,7 @@ namespace ITCompanySimulation.UI
                 KeyValuePair<ProjectTechnology, SafeFloat> ability = worker.Abilites.ElementAt(i);
 
                 StrBuilder.AppendFormat("{0} {1}\n",
-                    EnumToString.ProjectTechnologiesStrings[ability.Key],
+                    EnumToString.GetString(ability.Key),
                     ability.Value.Value.ToString("0.00"));
             }
 

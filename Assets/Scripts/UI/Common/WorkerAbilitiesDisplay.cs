@@ -2,6 +2,7 @@
 using ITCompanySimulation.Character;
 using System.Collections.Generic;
 using System.Collections;
+using ITCompanySimulation.Project;
 
 namespace ITCompanySimulation.UI
 {
@@ -42,7 +43,7 @@ namespace ITCompanySimulation.UI
         private string GetProgressBarText(ProjectTechnology ability, float abilityValue)
         {
             string result = string.Format("{0}\n{1}",
-                                          EnumToString.ProjectTechnologiesStrings[ability],
+                                          EnumToString.GetString(ability),
                                           abilityValue.ToString("0.00"));
             return result;
         }

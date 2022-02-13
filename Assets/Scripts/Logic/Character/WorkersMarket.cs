@@ -7,6 +7,7 @@ using ITCompanySimulation.UI;
 using ITCompanySimulation.Core;
 using ITCompanySimulation.Multiplayer;
 using System.Linq;
+using ITCompanySimulation.Project;
 
 namespace ITCompanySimulation.Character
 {
