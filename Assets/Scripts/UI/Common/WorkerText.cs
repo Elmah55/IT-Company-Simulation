@@ -111,8 +111,10 @@ namespace ITCompanySimulation.UI
             //-x + 1 linear function
             float colorAlpha =
                 -Utils.MapRange(mousePtrToCharacterDist, TEXT_COLOR_FULL_ALPHA_DISTANCE, TEXT_DISPLAY_DISTANCE, 0f, 1f) + 1;
+            //Activate text object only when mouse is close enough to worker's character
+            bool textObjectActive = colorAlpha > 0f;
 
-            if (colorAlpha > 0f)
+            if (true == textObjectActive)
             {
                 //Change background image alpha
                 Color newColor = TextWorkerNameBackgroundImage.color;
@@ -122,20 +124,18 @@ namespace ITCompanySimulation.UI
                 newColor = TextWorkerName.color;
                 newColor.a = colorAlpha;
                 TextWorkerName.color = newColor;
-                TextObject.SetActive(true);
             }
-            else
-            {
-                TextObject.SetActive(false);
-            }
+
+            TextObject.SetActive(textObjectActive);
         }
 
         private void LateUpdate()
         {
-            //Calculate onscreen position in late update to avoid moving UI controls to
-            //a new position when they are already active. It is needed because on screen
-            //controls position is calculated only when they are active. Using late update
-            //control can be actived and moved to proper onscreen position during one frame
+            /* Calculate onscreen position in late update to move UI controls to they target
+               position before they are visible. It is needed because on screen controls position 
+               is calculated only when they are active. Using late update control can be actived 
+               in coroutine and moved to proper onscreen position during one frame.
+            */
             Vector2 textScreenPositon;
 
             if (true == TextObject.activeInHierarchy)
@@ -147,15 +147,15 @@ namespace ITCompanySimulation.UI
             if (true == TextWorkerAbility.gameObject.activeInHierarchy)
             {
                 textScreenPositon = MainCamera.WorldToScreenPoint(AbilityTextPlaceholder.transform.position);
-                TextWorkerAbility.gameObject.transform.position = MainCamera.WorldToScreenPoint(AbilityTextPlaceholder.transform.position);
+                TextWorkerAbility.gameObject.transform.position = textScreenPositon;
             }
         }
 
         private void Awake()
         {
-            TextObject = GameObject.Instantiate(TextWorkerNamePrefab);
-            TextWorkerAbility = GameObject.Instantiate(TextWorkerAbilityPrefab);
             Transform canvasTransform = GameObject.FindGameObjectWithTag("Canvas").transform;
+            TextObject = GameObject.Instantiate(TextWorkerNamePrefab, canvasTransform);
+            TextWorkerAbility = GameObject.Instantiate(TextWorkerAbilityPrefab, canvasTransform);
 
             if (null == ScriptsObjectTransform)
             {
