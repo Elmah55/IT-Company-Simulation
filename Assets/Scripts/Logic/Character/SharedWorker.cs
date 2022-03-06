@@ -128,12 +128,12 @@ namespace ITCompanySimulation.Character
         /// </summary>
         public void UpdateAbility(ProjectTechnology ability, float abilityValue)
         {
-            abilityValue = Mathf.Clamp(abilityValue, 0f, MAX_ABILITY_VALUE);
-
             if (true == Abilites.ContainsKey(ability))
             {
                 SafeFloat abilityCurrentValue = Abilites[ability];
-                Abilites[ability] = new SafeFloat(abilityCurrentValue.Value + abilityValue);
+                float abilityNewValue = abilityCurrentValue.Value + abilityValue;
+                abilityNewValue = Mathf.Clamp(abilityNewValue, 0f, MAX_ABILITY_VALUE);
+                Abilites[ability] = new SafeFloat(abilityNewValue);
             }
             else
             {

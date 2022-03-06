@@ -296,7 +296,13 @@ namespace ITCompanySimulation.Character
 {
     public delegate void LocalWorkerAction(LocalWorker worker);
     public delegate void SharedWorkerAction(SharedWorker worker);
-    public delegate void WorkerAbilityAction(SharedWorker worker, ProjectTechnology workerAbility, float workerAbilityValue);
+    /// <summary>
+    /// Delegate for worker ability update action.
+    /// </summary>
+    /// <param name="worker">Worker whose ability was updated.</param>
+    /// <param name="workerAbility">Ability type that was updated.</param>
+    /// <param name="abilityValueDelta">Amount by which ability was changed.</param>
+    public delegate void WorkerAbilityAction(SharedWorker worker, ProjectTechnology workerAbility, float abilityValueDelta);
     public delegate void MultiplayerWorkerAction(SharedWorker worker, PhotonPlayer player);
 }
 

@@ -3,6 +3,7 @@ using ITCompanySimulation.Character;
 using System.Collections.Generic;
 using System.Collections;
 using ITCompanySimulation.Project;
+using ITCompanySimulation.Utilities;
 
 namespace ITCompanySimulation.UI
 {
@@ -26,7 +27,7 @@ namespace ITCompanySimulation.UI
         /// <summary>
         /// Stored references to instantiated progress bars.
         /// </summary>
-        private List<ProgressBar> AbilitiesProgressBars = new List<ProgressBar>();
+        private IObjectPool<ProgressBar> AbilitiesProgressBarPool = new ObjectPool<ProgressBar>();
         [SerializeField]
         private ProgressBar AbilityProgressBarPrefab;
         /// <summary>
@@ -81,61 +82,98 @@ namespace ITCompanySimulation.UI
 
         public void DisplayWorkerAbilities(SharedWorker worker)
         {
-            if (null != DisplayedWorker)
+            if (DisplayedWorker != worker)
             {
-                //Remove listener for previously displayed worker
-                DisplayedWorker.AbilityUpdated -= OnWorkerAbilityUpdated;
-            }
-
-            DisplayedWorker = worker;
-            AbilityProgressBarMap.Clear();
-
-            foreach (ProgressBar abilityProgressBar in AbilitiesProgressBars)
-            {
-                abilityProgressBar.gameObject.SetActive(false);
-            }
-
-            if (null != DisplayedWorker)
-            {
-                DisplayedWorker.AbilityUpdated += OnWorkerAbilityUpdated;
-                if (AbilitiesProgressBars.Count < worker.Abilites.Count)
+                if (null != DisplayedWorker)
                 {
-                    int progressBarsToInstantiate = worker.Abilites.Count - AbilitiesProgressBars.Count;
+                    //Remove listener for previously displayed worker
+                    DisplayedWorker.AbilityUpdated -= OnWorkerAbilityUpdated;
+                }
 
-                    for (int i = 0; i < progressBarsToInstantiate; i++)
+                DisplayedWorker = worker;
+
+                //Deactive all previously used progress bars and
+                //return them to pool
+                foreach (var ability in AbilityProgressBarMap)
+                {
+                    ability.Value.gameObject.SetActive(false);
+                    AbilitiesProgressBarPool.AddObject(ability.Value);
+                }
+
+                AbilityProgressBarMap.Clear();
+
+                if (null != DisplayedWorker)
+                {
+                    DisplayedWorker.AbilityUpdated += OnWorkerAbilityUpdated;
+
+                    foreach (var workerAbility in worker.Abilites)
                     {
-                        ProgressBar newProgressBar = GameObject.Instantiate(AbilityProgressBarPrefab, gameObject.transform);
-                        newProgressBar.MinimumValue = 0f;
-                        newProgressBar.MaximumValue = SharedWorker.MAX_ABILITY_VALUE;
-                        AbilitiesProgressBars.Add(newProgressBar);
+                        ProgressBar abilityProgerssBar = GetAbilityProgressBar();
+                        SetAbilityProgressBar(workerAbility.Key, workerAbility.Value.Value, abilityProgerssBar);
+                        //Set to 0 so progress bar animation can be run
+                        abilityProgerssBar.Value = 0f;
+                        AbilityProgressBarMap.Add(workerAbility.Key, abilityProgerssBar);
                     }
+
+                    StopAllCoroutines();
+                    StartCoroutine(ProgressBarSetValueAnimation());
                 }
-
-                int j = 0;
-
-                foreach (var workerAbility in worker.Abilites)
-                {
-                    string progressBarText = GetProgressBarText(workerAbility.Key, workerAbility.Value.Value);
-                    Color progressBarColor = AbilitiesColor[(int)workerAbility.Key];
-                    ProgressBar abilityProgerssBar = AbilitiesProgressBars[j];
-                    abilityProgerssBar.gameObject.SetActive(true);
-                    abilityProgerssBar.ProgressImage.color = progressBarColor;
-                    abilityProgerssBar.Text.text = progressBarText;
-                    abilityProgerssBar.Value = 0f;
-                    AbilityProgressBarMap.Add(workerAbility.Key, abilityProgerssBar);
-                    ++j;
-                }
-
-                StopAllCoroutines();
-                StartCoroutine(ProgressBarSetValueAnimation());
             }
+        }
+
+        /// <summary>
+        /// Returns new ability progress bar.
+        /// </summary>
+        private ProgressBar GetAbilityProgressBar()
+        {
+            ProgressBar newProgressBar = AbilitiesProgressBarPool.GetObject();
+
+            //No progress bars available in pool. Instantiate new object from prefab
+            if (null == newProgressBar)
+            {
+                newProgressBar = GameObject.Instantiate(AbilityProgressBarPrefab, gameObject.transform);
+                newProgressBar.MinimumValue = 0f;
+                newProgressBar.MaximumValue = SharedWorker.MAX_ABILITY_VALUE;
+            }
+
+            newProgressBar.gameObject.SetActive(true);
+
+            return newProgressBar;
+        }
+
+        /// <summary>
+        /// Sets progress bar to display ability.
+        /// </summary>
+        /// <param name="abilityType">Type of ability to be displayed.</param>
+        /// <param name="abilityValue">Value of ability to be displayed.</param>
+        /// <param name="abilityProgressBar">Progress bar that will display ability.</param>
+        private void SetAbilityProgressBar(ProjectTechnology abilityType, float abilityValue, ProgressBar abilityProgressBar)
+        {
+            string progressBarText = GetProgressBarText(abilityType, abilityValue);
+            Color progressBarColor = AbilitiesColor[(int)abilityType];
+
+            abilityProgressBar.ProgressImage.color = progressBarColor;
+            abilityProgressBar.Text.text = progressBarText;
+            abilityProgressBar.Value = abilityValue;
         }
 
         private void OnWorkerAbilityUpdated(SharedWorker worker, ProjectTechnology workerAbility, float workerAbilityValue)
         {
-            ProgressBar abilityProgressBar = AbilityProgressBarMap[workerAbility];
-            abilityProgressBar.Text.text = GetProgressBarText(workerAbility, workerAbilityValue);
-            abilityProgressBar.Value = workerAbilityValue;
+            ProgressBar abilityProgressBar = null;
+
+            //Existing ability updated
+            if (true == AbilityProgressBarMap.ContainsKey(workerAbility))
+            {
+                abilityProgressBar = AbilityProgressBarMap[workerAbility];
+            }
+            //New ability has been added to worker. Get new progress bard to display it
+            else
+            {
+                abilityProgressBar = GetAbilityProgressBar();
+                AbilityProgressBarMap.Add(workerAbility, abilityProgressBar);
+            }
+
+            SetAbilityProgressBar(workerAbility, worker.Abilites[workerAbility].Value, abilityProgressBar);
         }
     }
 
