@@ -7,6 +7,7 @@ using ITCompanySimulation.Multiplayer;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using ITCompanySimulation.Project;
 
 namespace ITCompanySimulation.UI
 {
@@ -82,6 +83,13 @@ namespace ITCompanySimulation.UI
         [SerializeField]
         private NotificationDisplay NotificationDisplayChatWindowButton;
         private IMultiplayerChat ChatComponent;
+        [SerializeField]
+        private SoundEffects SoundEffectsComponent;
+        /// <summary>
+        /// Sound effect played when comapny's project is completed.
+        /// </summary>
+        [SerializeField]
+        private AudioClip SoundEffectProjectCompleted;
 
         /*Public consts fields*/
 
@@ -100,6 +108,7 @@ namespace ITCompanySimulation.UI
             SimulationManagerComponent.ControlledCompany.BalanceChanged += OnControlledCompanyBalanceChanged;
             SimulationManagerComponent.ControlledCompany.WorkerAdded += OnControlledCompanyWorkerAddedOrRemoved;
             SimulationManagerComponent.ControlledCompany.WorkerRemoved += OnControlledCompanyWorkerAddedOrRemoved;
+            SimulationManagerComponent.ControlledCompany.ProjectAdded += OnControlledCompanyProjectAdded;
             SimulationManagerComponent.NotificatorComponent.NotificationReceived += OnNotificationReceived;
             SetBalanceTexts();
             TextWorkersCount.text = GetWorkersCountText(SimulationManagerComponent.ControlledCompany.Workers.Count);
@@ -217,6 +226,16 @@ namespace ITCompanySimulation.UI
         {
             TextCompanyBalance.text = GetCompanyBalanceText(newBalance, SimulationSettings.TargetBalance);
             SetProgressBarBalance(newBalance);
+        }
+
+        private void OnControlledCompanyProjectAdded(Scrum scrumObj)
+        {
+            scrumObj.BindedProject.Completed += OnCompanyProjectCompleted;
+        }
+
+        private void OnCompanyProjectCompleted(LocalProject proj)
+        {
+            SoundEffectsComponent.PlaySoundEffect(SoundEffectProjectCompleted);
         }
 
         private void OnGameTimeDayChanged()

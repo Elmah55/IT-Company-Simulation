@@ -13,8 +13,6 @@ namespace ITCompanySimulation.UI
         /*Private fields*/
 
         private AudioSource AudioSourceComponent;
-        [SerializeField]
-        private AudioClip UIButtonClickSound;
 
         /*Public consts fields*/
 
@@ -27,17 +25,28 @@ namespace ITCompanySimulation.UI
             AudioSourceComponent = GetComponent<AudioSource>();
         }
 
-        private void PlaySound(AudioClip sound)
-        {
-            AudioSourceComponent.clip = sound;
-            AudioSourceComponent.Play();
-        }
-
         /*Public methods*/
 
-        public void PlayUIButtonClickSound()
+        /// <summary>
+        /// Plays audio sound effect.
+        /// </summary>
+        /// <param name="soundEffect">Sound effect that will be played.</param>
+        public void PlaySoundEffect(AudioClip soundEffect)
         {
-            PlaySound(UIButtonClickSound);
+            AudioSourceComponent.PlayOneShot(soundEffect);
         }
-    } 
+
+        /// <summary>
+        /// Stops effect currently playing and plays new effect. Note that during
+        /// playing this effect other effects can be played if PlaySoundEffect is
+        /// used.
+        /// </summary>
+        /// <param name="soundEffect">Sound effect that will be played.</param>
+        public void PlaySoundEffectExclusively(AudioClip soundEffect)
+        {
+            AudioSourceComponent.clip = soundEffect;
+            AudioSourceComponent.Stop();
+            AudioSourceComponent.Play();
+        }
+    }
 }

@@ -25,7 +25,10 @@ namespace ITCompanySimulation.UI
         private Slider SliderUIVolume;
         [SerializeField]
         private Slider SliderMusicVolume;
+        [SerializeField]
         private SoundEffects SoundEffectsComponent;
+        [SerializeField]
+        private AudioClip ClipMenuButtonClick;
 
         /*Public consts fields*/
 
@@ -35,8 +38,6 @@ namespace ITCompanySimulation.UI
 
         private void Awake()
         {
-            SoundEffectsComponent = GameObject.FindGameObjectWithTag("SoundEffects").GetComponent<SoundEffects>();
-
             SliderMasterVolume.value = AudioSettings.MasterVolume;
             SliderMusicVolume.value = AudioSettings.MusicVolume;
             SliderUIVolume.value = AudioSettings.UIVolume;
@@ -67,7 +68,7 @@ namespace ITCompanySimulation.UI
                                 SliderUIVolume.value,
                                 SliderMusicVolume.value,
                                 true);
-            SoundEffectsComponent.PlayUIButtonClickSound();
+            SoundEffectsComponent.PlaySoundEffectExclusively(ClipMenuButtonClick);
 
         }
 

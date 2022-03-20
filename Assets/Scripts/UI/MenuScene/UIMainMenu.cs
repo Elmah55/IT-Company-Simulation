@@ -18,7 +18,6 @@ namespace ITCompanySimulation.UI
         private ApplicationManager ApplicationManagerComponent;
         [SerializeField]
         private Button ButtonStartGame;
-        private MenuButtonSoundEffects ButtonStartGameSoundEffects;
         private TextMeshProUGUI TextButtonStartGame;
         [SerializeField]
         private GameObject PanelMainMenu;
@@ -52,7 +51,6 @@ namespace ITCompanySimulation.UI
             TextButtonStartGame = ButtonStartGame.GetComponentInChildren<TextMeshProUGUI>();
             ApplicationManagerComponent = GameObject.FindGameObjectWithTag("ApplicationManager").GetComponent<ApplicationManager>();
             ApplicationManagerComponent.ReconnectFailed += OnGameManagerComponentReconnectFailed;
-            ButtonStartGameSoundEffects = ButtonStartGame.GetComponent<MenuButtonSoundEffects>();
         }
 
         private void OnGameManagerComponentReconnectFailed()
@@ -97,7 +95,8 @@ namespace ITCompanySimulation.UI
         {
             TextButtonStartGame.text = "Enter credentials";
             ButtonStartGame.onClick.RemoveAllListeners();
-            ButtonStartGameSoundEffects.AddSoundEffects();
+            //TODO: Use separete buttons instead of changing 
+            //click listeners in one button
             ButtonStartGame.onClick.AddListener(() =>
             {
                 CredentialsPanel.SetActive(true);
@@ -110,7 +109,6 @@ namespace ITCompanySimulation.UI
         {
             TextButtonStartGame.text = "Start";
             ButtonStartGame.onClick.RemoveAllListeners();
-            ButtonStartGameSoundEffects.AddSoundEffects();
             ButtonStartGame.onClick.AddListener(() =>
             {
                 if (true == ApplicationManagerComponent.UseRoom)
@@ -132,7 +130,6 @@ namespace ITCompanySimulation.UI
             TextButtonStartGame.text = "Connect";
             ButtonStartGame.interactable = true;
             ButtonStartGame.onClick.RemoveAllListeners();
-            ButtonStartGameSoundEffects.AddSoundEffects();
             ButtonStartGame.onClick.AddListener(() =>
             {
                 ReconnectFailed = false;

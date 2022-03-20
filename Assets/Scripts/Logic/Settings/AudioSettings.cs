@@ -64,7 +64,7 @@ namespace ITCompanySimulation.Settings
         {
             //Get handle to music audio source to get audio mixer. All audio sources will use same audio mixer
             AudioSource musicAudioSource =
-                GameObject.FindGameObjectWithTag("ApplicationManager").GetComponent<AudioSource>();
+                GameObject.FindGameObjectWithTag("ApplicationManager").GetComponentInChildren<AudioSource>();
             AudioMixerComponent = musicAudioSource.outputAudioMixerGroup.audioMixer;
         }
 
