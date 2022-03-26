@@ -90,10 +90,19 @@ namespace ITCompanySimulation.UI
         /// </summary>
         [SerializeField]
         private AudioClip SoundEffectProjectCompleted;
+        /// <summary>
+        /// Text used for animation when company's balance is increased.
+        /// </summary>
+        [SerializeField]
+        private TextMeshProUGUI TextCompanyBalanceAdded;
 
         /*Public consts fields*/
 
         /*Public fields*/
+
+        [Tooltip("For how many seconds panel displaying notification should be visible" +
+        " after notification was received.")]
+        public float PanelNotificationDisplayTime;
 
         /*Private methods*/
 
@@ -152,7 +161,7 @@ namespace ITCompanySimulation.UI
                 ButtonActivityLogNotificationDisplay.Notify();
             }
 
-            //Run animation to display notification on a dedicated panel for PANEL_NOTIFICATIONS_DISPLAY_TIME
+            //Run animation to display notification on a dedicated panel for specified
             //period of time
             if (false == LeanTween.isTweening(PanelNotifications))
             {
@@ -174,15 +183,15 @@ namespace ITCompanySimulation.UI
                 float panelOldLocationY = notificationPanelTransform.localPosition.y;
                 //Move panel along Y axis based on panel's height so whole panel can be visible in canvas
                 float panelNewLocationY = notificationPanelTransform.localPosition.y - notificationPanelTransform.sizeDelta.y;
-                LeanTween.moveLocalY(PanelNotifications, panelNewLocationY, 1f)
-                    .setIgnoreTimeScale(true)
-                    .setOnComplete(() =>
-                    {
-                        //After delay time start animation that hides notification
-                        LeanTween.moveLocalY(PanelNotifications, panelOldLocationY, 1f)
-                        .setIgnoreTimeScale(true)
-                        .setDelay(5f);
-                    });
+                float animationTime = 1f;
+                LTDescr showPanelTween = LeanTween.moveLocalY(PanelNotifications, panelNewLocationY, animationTime)
+                    .setIgnoreTimeScale(true);
+                LTDescr hidePanelTween = LeanTween.moveLocalY(PanelNotifications, panelOldLocationY, animationTime)
+                    .setIgnoreTimeScale(true);
+                LTSeq panelTweenSeq = LeanTween.sequence();
+                panelTweenSeq.append(showPanelTween);
+                panelTweenSeq.append(PanelNotificationDisplayTime);
+                panelTweenSeq.append(hidePanelTween);
             }
         }
 
@@ -226,6 +235,37 @@ namespace ITCompanySimulation.UI
         {
             TextCompanyBalance.text = GetCompanyBalanceText(newBalance, SimulationSettings.TargetBalance);
             SetProgressBarBalance(newBalance);
+
+            if ((balanceDelta > 0) && (false == LeanTween.isTweening(TextCompanyBalanceAdded.gameObject)))
+            {
+                //Run animation displaying amount by which balance was increased 
+                Transform textTransform = TextCompanyBalanceAdded.gameObject.transform;
+                Vector2 initialPosition = textTransform.localPosition;
+                Vector2 targetPosition = new Vector2(initialPosition.x, initialPosition.y + 250f);
+                Color initialColor = TextCompanyBalanceAdded.color;
+
+                TextCompanyBalanceAdded.text = string.Format("+{0} $", balanceDelta);
+                TextCompanyBalanceAdded.gameObject.SetActive(true);
+                LeanTween.moveLocalY(TextCompanyBalanceAdded.gameObject, targetPosition.y, 3f)
+                    .setIgnoreTimeScale(true)
+                    .setOnComplete(() =>
+                    {
+                        TextCompanyBalanceAdded.gameObject.SetActive(false);
+                        TextCompanyBalanceAdded.color = initialColor;
+                        textTransform.localPosition = initialPosition;
+                    })
+                    .setOnUpdate((float value) =>
+                    {
+                        if (value >= 0.5f)
+                        {
+                            //Start fading text
+                            Color updatedColor = TextCompanyBalanceAdded.color;
+                            float colorAlpha = 1f - Utils.MapRange(value, 0.5f, 1f, 0f, 1f);
+                            updatedColor.a = colorAlpha;
+                            TextCompanyBalanceAdded.color = updatedColor;
+                        }
+                    });
+            }
         }
 
         private void OnControlledCompanyProjectAdded(Scrum scrumObj)
