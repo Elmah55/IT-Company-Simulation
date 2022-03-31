@@ -4,7 +4,7 @@ namespace ITCompanySimulation.Utilities
 {
     /// <summary>
     /// This is safe version of float type. It allows to prevent any memory manipulation
-    /// by other software
+    /// by other software.
     /// </summary>
     public struct SafeFloat
     {
@@ -23,50 +23,34 @@ namespace ITCompanySimulation.Utilities
         {
             get
             {
-                return Get();
-            }
-
-            set
-            {
-                Assign(value);
+                return GetValue();
             }
         }
 
         /*Private methods*/
 
-        private unsafe float Get()
+        private unsafe float GetValue()
         {
-            fixed (float* ptr = &m_Value)
-            {
-                int* intPtr = (int*)ptr;
-                (*intPtr) = (*intPtr) ^ ObscureValue;
-                return (*ptr);
-            }
+            float tmpValue = m_Value;
+            int* intPtr = (int*)&tmpValue;
+            *intPtr = *intPtr ^ ObscureValue;
+            return tmpValue;
         }
 
-        private unsafe void Assign(float value)
+        private unsafe void SetValue(float value)
         {
-            if (ObscureValue == default(int))
-            {
-                ObscureValue = Random.Range(int.MinValue, int.MaxValue);
-            }
-
+            int* intPtr = (int*)&value;
+            (*intPtr) = (*intPtr) ^ ObscureValue;
             m_Value = value;
-
-            fixed (float* ptr = &m_Value)
-            {
-                int* intPtr = (int*)ptr;
-                (*intPtr) = (*intPtr) ^ ObscureValue;
-            }
         }
 
         /*Public methods*/
 
         public SafeFloat(float value)
         {
-            m_Value = 0.0f;
-            ObscureValue = Random.Range(int.MinValue, int.MaxValue);
-            Assign(value);
+            m_Value = 0f;
+            ObscureValue = Random.Range(1, int.MaxValue);
+            SetValue(value);
         }
     }
 }

@@ -39,7 +39,7 @@ namespace ITCompanySimulation.Company
             set
             {
                 int balanceDelta = value - m_Balance.Value;
-                m_Balance.Value = value;
+                m_Balance = new SafeInt(value);
                 BalanceChanged?.Invoke(m_Balance.Value, balanceDelta);
             }
         }

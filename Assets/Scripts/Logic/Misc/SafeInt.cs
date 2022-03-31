@@ -4,7 +4,7 @@ namespace ITCompanySimulation.Utilities
 {
     /// <summary>
     /// This is safe version of int type. It allows to prevent any memory manipulation
-    /// by other software
+    /// by other software.
     /// </summary>
     public struct SafeInt
     {
@@ -23,31 +23,20 @@ namespace ITCompanySimulation.Utilities
         {
             get
             {
-                return Get();
-            }
-
-            set
-            {
-                Assign(value);
+                return GetValue();
             }
         }
 
         /*Private methods*/
 
-        private int Get()
+        private int GetValue()
         {
             return m_Value ^ ObscureValue;
         }
 
-        private void Assign(int value)
+        private void SetValue(int value)
         {
-            if (ObscureValue == default(int))
-            {
-                ObscureValue = Random.Range(int.MinValue, int.MaxValue);
-            }
-
-            m_Value = value;
-            m_Value ^= ObscureValue;
+            m_Value = value ^ ObscureValue;
         }
 
         /*Public methods*/
@@ -55,8 +44,8 @@ namespace ITCompanySimulation.Utilities
         public SafeInt(int value)
         {
             m_Value = 0;
-            ObscureValue = Random.Range(int.MinValue, int.MaxValue);
-            Assign(value);
+            ObscureValue = Random.Range(1, int.MaxValue);
+            SetValue(value);
         }
     }
 }
