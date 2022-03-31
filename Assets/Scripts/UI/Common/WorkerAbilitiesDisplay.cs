@@ -39,6 +39,9 @@ namespace ITCompanySimulation.UI
 
         /*Public fields*/
 
+        [Tooltip("Time (in seconds) that should take to fill progress bar with worker abilites to target value.")]
+        public float ProgressBarFillTime;
+
         /*Private methods*/
 
         private string GetProgressBarText(ProjectTechnology ability, float abilityValue)
@@ -53,6 +56,7 @@ namespace ITCompanySimulation.UI
         {
             //Number of finished animations
             int progressBarAnimationsFinished = 0;
+            float lerpStep = 0f;
 
             while ((null != DisplayedWorker) && (progressBarAnimationsFinished != DisplayedWorker.Abilites.Count))
             {
@@ -62,17 +66,17 @@ namespace ITCompanySimulation.UI
 
                     if (progBar.Value != ability.Value.Value)
                     {
-                        float progBarValue = progBar.Value + 8f * Time.deltaTime;
-                        progBarValue = Mathf.Clamp(progBarValue, 0f, ability.Value.Value);
+                        float progBarValue = Mathf.Lerp(progBar.MinimumValue, ability.Value.Value, lerpStep / ProgressBarFillTime);
                         progBar.Value = progBarValue;
                         progBar.Text.text = GetProgressBarText(ability.Key, progBar.Value);
-
-                        if (progBar.Value == ability.Value.Value)
-                        {
-                            ++progressBarAnimationsFinished;
-                        }
+                    }
+                    else
+                    {
+                        ++progressBarAnimationsFinished;
                     }
                 }
+
+                lerpStep += Time.unscaledDeltaTime;
 
                 yield return null;
             }
