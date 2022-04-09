@@ -31,7 +31,6 @@ namespace ITCompanySimulation.Render
         private float LastCameraDirectionMovementFactor;
         private float LastCameraZoom;
         private float CameraDefaultZoom;
-        private float CameraPreviousZoom;
         /// <summary>
         /// Objects with this layer won't cancel camera control
         /// when mouse pointer is over them
@@ -67,14 +66,12 @@ namespace ITCompanySimulation.Render
         {
             float result = 0f;
             Vector2 camerPos = CameraComponent.transform.position;
-            /// <summary>
-            /// Value used to calcute distance limit based on camera zoom.
-            /// Used camera is ortographic. That means when zoom of camera
-            /// changes size of tilemap and sprites will change but distance
-            /// between unity game objects will remain the same. To have same
-            /// distance limit regardless of zoom this value needs to be taking
-            /// into consideration.
-            /// </summary>
+            /*Value used to calcute distance limit based on camera zoom.
+             *Used camera is ortographic. That means when zoom of camera
+             *changes size of tilemap and sprites will change but distance
+             *between unity game objects will remain the same. To have same
+             *distance limit regardless of zoom this value needs to be taken
+             *into consideration.*/
             float zoomFactor = CAMERA_MIN_ZOOM / CameraComponent.orthographicSize;
             float distanceFromCenterPoint = Vector2.Distance(CameraCenterPoint, camerPos);
 
@@ -104,11 +101,22 @@ namespace ITCompanySimulation.Render
                 CameraComponent.transform.Translate(LastCameraDirection);
             }
 
-            if (true == Input.GetMouseButton(RIGHT_MOUSE_BUTTON))
+            if ((true == Input.GetMouseButton(RIGHT_MOUSE_BUTTON)) && (true == Utils.MouseInsideScreen()))
             {
-                Vector2 mouseMovement = (Vector2)Input.mousePosition - LastMousePosition;
+                Vector2 camerPos = CameraComponent.transform.position;
+                Vector2 mouseMovement = LastMousePosition - (Vector2)Input.mousePosition;
+                //Vector from camera postion to center point
+                Vector2 centerPointVector = CameraCenterPoint - camerPos;
                 mouseMovement *= (CameraMovementSpeed / 100f) * CameraComponent.orthographicSize;
-                LastCameraDirection = -mouseMovement * Time.unscaledDeltaTime * (1f / CanvasComponent.scaleFactor);
+                LastCameraDirection = mouseMovement * Time.unscaledDeltaTime * (1f / CanvasComponent.scaleFactor);
+
+                /*If camera is over distance limit but player has started moving
+                camera towards center point do not slow down camera movement*/
+                if (Vector2.Dot(mouseMovement, centerPointVector) > 0f)
+                {
+                    overLimitAmount = 0f;
+                }
+
                 LastCameraDirectionMovementFactor = 1f - (overLimitAmount / 3f);
 
                 if (0f == CameraMovementSmoothness)
@@ -122,11 +130,6 @@ namespace ITCompanySimulation.Render
                 Vector2 centerPointVector = CameraCenterPoint - (Vector2)CameraComponent.transform.position;
                 LastCameraDirection = centerPointVector.normalized;
                 LastCameraDirectionMovementFactor = overLimitAmount / 100f;
-            }
-
-            if (CameraPreviousZoom != CameraComponent.orthographicSize)
-            {
-                CameraPreviousZoom = CameraComponent.orthographicSize;
             }
         }
 
@@ -180,9 +183,9 @@ namespace ITCompanySimulation.Render
             if (-1 == DontDisableCameraControlLayer)
             {
                 string debugMsg = string.Format(
-                    "[{0}] Could not get layer \"{1}\" by name. Holding mouse pointer over all UI elements will disable camera control",
+                    "[{0}] Could not get layer \"{1}\" by name. Holding mouse pointer over all UI elements will disable camera control.",
                     this.GetType().Name, layerName);
-                Debug.Log(debugMsg);
+                Debug.LogWarning(debugMsg);
             }
 #endif
         }
@@ -192,7 +195,7 @@ namespace ITCompanySimulation.Render
         /// </summary>
         private bool GetCameraControlActive()
         {
-            bool result = Utils.MouseInsideScreen();
+            bool result = true;
 
             if (-1 != DontDisableCameraControlLayer && true == result)
             {
@@ -231,5 +234,5 @@ namespace ITCompanySimulation.Render
         }
 
         /*Public methods*/
-    } 
+    }
 }
