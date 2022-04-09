@@ -77,7 +77,9 @@ namespace ITCompanySimulation.UI
 
         private void InitDropdownFullscreenMode()
         {
-            for (int i = 0; i < Enum.GetValues(typeof(FullScreenMode)).Length; i++)
+            int fullScreenModeCount = Enum.GetValues(typeof(FullScreenMode)).Length;
+
+            for (int i = 0; i < fullScreenModeCount; i++)
             {
                 string dropdownOptionText = EnumToString.GetString((FullScreenMode)i);
                 TMP_Dropdown.OptionData data = new TMP_Dropdown.OptionData(dropdownOptionText);
