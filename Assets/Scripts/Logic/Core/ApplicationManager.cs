@@ -96,11 +96,32 @@ namespace ITCompanySimulation.Core
         /// </summary>
         public bool IsSessionActive { get; private set; }
         public float SceneLoadingProgress { get; private set; }
+        /// <summary>
+        /// Invoked when reconnect (after losing connection) to game server failed.
+        /// </summary>
         public event UnityAction ReconnectFailed;
+        /// <summary>
+        /// Invoked when connection to game server is established.
+        /// </summary>
+        public event UnityAction ServerConnectionEstablished;
+        /// <summary>
+        /// Invoked after application disconnected from game server.
+        /// </summary>
+        public event UnityAction DisconnectedFromServer;
         public event UnityAction SessionStarted;
         public event UnityAction<Scene> SceneStartedLoading;
         public event UnityAction<Scene> SceneFinishedLoading;
         public event UnityAction<float> SceneLoadingProgressChanged;
+        /// <summary>
+        /// Indicates whether application is connected to game server.
+        /// </summary>
+        public bool Connected
+        {
+            get
+            {
+                return PhotonNetwork.connected;
+            }
+        }
 
         /*Private methods*/
 
@@ -136,7 +157,7 @@ namespace ITCompanySimulation.Core
 
             if (false == PhotonNetwork.offlineMode)
             {
-                PhotonNetwork.ConnectUsingSettings(GAME_VERSION);
+                Connect();
             }
 
             PhotonNetwork.OnEventCall += OnPhotonNetworkEventCall;
@@ -150,6 +171,26 @@ namespace ITCompanySimulation.Core
 
             LoadScene(SceneIndex.Menu);
         }
+
+#if DEVELOPMENT_BUILD || UNITY_EDITOR
+        private void OnGUI()
+        {
+            Event currentEvent = Event.current;
+
+            if (true == currentEvent.isKey)
+            {
+                KeyCode requiredKey = KeyCode.D;
+
+                //Disconnect from game server when proper key combination is pressed (Ctrl + D).
+                //This should be used only for debug purposes.
+                if (EventType.KeyDown == currentEvent.type && true == currentEvent.control && requiredKey == currentEvent.keyCode &&
+                   (true == PhotonNetwork.isMasterClient || null == PhotonNetwork.room))
+                {
+                    PhotonNetwork.Disconnect();
+                }
+            }
+        }
+#endif
 
         private void OnSceneLoaded(Scene loadedScene, LoadSceneMode sceneLoadMode)
         {
@@ -345,6 +386,18 @@ namespace ITCompanySimulation.Core
             SceneLoadingOperations.Clear();
         }
 
+        private void Reconnect()
+        {
+            if (MAX_RECONNECT_RETRIES > ReconnectRetries)
+            {
+                StartCoroutine(ReconnectCoroutine());
+            }
+            else
+            {
+                ReconnectFailed?.Invoke();
+            }
+        }
+
         /*Public methods*/
 
         public void StartGame()
@@ -424,7 +477,7 @@ namespace ITCompanySimulation.Core
 
         /// <summary>
         /// Is called when client is connected to photon since auto
-        /// join lobby is set to true
+        /// join lobby is set to true.
         /// </summary>
         public override void OnJoinedLobby()
         {
@@ -436,6 +489,8 @@ namespace ITCompanySimulation.Core
                                        PhotonNetwork.lobby.Name);
             Debug.Log(msg);
 #endif
+
+            ServerConnectionEstablished?.Invoke();
         }
 
         public override void OnLeftLobby()
@@ -480,15 +535,8 @@ namespace ITCompanySimulation.Core
         public override void OnDisconnectedFromPhoton()
         {
             base.OnDisconnectedFromPhoton();
-
-            if (MAX_RECONNECT_RETRIES != ReconnectRetries)
-            {
-                StartCoroutine(ReconnectCoroutine());
-            }
-            else
-            {
-                ReconnectFailed?.Invoke();
-            }
+            DisconnectedFromServer?.Invoke();
+            Reconnect();
 
 #if DEVELOPMENT_BUILD || UNITY_EDITOR
             string msg = string.Format("[{0}] Disconnected from Photon", this.GetType().Name);
@@ -499,6 +547,7 @@ namespace ITCompanySimulation.Core
         public override void OnConnectionFail(DisconnectCause cause)
         {
             base.OnConnectionFail(cause);
+            Reconnect();
 
 #if DEVELOPMENT_BUILD || UNITY_EDITOR
             string msg = string.Format("[{0}] Connection failed. Reason: {1}",
