@@ -13,6 +13,7 @@ using AudioSettings = ITCompanySimulation.Settings.AudioSettings;
 using System.Threading;
 using System.Globalization;
 using System.Collections.Generic;
+using Photon;
 
 #if DEVELOPMENT_BUILD || UNITY_EDITOR
 using System.Reflection;
@@ -24,16 +25,11 @@ namespace ITCompanySimulation.Core
     /// This class handles application aspects like loading scenes, data transfer,
     /// handling multiplayer connection and multiplayer session
     /// </summary>
-    public class ApplicationManager : Photon.PunBehaviour
+    public class ApplicationManager : PunBehaviour
     {
         /*Private consts fields*/
 
         private const string GAME_VERSION = "1.0";
-        /// <summary>
-        /// How many reconnect should be made when cannot connect to server
-        /// or after being disconnected from server
-        /// </summary>
-        private const int MAX_RECONNECT_RETRIES = 5;
 
         /*Private fields*/
 
@@ -71,7 +67,6 @@ namespace ITCompanySimulation.Core
         /// https://doc.photonengine.com/en-us/pun/current/gameplay/offlinemode
         /// </summary>
         private bool OfflineMode;
-        private int ReconnectRetries = 0;
         /// <summary>
         /// Settings set in inspector
         /// </summary>
@@ -96,32 +91,18 @@ namespace ITCompanySimulation.Core
         /// </summary>
         public bool IsSessionActive { get; private set; }
         public float SceneLoadingProgress { get; private set; }
-        /// <summary>
-        /// Invoked when reconnect (after losing connection) to game server failed.
-        /// </summary>
-        public event UnityAction ReconnectFailed;
-        /// <summary>
-        /// Invoked when connection to game server is established.
-        /// </summary>
-        public event UnityAction ServerConnectionEstablished;
-        /// <summary>
-        /// Invoked after application disconnected from game server.
-        /// </summary>
-        public event UnityAction DisconnectedFromServer;
         public event UnityAction SessionStarted;
         public event UnityAction<Scene> SceneStartedLoading;
         public event UnityAction<Scene> SceneFinishedLoading;
         public event UnityAction<float> SceneLoadingProgressChanged;
         /// <summary>
-        /// Indicates whether application is connected to game server.
+        /// Invoked when client is disconnected from game server.
         /// </summary>
-        public bool Connected
-        {
-            get
-            {
-                return PhotonNetwork.connected;
-            }
-        }
+        public event UnityAction DisconnectedFromServer;
+        /// <summary>
+        /// Invoked when connection to game server is established;
+        /// </summary>
+        public event UnityAction ConnectedToServer;
 
         /*Private methods*/
 
@@ -206,7 +187,7 @@ namespace ITCompanySimulation.Core
 
                 if (false == PhotonNetwork.offlineMode && true == UseRoom)
                 {
-                    DataReceiverComponents = GameObject.FindObjectsOfType<MonoBehaviour>().OfType<IDataReceiver>().ToArray();
+                    DataReceiverComponents = GameObject.FindObjectsOfType<UnityEngine.MonoBehaviour>().OfType<IDataReceiver>().ToArray();
 
                     foreach (IDataReceiver receiver in DataReceiverComponents)
                     {
@@ -224,7 +205,7 @@ namespace ITCompanySimulation.Core
                     if (true == PhotonNetwork.isMasterClient)
                     {
                         MasterClientDataReceiverComponents =
-                            GameObject.FindObjectsOfType<MonoBehaviour>().OfType<IMasterClientDataReceiver>().ToArray();
+                            GameObject.FindObjectsOfType<UnityEngine.MonoBehaviour>().OfType<IMasterClientDataReceiver>().ToArray();
 
                         foreach (IMasterClientDataReceiver receiver in MasterClientDataReceiverComponents)
                         {
@@ -322,13 +303,6 @@ namespace ITCompanySimulation.Core
             SessionStarted?.Invoke();
         }
 
-        private IEnumerator ReconnectCoroutine()
-        {
-            yield return new WaitForSecondsRealtime(5.0f);
-            PhotonNetwork.ConnectUsingSettings(GAME_VERSION);
-            ++ReconnectRetries;
-        }
-
         private void OnComponentDataTransfered()
         {
             ++NumberOfCompletedDataTransfers;
@@ -386,18 +360,6 @@ namespace ITCompanySimulation.Core
             SceneLoadingOperations.Clear();
         }
 
-        private void Reconnect()
-        {
-            if (MAX_RECONNECT_RETRIES > ReconnectRetries)
-            {
-                StartCoroutine(ReconnectCoroutine());
-            }
-            else
-            {
-                ReconnectFailed?.Invoke();
-            }
-        }
-
         /*Public methods*/
 
         public void StartGame()
@@ -438,7 +400,6 @@ namespace ITCompanySimulation.Core
 
         public void Connect()
         {
-            ReconnectRetries = 0;
             PhotonNetwork.ConnectUsingSettings(GAME_VERSION);
         }
 
@@ -468,7 +429,6 @@ namespace ITCompanySimulation.Core
         {
             base.OnConnectedToMaster();
 
-            ReconnectRetries = 0;
 #if DEVELOPMENT_BUILD || UNITY_EDITOR
             string msg = string.Format("[{0}] Connected to master", this.GetType().Name);
             Debug.Log(msg);
@@ -490,7 +450,9 @@ namespace ITCompanySimulation.Core
             Debug.Log(msg);
 #endif
 
-            ServerConnectionEstablished?.Invoke();
+            //Since auto lobby join is enabled this method
+            //will be called when client is connected to server
+            ConnectedToServer?.Invoke();
         }
 
         public override void OnLeftLobby()
@@ -535,19 +497,18 @@ namespace ITCompanySimulation.Core
         public override void OnDisconnectedFromPhoton()
         {
             base.OnDisconnectedFromPhoton();
-            DisconnectedFromServer?.Invoke();
-            Reconnect();
 
 #if DEVELOPMENT_BUILD || UNITY_EDITOR
             string msg = string.Format("[{0}] Disconnected from Photon", this.GetType().Name);
             Debug.Log(msg);
 #endif
+
+            DisconnectedFromServer?.Invoke();
         }
 
         public override void OnConnectionFail(DisconnectCause cause)
         {
             base.OnConnectionFail(cause);
-            Reconnect();
 
 #if DEVELOPMENT_BUILD || UNITY_EDITOR
             string msg = string.Format("[{0}] Connection failed. Reason: {1}",
@@ -555,6 +516,8 @@ namespace ITCompanySimulation.Core
                                        cause);
             Debug.Log(msg);
 #endif
+
+            DisconnectedFromServer?.Invoke();
         }
 
         public override void OnPhotonJoinRoomFailed(object[] codeAndMsg)

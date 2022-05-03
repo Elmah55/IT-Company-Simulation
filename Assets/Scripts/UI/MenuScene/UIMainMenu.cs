@@ -32,7 +32,6 @@ namespace ITCompanySimulation.UI
         private InfoWindow InfoWindowComponent;
         [SerializeField]
         private VerticalLayoutGroup LayoutMenuButtons;
-        private bool ReconnectFailed;
         /// <summary>
         /// Array with buttons that must be activated or deactived
         /// depending on current application state.
@@ -60,11 +59,6 @@ namespace ITCompanySimulation.UI
             SetApplicationStateButton();
         }
 
-        private void OnDestroy()
-        {
-            ApplicationManagerComponent.ReconnectFailed -= OnGameManagerComponentReconnectFailed;
-        }
-
         private void Awake()
         {
             ApplicationStateButtons = new Button[]
@@ -76,23 +70,31 @@ namespace ITCompanySimulation.UI
             };
 
             ApplicationManagerComponent = GameObject.FindGameObjectWithTag("ApplicationManager").GetComponent<ApplicationManager>();
-            ApplicationManagerComponent.ReconnectFailed += OnGameManagerComponentReconnectFailed;
-            ApplicationManagerComponent.ServerConnectionEstablished += OnServerConnectionEstablished;
-            ApplicationManagerComponent.DisconnectedFromServer += OnServerDisconnected;
-
+            ApplicationManagerComponent.DisconnectedFromServer += OnDisconnectedFromServer;
+            ApplicationManagerComponent.ConnectedToServer += OnConnectedToSever;
             ButtonStartGame.onClick.AddListener(ApplicationManagerComponent.StartGame);
             ButtonConnect.onClick.AddListener(() =>
             {
                 ApplicationManagerComponent.Connect();
-                ReconnectFailed = false;
+                SetApplicationStateButton();
             });
         }
 
-        private void OnGameManagerComponentReconnectFailed()
+        private void OnDestroy()
+        {
+            ApplicationManagerComponent.DisconnectedFromServer -= OnDisconnectedFromServer;
+            ApplicationManagerComponent.ConnectedToServer -= OnConnectedToSever;
+        }
+
+        private void OnConnectedToSever()
+        {
+            SetApplicationStateButton();
+        }
+
+        private void OnDisconnectedFromServer()
         {
             InfoWindowComponent.ShowOk("Connection to server failed", null);
-            ActivateStateButton(ApplicationState.Disconnected);
-            ReconnectFailed = true;
+            SetApplicationStateButton();
         }
 
         private void SetApplicationStateButton()
@@ -101,19 +103,24 @@ namespace ITCompanySimulation.UI
             {
                 ActivateStateButton(ApplicationState.MissingCredentials);
             }
-            //Auto join lobby is enabled
-            //Always "connected" while in offline mode
-            else if (true == ApplicationManagerComponent.Connected)
+            else
             {
-                ActivateStateButton(ApplicationState.Connected);
-            }
-            else if (false == ReconnectFailed)
-            {
-                ActivateStateButton(ApplicationState.Connecting);
-            }
-            else if (true == ReconnectFailed)
-            {
-                ActivateStateButton(ApplicationState.Disconnected);
+                switch (PhotonNetwork.connectionState)
+                {
+                    case ConnectionState.Disconnected:
+                        ActivateStateButton(ApplicationState.Disconnected);
+                        break;
+                    case ConnectionState.Connecting:
+                    case ConnectionState.InitializingApplication:
+                        ActivateStateButton(ApplicationState.Connecting);
+                        break;
+                    case ConnectionState.Connected:
+                        ActivateStateButton(ApplicationState.Connected);
+                        break;
+                    default:
+                        ActivateStateButton(ApplicationState.Disconnected);
+                        break;
+                }
             }
         }
 
@@ -167,16 +174,6 @@ namespace ITCompanySimulation.UI
             LayoutMenuButtons.enabled = true;
         }
 
-        private void OnServerConnectionEstablished()
-        {
-            SetApplicationStateButton();
-            ReconnectFailed = false;
-        }
-
-        private void OnServerDisconnected()
-        {
-            SetApplicationStateButton();
-        }
 
         /*Public methods*/
 
