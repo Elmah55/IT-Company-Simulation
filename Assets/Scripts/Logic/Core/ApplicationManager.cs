@@ -333,6 +333,9 @@ namespace ITCompanySimulation.Core
 
         private IEnumerator LoadSceneAsync()
         {
+            SceneLoadingProgress = 0f;
+            SceneLoadingProgressChanged?.Invoke(SceneLoadingProgress);
+
             foreach (AsyncOperation operation in SceneLoadingOperations)
             {
                 while (false == operation.isDone)
