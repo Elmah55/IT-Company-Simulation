@@ -32,6 +32,10 @@ namespace ITCompanySimulation.Render
         private float LastCameraZoom;
         private float CameraDefaultZoom;
         /// <summary>
+        /// Amount by which camera position exceeded distance limit.
+        /// </summary>
+        private float AmountOverDistanceLimit;
+        /// <summary>
         /// Objects with this layer won't cancel camera control
         /// when mouse pointer is over them
         /// </summary>
@@ -52,7 +56,7 @@ namespace ITCompanySimulation.Render
         [Range(0f, 10f)]
         public float CameraZoomSmoothness;
         [Tooltip("Camera distance limit will be measured from this point")]
-        public Vector2 CameraCenterPoint;
+        public Transform CameraCenterPoint;
         [Tooltip("Indicates how far camera can move from center point")]
         public float CameraDistanceLimit;
 
@@ -73,12 +77,12 @@ namespace ITCompanySimulation.Render
              *distance limit regardless of zoom this value needs to be taken
              *into consideration.*/
             float zoomFactor = CAMERA_MIN_ZOOM / CameraComponent.orthographicSize;
-            float distanceFromCenterPoint = Vector2.Distance(CameraCenterPoint, camerPos);
+            float distanceFromCenterPoint = Vector2.Distance(CameraCenterPoint.position, camerPos);
 
             if (distanceFromCenterPoint > CameraDistanceLimit * zoomFactor)
             {
                 //Vector from camera position to center point
-                Vector2 centerPointVector = CameraCenterPoint - camerPos;
+                Vector2 centerPointVector = (Vector2)CameraCenterPoint.position - camerPos;
                 result = centerPointVector.magnitude - CameraDistanceLimit;
                 result /= zoomFactor;
             }
@@ -87,26 +91,16 @@ namespace ITCompanySimulation.Render
         }
 
         /// <summary>
-        /// Moves camera based on user input
+        /// Moves camera based on user input.
         /// </summary>
         private void SetCameraPosition()
         {
-            float overLimitAmount = CheckCameraDistanceLimit();
-
-            if (0f != CameraMovementSmoothness)
-            {
-                LastCameraDirectionMovementFactor -= (2f / CameraMovementSmoothness) * Time.unscaledDeltaTime;
-                LastCameraDirectionMovementFactor = Mathf.Clamp(LastCameraDirectionMovementFactor, 0f, 1f);
-                LastCameraDirection *= LastCameraDirectionMovementFactor;
-                CameraComponent.transform.Translate(LastCameraDirection);
-            }
-
-            if ((true == Input.GetMouseButton(RIGHT_MOUSE_BUTTON)) && (true == Utils.MouseInsideScreen()))
+            if ((true == Input.GetMouseButton(RIGHT_MOUSE_BUTTON)))
             {
                 Vector2 camerPos = CameraComponent.transform.position;
                 Vector2 mouseMovement = LastMousePosition - (Vector2)Input.mousePosition;
                 //Vector from camera postion to center point
-                Vector2 centerPointVector = CameraCenterPoint - camerPos;
+                Vector2 centerPointVector = (Vector2)CameraCenterPoint.position - camerPos;
                 mouseMovement *= (CameraMovementSpeed / 100f) * CameraComponent.orthographicSize;
                 LastCameraDirection = mouseMovement * Time.unscaledDeltaTime * (1f / CanvasComponent.scaleFactor);
 
@@ -114,22 +108,21 @@ namespace ITCompanySimulation.Render
                 camera towards center point do not slow down camera movement*/
                 if (Vector2.Dot(mouseMovement, centerPointVector) > 0f)
                 {
-                    overLimitAmount = 0f;
+                    AmountOverDistanceLimit = 0f;
                 }
 
-                LastCameraDirectionMovementFactor = 1f - (overLimitAmount / 3f);
+                LastCameraDirectionMovementFactor = 1f - (AmountOverDistanceLimit / 3f);
 
-                if (0f == CameraMovementSmoothness)
+                if (0f == CameraMovementSmoothness && 0f == AmountOverDistanceLimit)
                 {
                     CameraComponent.transform.Translate(LastCameraDirection);
                 }
             }
-            else if (overLimitAmount > 0f)
+            else
             {
-                //Vector from camera position to center point
-                Vector2 centerPointVector = CameraCenterPoint - (Vector2)CameraComponent.transform.position;
-                LastCameraDirection = centerPointVector.normalized;
-                LastCameraDirectionMovementFactor = overLimitAmount / 100f;
+                //Camera control is active this frame but no input entered.
+                //Move camera towards center if distance limit is exceeded.
+                HandleCameraOverDistanceLimit();
             }
         }
 
@@ -191,11 +184,11 @@ namespace ITCompanySimulation.Render
         }
 
         /// <summary>
-        /// Checks if camera control should be active this frame
+        /// Checks if camera control should be active this frame.
         /// </summary>
         private bool GetCameraControlActive()
         {
-            bool result = true;
+            bool result = Utils.MouseInsideScreen();
 
             if (-1 != DontDisableCameraControlLayer && true == result)
             {
@@ -219,15 +212,49 @@ namespace ITCompanySimulation.Render
             return result;
         }
 
+        /// <summary>
+        /// Moves camera towards center when it's position from center
+        /// is over distance limit.
+        /// </summary>
+        private void HandleCameraOverDistanceLimit()
+        {
+            if (AmountOverDistanceLimit > 0f)
+            {
+                //Vector from camera position to center point
+                Vector2 centerPointVector = CameraCenterPoint.position - CameraComponent.transform.position;
+                LastCameraDirection = centerPointVector.normalized;
+                LastCameraDirectionMovementFactor = AmountOverDistanceLimit / 100f;
+            }
+        }
+
+        /// <summary>
+        /// Moves camera when no input is entered but camera needs to be moved because of smoothness set.
+        /// </summary>
+        private void MoveCamera()
+        {
+            if (0f != CameraMovementSmoothness)
+            {
+                LastCameraDirectionMovementFactor -= (2f / CameraMovementSmoothness) * Time.unscaledDeltaTime;
+                LastCameraDirectionMovementFactor = Mathf.Clamp(LastCameraDirectionMovementFactor, 0f, 1f);
+                LastCameraDirection *= LastCameraDirectionMovementFactor;
+                CameraComponent.transform.Translate(LastCameraDirection);
+            }
+        }
+
         private void Update()
         {
-            //Whether camera control should be enabled this frame
             bool cameraControlActive = GetCameraControlActive();
+            AmountOverDistanceLimit = CheckCameraDistanceLimit();
+            MoveCamera();
 
             if (true == cameraControlActive)
             {
                 SetCameraPosition();
                 SetCameraZoom();
+            }
+            else
+            {
+                HandleCameraOverDistanceLimit();
             }
 
             LastMousePosition = Input.mousePosition;
