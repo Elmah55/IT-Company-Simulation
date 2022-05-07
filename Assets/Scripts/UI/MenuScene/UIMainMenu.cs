@@ -72,7 +72,18 @@ namespace ITCompanySimulation.UI
             ApplicationManagerComponent = GameObject.FindGameObjectWithTag("ApplicationManager").GetComponent<ApplicationManager>();
             ApplicationManagerComponent.DisconnectedFromServer += OnDisconnectedFromServer;
             ApplicationManagerComponent.ConnectedToServer += OnConnectedToSever;
-            ButtonStartGame.onClick.AddListener(ApplicationManagerComponent.StartGame);
+            ButtonStartGame.onClick.AddListener(() =>
+            {
+                if (true == ApplicationManagerComponent.UseRoom)
+                {
+                    PanelMainMenu.gameObject.SetActive(false);
+                    PanelMainLobby.gameObject.SetActive(true);
+                }
+                else
+                {
+                    ApplicationManagerComponent.StartGame();
+                }
+            });
             ButtonConnect.onClick.AddListener(() =>
             {
                 ApplicationManagerComponent.Connect();
