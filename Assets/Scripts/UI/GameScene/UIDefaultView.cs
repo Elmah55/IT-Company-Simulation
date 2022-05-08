@@ -8,6 +8,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using ITCompanySimulation.Project;
+using System;
 
 namespace ITCompanySimulation.UI
 {
@@ -15,7 +16,7 @@ namespace ITCompanySimulation.UI
     /// This class handles UI for default view. This is the view that is displayed
     /// after loading game scene.
     /// </summary>
-    public class UIDefaultView : MonoBehaviour
+    public class UIDefaultView : MonoBehaviour, IDisposable
     {
         /*Private consts fields*/
 
@@ -135,6 +136,8 @@ namespace ITCompanySimulation.UI
             //Initialization for UI components that are inactive when scene is loaded
             UIActivityLogComponent.Init();
             ChatWindowComponent.Init();
+
+            ApplicationManager.RegisterObjectForCleanup(this);
         }
 
         private void OnChatMessageReceived(string senderNickname, string message)
@@ -335,6 +338,12 @@ namespace ITCompanySimulation.UI
                 ChatWindowComponent.gameObject.SetActive(true);
                 LeanTween.scale(ChatWindowComponent.gameObject, Vector2.one, .5f).setIgnoreTimeScale(true);
             }
+        }
+
+        public void Dispose()
+        {
+            ChatComponent.PrivateMessageReceived -= OnChatMessageReceived;
+            ChatComponent.MessageReceived -= OnChatMessageReceived;
         }
     }
 }

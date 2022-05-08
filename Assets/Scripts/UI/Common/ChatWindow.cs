@@ -3,13 +3,15 @@ using TMPro;
 using ITCompanySimulation.Multiplayer;
 using System.Text.RegularExpressions;
 using ITCompanySimulation.Utilities;
+using System;
+using ITCompanySimulation.Core;
 
 namespace ITCompanySimulation.UI
 {
     /// <summary>
     /// Class for handling UI related to in-game chat.
     /// </summary>
-    public class ChatWindow : MonoBehaviour
+    public class ChatWindow : MonoBehaviour, IDisposable
     {
         /*Private consts fields*/
 
@@ -92,14 +94,6 @@ namespace ITCompanySimulation.UI
             {
                 Init();
             }
-        }
-
-        private void OnDestroy()
-        {
-            ChatComponent.MessageReceived -= OnChatMessageReceived;
-            ChatComponent.PrivateMessageReceived -= OnChatPrivateMessageReceived;
-            ChatComponent.Disconnected -= OnChatDisconnected;
-            ChatComponent.Connected -= OnChatConnected;
         }
 
         private void OnChatConnected()
@@ -258,6 +252,7 @@ namespace ITCompanySimulation.UI
             ChatComponent.PrivateMessageReceived += OnChatPrivateMessageReceived;
             ChatComponent.Disconnected += OnChatDisconnected;
             ChatComponent.Connected += OnChatConnected;
+            ApplicationManager.RegisterObjectForCleanup(this);
 
             if (false == ChatComponent.IsConnected)
             {
@@ -265,6 +260,14 @@ namespace ITCompanySimulation.UI
             }
 
             IsInitialized = true;
+        }
+
+        public void Dispose()
+        {
+            ChatComponent.MessageReceived -= OnChatMessageReceived;
+            ChatComponent.PrivateMessageReceived -= OnChatPrivateMessageReceived;
+            ChatComponent.Disconnected -= OnChatDisconnected;
+            ChatComponent.Connected -= OnChatConnected;
         }
     }
 }

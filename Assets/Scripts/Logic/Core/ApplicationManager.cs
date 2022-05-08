@@ -72,6 +72,12 @@ namespace ITCompanySimulation.Core
         /// </summary>
         private SettingsObject Settings;
         private List<AsyncOperation> SceneLoadingOperations = new List<AsyncOperation>();
+        /// <summary>
+        /// Cleans resources when before scene is unloaded. This list should be
+        /// used for components that need cleanup before scene unload but callback
+        /// like OnDestoy won't be called on them because they are inactive.
+        /// </summary>
+        private static List<IDisposable> ObjectsToDispose = new List<IDisposable>();
 
         /*Public consts fields*/
 
@@ -219,10 +225,6 @@ namespace ITCompanySimulation.Core
                             }
                         }
                     }
-
-                    //Allow incoming messages again. Scene is already loaded so
-                    //components will receive messages sent by other clients.
-                    PhotonNetwork.isMessageQueueRunning = true;
                 }
                 else
                 {
@@ -230,6 +232,10 @@ namespace ITCompanySimulation.Core
                     StartSessionRPC();
                 }
             }
+
+            //Allow incoming messages again. Scene is already loaded so
+            //components will receive messages sent by other clients.
+            PhotonNetwork.isMessageQueueRunning = true;
         }
 
         private void OnPhotonNetworkEventCall(byte eventCode, object content, int senderId)
@@ -363,6 +369,16 @@ namespace ITCompanySimulation.Core
             SceneLoadingOperations.Clear();
         }
 
+        private static void CleanupDisposableObjects()
+        {
+            foreach (IDisposable disposableObject in ObjectsToDispose)
+            {
+                disposableObject.Dispose();
+            }
+
+            ObjectsToDispose.Clear();
+        }
+
         /*Public methods*/
 
         public void StartGame()
@@ -414,6 +430,7 @@ namespace ITCompanySimulation.Core
             if (activeScene.buildIndex != intIndex)
             {
                 SceneLoadingProgress = 0f;
+                CleanupDisposableObjects();
                 SceneStartedLoading?.Invoke(activeScene);
 
                 //Do not try to unload previous scene at application start when no previous scene was loaded
@@ -460,9 +477,6 @@ namespace ITCompanySimulation.Core
 
         public override void OnLeftLobby()
         {
-            //TODO: Fix re-joining lobby when offline mode
-            //is off and room is not used. After finished session
-            //photon network does not call OnLeftRoom.
 #if DEVELOPMENT_BUILD || UNITY_EDITOR
             string msg = string.Format("[{0}] Left lobby",
                                        this.GetType().Name);
@@ -486,13 +500,23 @@ namespace ITCompanySimulation.Core
             string msg = string.Format("[{0}] Joined room\n" +
                                "Name: {1}\n" +
                                "Number of players: {2}\n" +
-                               "Max number of players : {3}" +
+                               "Max number of players : {3}\n" +
                                "Open: {4}",
                                this.GetType().Name,
                                PhotonNetwork.room.Name,
                                PhotonNetwork.room.PlayerCount,
                                PhotonNetwork.room.MaxPlayers,
                                PhotonNetwork.room.IsOpen);
+            Debug.Log(msg);
+#endif
+        }
+
+        public override void OnLeftRoom()
+        {
+            base.OnLeftRoom();
+
+#if DEVELOPMENT_BUILD || UNITY_EDITOR
+            string msg = string.Format("[{0}] Left room", this.GetType().Name);
             Debug.Log(msg);
 #endif
         }
@@ -531,6 +555,15 @@ namespace ITCompanySimulation.Core
             string msg = string.Format("[{0}] Failed to join the room", this.GetType().Name);
             Debug.Log(msg);
 #endif
+        }
+
+        /// <summary>
+        /// Register object that needs to be disposed before scene is unloaded.
+        /// </summary>
+        /// <param name="obj">Object that will be disposed before scene unload.</param>
+        public static void RegisterObjectForCleanup(IDisposable obj)
+        {
+            ObjectsToDispose.Add(obj);
         }
     }
 }
