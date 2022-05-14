@@ -6,10 +6,11 @@ using ExitGames.Client.Photon;
 using ITCompanySimulation.Multiplayer;
 using ITCompanySimulation.Core;
 using ITCompanySimulation.Settings;
+using Photon;
 
 namespace ITCompanySimulation.UI
 {
-    public class UICreateRoom : Photon.PunBehaviour
+    public class UICreateRoom : PunBehaviour
     {
         /*Private consts fields*/
 
@@ -101,10 +102,6 @@ namespace ITCompanySimulation.UI
             SliderMinimalBalance.minValue = SimulationSettings.MIN_MINIMAL_BALANCE;
             SliderMinimalBalance.value = SliderInitialBalance.value - 100000;
 
-            TextInputFieldInitialBalanceHelper.gameObject.SetActive(false);
-            TextInputFieldMinimalBalanceHelper.gameObject.SetActive(false);
-            TextInputFieldTargetBalanceHelper.gameObject.SetActive(false);
-
             TextNumberOfPlayers.text =
                 "Maximum number of players " + SliderNumberOfPlayers.value;
             TextTargetBalance.text =
@@ -123,26 +120,38 @@ namespace ITCompanySimulation.UI
         private bool CheckAndSetNumericInput(TMP_InputField input, TextMeshProUGUI helperText, Slider inputSlider, int minValue, int maxValue)
         {
             bool result = false;
-            string regexPattern = @"^ *[0-9]+ *\$? *$";
+            string regexPattern = @"^ *(-?[0-9]+) *\$? *$";
+            string helperTextString = string.Empty;
             Match regexMatch = Regex.Match(input.text, regexPattern);
 
             if (true == regexMatch.Success)
             {
-                string regexReplacePattern = @"[^0-9]";
-                string valueStr = Regex.Replace(input.text, regexReplacePattern, string.Empty);
-                int value = int.Parse(valueStr);
-                value = Mathf.Clamp(value, minValue, maxValue);
-                input.text = value.ToString();
-                inputSlider.value = value;
-                helperText.gameObject.SetActive(false);
-                input.GetComponent<Image>().color = InputFieldNormalColor;
-                result = true;
+                int value;
+                string valueStr = regexMatch.Groups[1].Value;
+                if (true == int.TryParse(valueStr, out value))
+                {
+                    value = Mathf.Clamp(value, minValue, maxValue);
+                    input.text = value.ToString();
+                    inputSlider.value = value;
+                    input.GetComponent<Image>().color = InputFieldNormalColor;
+                    result = true;
+                }
+                else
+                {
+                    helperTextString = "Provided value is out of range";
+                }
             }
             else
             {
-                input.GetComponent<Image>().color = InputFieldInvalidColor;
-                helperText.gameObject.SetActive(true);
+                helperTextString = "Enter numeric value";
             }
+
+            if (false == result)
+            {
+                input.GetComponent<Image>().color = InputFieldInvalidColor;
+            }
+
+            helperText.text = helperTextString;
 
             return result;
         }
@@ -194,13 +203,14 @@ namespace ITCompanySimulation.UI
         {
             TextTargetBalance.text = "Target balance " + SliderTargetBalance.value + " $";
             InputFieldTargetBalance.text = SliderTargetBalance.value.ToString() + " $";
+            InputFieldTargetBalance.GetComponent<Image>().color = InputFieldNormalColor;
 
             //Initial balance cannot be higher or equal to target balance
             //otherwise all players would win game at start
             SliderInitialBalance.maxValue = SliderTargetBalance.value - 1;
 
             TargetBalanceValid = true;
-            TextInputFieldTargetBalanceHelper.gameObject.SetActive(false);
+            TextInputFieldTargetBalanceHelper.text = string.Empty;
             CheckInput();
         }
 
@@ -208,13 +218,14 @@ namespace ITCompanySimulation.UI
         {
             TextInitialBalance.text = "Initial balance " + SliderInitialBalance.value + " $";
             InputFieldInitialBalance.text = SliderInitialBalance.value.ToString() + " $";
+            InputFieldInitialBalance.GetComponent<Image>().color = InputFieldNormalColor;
 
             //Initial balance cannot be higher or equal to target balance
             //otherwise all players would lose game at start
             SliderMinimalBalance.maxValue = SliderInitialBalance.value - 1;
 
             InitialBalanceValid = true;
-            TextInputFieldInitialBalanceHelper.gameObject.SetActive(false);
+            TextInputFieldInitialBalanceHelper.text = string.Empty;
             CheckInput();
         }
 
@@ -222,8 +233,9 @@ namespace ITCompanySimulation.UI
         {
             TextMinimalBalance.text = "Minimal balance " + SliderMinimalBalance.value + " $";
             InputFieldMinimalBalance.text = SliderMinimalBalance.value.ToString() + " $";
+            InputFieldMinimalBalance.GetComponent<Image>().color = InputFieldNormalColor;
             MinimalBalanceValid = true;
-            TextInputFieldMinimalBalanceHelper.gameObject.SetActive(false);
+            TextInputFieldMinimalBalanceHelper.text = string.Empty;
             CheckInput();
         }
 
@@ -263,7 +275,7 @@ namespace ITCompanySimulation.UI
                                                           SliderMinimalBalance,
                                                           SimulationSettings.MIN_MINIMAL_BALANCE,
                                                           (int)(SliderInitialBalance.value - 1)); //Minimal value cannot be bigger than initial
-            if (true == InitialBalanceValid)
+            if (true == MinimalBalanceValid)
             {
                 TextMinimalBalance.text = "Minimal balance " + InputFieldMinimalBalance.text + " $";
                 CheckInput();
@@ -317,7 +329,12 @@ namespace ITCompanySimulation.UI
         {
             base.OnPhotonCreateRoomFailed(codeAndMsg);
             ButtonCreateRoom.interactable = true;
-            InfoWindowComponent.ShowOk(codeAndMsg[1].ToString(), null);
+            string errorMsg = string.Format("Failed to create room\n" +
+                                            "{0}\n" +
+                                            "Error code: {1}",
+                                            codeAndMsg[1],
+                                            codeAndMsg[0]);
+            InfoWindowComponent.ShowOk(errorMsg, null);
         }
-    } 
+    }
 }

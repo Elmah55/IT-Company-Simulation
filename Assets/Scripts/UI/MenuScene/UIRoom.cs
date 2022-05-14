@@ -22,8 +22,17 @@ namespace ITCompanySimulation.UI
             if (false == PhotonNetwork.offlineMode)
             {
                 Hashtable customProperties = PhotonNetwork.player.CustomProperties;
-                customProperties.Clear();
-                customProperties.Add(PlayerCustomPropertiesKey.RoomLobbyPlayerState.ToString(), state);
+                string propertiesKey = PlayerCustomPropertiesKey.RoomLobbyPlayerState.ToString();
+
+                if (true == customProperties.ContainsKey(propertiesKey))
+                {
+                    customProperties[propertiesKey] = state;
+                }
+                else
+                {
+                    customProperties.Add(PlayerCustomPropertiesKey.RoomLobbyPlayerState.ToString(), state);
+                }
+
                 PhotonNetwork.player.SetCustomProperties(customProperties);
             }
         }

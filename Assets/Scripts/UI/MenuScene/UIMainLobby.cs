@@ -138,8 +138,12 @@ namespace ITCompanySimulation.UI
         public override void OnPhotonJoinRoomFailed(object[] codeAndMsg)
         {
             base.OnPhotonJoinRoomFailed(codeAndMsg);
-
-            InfoWindowComponent.ShowOk(codeAndMsg[1].ToString(), RefreshRoomList);
+            string errorMsg = string.Format("Failed to join room\n" +
+                                            "{0}\n" +
+                                            "Error code: {1}",
+                                            codeAndMsg[1],
+                                            codeAndMsg[0]);
+            InfoWindowComponent.ShowOk(errorMsg, RefreshRoomList);
         }
     }
 }
