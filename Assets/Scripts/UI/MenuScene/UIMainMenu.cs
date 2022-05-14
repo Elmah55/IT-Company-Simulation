@@ -164,27 +164,7 @@ namespace ITCompanySimulation.UI
             }
 
             currentStateButton.gameObject.SetActive(true);
-
-            if (true == LayoutMenuButtons.gameObject.activeInHierarchy)
-            {
-                StartCoroutine(UpdateMenuButtonsLayout());
-            }
         }
-
-        /// <summary>
-        /// This method is a workaround for glitched layout group.
-        /// When one menu button is disabled and another one activated
-        /// layout does not calculate position of activated button correctly.
-        /// It happens only the first time button is activated. Calling
-        /// LayoutRebuilder.ForceRebuildLayoutImmediate does not help.
-        /// </summary>
-        private IEnumerator UpdateMenuButtonsLayout()
-        {
-            LayoutMenuButtons.enabled = false;
-            yield return null;
-            LayoutMenuButtons.enabled = true;
-        }
-
 
         /*Public methods*/
 
