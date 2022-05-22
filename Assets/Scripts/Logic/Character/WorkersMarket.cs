@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using ITCompanySimulation.Utilities;
 using UnityEngine.Events;
-using ITCompanySimulation.UI;
 using ITCompanySimulation.Core;
 using ITCompanySimulation.Multiplayer;
 using System.Linq;
@@ -45,7 +44,6 @@ namespace ITCompanySimulation.Character
         /// </summary>
         private int MaxWorkersOnMarket;
         private GameTime GameTimeComponent;
-        private ResourceHolder Resources;
         private ApplicationManager ApplicationManagerComponent;
         private SimulationManager SimulationManagerComponent;
 
@@ -64,6 +62,7 @@ namespace ITCompanySimulation.Character
         /// </summary>
         public Dictionary<int, SharedWorker> Workers { get; private set; } = new Dictionary<int, SharedWorker>();
         public bool IsDataReceived { get; private set; }
+        public WorkerGenerationData GenerationData;
 
         public event SharedWorkerAction WorkerAdded;
         public event SharedWorkerAction WorkerRemoved;
@@ -109,9 +108,8 @@ namespace ITCompanySimulation.Character
 
             int nameIndex;
             string newWorkerName = CreateWorkerName(newWorkerGender, out nameIndex);
-            int surenameIndex = UnityEngine.Random.Range(0, WorkerData.Surenames.Count);
-            string newWorkerSurename =
-                WorkerData.Surenames[surenameIndex];
+            int surenameIndex = UnityEngine.Random.Range(0, GenerationData.Surenames.Length);
+            string newWorkerSurename = GenerationData.Surenames[surenameIndex];
 
             SharedWorker newMarketWorker =
                 new SharedWorker(newWorkerName, newWorkerSurename, newWorkerGender);
@@ -135,13 +133,13 @@ namespace ITCompanySimulation.Character
 
             if (Gender.Male == workerGender)
             {
-                nameIndex = UnityEngine.Random.Range(0, WorkerData.MaleNames.Count);
-                newWorkerName = WorkerData.MaleNames[nameIndex];
+                nameIndex = UnityEngine.Random.Range(0, GenerationData.MaleNames.Length);
+                newWorkerName = GenerationData.MaleNames[nameIndex];
             }
             else
             {
-                nameIndex = UnityEngine.Random.Range(0, WorkerData.FemaleNames.Count);
-                newWorkerName = WorkerData.FemaleNames[nameIndex];
+                nameIndex = UnityEngine.Random.Range(0, GenerationData.FemaleNames.Length);
+                newWorkerName = GenerationData.FemaleNames[nameIndex];
             }
 
             return newWorkerName;
@@ -152,16 +150,16 @@ namespace ITCompanySimulation.Character
             Sprite avatar = null;
             int randomIndex = UnityEngine.Random.Range(0,
                 worker.Gender == Gender.Male ?
-                Resources.MaleCharactersAvatars.Length - 1 : Resources.FemaleCharactersAvatars.Length - 1);
+                GenerationData.MaleCharactersAvatars.Length - 1 : GenerationData.FemaleCharactersAvatars.Length - 1);
             avatarIndex = randomIndex;
 
             if (Gender.Male == worker.Gender)
             {
-                avatar = Resources.MaleCharactersAvatars[randomIndex];
+                avatar = GenerationData.MaleCharactersAvatars[randomIndex];
             }
             else
             {
-                avatar = Resources.FemaleCharactersAvatars[randomIndex];
+                avatar = GenerationData.FemaleCharactersAvatars[randomIndex];
             }
 
             return avatar;
@@ -239,7 +237,6 @@ namespace ITCompanySimulation.Character
         {
             GameTimeComponent = GetComponent<GameTime>();
             GameTimeComponent.DayChanged += OnGameTimeDayChanged;
-            Resources = GetComponent<ResourceHolder>();
             ApplicationManagerComponent =
                 GameObject.FindGameObjectWithTag("ApplicationManager").GetComponent<ApplicationManager>();
             SimulationManagerComponent = GetComponent<SimulationManager>();

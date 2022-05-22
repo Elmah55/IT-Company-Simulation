@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
-using ITCompanySimulation.UI;
 using ITCompanySimulation.Utilities;
 using ITCompanySimulation.Project;
+
 
 namespace ITCompanySimulation.Character
 {
@@ -15,7 +15,7 @@ namespace ITCompanySimulation.Character
 
         private int m_Salary;
         private int m_ExpierienceTime;
-        private static ResourceHolder Resources;
+        private static WorkerGenerationData GenerationData;
 
         /*Public consts fields*/
 
@@ -210,10 +210,10 @@ namespace ITCompanySimulation.Character
 
         public static object Deserialize(byte[] workerBytes)
         {
-            if (null == Resources)
+            if (null == GenerationData)
             {
                 GameObject scriptsObject = GameObject.FindGameObjectWithTag("ScriptsGameObject");
-                Resources = scriptsObject.GetComponent<ResourceHolder>(); ;
+                GenerationData = scriptsObject.GetComponent<WorkersMarket>().GenerationData;
             }
 
             int offset = 0;
@@ -246,9 +246,9 @@ namespace ITCompanySimulation.Character
             offset += sizeof(int);
             Gender workerGender = (Gender)BitConverter.ToInt32(workerBytes, offset);
 
-            string name = (Gender.Male == workerGender) ? WorkerData.MaleNames[nameIndex] : WorkerData.FemaleNames[nameIndex];
-            string surename = WorkerData.Surenames[surenameIndex];
-            Sprite avatar = (Gender.Male == workerGender) ? Resources.MaleCharactersAvatars[avatarIndex] : Resources.FemaleCharactersAvatars[avatarIndex];
+            string name = (Gender.Male == workerGender) ? GenerationData.MaleNames[nameIndex] : GenerationData.FemaleNames[nameIndex];
+            string surename = GenerationData.Surenames[surenameIndex];
+            Sprite avatar = (Gender.Male == workerGender) ? GenerationData.MaleCharactersAvatars[avatarIndex] : GenerationData.FemaleCharactersAvatars[avatarIndex];
 
             SharedWorker deserializedWorker = new SharedWorker(name, surename, workerGender);
 

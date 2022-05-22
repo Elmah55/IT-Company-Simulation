@@ -1,6 +1,5 @@
 ﻿using ITCompanySimulation.Core;
 using ITCompanySimulation.Multiplayer;
-using ITCompanySimulation.UI;
 using ITCompanySimulation.Utilities;
 using System;
 using System.Collections.Generic;
@@ -65,7 +64,6 @@ namespace ITCompanySimulation.Project
         [Range(1.0f, 1000.0f)]
         [SerializeField]
         private int NumberOfProjectsGeneratedInOfflineMode;
-        private ResourceHolder ResourceHolderComponent;
         private SimulationManager SimulationManagerComponent;
         private ApplicationManager ApplicationManagerComponent;
 
@@ -82,6 +80,7 @@ namespace ITCompanySimulation.Project
         /// </summary>
         public Dictionary<int, SharedProject> Projects { get; private set; } = new Dictionary<int, SharedProject>();
         public bool IsDataReceived { get; private set; }
+        public ProjectGenerationData GenerationData;
 
         /*Private methods*/
 
@@ -110,9 +109,8 @@ namespace ITCompanySimulation.Project
         private SharedProject GenerateSingleProject()
         {
             SharedProject newProject;
-            int projectNameIndex = UnityEngine.Random.Range(0, ProjectData.Names.Count);
-            string projectName =
-                ProjectData.Names[projectNameIndex];
+            int projectNameIndex = UnityEngine.Random.Range(0, GenerationData.Names.Length);
+            string projectName = GenerationData.Names[projectNameIndex];
 
             newProject = new SharedProject(projectName);
             newProject.UsedTechnologies = GenerateProjectTechnologies();
@@ -122,7 +120,7 @@ namespace ITCompanySimulation.Project
             newProject.NameIndex = projectNameIndex;
             //Every project name is associated with one icon
             newProject.IconIndex = projectNameIndex;
-            newProject.Icon = ResourceHolderComponent.ProjectsIcons[projectNameIndex];
+            newProject.Icon = GenerationData.Icons[projectNameIndex];
 
             return newProject;
         }
@@ -301,7 +299,6 @@ namespace ITCompanySimulation.Project
 
         private void Start()
         {
-            ResourceHolderComponent = GetComponent<ResourceHolder>();
             SimulationManagerComponent = GetComponent<SimulationManager>();
             ApplicationManagerComponent =
                 GameObject.FindGameObjectWithTag("ApplicationManager").GetComponent<ApplicationManager>();

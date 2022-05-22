@@ -1,5 +1,4 @@
-﻿using ITCompanySimulation.UI;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 using ITCompanySimulation.Core;
@@ -13,7 +12,7 @@ namespace ITCompanySimulation.Project
         /*Private fields*/
 
         private int m_CompletionTime;
-        private static ResourceHolder ResourceHolderComponent;
+        private static ProjectGenerationData GenerationData;
 
         /*Public consts fields*/
 
@@ -120,9 +119,9 @@ namespace ITCompanySimulation.Project
 
         public static object Deserialize(byte[] projectBytes)
         {
-            if (null == ResourceHolderComponent)
+            if (null == GenerationData)
             {
-                ResourceHolderComponent = GameObject.FindGameObjectWithTag("ScriptsGameObject").GetComponent<ResourceHolder>();
+                GenerationData = GameObject.FindGameObjectWithTag("ScriptsGameObject").GetComponent<ProjectsMarket>().GenerationData;
             }
 
             int offset = 0;
@@ -154,13 +153,13 @@ namespace ITCompanySimulation.Project
                 offset += sizeof(byte);
             }
 
-            SharedProject deserializedProject = new SharedProject(ProjectData.Names[nameIndex]);
+            SharedProject deserializedProject = new SharedProject(GenerationData.Names[nameIndex]);
             deserializedProject.ID = ID;
             deserializedProject.CompletionBonus = completeBonus;
             deserializedProject.UsedTechnologies = technologies;
             deserializedProject.CompletionTime = completionTime;
             deserializedProject.IconIndex = iconIndex;
-            deserializedProject.Icon = ResourceHolderComponent.ProjectsIcons[iconIndex];
+            deserializedProject.Icon = GenerationData.Icons[iconIndex];
             ;
             return deserializedProject;
         }
