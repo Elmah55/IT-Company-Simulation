@@ -7,7 +7,7 @@ namespace ITCompanySimulation.UI
     /// <summary>
     /// Custom editor for SettingsObject
     /// </summary>
-    //[CustomEditor(typeof(SettingsObject))]
+    [CustomEditor(typeof(SettingsObject))]
     public class SettingsObjectEditor : Editor
     {
         /*Private consts fields*/
@@ -32,7 +32,7 @@ namespace ITCompanySimulation.UI
             inspectedSettings.OfflineMode = EditorGUILayout.Toggle("Use Offline Mode", inspectedSettings.OfflineMode);
             EditorGUI.indentLevel = 0;
 
-            GUILayout.Space(10);
+            GUILayout.Space(10f);
 
             EditorGUILayout.LabelField("Simulation Settings");
             EditorGUI.indentLevel = 1;
@@ -44,11 +44,30 @@ namespace ITCompanySimulation.UI
                                                                         inspectedSettings.InitialBalance,
                                                                         SimulationSettings.MIN_INITIAL_BALANCE,
                                                                         SimulationSettings.MAX_INITIAL_BALANCE);
-            inspectedSettings.MinimalBalance = EditorGUILayout.IntSlider("Minimal Balance", 
+            inspectedSettings.MinimalBalance = EditorGUILayout.IntSlider("Minimal Balance",
                                                                          inspectedSettings.MinimalBalance,
                                                                          SimulationSettings.MIN_MINIMAL_BALANCE,
                                                                          SimulationSettings.MAX_MINIMAL_BALANCE);
             EditorGUI.indentLevel = 0;
+
+            GUILayout.Space(30f);
+
+            //Set default settings values used for release version
+            //of build
+            if (GUILayout.Button("Set default values"))
+            {
+                inspectedSettings.UseRoom = true;
+                inspectedSettings.OfflineMode = false;
+                inspectedSettings.TargetBalance = 500000;
+                inspectedSettings.InitialBalance = 100000;
+                inspectedSettings.MinimalBalance = 0;
+                inspectedSettings.TargetBalance =
+                    Mathf.Clamp(inspectedSettings.TargetBalance, SimulationSettings.MIN_TARGET_BALANCE, SimulationSettings.MAX_INITIAL_BALANCE);
+                inspectedSettings.MinimalBalance =
+                    Mathf.Clamp(inspectedSettings.MinimalBalance, SimulationSettings.MIN_MINIMAL_BALANCE, SimulationSettings.MAX_MINIMAL_BALANCE);
+                inspectedSettings.InitialBalance =
+                    Mathf.Clamp(inspectedSettings.InitialBalance, SimulationSettings.MIN_INITIAL_BALANCE, SimulationSettings.MAX_INITIAL_BALANCE);
+            }
 
             serializedObject.ApplyModifiedProperties();
         }
