@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections;
 using UnityEngine;
-using ITCompanySimulation.Multiplayer;
-using UnityEngine.Events;
+using ITCompanySimulation.Events;
+using Photon;
 
 namespace ITCompanySimulation.Core
 {
@@ -11,7 +11,7 @@ namespace ITCompanySimulation.Core
     /// measured here is based on const values and might not be
     /// equal to scaled time
     /// </summary>
-    public class GameTime : Photon.PunBehaviour, IDataReceiver
+    public class GameTime : PunBehaviour
     {
         /*Private consts fields*/
 
@@ -25,6 +25,8 @@ namespace ITCompanySimulation.Core
         /*Private fields*/
 
         private SimulationManager SimulationManagerComponent;
+        [SerializeField]
+        private DataTransferEvent InitialDataReceivedEvent;
 
         /*Public consts fields*/
 
@@ -50,13 +52,11 @@ namespace ITCompanySimulation.Core
                 return TIME_UPDATE_FREQUENCY;
             }
         }
-        public bool IsDataReceived { get; private set; }
         public bool IsTimeStarted { get; private set; }
 
         public event Action DayChanged;
         public event Action MonthChanged;
         public event Action YearChanged;
-        public event UnityAction DataReceived;
 
         /*Private methods*/
 
@@ -92,12 +92,10 @@ namespace ITCompanySimulation.Core
         {
             CurrentTime = new DateTime(year, month, day);
             //Inform all subscribers right after receiving new date from master client
-            if (false == IsDataReceived)
-            {
-                IsDataReceived = true;
-                DataReceived?.Invoke();
-            }
+            InitialDataReceivedEvent.RaiseEvent(DataTransferSource.GameTime);
             DayChanged?.Invoke();
+            MonthChanged?.Invoke();
+            YearChanged?.Invoke();
         }
 
         private void Awake()
@@ -107,13 +105,23 @@ namespace ITCompanySimulation.Core
 
             //Only master client shoud start timer with default time.
             //In other cases client will receive current time from
-            //master client at joining game so time in game of all
+            //master client before simulation start so time in game of all
             //clients is synchronized
             if (true == PhotonNetwork.isMasterClient)
             {
                 CurrentTime = DateTime.Now;
+
                 this.photonView.RPC("SetTimeRPC", PhotonTargets.Others,
                     CurrentTime.Day, CurrentTime.Month, CurrentTime.Year);
+            }
+        }
+
+        private void Start()
+        {
+            if (true == PhotonNetwork.isMasterClient)
+            {
+                //Master client doesn't need to wait for data
+                InitialDataReceivedEvent.RaiseEvent(DataTransferSource.GameTime);
             }
         }
 

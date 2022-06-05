@@ -8,8 +8,9 @@ using ITCompanySimulation.Multiplayer;
 using ITCompanySimulation.Company;
 using ITCompanySimulation.Project;
 using ITCompanySimulation.Settings;
-using UnityEngine.Events;
+using ITCompanySimulation.Events;
 using ITCompanySimulation.Utilities;
+using Photon;
 
 namespace ITCompanySimulation.Core
 {
@@ -18,7 +19,7 @@ namespace ITCompanySimulation.Core
     /// happen during running simulation (like ending game if gameplay
     /// target is reached)
     /// </summary>
-    public class SimulationManager : Photon.PunBehaviour, IDataReceiver, IMasterClientDataReceiver
+    public class SimulationManager : PunBehaviour
     {
         /*Private consts fields*/
 
@@ -41,7 +42,12 @@ namespace ITCompanySimulation.Core
         /// </summary>
         private float SimulationStartTimestamp;
         private ApplicationManager ApplicationManagerComponent;
-
+        /// <summary>
+        /// How many clients sent initial data to this client.
+        /// </summary>
+        private int NumberOfPlayerDataReceived;
+        [SerializeField]
+        private DataTransferEvent InitialDataReceivedEvent;
 
         /*Public consts fields*/
 
@@ -73,7 +79,6 @@ namespace ITCompanySimulation.Core
         /// Simulation statistics collected during simulation run.
         /// </summary>
         public LocalSimulationStats Stats { get; private set; }
-        public bool IsDataReceived { get; private set; }
 
         public event SimulationFinishAction SimulationFinished;
         public event Action SimulationStarted;
@@ -92,7 +97,6 @@ namespace ITCompanySimulation.Core
         /// of simulation
         /// </summary>
         public event PhotonPlayerAction OtherPlayerCompanyMinimalBalanceReached;
-        public event UnityAction DataReceived;
 
         /*Private methods*/
 
@@ -424,19 +428,36 @@ namespace ITCompanySimulation.Core
         }
 
         /// <summary>
-        /// Called by client that wants to send its data to master client
+        /// Called by client that wants to send its data to master client.
         /// </summary>
         [PunRPC]
         private void OnOtherPlayerDataReceivedRPC(int photonPlayerID, PlayerData data)
         {
-            IsDataReceived = true;
-            DataReceived?.Invoke();
-            PhotonPlayer sourcePlayer = Utils.PhotonPlayerFromID(photonPlayerID);
-            data.Player = sourcePlayer;
-            SharedSimulationStats stats = new SharedSimulationStats();
-            stats.CompanyBalance = SimulationSettings.InitialBalance;
-            data.Stats = stats;
-            PlayerDataMap.Add(photonPlayerID, data);
+            if (false == PlayerDataMap.ContainsKey(photonPlayerID))
+            {
+                PhotonPlayer sourcePlayer = Utils.PhotonPlayerFromID(photonPlayerID);
+                data.Player = sourcePlayer;
+                SharedSimulationStats stats = new SharedSimulationStats();
+                stats.CompanyBalance = SimulationSettings.InitialBalance;
+                data.Stats = stats;
+                PlayerDataMap.Add(photonPlayerID, data);
+                NumberOfPlayerDataReceived++;
+            }
+#if DEVELOPMENT_BUILD || UNITY_EDITOR
+            else
+            {
+                PhotonPlayer sourcePlayer = Utils.PhotonPlayerFromID(photonPlayerID);
+                Debug.LogWarningFormat("[{0}] Received data from player {1} (ID {2}) more than one time",
+                    this.GetType().Name,
+                    sourcePlayer.NickName,
+                    photonPlayerID);
+            }
+#endif
+
+            if (PhotonNetwork.otherPlayers.Length == NumberOfPlayerDataReceived)
+            {
+                InitialDataReceivedEvent.RaiseEvent(DataTransferSource.SimulationManager);
+            }
         }
 
         /// <summary>

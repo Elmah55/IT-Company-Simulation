@@ -192,6 +192,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 41e3bc83c727c534b96b346c0bdc1d45, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  SimulationInitialDataReceived: {fileID: 11400000, guid: b14f57b61bb8b6940affc6c5b96f2629,
+    type: 2}
 --- !u!114 &3765739074144711040
 MonoBehaviour:
   m_ObjectHideFlags: 0

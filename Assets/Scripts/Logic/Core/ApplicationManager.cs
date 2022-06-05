@@ -6,7 +6,6 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.SceneManagement;
-using System.Linq;
 using System;
 using ITCompanySimulation.Settings;
 using AudioSettings = ITCompanySimulation.Settings.AudioSettings;
@@ -14,6 +13,7 @@ using System.Threading;
 using System.Globalization;
 using System.Collections.Generic;
 using Photon;
+using ITCompanySimulation.Events;
 
 #if DEVELOPMENT_BUILD || UNITY_EDITOR
 using System.Reflection;
@@ -30,6 +30,11 @@ namespace ITCompanySimulation.Core
         /*Private consts fields*/
 
         private const string GAME_VERSION = "1.0";
+        /// <summary>
+        /// Number of components that need to receive data before simulation start.
+        /// </summary>
+        private readonly int NUMBER_OF_REQUIRED_DATA_TRANSFERS =
+            Enum.GetValues(typeof(DataTransferSource)).Length;
 
         /*Private fields*/
 
@@ -39,24 +44,10 @@ namespace ITCompanySimulation.Core
         /// </summary>
         private int NumberOfClientsWithDataReceived;
         /// <summary>
-        /// Number of this client's completed data transfers required by components to start simulation.
-        /// This will be counted only for clients that are not master clients since master client
-        /// only sends these data to other clients and not receives them.
+        /// Collection of components that received data that needs to be received before starting
+        /// session.
         /// </summary>
-        private int NumberOfCompletedDataTransfers;
-        /// <summary>
-        /// Number of this client's completed data transfers required by components to start simulation.
-        /// Valid only if client is master client.
-        /// </summary>
-        private int NumberOfMasterClientCompletedDataTransfers;
-        /// <summary>
-        /// Components that need to receive data before starting session
-        /// </summary>
-        private IDataReceiver[] DataReceiverComponents;
-        /// <summary>
-        /// Components of master client that need to receive data before starting session
-        /// </summary>
-        private IMasterClientDataReceiver[] MasterClientDataReceiverComponents;
+        private HashSet<DataTransferSource> ComponentsWithReceivedData = new HashSet<DataTransferSource>();
         /// <summary>
         /// When this is set to true simulation will be run in
         /// Offline Mode. It means that this client won't be connected
@@ -78,6 +69,11 @@ namespace ITCompanySimulation.Core
         /// like OnDestoy won't be called on them because they are inactive.
         /// </summary>
         private static List<IDisposable> ObjectsToDispose = new List<IDisposable>();
+        /// <summary>
+        /// Event invoked when component received data that is needed before start of simulation.
+        /// </summary>
+        [SerializeField]
+        private DataTransferEvent SimulationInitialDataReceived;
 
         /*Public consts fields*/
 
@@ -149,6 +145,7 @@ namespace ITCompanySimulation.Core
 
             PhotonNetwork.OnEventCall += OnPhotonNetworkEventCall;
             SceneManager.sceneLoaded += OnSceneLoaded;
+            SimulationInitialDataReceived.DataTransfered += OnComponentDataTransfered;
         }
 
         private void Start()
@@ -185,48 +182,13 @@ namespace ITCompanySimulation.Core
 
             if ((int)SceneIndex.Game == loadedScene.buildIndex)
             {
-                //Clear event listeners to avoid problems when game scene is loaded again
+                //Reset variables needed for initial data reception to avoid problems
+                //when game scene is loaded again
                 SessionStarted = null;
                 NumberOfClientsWithDataReceived = 0;
-                NumberOfCompletedDataTransfers = 0;
-                NumberOfMasterClientCompletedDataTransfers = 0;
+                ComponentsWithReceivedData.Clear();
 
-                if (false == PhotonNetwork.offlineMode && true == UseRoom)
-                {
-                    DataReceiverComponents = GameObject.FindObjectsOfType<UnityEngine.MonoBehaviour>().OfType<IDataReceiver>().ToArray();
-
-                    foreach (IDataReceiver receiver in DataReceiverComponents)
-                    {
-                        if (true == receiver.IsDataReceived)
-                        {
-                            OnComponentDataTransfered();
-                        }
-                        else
-                        {
-                            receiver.DataReceived += OnComponentDataTransfered;
-                        }
-                    }
-
-                    //Subscribe to data transfers needed also by master client
-                    if (true == PhotonNetwork.isMasterClient)
-                    {
-                        MasterClientDataReceiverComponents =
-                            GameObject.FindObjectsOfType<UnityEngine.MonoBehaviour>().OfType<IMasterClientDataReceiver>().ToArray();
-
-                        foreach (IMasterClientDataReceiver receiver in MasterClientDataReceiverComponents)
-                        {
-                            if (true == receiver.IsDataReceived)
-                            {
-                                OnComponentDataTransfered();
-                            }
-                            else
-                            {
-                                receiver.DataReceived += OnMasterClientComponentDataTransfered;
-                            }
-                        }
-                    }
-                }
-                else
+                if (true == PhotonNetwork.offlineMode)
                 {
                     //No need to receive data in offline mode
                     StartSessionRPC();
@@ -242,7 +204,7 @@ namespace ITCompanySimulation.Core
         {
             switch (eventCode)
             {
-                case (byte)RaiseEventCode.ClientReceivedData:
+                case (byte)RaiseEventCode.ClientDataTransferCompleted:
                     ++NumberOfClientsWithDataReceived;
                     TryStartSession();
                     break;
@@ -263,7 +225,7 @@ namespace ITCompanySimulation.Core
                 //Make sure all data that needs to be transfered between components before session
                 //start is already transfered
                 if (NumberOfClientsWithDataReceived == PhotonNetwork.otherPlayers.Length &&
-                    NumberOfMasterClientCompletedDataTransfers == MasterClientDataReceiverComponents.Length)
+                    NUMBER_OF_REQUIRED_DATA_TRANSFERS == ComponentsWithReceivedData.Count)
                 {
 #if DEVELOPMENT_BUILD || UNITY_EDITOR
                     Debug.LogFormat("[{0}] All clients ({1}) received data. Starting sesssion",
@@ -309,32 +271,38 @@ namespace ITCompanySimulation.Core
             SessionStarted?.Invoke();
         }
 
-        private void OnComponentDataTransfered()
+        private void OnComponentDataTransfered(DataTransferSource source)
         {
-            ++NumberOfCompletedDataTransfers;
-
-            if (DataReceiverComponents.Length == NumberOfCompletedDataTransfers)
+            if (false == ComponentsWithReceivedData.Add(source))
             {
 #if DEVELOPMENT_BUILD || UNITY_EDITOR
-                Debug.LogFormat("[{0}] All components received data. Notifying master client",
-                    this.GetType().Name);
+                Debug.LogWarningFormat("[{0}] Data from same source ({1}) received more than one time",
+                    this.GetType().Name,
+                    source.ToString());
 #endif
-                //Notify master client that all required data is received
-                RaiseEventOptions options = new RaiseEventOptions
-                {
-                    Receivers = ReceiverGroup.Others
-                };
-
-                PhotonNetwork.RaiseEvent((byte)RaiseEventCode.ClientReceivedData, null, true, options);
             }
-        }
 
-        private void OnMasterClientComponentDataTransfered()
-        {
-            ++NumberOfMasterClientCompletedDataTransfers;
-            //Try to start session here in case all other clients
-            //already received required data and are waiting for master client
-            TryStartSession();
+            if (NUMBER_OF_REQUIRED_DATA_TRANSFERS == ComponentsWithReceivedData.Count)
+            {
+                if (false == PhotonNetwork.isMasterClient)
+                {
+#if DEVELOPMENT_BUILD || UNITY_EDITOR
+                    Debug.LogFormat("[{0}] All components received data. Notifying master client",
+                        this.GetType().Name);
+#endif
+                    //Notify master client that all required data is received
+                    RaiseEventOptions options = new RaiseEventOptions
+                    {
+                        Receivers = ReceiverGroup.MasterClient
+                    };
+
+                    PhotonNetwork.RaiseEvent((byte)RaiseEventCode.ClientDataTransferCompleted, null, true, options);
+                }
+                else
+                {
+                    TryStartSession();
+                }
+            }
         }
 
         private IEnumerator LoadSceneAsync()

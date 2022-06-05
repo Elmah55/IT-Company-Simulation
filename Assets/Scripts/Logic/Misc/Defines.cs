@@ -56,7 +56,8 @@ public enum SceneIndex
 public enum RaiseEventCode : byte
 {
     RoomLobbyPlayerStateChanged,
-    ClientReceivedData
+    //Invoked when client received all data needed before starting simulation.
+    ClientDataTransferCompleted
 }
 
 /// <summary>
@@ -131,6 +132,17 @@ namespace ITCompanySimulation.Character
     {
         Male,
         Female
+    }
+}
+
+namespace ITCompanySimulation.Events
+{
+    public enum DataTransferSource
+    {
+        WorkersMarket,
+        SimulationManager, //Used for both normal and master client
+        ProjectsMarket,
+        GameTime
     }
 }
 

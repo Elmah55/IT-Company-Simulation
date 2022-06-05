@@ -2,11 +2,11 @@
 using System.Collections.Generic;
 using UnityEngine;
 using ITCompanySimulation.Utilities;
-using UnityEngine.Events;
+using ITCompanySimulation.Events;
 using ITCompanySimulation.Core;
-using ITCompanySimulation.Multiplayer;
 using System.Linq;
 using ITCompanySimulation.Project;
+using Photon;
 
 namespace ITCompanySimulation.Character
 {
@@ -14,7 +14,7 @@ namespace ITCompanySimulation.Character
     /// This class handles represents workers market. Each of player can hire worker
     /// from market. Workers market is shared across all players
     /// </summary>
-    public class WorkersMarket : Photon.PunBehaviour, IDataReceiver
+    public class WorkersMarket : PunBehaviour
     {
         /*Private consts fields*/
 
@@ -46,6 +46,8 @@ namespace ITCompanySimulation.Character
         private GameTime GameTimeComponent;
         private ApplicationManager ApplicationManagerComponent;
         private SimulationManager SimulationManagerComponent;
+        [SerializeField]
+        private DataTransferEvent InitialDataReceivedEvent;
 
         /*Public consts fields*/
 
@@ -61,12 +63,10 @@ namespace ITCompanySimulation.Character
         /// Workers available on market. Key is ID of worker and value is SharedWoker instance.
         /// </summary>
         public Dictionary<int, SharedWorker> Workers { get; private set; } = new Dictionary<int, SharedWorker>();
-        public bool IsDataReceived { get; private set; }
         public WorkerGenerationData GenerationData;
 
         public event SharedWorkerAction WorkerAdded;
         public event SharedWorkerAction WorkerRemoved;
-        public event UnityAction DataReceived;
 
         /*Private methods*/
 
@@ -248,6 +248,7 @@ namespace ITCompanySimulation.Character
                 MaxWorkersOnMarket = CalculateMaxWorkersOnMarket();
                 this.photonView.RPC("SetMaxWorkersOnMarketRPC", PhotonTargets.Others, MaxWorkersOnMarket);
                 GenerateAndSendWorkers();
+                InitialDataReceivedEvent.RaiseEvent(DataTransferSource.WorkersMarket);
             }
         }
 
@@ -277,7 +278,7 @@ namespace ITCompanySimulation.Character
         /// at the beggining of simulation.
         /// </summary>
         [PunRPC]
-        public void OnWorkersGeneratedRPC(SharedWorker[] generatedWorkers)
+        private void OnWorkersGeneratedRPC(SharedWorker[] generatedWorkers)
         {
             foreach (SharedWorker worker in generatedWorkers)
             {
@@ -285,18 +286,17 @@ namespace ITCompanySimulation.Character
                 this.WorkerAdded?.Invoke(worker);
             }
 
-            if (false == PhotonNetwork.isMasterClient && false == IsDataReceived)
+            if (false == PhotonNetwork.isMasterClient)
             {
                 if (this.Workers.Count == MaxWorkersOnMarket)
                 {
-                    IsDataReceived = true;
-                    DataReceived?.Invoke();
+                    InitialDataReceivedEvent.RaiseEvent(DataTransferSource.WorkersMarket);
                 }
             }
         }
 
         [PunRPC]
-        public void OnWorkerAddedRPC(SharedWorker workerToAdd)
+        private void OnWorkerAddedRPC(SharedWorker workerToAdd)
         {
             this.Workers.Add(workerToAdd.ID, workerToAdd);
             this.WorkerAdded?.Invoke(workerToAdd);

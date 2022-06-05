@@ -1,11 +1,11 @@
 ﻿using ITCompanySimulation.Core;
-using ITCompanySimulation.Multiplayer;
 using ITCompanySimulation.Utilities;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Events;
+using ITCompanySimulation.Events;
 using System.Linq;
+using Photon;
 
 namespace ITCompanySimulation.Project
 {
@@ -14,7 +14,7 @@ namespace ITCompanySimulation.Project
     /// from market. Each of project can only be progressed by one player.
     /// Projects market is shared across all players
     /// </summary>
-    public class ProjectsMarket : Photon.PunBehaviour, IDataReceiver
+    public class ProjectsMarket : PunBehaviour
     {
         /*Private consts fields*/
 
@@ -66,6 +66,8 @@ namespace ITCompanySimulation.Project
         private int NumberOfProjectsGeneratedInOfflineMode;
         private SimulationManager SimulationManagerComponent;
         private ApplicationManager ApplicationManagerComponent;
+        [SerializeField]
+        private DataTransferEvent InitialDataReceivedEvent;
 
         /*Public consts fields*/
 
@@ -73,13 +75,11 @@ namespace ITCompanySimulation.Project
 
         public event SharedProjectAction ProjectRemoved;
         public event SharedProjectAction ProjectAdded;
-        public event UnityAction DataReceived;
 
         /// <summary>
         /// Map containing all projects in market with project id as key and project as value.
         /// </summary>
         public Dictionary<int, SharedProject> Projects { get; private set; } = new Dictionary<int, SharedProject>();
-        public bool IsDataReceived { get; private set; }
         public ProjectGenerationData GenerationData;
 
         /*Private methods*/
@@ -205,12 +205,11 @@ namespace ITCompanySimulation.Project
                 ProjectAdded?.Invoke(proj);
             }
 
-            if (false == PhotonNetwork.isMasterClient && false == IsDataReceived)
+            if (false == PhotonNetwork.isMasterClient)
             {
                 if (this.Projects.Count == MaxProjectsOnMarket)
                 {
-                    IsDataReceived = true;
-                    DataReceived?.Invoke();
+                    InitialDataReceivedEvent.RaiseEvent(DataTransferSource.ProjectsMarket);
                 }
             }
         }
@@ -312,6 +311,7 @@ namespace ITCompanySimulation.Project
                 MaxProjectsOnMarket = CalculateMaxProjectsOnMarket();
                 this.photonView.RPC("SetMaxProjectsOnMarketRPC", PhotonTargets.Others, MaxProjectsOnMarket);
                 GenerateAndSendProjects();
+                InitialDataReceivedEvent.RaiseEvent(DataTransferSource.ProjectsMarket);
             }
         }
 
