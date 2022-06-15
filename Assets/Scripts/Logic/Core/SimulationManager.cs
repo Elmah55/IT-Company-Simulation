@@ -103,7 +103,7 @@ namespace ITCompanySimulation.Core
         private void Start()
         {
             InfoWindowComponent.Show("Waiting for session start...");
-            ApplicationManagerComponent.SessionStarted += OnGameManagerComponentSessionStarted;
+            ApplicationManagerComponent.SessionStarted += OnSessionStarted;
             Stats.StatsUpdated += OnSimulationStatsUpdate;
 
             PlayerData data = new PlayerData();
@@ -121,6 +121,11 @@ namespace ITCompanySimulation.Core
             NotificatorComponent = new SimulationEventNotificator(GameTimeComponent);
             Stats = new LocalSimulationStats();
             CreateCompany();
+        }
+
+        private void OnDestroy()
+        {
+            ApplicationManagerComponent.SessionStarted -= OnSessionStarted;
         }
 
 #if DEVELOPMENT_BUILD || UNITY_EDITOR
@@ -220,7 +225,7 @@ namespace ITCompanySimulation.Core
             Stats.CompanyBalance = newBalance;
         }
 
-        private void OnGameManagerComponentSessionStarted()
+        private void OnSessionStarted()
         {
             StartSimulation();
 

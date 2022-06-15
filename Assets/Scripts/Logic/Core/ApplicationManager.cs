@@ -89,9 +89,13 @@ namespace ITCompanySimulation.Core
         /// </summary>
         public bool UseRoom { get; private set; }
         /// <summary>
-        /// True when session has started and is active
+        /// True when session has started and is active.
         /// </summary>
         public bool IsSessionActive { get; private set; }
+        /// <summary>
+        /// True if session has started.
+        /// </summary>
+        public bool IsSessionStarted { get; private set; }
         public float SceneLoadingProgress { get; private set; }
         public event UnityAction SessionStarted;
         public event UnityAction<Scene> SceneStartedLoading;
@@ -105,6 +109,9 @@ namespace ITCompanySimulation.Core
         /// Invoked when connection to game server is established;
         /// </summary>
         public event UnityAction ConnectedToServer;
+        [Tooltip("Specifies time in seconds after which timeout occurs if session did not start." +
+            "Time is measured since loading of game scene.")]
+        public float SessionStartTimeout;
 
         /*Private methods*/
 
@@ -179,25 +186,44 @@ namespace ITCompanySimulation.Core
         private void OnSceneLoaded(Scene loadedScene, LoadSceneMode sceneLoadMode)
         {
             SceneFinishedLoading?.Invoke(loadedScene);
+            SceneIndex loadedSceneIndex = (SceneIndex)loadedScene.buildIndex;
 
-            if ((int)SceneIndex.Game == loadedScene.buildIndex)
+            switch (loadedSceneIndex)
             {
-                //Reset variables needed for initial data reception to avoid problems
-                //when game scene is loaded again
-                SessionStarted = null;
-                NumberOfClientsWithDataReceived = 0;
-                ComponentsWithReceivedData.Clear();
+                case SceneIndex.Game:
+                    //Reset variables needed for initial data reception to avoid problems
+                    //when game scene is loaded again
+                    NumberOfClientsWithDataReceived = 0;
+                    IsSessionStarted = false;
+                    ComponentsWithReceivedData.Clear();
 
-                if (true == PhotonNetwork.offlineMode)
-                {
-                    //No need to receive data in offline mode
-                    StartSessionRPC();
-                }
+                    if (true == PhotonNetwork.offlineMode)
+                    {
+                        //No need to receive data in offline mode
+                        StartSessionRPC();
+                    }
+
+                    StartCoroutine(CheckSessionStartTimeout());
+
+                    break;
+                default:
+                    break;
             }
 
             //Allow incoming messages again. Scene is already loaded so
             //components will receive messages sent by other clients.
             PhotonNetwork.isMessageQueueRunning = true;
+        }
+
+        private IEnumerator CheckSessionStartTimeout()
+        {
+            yield return new WaitForSecondsRealtime(SessionStartTimeout);
+
+            if (false == IsSessionActive && false == IsSessionStarted)
+            {
+                FinishSession();
+                LoadScene(SceneIndex.Menu);
+            }
         }
 
         private void OnPhotonNetworkEventCall(byte eventCode, object content, int senderId)
@@ -266,6 +292,7 @@ namespace ITCompanySimulation.Core
             //being loaded
             yield return null;
 
+            IsSessionStarted = true;
             IsSessionActive = true;
             //Session has started now, notify other components
             SessionStarted?.Invoke();
@@ -382,7 +409,11 @@ namespace ITCompanySimulation.Core
         public void FinishSession()
         {
             IsSessionActive = false;
-            PhotonNetwork.LeaveRoom();
+
+            if (null != PhotonNetwork.room)
+            {
+                PhotonNetwork.LeaveRoom();
+            }
         }
 
         public void Connect()
