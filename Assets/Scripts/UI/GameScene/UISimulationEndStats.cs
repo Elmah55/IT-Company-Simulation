@@ -14,8 +14,6 @@ namespace ITCompanySimulation.UI
         [SerializeField]
         private SimulationManager SimulationManagerComponent;
         [SerializeField]
-        private InfoWindow InfoWindowComponent;
-        [SerializeField]
         private TextMeshProUGUI TextStats;
 
         /*Public consts fields*/

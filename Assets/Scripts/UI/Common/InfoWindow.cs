@@ -23,6 +23,16 @@ namespace ITCompanySimulation.UI
         [SerializeField]
         private Button CancelButton;
         /// <summary>
+        /// Game object that contains window's content.
+        /// </summary>
+        [SerializeField]
+        private GameObject InfoWindowContent;
+        /// <summary>
+        /// Game object that contains window's buttons.
+        /// </summary>
+        [SerializeField]
+        private GameObject ButtonsGameObject;
+        /// <summary>
         /// Invoked when player clicks "Ok" button in this window.
         /// </summary>
         private UnityAction ConfirmButtonClicked;
@@ -31,9 +41,10 @@ namespace ITCompanySimulation.UI
         /// </summary>
         private UnityAction CancelButtonClicked;
         /// <summary>
-        /// Info window actions will be queued here in case showing window is called when info window is already visible.
+        /// Info window messages will be queued here in case showing window method is called when info window
+        /// is already visible and is showing current message.
         /// </summary>
-        private Queue<InfoWindowData> InfoWindowActions = new Queue<InfoWindowData>();
+        private Queue<InfoWindowData> InfoWindowPendingMessages = new Queue<InfoWindowData>();
         private struct InfoWindowData
         {
             public string Text;
@@ -59,35 +70,49 @@ namespace ITCompanySimulation.UI
                 return m_Text.text;
             }
 
-            set
+            private set
             {
                 m_Text.text = value;
             }
         }
+
+        //Since only one window can be displayed at a time
+        //make this a singleton.
+        public static InfoWindow Instance { get; private set; }
 
         /*Private methods*/
 
         private void OnConfirmButtonClicked()
         {
             ConfirmButtonClicked?.Invoke();
+            Hide();
         }
 
         private void OnCancelButtonClicked()
         {
             CancelButtonClicked?.Invoke();
+            Hide();
         }
 
         private void Awake()
         {
+#if DEVELOPMENT_BUILD || UNITY_EDITOR
+            if (null != Instance)
+            {
+                Debug.LogErrorFormat("[{0}] Only one instance of {0} should exist but is instantiated multiple times.",
+                                     this.GetType().Name);
+            }
+#endif
+
+            Instance = this;
+
             ConfirmationButton.onClick.AddListener(OnConfirmButtonClicked);
-            ConfirmationButton.onClick.AddListener(Hide);
             CancelButton.onClick.AddListener(OnCancelButtonClicked);
-            CancelButton.onClick.AddListener(Hide);
         }
 
         private void Show(string text, UnityAction onConfirmAction, UnityAction onCancelAction, InfoWindowType type)
         {
-            if (true == gameObject.GetActive())
+            if (true == InfoWindowContent.GetActive())
             {
                 //Info window is already active and is displaying other data,
                 //store data so it can be displayed after user closes window
@@ -98,21 +123,18 @@ namespace ITCompanySimulation.UI
                 data.OnCancelAction = onCancelAction;
                 data.Type = type;
 
-                InfoWindowActions.Enqueue(data);
+                InfoWindowPendingMessages.Enqueue(data);
             }
             else
             {
                 switch (type)
                 {
-                    case InfoWindowType.Text:
-                        CancelButton.gameObject.SetActive(false);
-                        ConfirmationButton.gameObject.SetActive(false);
-                        break;
                     case InfoWindowType.Ok:
-                        CancelButton.gameObject.SetActive(false);
+                        ButtonsGameObject.SetActive(true);
                         ConfirmationButton.gameObject.SetActive(true);
                         break;
                     case InfoWindowType.OkCancel:
+                        ButtonsGameObject.SetActive(true);
                         CancelButton.gameObject.SetActive(true);
                         ConfirmationButton.gameObject.SetActive(true);
                         break;
@@ -123,7 +145,7 @@ namespace ITCompanySimulation.UI
                 this.Text = text;
                 ConfirmButtonClicked = onConfirmAction;
                 CancelButtonClicked = onCancelAction;
-                gameObject.SetActive(true);
+                InfoWindowContent.SetActive(true);
             }
         }
 
@@ -147,7 +169,7 @@ namespace ITCompanySimulation.UI
         /// If it is null nothing happens</param>
         /// <param name="text">Text displayed in this window</param>
         /// <param name="onConfirmAction">Event invoked when "Ok" button is pressed</param>
-        public void ShowOk(string text, UnityAction onConfirmAction)
+        public void ShowOk(string text, UnityAction onConfirmAction = null)
         {
             Show(text, onConfirmAction, null, InfoWindowType.Ok);
         }
@@ -159,24 +181,37 @@ namespace ITCompanySimulation.UI
         /// <param name="text">Text displayed in this window</param>
         /// <param name="onConfirmAction">Event invoked when "Ok" button is pressed</param>
         /// <param name="onCancelAction">Event invoked when "Cancel" button is pressed</param>
-        public void ShowOkCancel(string text, UnityAction onConfirmAction, UnityAction onCancelAction)
+        public void ShowOkCancel(string text, UnityAction onConfirmAction = null, UnityAction onCancelAction = null)
         {
             Show(text, onConfirmAction, onCancelAction, InfoWindowType.OkCancel);
         }
 
         /// <summary>
-        /// Makes info window not visible
+        /// Makes info window not visible.
         /// </summary>
         public void Hide()
         {
-            gameObject.SetActive(false);
+            InfoWindowContent.SetActive(false);
+            ButtonsGameObject.SetActive(false);
+            CancelButton.gameObject.SetActive(false);
+            ConfirmationButton.gameObject.SetActive(false);
 
-            if (InfoWindowActions.Count > 0)
+            if (InfoWindowPendingMessages.Count > 0)
             {
                 //Show next data
-                InfoWindowData data = InfoWindowActions.Dequeue();
+                InfoWindowData data = InfoWindowPendingMessages.Dequeue();
                 Show(data.Text, data.OnConfirmAction, data.OnCancelAction, data.Type);
             }
+        }
+
+        /// <summary>
+        /// Removes currently displayed message all messages waiting to be shown in info window
+        /// then hides window.
+        /// </summary>
+        public void RemoveAllMessages()
+        {
+            InfoWindowPendingMessages.Clear();
+            Hide();
         }
     }
 }

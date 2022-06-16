@@ -31,7 +31,6 @@ namespace ITCompanySimulation.UI
         private ListViewElement ListViewElementPrefab;
         [SerializeField]
         private Button ButtonJoinRoom;
-        [SerializeField]
         private InfoWindow InfoWindowComponent;
         private RoomInfo SelectedRoom;
 
@@ -85,6 +84,7 @@ namespace ITCompanySimulation.UI
 
         private void Start()
         {
+            InfoWindowComponent = InfoWindow.Instance;
             SetRoomListText();
             RoomButtonSelector.SelectedButtonChanged += OnRoomListViewSelectedButtonChanged;
         }

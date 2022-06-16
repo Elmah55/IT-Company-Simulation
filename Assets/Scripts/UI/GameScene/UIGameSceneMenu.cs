@@ -10,7 +10,6 @@ namespace ITCompanySimulation.UI
 
         /*Private fields*/
 
-        [SerializeField]
         private InfoWindow InfoWindowComponent;
         private ApplicationManager ApplicationManagerComponent;
 
@@ -22,6 +21,7 @@ namespace ITCompanySimulation.UI
 
         private void Start()
         {
+            InfoWindowComponent = InfoWindow.Instance;
             ApplicationManagerComponent = GameObject.FindGameObjectWithTag("ApplicationManager").GetComponent<ApplicationManager>();
         }
 

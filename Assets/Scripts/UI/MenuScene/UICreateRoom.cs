@@ -66,7 +66,6 @@ namespace ITCompanySimulation.UI
         private TextMeshProUGUI TextInitialBalance;
         [SerializeField]
         private TextMeshProUGUI TextMinimalBalance;
-        [SerializeField]
         private InfoWindow InfoWindowComponent;
 
         //Below are defined "HelperText" fields that will display
@@ -87,6 +86,8 @@ namespace ITCompanySimulation.UI
 
         private void Start()
         {
+            InfoWindowComponent = InfoWindow.Instance;
+
             InputFieldRoomName.characterLimit = PlayerInfoSettings.COMPANY_NAME_MAX_LENGHT;
             InputFieldNormalColor = InputFieldRoomName.GetComponent<Image>().color;
 

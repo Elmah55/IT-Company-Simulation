@@ -14,6 +14,7 @@ using System.Globalization;
 using System.Collections.Generic;
 using Photon;
 using ITCompanySimulation.Events;
+using ITCompanySimulation.UI;
 
 #if DEVELOPMENT_BUILD || UNITY_EDITOR
 using System.Reflection;
@@ -223,6 +224,8 @@ namespace ITCompanySimulation.Core
             {
                 FinishSession();
                 LoadScene(SceneIndex.Menu);
+                InfoWindow.Instance.RemoveAllMessages();
+                InfoWindow.Instance.ShowOk("Session has timed out.");
             }
         }
 

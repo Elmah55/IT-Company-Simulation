@@ -26,7 +26,6 @@ namespace ITCompanySimulation.Core
         /*Private fields*/
 
         private GameTime GameTimeComponent;
-        [SerializeField]
         private InfoWindow InfoWindowComponent;
         /// <summary>
         /// Game object of UI element with simulation statistics
@@ -102,6 +101,7 @@ namespace ITCompanySimulation.Core
 
         private void Start()
         {
+            InfoWindowComponent = InfoWindow.Instance;
             InfoWindowComponent.Show("Waiting for session start...");
             ApplicationManagerComponent.SessionStarted += OnSessionStarted;
             Stats.StatsUpdated += OnSimulationStatsUpdate;

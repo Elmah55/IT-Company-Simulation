@@ -36,7 +36,6 @@ namespace ITCompanySimulation.UI
         private WorkerAbilitiesDisplay AbilitiesDisplay;
         [SerializeField]
         private Tooltip TooltipComponent;
-        [SerializeField]
         private InfoWindow InfoWindowComponent;
         private IButtonSelector WorkersButtonSelector = new ButtonSelector();
         private SharedWorker SelectedWorker;
@@ -170,6 +169,7 @@ namespace ITCompanySimulation.UI
 
         private void Awake()
         {
+            InfoWindowComponent = InfoWindow.Instance;
             GameObject scriptsObject = GameObject.FindGameObjectWithTag("ScriptsGameObject");
             SimulationManagerComponent = scriptsObject.GetComponent<SimulationManager>();
             GameTimeComponent = scriptsObject.GetComponent<GameTime>();

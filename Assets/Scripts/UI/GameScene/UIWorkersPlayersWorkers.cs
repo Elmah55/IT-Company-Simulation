@@ -42,7 +42,6 @@ namespace ITCompanySimulation.UI
         private TMP_Dropdown DropdownPlayersList;
         [SerializeField]
         private Tooltip TooltipComponent;
-        [SerializeField]
         private InfoWindow InfoWindowComponent;
         private PhotonPlayer SelectedPlayer;
         private SharedWorker SelectedWorker;
@@ -219,6 +218,7 @@ namespace ITCompanySimulation.UI
 
         private void Awake()
         {
+            InfoWindowComponent = InfoWindow.Instance;
             GameObject scriptsGameObject = GameObject.FindGameObjectWithTag("ScriptsGameObject");
             SimulationManagerComponent = scriptsGameObject.GetComponent<SimulationManager>();
         }

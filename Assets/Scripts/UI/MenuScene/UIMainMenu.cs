@@ -28,7 +28,6 @@ namespace ITCompanySimulation.UI
         private GameObject PanelMainMenu;
         [SerializeField]
         private GameObject PanelMainLobby;
-        [SerializeField]
         private InfoWindow InfoWindowComponent;
         [SerializeField]
         private VerticalLayoutGroup LayoutMenuButtons;
@@ -69,6 +68,7 @@ namespace ITCompanySimulation.UI
                 ButtonEnterCredentials
             };
 
+            InfoWindowComponent = InfoWindow.Instance;
             ApplicationManagerComponent = GameObject.FindGameObjectWithTag("ApplicationManager").GetComponent<ApplicationManager>();
             ApplicationManagerComponent.DisconnectedFromServer += OnDisconnectedFromServer;
             ApplicationManagerComponent.ConnectedToServer += OnConnectedToSever;
