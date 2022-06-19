@@ -94,14 +94,14 @@ namespace ITCompanySimulation.UI
             SliderTargetBalance.minValue = SimulationSettings.MIN_TARGET_BALANCE;
             SliderTargetBalance.maxValue = SimulationSettings.MAX_TARGET_BALANCE;
             SliderTargetBalance.value = SliderTargetBalance.maxValue / 2.0f;
+            SliderMinimalBalance.maxValue = SimulationSettings.MAX_MINIMAL_BALANCE;
+            SliderMinimalBalance.minValue = SimulationSettings.MIN_MINIMAL_BALANCE;
+            SliderMinimalBalance.value = SliderInitialBalance.value - 100000;
             SliderInitialBalance.minValue = SimulationSettings.MIN_INITIAL_BALANCE;
             SliderInitialBalance.maxValue = SliderTargetBalance.value - 1;
             SliderInitialBalance.value = SliderTargetBalance.value - 50000;
             SliderNumberOfPlayers.minValue = ApplicationManager.MIN_NUMBER_OF_PLAYERS_PER_ROOM;
             SliderNumberOfPlayers.maxValue = ApplicationManager.MAX_NUMBER_OF_PLAYERS_PER_ROOM;
-            SliderMinimalBalance.maxValue = SimulationSettings.MAX_MINIMAL_BALANCE;
-            SliderMinimalBalance.minValue = SimulationSettings.MIN_MINIMAL_BALANCE;
-            SliderMinimalBalance.value = SliderInitialBalance.value - 100000;
 
             TextNumberOfPlayers.text =
                 "Maximum number of players " + SliderNumberOfPlayers.value;
