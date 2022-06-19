@@ -19,11 +19,6 @@ namespace ITCompanySimulation.UI
         private GameTime GameTimeComponent;
         [SerializeField]
         private ListViewElement ListViewWorkerElementPrefab;
-        /// <summary>
-        /// Colors that will be applied to selected button component of list view element.
-        /// </summary>
-        [SerializeField]
-        private ColorBlock ListViewElementSelectedColors;
         [SerializeField]
         private ControlListView ListViewCompanyProjects;
         [SerializeField]
@@ -70,7 +65,7 @@ namespace ITCompanySimulation.UI
 
         private void Start()
         {
-            ButtonSelectorProjects = new ButtonSelector(ListViewElementSelectedColors);
+            ButtonSelectorProjects = new ButtonSelector();
 
             //Add workers that were in company before of start of this script
             foreach (LocalWorker worker in SimulationManagerComponent.ControlledCompany.Workers)

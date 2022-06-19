@@ -12,11 +12,6 @@ namespace ITCompanySimulation.UI
 
         /*Private fields*/
 
-        /// <summary>
-        /// Colors that will be applied to selected button component of list view element.
-        /// </summary>
-        [SerializeField]
-        private ColorBlock ListViewElementSelectedColors;
         private SimulationManager SimulationManagerComponent;
         [SerializeField]
         private TextMeshProUGUI TextMarketProjects;
@@ -42,7 +37,7 @@ namespace ITCompanySimulation.UI
 
         private void Start()
         {
-            ButtonSelectorProjects = new ButtonSelector(ListViewElementSelectedColors);
+            ButtonSelectorProjects = new ButtonSelector();
 
             foreach (var proj in ProjectsMarketComponent.Projects)
             {

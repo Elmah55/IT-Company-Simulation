@@ -278,7 +278,7 @@ namespace ITCompanySimulation.UI
 
         public void OnButtonFireWorkerClicked()
         {
-            Button selectedButton = WorkersButtonsSelector.GetSelectedButton();
+            Button selectedButton = WorkersButtonsSelector.SelectedButton;
             ListViewElement element = selectedButton.GetComponent<ListViewElement>();
             LocalWorker workerToRemove = (LocalWorker)element.RepresentedObject;
 
@@ -293,7 +293,7 @@ namespace ITCompanySimulation.UI
         public void OnButtonGiveSalaryRaiseClicked()
         {
             int salaryRaiseAmount = (int)SliderSalaryRaiseAmount.value;
-            Button selectedButton = WorkersButtonsSelector.GetSelectedButton();
+            Button selectedButton = WorkersButtonsSelector.SelectedButton;
             ListViewElement element = selectedButton.GetComponent<ListViewElement>();
             LocalWorker companyWorker = (LocalWorker)element.RepresentedObject;
             companyWorker.Salary = companyWorker.Salary + salaryRaiseAmount;

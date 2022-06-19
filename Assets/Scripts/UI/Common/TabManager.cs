@@ -1,5 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
+using System;
+using System.Collections.Generic;
 
 /// <summary>
 /// This class handles panel with buttons for activating od disabling other UI elements
@@ -10,19 +12,23 @@ public class TabManager : MonoBehaviour
 
     /*Private fields*/
 
-    /// <summary>
-    /// Stores buttons that are associated to their respective tabs
-    /// </summary>
-    [Tooltip("Buttons that will toggle tabs")]
     [SerializeField]
-    private Button[] TabButtons;
-    [Tooltip("Tabs game objects. Array index of tab should match sibling index of button")]
-    [SerializeField]
-    private GameObject[] Tabs;
+    private TabSelectionData[] TabSelections;
     private GameObject ActiveTab;
-    [SerializeField]
-    private ColorBlock TabButtonColors;
     private IButtonSelector TabButtonSelector;
+    /// <summary>
+    /// Maps button to game object that should be activated by the button.
+    /// </summary>
+    private Dictionary<Button, GameObject> TabButtonToTabMap = new Dictionary<Button, GameObject>();
+
+    [Serializable]
+    private struct TabSelectionData
+    {
+        [Tooltip("Buttons that will activate tab.")]
+        public Button TabButton;
+        [Tooltip("Tab that will be activated by button.")]
+        public GameObject Tab;
+    }
 
     /*Public consts fields*/
 
@@ -32,30 +38,28 @@ public class TabManager : MonoBehaviour
 
     private void Start()
     {
-        TabButtonSelector = new ButtonSelector(TabButtonColors);
+        TabButtonSelector = new ButtonSelector();
         TabButtonSelector.SelectedButtonChanged += OnTabButtonSelectorSelectedButtonChanged;
 
-        foreach (Button panelSelectionButton in TabButtons)
+        foreach (TabSelectionData selectionData in TabSelections)
         {
-            TabButtonSelector.AddButton(panelSelectionButton);
+            TabButtonToTabMap.Add(selectionData.TabButton, selectionData.Tab);
+            TabButtonSelector.AddButton(selectionData.TabButton);
         }
 
-        if (0 < TabButtons.Length)
+        if (0 < TabSelections.Length)
         {
+            TabSelectionData defaultSelection = TabSelections[0];
             //Button selector checks selected element on onClick event
-            TabButtons[0].Select();
-            TabButtons[0].onClick.Invoke();
+            defaultSelection.TabButton.Select();
+            defaultSelection.TabButton.onClick.Invoke();
         }
     }
 
-    private void OnTabButtonSelectorSelectedButtonChanged(Button obj)
+    private void OnTabButtonSelectorSelectedButtonChanged(Button selectedButton)
     {
-        if (null != ActiveTab)
-        {
-            ActiveTab.SetActive(false);
-        }
-
-        ActiveTab = Tabs[obj.transform.GetSiblingIndex()];
+        ActiveTab?.SetActive(false);
+        ActiveTab = TabButtonToTabMap[selectedButton];
         ActiveTab.SetActive(true);
     }
 

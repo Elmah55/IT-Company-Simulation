@@ -297,7 +297,7 @@ namespace ITCompanySimulation.UI
 
         public void OnButtonHireWorkerClick()
         {
-            Button selectedWorkerButton = WorkersButtonSelector.GetSelectedButton();
+            Button selectedWorkerButton = WorkersButtonSelector.SelectedButton;
 
             string infoWindowText = string.Format("Do you want to hire this worker ? It will cost you {0} $", SelectedWorker.HireSalary);
             InfoWindowComponent.ShowOkCancel(infoWindowText, () =>

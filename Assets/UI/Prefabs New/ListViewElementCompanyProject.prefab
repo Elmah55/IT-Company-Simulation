@@ -172,6 +172,21 @@ PrefabInstance:
 
 '
       objectReference: {fileID: 0}
+    - target: {fileID: 9046329411635459533, guid: c9b84bc14f59a3a4cbd0bee5a4d85754,
+        type: 3}
+      propertyPath: m_Transition
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 9046329411635459533, guid: c9b84bc14f59a3a4cbd0bee5a4d85754,
+        type: 3}
+      propertyPath: m_SpriteState.m_HighlightedSprite
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 9046329411635459533, guid: c9b84bc14f59a3a4cbd0bee5a4d85754,
+        type: 3}
+      propertyPath: m_Interactable
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 219036697692947802, guid: c9b84bc14f59a3a4cbd0bee5a4d85754,
         type: 3}
       propertyPath: m_LocalPosition.x

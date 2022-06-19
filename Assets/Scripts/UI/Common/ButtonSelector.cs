@@ -5,8 +5,11 @@ using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 /// <summary>
-/// This class saves pressed button as selected button and optionally
-/// sets atributtes of selected button
+/// Groups buttons that can be selected.
+/// <para>
+/// It allows to make multiple groups where in each group one button can be selected.
+/// Using this class removes unity's limitation of choosing only one UI element at a time.
+/// </para>
 /// </summary>
 public class ButtonSelector : IButtonSelector
 {
@@ -14,50 +17,7 @@ public class ButtonSelector : IButtonSelector
 
     /*Private fields*/
 
-    private ColorBlock SavedButtonColors;
-    private ColorBlock m_SelectedButtonColors;
-    private ColorBlock SelectedButtonColors
-    {
-        get
-        {
-            return m_SelectedButtonColors;
-        }
-
-        set
-        {
-            m_SelectedButtonColors = value;
-
-            if (null != SelectedButton)
-            {
-                SelectedButton.colors = m_SelectedButtonColors;
-            }
-        }
-    }
-    private Button m_SelectedButton;
-    private Button SelectedButton
-    {
-        get
-        {
-            return m_SelectedButton;
-        }
-
-        set
-        {
-            if (null != SelectedButton)
-            {
-                //Restore colors to previously selected button
-                SelectedButton.colors = SavedButtonColors;
-            }
-
-            m_SelectedButton = value;
-
-            if (null != SelectedButton)
-            {
-                SavedButtonColors = SelectedButton.colors;
-                SelectedButton.colors = SelectedButtonColors;
-            }
-        }
-    }
+    private Color SelectedButtonNormalColor;
     private List<Button> Buttons = new List<Button>();
 
     /*Public consts fields*/
@@ -65,8 +25,19 @@ public class ButtonSelector : IButtonSelector
     /*Public fields*/
 
     public event Action<Button> SelectedButtonChanged;
+    public Button SelectedButton { get; private set; }
 
     /*Private methods*/
+
+    private void OnButtonDeselected(Button deselectedButton)
+    {
+        if (Selectable.Transition.ColorTint == deselectedButton.transition)
+        {
+            ColorBlock deselectedButtonColors = deselectedButton.colors;
+            deselectedButtonColors.normalColor = SelectedButtonNormalColor;
+            deselectedButton.colors = deselectedButtonColors;
+        }
+    }
 
     private void OnButtonClicked()
     {
@@ -76,17 +47,40 @@ public class ButtonSelector : IButtonSelector
 
         if (buttonComponent != SelectedButton)
         {
+            //Deselect previously selected button
+            DeselectButton();
             SelectedButton = buttonComponent;
+
+            //Save button normal visuals to restore it when button is deselected
+            //Set button's normal visuals as selected visuals. This way when unity event system
+            //selects another UI element this button's visuals will be same as selected visuals.
+            switch (buttonComponent.transition)
+            {
+                case Selectable.Transition.ColorTint:
+                    ColorBlock selectedButtonColors = buttonComponent.colors;
+                    SelectedButtonNormalColor = selectedButtonColors.normalColor;
+                    selectedButtonColors.normalColor = selectedButtonColors.selectedColor;
+                    buttonComponent.colors = selectedButtonColors;
+                    break;
+#if DEVELOPMENT_BUILD || UNITY_EDITOR
+                case Selectable.Transition.None:
+                case Selectable.Transition.SpriteSwap:
+                case Selectable.Transition.Animation:
+                    Debug.LogWarningFormat("[{0}] Unsupported button transition: {1}",
+                        this.GetType().Name,
+                        buttonComponent.transition.ToString());
+                    break;
+#endif
+                default:
+                    break;
+            }
+
+
             SelectedButtonChanged?.Invoke(buttonComponent);
         }
     }
 
     /*Public methods*/
-
-    public Button GetSelectedButton()
-    {
-        return SelectedButton;
-    }
 
     public void AddButton(Button buttonComponent)
     {
@@ -115,29 +109,12 @@ public class ButtonSelector : IButtonSelector
         }
     }
 
-    public void SetSelectedButtonColor(ColorBlock selectedButtonColors)
-    {
-        this.SelectedButtonColors = selectedButtonColors;
-    }
-
     public void DeselectButton()
     {
-        SelectedButton = null;
-    }
-
-    public ButtonSelector()
-    {
-        SelectedButtonColors = new ColorBlock()
+        if (null != SelectedButton)
         {
-            normalColor = Color.gray,
-            selectedColor = Color.gray,
-            highlightedColor = Color.gray,
-            colorMultiplier = 1.0f
-        };
-    }
-
-    public ButtonSelector(ColorBlock selectedButtonColors)
-    {
-        this.SelectedButtonColors = selectedButtonColors;
+            OnButtonDeselected(SelectedButton);
+            SelectedButton = null;
+        }
     }
 }
