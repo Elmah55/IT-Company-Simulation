@@ -42,6 +42,11 @@ namespace ITCompanySimulation.Render
         private int DontDisableCameraControlLayer;
         [SerializeField]
         private Canvas CanvasComponent;
+        /// <summary>
+        /// True if mouse cursor is inside application window,
+        /// false otherwise.
+        /// </summary>
+        private bool MouseInsideScreen;
 
         /*Public consts fields*/
 
@@ -79,7 +84,7 @@ namespace ITCompanySimulation.Render
             float zoomFactor = CAMERA_MIN_ZOOM / CameraComponent.orthographicSize;
             float distanceFromCenterPoint = Vector2.Distance(CameraCenterPoint.position, camerPos);
 
-            if (distanceFromCenterPoint > CameraDistanceLimit * zoomFactor)
+            if ((distanceFromCenterPoint * zoomFactor) > (CameraDistanceLimit * zoomFactor))
             {
                 //Vector from camera position to center point
                 Vector2 centerPointVector = (Vector2)CameraCenterPoint.position - camerPos;
@@ -188,7 +193,7 @@ namespace ITCompanySimulation.Render
         /// </summary>
         private bool GetCameraControlActive()
         {
-            bool result = Utils.MouseInsideScreen();
+            bool result = MouseInsideScreen;
 
             if (-1 != DontDisableCameraControlLayer && true == result)
             {
@@ -243,6 +248,7 @@ namespace ITCompanySimulation.Render
 
         private void Update()
         {
+            MouseInsideScreen = Utils.MouseInsideScreen();
             bool cameraControlActive = GetCameraControlActive();
             AmountOverDistanceLimit = CheckCameraDistanceLimit();
             MoveCamera();
@@ -257,7 +263,11 @@ namespace ITCompanySimulation.Render
                 HandleCameraOverDistanceLimit();
             }
 
-            LastMousePosition = Input.mousePosition;
+
+            if (true == MouseInsideScreen)
+            {
+                LastMousePosition = Input.mousePosition;
+            }
         }
 
         /*Public methods*/
