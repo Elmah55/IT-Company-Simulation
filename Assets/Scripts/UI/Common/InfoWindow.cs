@@ -108,6 +108,8 @@ namespace ITCompanySimulation.UI
 
             ConfirmationButton.onClick.AddListener(OnConfirmButtonClicked);
             CancelButton.onClick.AddListener(OnCancelButtonClicked);
+            //Disable all buttons
+            Hide();
         }
 
         private void Show(string text, UnityAction onConfirmAction, UnityAction onCancelAction, InfoWindowType type)
