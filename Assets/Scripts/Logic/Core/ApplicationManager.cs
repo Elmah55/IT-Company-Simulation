@@ -198,9 +198,10 @@ namespace ITCompanySimulation.Core
                     IsSessionStarted = false;
                     ComponentsWithReceivedData.Clear();
 
-                    if (true == PhotonNetwork.offlineMode)
+                    if (true == OfflineMode || (false == OfflineMode && false == UseRoom))
                     {
-                        //No need to receive data in offline mode
+                        //No need to receive data in offline mode or when player is not creating room
+                        //since only one player will be inside of default room
                         StartSessionRPC();
                     }
 
@@ -491,7 +492,7 @@ namespace ITCompanySimulation.Core
             base.OnJoinedRoom();
 
             //Game will be started in online mode but only with one player in room
-            if (false == UseRoom && false == PhotonNetwork.offlineMode)
+            if (false == UseRoom && false == OfflineMode)
             {
                 PhotonNetwork.room.IsOpen = false;
                 PhotonNetwork.room.IsVisible = false;
@@ -527,6 +528,8 @@ namespace ITCompanySimulation.Core
         {
             base.OnDisconnectedFromPhoton();
 
+            InfoWindow.Instance.ShowOk("Disconnected from game server.");
+
 #if DEVELOPMENT_BUILD || UNITY_EDITOR
             string msg = string.Format("[{0}] Disconnected from Photon", this.GetType().Name);
             Debug.Log(msg);
@@ -552,6 +555,13 @@ namespace ITCompanySimulation.Core
         public override void OnPhotonJoinRoomFailed(object[] codeAndMsg)
         {
             base.OnPhotonJoinRoomFailed(codeAndMsg);
+
+            string errorMsg = string.Format("Failed to create room\n" +
+                                "{0}\n" +
+                                "Error code: {1}",
+                                codeAndMsg[1],
+                                codeAndMsg[0]);
+            InfoWindow.Instance.ShowOk(errorMsg);
 
 #if DEVELOPMENT_BUILD || UNITY_EDITOR
             string msg = string.Format("[{0}] Failed to join the room", this.GetType().Name);

@@ -66,7 +66,6 @@ namespace ITCompanySimulation.UI
         private TextMeshProUGUI TextInitialBalance;
         [SerializeField]
         private TextMeshProUGUI TextMinimalBalance;
-        private InfoWindow InfoWindowComponent;
 
         //Below are defined "HelperText" fields that will display
         //information with hints how to fill in input field 
@@ -86,8 +85,6 @@ namespace ITCompanySimulation.UI
 
         private void Start()
         {
-            InfoWindowComponent = InfoWindow.Instance;
-
             InputFieldRoomName.characterLimit = PlayerInfoSettings.COMPANY_NAME_MAX_LENGHT;
             InputFieldNormalColor = InputFieldRoomName.GetComponent<Image>().color;
 
@@ -330,12 +327,6 @@ namespace ITCompanySimulation.UI
         {
             base.OnPhotonCreateRoomFailed(codeAndMsg);
             ButtonCreateRoom.interactable = true;
-            string errorMsg = string.Format("Failed to create room\n" +
-                                            "{0}\n" +
-                                            "Error code: {1}",
-                                            codeAndMsg[1],
-                                            codeAndMsg[0]);
-            InfoWindowComponent.ShowOk(errorMsg, null);
         }
     }
 }

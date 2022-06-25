@@ -28,7 +28,6 @@ namespace ITCompanySimulation.UI
         private GameObject PanelMainMenu;
         [SerializeField]
         private GameObject PanelMainLobby;
-        private InfoWindow InfoWindowComponent;
         [SerializeField]
         private VerticalLayoutGroup LayoutMenuButtons;
         /// <summary>
@@ -68,7 +67,6 @@ namespace ITCompanySimulation.UI
                 ButtonEnterCredentials
             };
 
-            InfoWindowComponent = InfoWindow.Instance;
             ApplicationManagerComponent = GameObject.FindGameObjectWithTag("ApplicationManager").GetComponent<ApplicationManager>();
             ApplicationManagerComponent.DisconnectedFromServer += OnDisconnectedFromServer;
             ApplicationManagerComponent.ConnectedToServer += OnConnectedToSever;
@@ -104,7 +102,6 @@ namespace ITCompanySimulation.UI
 
         private void OnDisconnectedFromServer()
         {
-            InfoWindowComponent.ShowOk("Connection to server failed", null);
             SetApplicationStateButton();
         }
 
