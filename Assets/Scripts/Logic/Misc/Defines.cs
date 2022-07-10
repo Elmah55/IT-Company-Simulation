@@ -146,6 +146,27 @@ namespace ITCompanySimulation.Events
     }
 }
 
+namespace ITCompanySimulation.Multiplayer
+{
+    /// <summary>
+    /// This enum defines keys to access photon player custom properties
+    /// </summary>
+    public enum PlayerCustomPropertiesKey
+    {
+        RoomLobbyPlayerState
+    }
+
+    /// <summary>
+    /// This enum defines keys to access room custom properties
+    /// </summary>
+    public enum RoomCustomPropertiesKey
+    {
+        SettingsOfSimulationMinimalBalance,
+        SettingsOfSimulationInitialBalance,
+        SettingsOfSimulationTargetBalance
+    }
+}
+
 /*Classes*/
 
 /// <summary>
@@ -206,22 +227,21 @@ namespace ITCompanySimulation.Multiplayer
         public const byte SIMULATION_STATS_BYTE_CODE = 5;
     }
 
-    /// <summary>
-    /// This enum defines keys to access photon player custom properties
-    /// </summary>
-    public enum PlayerCustomPropertiesKey
+    public struct ChatMessage
     {
-        RoomLobbyPlayerState
-    }
+        public string Sender { get; private set; }
+        public string Message { get; private set; }
 
-    /// <summary>
-    /// This enum defines keys to access room custom properties
-    /// </summary>
-    public enum RoomCustomPropertiesKey
-    {
-        SettingsOfSimulationMinimalBalance,
-        SettingsOfSimulationInitialBalance,
-        SettingsOfSimulationTargetBalance
+        public ChatMessage(string sender, string message)
+        {
+            this.Sender = sender;
+            this.Message = message;
+        }
+
+        public override string ToString()
+        {
+            return string.Format("{0}: {1}", Sender, Message);
+        }
     }
 }
 
@@ -259,8 +279,8 @@ namespace ITCompanySimulation.Multiplayer
     /// Delagate for event fired when photon chat message from other client is received
     /// </summary>
     /// <param name="senderNickname">Nickname of player that sent message</param>
-    /// <param name="message">String containing message</param>
-    public delegate void PhotonChatMessageAction(string senderNickname, string message);
+    /// <param name="message">Contains message data</param>
+    public delegate void PhotonChatMessageAction(ChatMessage message);
     public delegate void PhotonPlayerAction(PhotonPlayer player);
 }
 

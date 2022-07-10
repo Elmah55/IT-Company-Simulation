@@ -51,6 +51,8 @@ namespace ITCompanySimulation.UI
         private TextMeshProUGUI TextMinimalBalance;
         [SerializeField]
         private TextMeshProUGUI TextTargetBalance;
+        [SerializeField]
+        private ChatWindow ChatWindowComponent;
         private int NumberOfReadyClients;
 
         /*Public consts fields*/
@@ -80,6 +82,7 @@ namespace ITCompanySimulation.UI
             NumberOfReadyClients = 0;
             SetStartButtonState();
             SetReadyButtonText(RoomLobbyPlayerState.NotReady);
+            ChatWindowComponent.ClearChat();
         }
 
         private void OnDisable()

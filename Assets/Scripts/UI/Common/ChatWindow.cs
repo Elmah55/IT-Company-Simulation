@@ -3,22 +3,23 @@ using TMPro;
 using ITCompanySimulation.Multiplayer;
 using System.Text.RegularExpressions;
 using ITCompanySimulation.Utilities;
-using System;
-using ITCompanySimulation.Core;
+using UnityEngine.UI;
+using System.Collections.Generic;
 
 namespace ITCompanySimulation.UI
 {
     /// <summary>
     /// Class for handling UI related to in-game chat.
     /// </summary>
-    public class ChatWindow : MonoBehaviour, IDisposable
+    public class ChatWindow : MonoBehaviour
     {
         /*Private consts fields*/
 
         /// <summary>
-        /// How many of previous inputs should be stored.
+        /// Value used to take into account floating point error of
+        /// scroll rect vertical position.
         /// </summary>
-        private const int INPUTS_HISTORY_STORAGE_COUNT = 50;
+        private const float SCROLL_RECT_TRESHOLD_VALUE = 0.01f;
 
         /*Private fields*/
 
@@ -28,16 +29,20 @@ namespace ITCompanySimulation.UI
         /// </summary>
         [SerializeField]
         private TMP_InputField InputFieldMessage;
-        /// <summary>
-        /// All chat messages will be stored in this text
-        /// component
-        /// </summary>
-        [SerializeField]
-        private TextMeshProUGUI TextChatDisplay;
-        private IMultiplayerChat ChatComponent;
+        private MultiplayerChatManager ChatManagerComponent;
         [SerializeField]
         [Tooltip("Key that will activate input field of chat")]
         private KeyCode ActivateChatInputFieldKey;
+        /// <summary>
+        /// Object that has layout group and is parent of all text elements with
+        /// chat messages.
+        /// </summary>
+        [SerializeField]
+        private HorizontalOrVerticalLayoutGroup TextLayout;
+        [SerializeField]
+        private ScrollRect ChatScrollRect;
+        [SerializeField]
+        private TextMeshProUGUI TextObjectPrefab;
         /// <summary>
         /// Key for fetching older input from saved inputs
         /// </summary>
@@ -60,40 +65,64 @@ namespace ITCompanySimulation.UI
         /// <summary>
         /// Buffer with stored inputs so they can be reused later if needed.
         /// </summary>
-        private CircularBuffer<string> StoredInputs = new CircularBuffer<string>(INPUTS_HISTORY_STORAGE_COUNT);
+        private CircularBuffer<string> StoredInputs;
         /// <summary>
         /// Index of input that is being fetched currently.
         /// </summary>
         private int StoredInputsCurrentIndex = 0;
         /// <summary>
-        /// Indicates whether this component has been initialized by calling Init() method.
+        /// Number of chat text prefabs instantiated.
         /// </summary>
-        private bool IsInitialized;
+        private int NumberOfTextObjectsInstantiated;
+        private int OldestMessageIndex;
+        private int NewestMessageIndex = -1;
+        /// <summary>
+        /// Stores all messages of this chat window (including ones that are not
+        /// displayed at the moment.
+        /// </summary>
+        private List<string> ChatMessages = new List<string>();
+        [SerializeField]
+        private Scrollbar ScrollBarChatWindow;
 
         /*Public consts fields*/
 
         /*Public fields*/
 
+        [Tooltip("Number of user chat inputs that should be stored.")]
+        [Range(1, 500)]
+        public int InputsHistoryStorageSize = 50;
+        [Tooltip("Number of text objects that will be instantiated for this chat window." +
+            " After reaching this limit existing text objects will be reused to display messages.")]
+        [Range(2, 100)]
+        public int NumberOfTextObjects = 20;
+
         /*Private methods*/
+
+        private void Awake()
+        {
+            StoredInputs = new CircularBuffer<string>(InputsHistoryStorageSize);
+        }
 
         private void OnEnable()
         {
-            if (true == InputFieldMessage.enabled)
+            ChatManagerComponent = MultiplayerChatManager.Instance;
+            ChatManagerComponent.MessageReceived += OnChatMessageReceived;
+            ChatManagerComponent.PrivateMessageReceived += OnChatPrivateMessageReceived;
+            ChatManagerComponent.Disconnected += OnChatDisconnected;
+            ChatManagerComponent.Connected += OnChatConnected;
+
+            if (false == ChatManagerComponent.IsConnected)
             {
-                InputFieldMessage.text = string.Empty;
-                InputFieldMessage.ActivateInputField();
+                OnChatConnectionFailed();
             }
         }
 
-        private void Start()
+        private void OnDisable()
         {
-            //In game scene chat will be initialized by diffrent script
-            //but in menu scene there is no need for this so "Start()" method
-            //can be used
-            if (false == IsInitialized)
-            {
-                Init();
-            }
+            ChatManagerComponent.MessageReceived -= OnChatMessageReceived;
+            ChatManagerComponent.PrivateMessageReceived -= OnChatPrivateMessageReceived;
+            ChatManagerComponent.Disconnected -= OnChatDisconnected;
+            ChatManagerComponent.Connected -= OnChatConnected;
         }
 
         private void OnChatConnected()
@@ -118,12 +147,13 @@ namespace ITCompanySimulation.UI
                 {
                     string targetPlayer = regexMatch.Groups[1].Captures[0].ToString();
                     string msg = regexMatch.Groups[2].Captures[0].ToString();
-                    bool result = ChatComponent.SendPrivateChatMessage(targetPlayer, msg);
+                    bool result = ChatManagerComponent.SendPrivateChatMessage(targetPlayer, msg);
 
                     if (false == result)
                     {
-                        TextChatDisplay.text += string.Format("Could not send message to player \"{0}\"",
-                                                              targetPlayer);
+                        string txt = string.Format("Could not send message to player \"{0}\"",
+                                                    targetPlayer);
+                        AddTextToChat(txt, true);
                     }
                     else
                     {
@@ -133,16 +163,38 @@ namespace ITCompanySimulation.UI
                 }
                 else
                 {
-                    TextChatDisplay.text += "Unkown command\n";
+                    AddTextToChat("Unkown command", true);
                 }
             }
             //No command executing, just send chat message
             else
             {
-                bool result = ChatComponent.SendChatMessage(input);
+                ChatManagerComponent.SendChatMessage(input);
             }
 
             ClearInput();
+        }
+
+        private void AddTextToChat(string txt, bool scrollToBottom)
+        {
+            ChatMessages.Add(txt);
+
+            if (NumberOfTextObjectsInstantiated < NumberOfTextObjects)
+            {
+                TextMeshProUGUI newTextObject = GameObject.Instantiate(TextObjectPrefab, TextLayout.transform);
+                NumberOfTextObjectsInstantiated++;
+                NewestMessageIndex++;
+                newTextObject.text = txt;
+                newTextObject.gameObject.SetActive(true);
+                newTextObject.transform.SetAsLastSibling();
+            }
+
+            if (true == scrollToBottom)
+            {
+                LayoutRebuilder.ForceRebuildLayoutImmediate((RectTransform)TextLayout.transform);
+                ChatScrollRect.verticalNormalizedPosition = 0f;
+                HandleTextLayout();
+            }
         }
 
         /// <summary>
@@ -166,8 +218,73 @@ namespace ITCompanySimulation.UI
 
         private void Update()
         {
-            if (true == Input.GetKeyDown(KeyCode.Return) &&
-               (false == string.IsNullOrWhiteSpace(InputFieldMessage.text)))
+            ReadInput();
+            HandleTextLayout();
+        }
+
+        private void HandleTextLayout()
+        {
+            if (TextLayout.transform.childCount > 3)
+            {
+                const int numberOfReusedTextObjects = 1;
+
+                //User scrolled to top, load older messages
+                if ((ChatScrollRect.verticalNormalizedPosition > (1f - SCROLL_RECT_TRESHOLD_VALUE))
+                    && (OldestMessageIndex > 0))
+                {
+                    for (int i = 0; i < numberOfReusedTextObjects && OldestMessageIndex > 0; i++)
+                    {
+                        //Reuse text object most recent to display older message
+                        TextMeshProUGUI textComponent =
+                            TextLayout.transform.GetChild(TextLayout.transform.childCount - 1).GetComponent<TextMeshProUGUI>();
+                        OldestMessageIndex--;
+                        NewestMessageIndex--;
+                        textComponent.text = ChatMessages[OldestMessageIndex];
+                        textComponent.transform.SetSiblingIndex(1);
+                    }
+
+                    if (OldestMessageIndex != 0)
+                    {
+                        ChatScrollRect.verticalNormalizedPosition = 0.9f;
+                        ScrollBarChatWindow.value = 0.9f;
+                    }
+                    else
+                    {
+                        ChatScrollRect.verticalNormalizedPosition = 1f;
+                    }
+                }
+
+                //User scrolled to bottom, load newer messages
+                if ((ChatScrollRect.verticalNormalizedPosition < SCROLL_RECT_TRESHOLD_VALUE)
+                    && (NewestMessageIndex < ChatMessages.Count - 1))
+                {
+                    for (int i = 0; i < numberOfReusedTextObjects && NewestMessageIndex < ChatMessages.Count - 1; i++)
+                    {
+                        //Reuse text object to display newer message
+                        TextMeshProUGUI textComponent = TextLayout.transform.GetChild(1).GetComponent<TextMeshProUGUI>();
+                        OldestMessageIndex++;
+                        NewestMessageIndex++;
+                        textComponent.text = ChatMessages[NewestMessageIndex];
+                        textComponent.transform.SetAsLastSibling();
+                    }
+
+                    if (NewestMessageIndex != ChatMessages.Count - 1)
+                    {
+                        ChatScrollRect.verticalNormalizedPosition = 0.1f;
+                        ScrollBarChatWindow.value = 0.1f;
+                    }
+                    else
+                    {
+                        ChatScrollRect.verticalNormalizedPosition = 0f;
+                    }
+                }
+            }
+        }
+
+        private void ReadInput()
+        {
+            if (true == Input.GetKeyDown(KeyCode.Return)
+                && (false == string.IsNullOrWhiteSpace(InputFieldMessage.text)))
             {
                 StoreInput(InputFieldMessage.text);
                 HandleInputEntered(InputFieldMessage.text);
@@ -207,34 +324,32 @@ namespace ITCompanySimulation.UI
             }
         }
 
-        private void OnChatMessageReceived(string senderNickname, string message)
+        private void OnChatMessageReceived(ChatMessage message)
         {
-            string displayedMessage = string.Format("{0}: {1}\n",
-                                                    senderNickname,
-                                                    message);
-            TextChatDisplay.text += displayedMessage;
+            AddTextToChat(message.ToString(), true);
         }
 
-        private void OnChatPrivateMessageReceived(string senderNickname, string message)
+        private void OnChatPrivateMessageReceived(ChatMessage message)
         {
             string displayedMessage;
 
             //Callback will be invoked also on client that sent message
-            if (null != PrivateMsgTarget && senderNickname == PhotonNetwork.player.NickName)
+            if (null != PrivateMsgTarget && message.Sender == PhotonNetwork.player.NickName)
             {
-                displayedMessage = string.Format("(You -> {0}): {1}\n",
+                displayedMessage = string.Format("(You -> {0}): {1}",
                                  PrivateMsgTarget,
-                                 message);
+                                 message.Message);
                 PrivateMsgTarget = null;
             }
+            //Message received from other client
             else
             {
-                displayedMessage = string.Format("({0} -> You): {1}\n",
-                                                 senderNickname,
-                                                 message);
+                displayedMessage = string.Format("({0} -> You): {1}",
+                                                 message.Sender,
+                                                 message.Message);
             }
 
-            TextChatDisplay.text += displayedMessage;
+            AddTextToChat(displayedMessage, true);
         }
 
         private void OnChatConnectionFailed()
@@ -245,29 +360,26 @@ namespace ITCompanySimulation.UI
 
         /*Public methods*/
 
-        public void Init()
+        /// <summary>
+        /// Clears all displayed messages and chat history.
+        /// </summary>
+        public void ClearChat()
         {
-            ChatComponent = GameObject.FindGameObjectWithTag("ApplicationManager").GetComponent<ChatManager>();
-            ChatComponent.MessageReceived += OnChatMessageReceived;
-            ChatComponent.PrivateMessageReceived += OnChatPrivateMessageReceived;
-            ChatComponent.Disconnected += OnChatDisconnected;
-            ChatComponent.Connected += OnChatConnected;
-            ApplicationManager.RegisterObjectForCleanup(this);
+            ChatMessages.Clear();
+            int textObjectsCount = TextLayout.transform.childCount;
 
-            if (false == ChatComponent.IsConnected)
+            //Destroy all text objects except text prefab (index 0)
+            for (int i = 1; i < textObjectsCount; i++)
             {
-                OnChatConnectionFailed();
+                GameObject objectToDestroy = TextLayout.transform.GetChild(i).gameObject;
+                GameObject.Destroy(objectToDestroy);
             }
 
-            IsInitialized = true;
-        }
+            NumberOfTextObjectsInstantiated = 0;
+            OldestMessageIndex = 0;
+            NewestMessageIndex = -1;
 
-        public void Dispose()
-        {
-            ChatComponent.MessageReceived -= OnChatMessageReceived;
-            ChatComponent.PrivateMessageReceived -= OnChatPrivateMessageReceived;
-            ChatComponent.Disconnected -= OnChatDisconnected;
-            ChatComponent.Connected -= OnChatConnected;
+            ScrollBarChatWindow.Rebuild(CanvasUpdate.Layout);
         }
     }
 }

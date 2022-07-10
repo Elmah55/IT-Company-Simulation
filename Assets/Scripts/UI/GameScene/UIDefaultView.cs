@@ -83,7 +83,7 @@ namespace ITCompanySimulation.UI
         /// </summary>
         [SerializeField]
         private NotificationDisplay NotificationDisplayChatWindowButton;
-        private IMultiplayerChat ChatComponent;
+        private MultiplayerChatManager ChatComponent;
         [SerializeField]
         private SoundEffects SoundEffectsComponent;
         /// <summary>
@@ -96,6 +96,7 @@ namespace ITCompanySimulation.UI
         /// </summary>
         [SerializeField]
         private TextMeshProUGUI TextCompanyBalanceAdded;
+        private bool ChatWindowVisible;
 
         /*Public consts fields*/
 
@@ -125,26 +126,21 @@ namespace ITCompanySimulation.UI
             SetProgressBarBalance(SimulationManagerComponent.ControlledCompany.Balance);
 
             //Get chat component reference and subscribe to events
-            ChatComponent = GameObject.FindGameObjectWithTag("ApplicationManager").GetComponent<ChatManager>();
+            ChatComponent = MultiplayerChatManager.Instance;
             ChatComponent.MessageReceived += OnChatMessageReceived;
             ChatComponent.PrivateMessageReceived += OnChatMessageReceived;
 
-            //Set initial chat window scale to 0 so grow animation can be played when its activated
-            RectTransform chatWindowTransform = (RectTransform)ChatWindowComponent.gameObject.transform;
-            chatWindowTransform.localScale = Vector2.zero;
-
             //Initialization for UI components that are inactive when scene is loaded
             UIActivityLogComponent.Init();
-            ChatWindowComponent.Init();
 
             ApplicationManager.RegisterObjectForCleanup(this);
         }
 
-        private void OnChatMessageReceived(string senderNickname, string message)
+        private void OnChatMessageReceived(ChatMessage message)
         {
             //No need to notify player about incoming message when chat window
             //is already open
-            if (false == ChatWindowComponent.gameObject.activeSelf)
+            if (false == ChatWindowVisible)
             {
                 NotificationDisplayChatWindowButton.Notify();
             }
@@ -321,22 +317,24 @@ namespace ITCompanySimulation.UI
         /// </summary>
         public void ToggleChatWindow()
         {
-            RectTransform windowTransform = (RectTransform)ChatWindowComponent.gameObject.transform;
-            LeanTween.cancel(ChatWindowComponent.gameObject);
+            RectTransform chatWindowTransform = (RectTransform)ChatWindowComponent.gameObject.transform;
 
-            if (true == ChatWindowComponent.gameObject.activeSelf)
+            if (false == LeanTween.isTweening(ChatWindowComponent.gameObject))
             {
-                LeanTween.scale(ChatWindowComponent.gameObject, Vector2.zero, .5f)
-                    .setIgnoreTimeScale(true)
-                    .setOnComplete(() =>
-                    {
-                        ChatWindowComponent.gameObject.SetActive(false);
-                    });
-            }
-            else
-            {
-                ChatWindowComponent.gameObject.SetActive(true);
-                LeanTween.scale(ChatWindowComponent.gameObject, Vector2.one, .5f).setIgnoreTimeScale(true);
+                if (false == ChatWindowVisible)
+                {
+                    ChatWindowVisible = true;
+                    LeanTween.moveLocalX(ChatWindowComponent.gameObject, chatWindowTransform.localPosition.x + chatWindowTransform.sizeDelta.x, 1f)
+                        .setIgnoreTimeScale(true)
+                        .setEaseOutCirc();
+                }
+                else
+                {
+                    ChatWindowVisible = false;
+                    LeanTween.moveLocalX(ChatWindowComponent.gameObject, chatWindowTransform.localPosition.x - chatWindowTransform.sizeDelta.x, 1f)
+                        .setIgnoreTimeScale(true)
+                        .setEaseOutCirc();
+                } 
             }
         }
 

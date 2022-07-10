@@ -3,10 +3,12 @@ using Photon.Chat;
 using UnityEngine;
 using System.Linq;
 using UnityEngine.Events;
+using Photon;
+using System.Collections.Generic;
 
 namespace ITCompanySimulation.Multiplayer
 {
-    public class ChatManager : Photon.PunBehaviour, IChatClientListener, IMultiplayerChat
+    public class MultiplayerChatManager : PunBehaviour, IChatClientListener
     {
         /*Private consts fields*/
 
@@ -28,8 +30,28 @@ namespace ITCompanySimulation.Multiplayer
         public event PhotonChatMessageAction PrivateMessageReceived;
         public event UnityAction Connected;
         public event UnityAction Disconnected;
+        /// <summary>
+        /// List of all sent and received messages. Cleared when channel
+        /// is changed or rejoined.
+        /// </summary>
+        public List<ChatMessage> Messages { get; private set; } = new List<ChatMessage>();
+        /// <summary>
+        /// Only instance of multiplayer chat manager.
+        /// </summary>
+        public static MultiplayerChatManager Instance { get; private set; }
 
         /*Private methods*/
+
+        private void Awake()
+        {
+            if (null != Instance)
+            {
+                Debug.LogErrorFormat("[{0}] Only one instance of {0} should exist but is instantiated multiple times.",
+                     this.GetType().Name);
+            }
+
+            Instance = this;
+        }
 
         private void Init()
         {
@@ -123,7 +145,10 @@ namespace ITCompanySimulation.Multiplayer
             {
                 for (int i = 0; i < senders.Length; i++)
                 {
-                    MessageReceived?.Invoke(senders[i], messages[i].ToString());
+                    string receivedMessageString = messages[i].ToString();
+                    ChatMessage receivedMessage = new ChatMessage(senders[i], receivedMessageString);
+                    this.Messages.Add(receivedMessage);
+                    MessageReceived?.Invoke(receivedMessage);
                 }
             }
 #if DEVELOPMENT_BUILD || UNITY_EDITOR
@@ -141,7 +166,9 @@ namespace ITCompanySimulation.Multiplayer
 
         public void OnPrivateMessage(string sender, object message, string channelName)
         {
-            PrivateMessageReceived?.Invoke(sender, message.ToString());
+            ChatMessage receivedMessage = new ChatMessage(sender, message.ToString());
+            this.Messages.Add(receivedMessage);
+            PrivateMessageReceived?.Invoke(receivedMessage);
         }
 
         public void OnStatusUpdate(string user, int status, bool gotMessage, object message) { }
@@ -159,6 +186,11 @@ namespace ITCompanySimulation.Multiplayer
             }
 #endif
             Channel = (true == results[0]) ? channels[0] : null;
+
+            if (null != Channel)
+            {
+                Messages.Clear();
+            }
         }
 
         public void OnUnsubscribed(string[] channels)
