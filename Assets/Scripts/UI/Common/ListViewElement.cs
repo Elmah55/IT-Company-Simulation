@@ -11,13 +11,13 @@ namespace ITCompanySimulation.UI
         /*Private fields*/
 
         [SerializeField]
-        private Image m_BackgroundImage;
+        protected Image m_BackgroundImage;
         [SerializeField]
-        private Image m_FrontImage;
+        protected Image m_FrontImage;
         [SerializeField]
-        private TextMeshProUGUI m_Text;
+        protected TextMeshProUGUI m_Text;
         [SerializeField]
-        private Button m_Button;
+        protected Button m_Button;
 
         /*Public consts fields*/
 

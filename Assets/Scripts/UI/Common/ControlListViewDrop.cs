@@ -1,8 +1,9 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 using UnityEngine.EventSystems;
 
 /// <summary>
-/// UI controls list view that allows to drop element onto it
+/// UI controls list view that allows to drop element onto it.
 /// </summary>
 namespace ITCompanySimulation.UI
 {
@@ -12,11 +13,39 @@ namespace ITCompanySimulation.UI
 
         /*Private fields*/
 
+        /// <summary>
+        /// Array with allowed IDs. Used only to support adding IDs through editor.
+        /// </summary>
+        [SerializeField]
+        private int[] m_AllowedDraggableIds;
+        /// <summary>
+        /// Contains allowed IDs of draggable objects. If draggable object has ID
+        /// that is allowed it can be dropped onto this list view.
+        /// </summary>
+        private HashSet<int> AllowedDraggableIds = new HashSet<int>();
+
         /*Public consts fields*/
 
         /*Public fields*/
 
         /*Private methods*/
+
+        private void Awake()
+        {
+            foreach (int id in m_AllowedDraggableIds)
+            {
+                bool result = AllowedDraggableIds.Add(id);
+
+#if DEVELOPMENT_BUILD || UNITY_EDITOR
+                if (false == result)
+                {
+                    Debug.LogWarningFormat("[{0}] Allowed ID ({1}) defined multiple times.",
+                        this.GetType().Name,
+                        id);
+                }
+#endif
+            }
+        }
 
         /*Public methods*/
 
@@ -24,11 +53,10 @@ namespace ITCompanySimulation.UI
         {
             base.AddControl(control);
 
-            UIElementDrag drag = control.GetComponent<UIElementDrag>();
+            DraggableListViewElement drag = control.GetComponent<DraggableListViewElement>();
 
             if (null != drag)
             {
-                drag.ParentTransform = Layout.GetComponent<RectTransform>();
                 drag.ParentChanged += OnDraggedElementParentChanged;
             }
         }
@@ -37,7 +65,7 @@ namespace ITCompanySimulation.UI
         {
             if (newParent != Layout)
             {
-                UIElementDrag drag = obj.GetComponent<UIElementDrag>();
+                DraggableListViewElement drag = obj.GetComponent<DraggableListViewElement>();
                 drag.ParentChanged -= OnDraggedElementParentChanged;
                 RemoveControl(obj, false);
             }
@@ -45,12 +73,13 @@ namespace ITCompanySimulation.UI
 
         public void OnDrop(PointerEventData eventData)
         {
-            UIElementDrag drag = eventData.pointerDrag.GetComponent<UIElementDrag>();
+            DraggableListViewElement drag = eventData.pointerDrag.GetComponent<DraggableListViewElement>();
             //Element might be dropped in list view that it was dragged from
             //For some reason sometimes Unity UI system call this even when
             //dropping at same object it was dragged from
-            if (false == Controls.Contains(eventData.pointerDrag)
-                && drag != null)
+            if (drag != null
+                && false == Controls.Contains(eventData.pointerDrag)
+                && true == AllowedDraggableIds.Contains(drag.ID))
             {
                 AddControl(eventData.pointerDrag);
             }

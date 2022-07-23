@@ -18,7 +18,7 @@ namespace ITCompanySimulation.UI
         private SimulationManager SimulationManagerComponent;
         private GameTime GameTimeComponent;
         [SerializeField]
-        private ListViewElement ListViewWorkerElementPrefab;
+        private DraggableListViewElement ListViewWorkerElementPrefab;
         [SerializeField]
         private ControlListView ListViewCompanyProjects;
         [SerializeField]
@@ -119,15 +119,15 @@ namespace ITCompanySimulation.UI
             }
         }
 
-        //On control removed from list view check will be peformed to check
-        //if control was removed because worker was removed from project.
-        //If player moved worker's control to other list if condition will be true.
-        //If worker got removed for other reason (i.e level of satisfaction fell
-        //below threshold) if condition will be false
         private void OnListViewAssignedWorkersControlRemoved(GameObject ctrl)
         {
             LocalWorker worker = (LocalWorker)ctrl.GetComponent<ListViewElement>().RepresentedObject;
 
+            //On control removed from list view check will be peformed to check
+            //if control was removed because worker was removed from project.
+            //If player moved worker's control to other list if condition will be true.
+            //If worker got removed for other reason (i.e level of satisfaction fell
+            //below threshold) if condition will be false
             if (true == SelectedScrum.BindedProject.Workers.Contains(worker))
             {
                 SelectedScrum.BindedProject.RemoveWorker(worker);
@@ -155,10 +155,10 @@ namespace ITCompanySimulation.UI
 
         private ListViewElement CreateWorkerListViewElement(LocalWorker companyWorker)
         {
-            ListViewElement newElement = UIWorkers.CreateWorkerListViewElement(companyWorker, ListViewWorkerElementPrefab, TooltipComponent);
-            UIElementDrag drag = newElement.GetComponent<UIElementDrag>();
-            drag.DragParentTransform = gameObject.GetComponent<RectTransform>();
+            DraggableListViewElement newElement =
+                (DraggableListViewElement)UIWorkers.CreateWorkerListViewElement(companyWorker, ListViewWorkerElementPrefab, TooltipComponent);
 
+            newElement.BeginDragParentTransform = (RectTransform)gameObject.transform;
             newElement.gameObject.SetActive(true);
             newElement.Text.text = GetWorkerListViewElementText(companyWorker);
             newElement.RepresentedObject = companyWorker;
