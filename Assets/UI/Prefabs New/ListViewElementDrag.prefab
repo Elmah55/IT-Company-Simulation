@@ -41,6 +41,36 @@ PrefabInstance:
       propertyPath: m_Name
       value: ListViewElementDrag
       objectReference: {fileID: 0}
+    - target: {fileID: 6476591121585805272, guid: 6b9760e56bd65dd4aa7116f685d968d9,
+        type: 3}
+      propertyPath: m_enableAutoSizing
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6476591121585805272, guid: 6b9760e56bd65dd4aa7116f685d968d9,
+        type: 3}
+      propertyPath: m_fontSize
+      value: 17.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6476591121585805272, guid: 6b9760e56bd65dd4aa7116f685d968d9,
+        type: 3}
+      propertyPath: m_firstOverflowCharacterIndex
+      value: -1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6476591121585805272, guid: 6b9760e56bd65dd4aa7116f685d968d9,
+        type: 3}
+      propertyPath: m_fontSizeMax
+      value: 18
+      objectReference: {fileID: 0}
+    - target: {fileID: 6476591121585805272, guid: 6b9760e56bd65dd4aa7116f685d968d9,
+        type: 3}
+      propertyPath: m_fontSizeMin
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 6476591121585805272, guid: 6b9760e56bd65dd4aa7116f685d968d9,
+        type: 3}
+      propertyPath: m_RaycastTarget
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 4744411011136369944, guid: 6b9760e56bd65dd4aa7116f685d968d9,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -146,35 +176,15 @@ PrefabInstance:
       propertyPath: m_Pivot.y
       value: 0.5
       objectReference: {fileID: 0}
-    - target: {fileID: 6476591121585805272, guid: 6b9760e56bd65dd4aa7116f685d968d9,
-        type: 3}
-      propertyPath: m_enableAutoSizing
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 6476591121585805272, guid: 6b9760e56bd65dd4aa7116f685d968d9,
-        type: 3}
-      propertyPath: m_fontSize
-      value: 17.1
-      objectReference: {fileID: 0}
-    - target: {fileID: 6476591121585805272, guid: 6b9760e56bd65dd4aa7116f685d968d9,
-        type: 3}
-      propertyPath: m_firstOverflowCharacterIndex
-      value: -1
-      objectReference: {fileID: 0}
-    - target: {fileID: 6476591121585805272, guid: 6b9760e56bd65dd4aa7116f685d968d9,
-        type: 3}
-      propertyPath: m_fontSizeMax
-      value: 18
-      objectReference: {fileID: 0}
-    - target: {fileID: 6476591121585805272, guid: 6b9760e56bd65dd4aa7116f685d968d9,
-        type: 3}
-      propertyPath: m_fontSizeMin
-      value: 10
-      objectReference: {fileID: 0}
     - target: {fileID: 2541303583264927900, guid: 6b9760e56bd65dd4aa7116f685d968d9,
         type: 3}
       propertyPath: m_SizeDelta.x
       value: 290
+      objectReference: {fileID: 0}
+    - target: {fileID: 3112297472103586629, guid: 6b9760e56bd65dd4aa7116f685d968d9,
+        type: 3}
+      propertyPath: m_RaycastTarget
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 6b9760e56bd65dd4aa7116f685d968d9, type: 3}

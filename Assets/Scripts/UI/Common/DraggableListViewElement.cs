@@ -4,7 +4,7 @@ using UnityEngine.EventSystems;
 namespace ITCompanySimulation.UI
 {
     /// <summary>
-    /// List view element that can be dragged to other control list view.
+    /// List view element that can be dragged and dropped to control list view.
     /// </summary>
     [RequireComponent(typeof(RectTransform))]
     public class DraggableListViewElement : ListViewElement, IBeginDragHandler, IEndDragHandler, IDragHandler
@@ -18,17 +18,23 @@ namespace ITCompanySimulation.UI
         /// Offset of dragged object from mouse position
         /// </summary>
         private Vector2 MousePositionOffset;
-        /// <summary>
-        /// Stored to place element in same order after dragging
-        /// </summary>
-        private int SiblingIndex;
         [Tooltip("If ID matches allowed IDs of control list view it can be dropped onto that list view.")]
         [SerializeField]
         private int m_ID;
         private RectTransform LayoutTransform;
         private CanvasGroup CanvasGroupComponent;
+        /// <summary>
+        /// Clone of this element placed in list view that this element is dragged from. It is used
+        /// to visualize position of this element before it was dragged out of list view.
+        /// </summary>
+        private DraggableListViewElement DraggedElementClone;
 
         /*Public consts fields*/
+
+        /// <summary>
+        /// Color of dragged element clone. See: <see cref="DraggedElementClone"/>
+        /// </summary>
+        public const float DRAGGED_ELEMENT_CLONE_COLOR_ALPHA = 0.5f;
 
         /*Public fields*/
 
@@ -52,7 +58,7 @@ namespace ITCompanySimulation.UI
 
         /*Private methods*/
 
-        private void Start()
+        private void Awake()
         {
             TransformComponent = GetComponent<RectTransform>();
             CanvasGroupComponent = GetComponent<CanvasGroup>();
@@ -64,10 +70,15 @@ namespace ITCompanySimulation.UI
         {
             CanvasGroupComponent.blocksRaycasts = false;
             LayoutTransform = (RectTransform)gameObject.transform.parent;
-            SiblingIndex = TransformComponent.GetSiblingIndex();
+            int siblingIndex = TransformComponent.GetSiblingIndex();
             gameObject.transform.SetParent(BeginDragParentTransform);
             RectTransformUtility.ScreenPointToLocalPointInRectangle(BeginDragParentTransform, Input.mousePosition, null, out MousePositionOffset);
             MousePositionOffset = MousePositionOffset - (Vector2)TransformComponent.localPosition;
+
+            DraggedElementClone =
+                GameObject.Instantiate<DraggableListViewElement>(gameObject.GetComponent<DraggableListViewElement>(), LayoutTransform);
+            DraggedElementClone.transform.SetSiblingIndex(siblingIndex);
+            DraggedElementClone.CanvasGroupComponent.alpha = DRAGGED_ELEMENT_CLONE_COLOR_ALPHA;
         }
 
         public void OnDrag(PointerEventData eventData)
@@ -82,16 +93,21 @@ namespace ITCompanySimulation.UI
         {
             CanvasGroupComponent.blocksRaycasts = true;
 
-            //Parent might be changed by other script when ui element is dropped
+            //Parent might be changed by list view that this element is dropped into
             if (TransformComponent.parent.gameObject != BeginDragParentTransform.gameObject)
             {
                 ParentChanged?.Invoke(this.gameObject, TransformComponent.parent.gameObject);
             }
+            //Element was not dropped to another list view. Place this element back to previous
+            //list view's layout with same sibling index as before.
             else
             {
+                int siblingIndex = DraggedElementClone.transform.GetSiblingIndex();
                 gameObject.transform.SetParent(LayoutTransform);
-                TransformComponent.SetSiblingIndex(SiblingIndex);
+                TransformComponent.SetSiblingIndex(siblingIndex);
             }
+
+            GameObject.Destroy(DraggedElementClone.gameObject);
         }
     }
 }
