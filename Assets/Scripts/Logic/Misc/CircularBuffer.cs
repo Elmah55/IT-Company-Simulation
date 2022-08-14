@@ -127,6 +127,13 @@ namespace ITCompanySimulation.Utilities
         /// <param name="capacity">Indicates how many elements buffer can hold.</param>
         public CircularBuffer(int capacity)
         {
+            if (capacity < 1)
+            {
+                string exceptionMsg = string.Format("Expected capacity greater than 0 but instead got {0}",
+                                                    capacity);
+                throw new ArgumentException(exceptionMsg);
+            }
+
             InnerBuffer = new T[capacity];
         }
 
