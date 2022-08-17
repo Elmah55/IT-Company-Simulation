@@ -130,7 +130,6 @@ namespace ITCompanySimulation.Core
             //derived class to be registered even when using base class as argument in method.
             PhotonPeer.RegisterType(typeof(LocalWorker), NetworkingData.LOCAL_WORKER_BYTE_CODE, SharedWorker.Serialize, SharedWorker.Deserialize);
             PhotonPeer.RegisterType(typeof(SharedWorker), NetworkingData.SHARED_WORKER_BYTE_CODE, SharedWorker.Serialize, SharedWorker.Deserialize);
-            PhotonPeer.RegisterType(typeof(SharedSimulationStats), NetworkingData.SIMULATION_STATS_BYTE_CODE, SharedSimulationStats.Serialize, SharedSimulationStats.Deserialize);
 
             //Init static classes that need to be loaded before other components
             PlayerInfoSettings.Load();

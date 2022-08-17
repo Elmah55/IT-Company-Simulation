@@ -1,7 +1,8 @@
 ﻿using UnityEngine;
 using TMPro;
 using ITCompanySimulation.Core;
-using UnityEngine.UI;
+using System.Collections.Generic;
+using ITCompanySimulation.Settings;
 
 namespace ITCompanySimulation.UI
 {
@@ -11,23 +12,29 @@ namespace ITCompanySimulation.UI
 
         /*Private fields*/
 
-        [SerializeField]
-        private TextMeshProUGUI TextOtherPlayerStats;
-        [SerializeField]
-        private TextMeshProUGUI TextThisPlayerStats;
-        [SerializeField]
-        private TextMeshProUGUI TextOtherPlayerStatsTitle;
-        [SerializeField]
-        private ListViewElement PlayerListListViewElementPrefab;
-        [SerializeField]
-        private ControlListView PlayerListListView;
         private SimulationManager SimulationManagerComponent;
-        private IButtonSelector ButtonSelectorPlayerList = new ButtonSelector();
+        [SerializeField]
+        private TextMeshProUGUI TextMoneyEarned;
+        [SerializeField]
+        private TextMeshProUGUI TextMoneySpent;
+        [SerializeField]
+        private TextMeshProUGUI TextWorkersHired;
+        [SerializeField]
+        private TextMeshProUGUI TextOtherPlayersWorkersHired;
+        [SerializeField]
+        private TextMeshProUGUI TextWorkersLeftCompany;
+        [SerializeField]
+        private TextMeshProUGUI TextProjectsCompleted;
+        [SerializeField]
+        private TextMeshProUGUI TextCompanyBalance;
+        [SerializeField]
+        private ProgressBar OtherPlayerBalanceProgressBarPrefab;
+        [SerializeField]
+        private GameObject ProgressBarLayout;
         /// <summary>
-        /// Player that is currently selected form players' list view.
-        /// Null if none player is selected.
+        /// Maps ID of photon player to progress bar with balance of his company.
         /// </summary>
-        private PhotonPlayer SelectedPlayer;
+        private Dictionary<int, ProgressBar> PhotonPlayerProgressBarMap = new Dictionary<int, ProgressBar>();
 
         /*Public consts fields*/
 
@@ -36,49 +43,32 @@ namespace ITCompanySimulation.UI
         /*Private methods*/
 
         /// <summary>
-        /// Returns string with simulation statistics listed.
-        /// </summary>
-        private string GetStatsTxt(SharedSimulationStats stats)
-        {
-            string statsTxt = string.Format(
-                                "Money earned: {0} $\n" +
-                                "Money spent: {1} $\n" +
-                                "Workers hired: {2}\n" +
-                                "Other players' workers hired: {3}\n" +
-                                "Workers that left company: {4}\n" +
-                                "Projects completed: {5}\n" +
-                                "Balance: {6} $",
-                                stats.MoneyEarned,
-                                stats.MoneySpent,
-                                stats.WorkersHired,
-                                stats.OtherPlayersWorkersHired,
-                                stats.WorkersLeftCompany,
-                                stats.ProjectsCompleted,
-                                stats.CompanyBalance);
-
-            return statsTxt;
-        }
-
-        /// <summary>
-        /// Called when stats of local player are updated.
+        /// Called when stats of player are updated.
         /// </summary>
         private void OnThisPlayerStatsUpdated()
         {
-            TextThisPlayerStats.text = GetStatsTxt(SimulationManagerComponent.Stats);
+            SimulationStats stats = SimulationManagerComponent.Stats;
+            TextMoneyEarned.text = string.Format("Money earned: {0} $", stats.MoneyEarned);
+            TextMoneySpent.text = string.Format("Money spent: {0} $", stats.MoneySpent);
+            TextWorkersHired.text = string.Format("Workers hired: {0}", stats.WorkersHired);
+            TextOtherPlayersWorkersHired.text = string.Format("Other players' workers hired: {0}", stats.OtherPlayersWorkersHired);
+            TextWorkersLeftCompany.text = string.Format("Workers that left company: {0}", stats.WorkersLeftCompany);
+            TextProjectsCompleted.text = string.Format("Number of completed projects: {0}", stats.ProjectsCompleted);
+            TextCompanyBalance.text = string.Format("Company balance: {0} $", stats.CompanyBalance);
         }
 
         /// <summary>
         /// Called when stats of other player are updated.
         /// </summary>
         /// <param name="otherPlayer"></param>
-        private void OnOtherPlayerStatsUpdated(PhotonPlayer otherPlayer)
+        private void OnOtherPlayerCompanyBalanceUpdated(PlayerData data)
         {
-            if (null != SelectedPlayer && SelectedPlayer.ID == otherPlayer.ID)
-            {
-                TextOtherPlayerStats.text =
-                    GetStatsTxt(SimulationManagerComponent.PlayerDataMap[otherPlayer.ID].Stats);
-                TextOtherPlayerStatsTitle.text = string.Format("{0}'s stats", otherPlayer.NickName);
-            }
+            ProgressBar companyBalanceProgressBar = PhotonPlayerProgressBarMap[data.Player.ID];
+            companyBalanceProgressBar.Value = data.CompanyBalance;
+            companyBalanceProgressBar.Text.text = string.Format("{0} {1} / {2} $",
+                                                                data.Player.NickName,
+                                                                data.CompanyBalance,
+                                                                SimulationSettings.TargetBalance);
         }
 
         private void Awake()
@@ -90,53 +80,34 @@ namespace ITCompanySimulation.UI
         private void Start()
         {
             SimulationManagerComponent.Stats.StatsUpdated += OnThisPlayerStatsUpdated;
-            ButtonSelectorPlayerList.SelectedButtonChanged += OnPlayerListSelectedButtonChanged;
 
             foreach (var data in SimulationManagerComponent.PlayerDataMap)
             {
-                data.Value.StatsUpdated += OnOtherPlayerStatsUpdated;
+                ProgressBar playerBalanceProgressBar =
+                    GameObject.Instantiate(OtherPlayerBalanceProgressBarPrefab, ProgressBarLayout.transform);
+                playerBalanceProgressBar.gameObject.SetActive(true);
+                playerBalanceProgressBar.MinimumValue = SimulationSettings.MinimalBalance;
+                playerBalanceProgressBar.MaximumValue = SimulationSettings.TargetBalance;
+                PhotonPlayerProgressBarMap.Add(data.Value.Player.ID, playerBalanceProgressBar);
+
+                data.Value.CompanyBalanceUpdated += OnOtherPlayerCompanyBalanceUpdated;
+                //Init stats so balance is displayed without waiting for update
+                OnOtherPlayerCompanyBalanceUpdated(data.Value);
             }
 
-            foreach (PhotonPlayer player in PhotonNetwork.otherPlayers)
-            {
-                ListViewElement newListViewElement =
-                    GameObject.Instantiate(PlayerListListViewElementPrefab);
-                newListViewElement.RepresentedObject = player;
-                newListViewElement.Text.text = player.NickName;
-                ButtonSelectorPlayerList.AddButton(newListViewElement.Button);
-                PlayerListListView.AddControl(newListViewElement.gameObject);
-            }
-
-            TextOtherPlayerStatsTitle.text = "Other player's stats";
-            //Init stats text so stats are displayed without waiting
-            //for update
+            //Init stats text so stats are displayed without waiting for update
             OnThisPlayerStatsUpdated();
-        }
-
-        private void OnPlayerListSelectedButtonChanged(Button btn)
-        {
-            if (null != btn)
-            {
-                ListViewElement listViewElement = btn.GetComponent<ListViewElement>();
-                SelectedPlayer = (PhotonPlayer)listViewElement.RepresentedObject;
-                OnOtherPlayerStatsUpdated(SelectedPlayer);
-            }
-            else
-            {
-                SelectedPlayer = null;
-            }
         }
 
         /*Public methods*/
 
-        public override void OnPhotonPlayerDisconnected(PhotonPlayer disconnectedPlayer)
+        public override void OnPhotonPlayerDisconnected(PhotonPlayer otherPlayer)
         {
-            base.OnPhotonPlayerDisconnected(disconnectedPlayer);
+            base.OnPhotonPlayerDisconnected(otherPlayer);
 
-            ListViewElement disconnectedPlayerElement = PlayerListListView.FindElement(disconnectedPlayer);
-            Button elementButton = disconnectedPlayerElement.GetComponent<Button>();
-            ButtonSelectorPlayerList.RemoveButton(elementButton);
-            PlayerListListView.RemoveControl(disconnectedPlayerElement.gameObject);
+            ProgressBar companyBalanceProgressBar = PhotonPlayerProgressBarMap[otherPlayer.ID];
+            GameObject.Destroy(companyBalanceProgressBar.gameObject);
+            PhotonPlayerProgressBarMap.Remove(otherPlayer.ID);
         }
     }
 }

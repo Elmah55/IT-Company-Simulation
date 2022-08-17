@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Linq;
+using System.Reflection;
 
 namespace ITCompanySimulation.Utilities
 {
@@ -78,7 +79,19 @@ namespace ITCompanySimulation.Utilities
         /// </summary>
         public static PhotonPlayer PhotonPlayerFromID(int playerID)
         {
-            return PhotonNetwork.playerList?.FirstOrDefault(player => player.ID == playerID);
+            PhotonPlayer result = PhotonNetwork.playerList?.FirstOrDefault(player => player.ID == playerID);
+
+#if DEVELOPMENT_BUILD || UNITY_EDITOR
+            if (default(PhotonPlayer) == result)
+            {
+                string warningMsg = string.Format("[{0}] {1} - could not find photon player with ID ({2})",
+                                                  typeof(Utils).Name,
+                                                  MethodBase.GetCurrentMethod().Name,
+                                                  playerID);
+                Debug.LogWarning(warningMsg);
+            }
+#endif
+            return result;
         }
     }
 }

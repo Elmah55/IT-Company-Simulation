@@ -64,4 +64,5 @@ MonoBehaviour:
   - StartSessionRPC
   - OnOtherPlayerWorkerRequestCfmRPC
   - OnOtherPlayerWorkerRequestRPC
+  - OnOtherPlayerCompanyBalanceUpdatedRPC
   DisableAutoOpenWizard: 1

@@ -77,7 +77,7 @@ namespace ITCompanySimulation.Core
         /// <summary>
         /// Simulation statistics collected during simulation run.
         /// </summary>
-        public LocalSimulationStats Stats { get; private set; }
+        public SimulationStats Stats { get; private set; } = new SimulationStats();
 
         public event SimulationFinishAction SimulationFinished;
         public event Action SimulationStarted;
@@ -104,10 +104,10 @@ namespace ITCompanySimulation.Core
             InfoWindowComponent = InfoWindow.Instance;
             InfoWindowComponent.Show("Waiting for session start...");
             ApplicationManagerComponent.SessionStarted += OnSessionStarted;
-            Stats.StatsUpdated += OnSimulationStatsUpdate;
 
             PlayerData data = new PlayerData();
             data.CompanyName = ControlledCompany.Name;
+            data.CompanyBalance = SimulationSettings.InitialBalance;
             this.photonView.RPC("OnOtherPlayerDataReceivedRPC",
                                 PhotonTargets.Others,
                                 PhotonNetwork.player.ID,
@@ -119,7 +119,6 @@ namespace ITCompanySimulation.Core
             ApplicationManagerComponent = GameObject.FindGameObjectWithTag("ApplicationManager").GetComponent<ApplicationManager>();
             GameTimeComponent = GetComponent<GameTime>();
             NotificatorComponent = new SimulationEventNotificator(GameTimeComponent);
-            Stats = new LocalSimulationStats();
             CreateCompany();
         }
 
@@ -220,6 +219,11 @@ namespace ITCompanySimulation.Core
 
                     FinishSimulationRPC(PhotonNetwork.player.ID, (int)finishReason);
                 }
+
+                this.photonView.RPC("OnOtherPlayerCompanyBalanceUpdatedRPC",
+                                    PhotonTargets.Others,
+                                    PhotonNetwork.player.ID,
+                                    newBalance);
             }
 
             Stats.CompanyBalance = newBalance;
@@ -293,10 +297,9 @@ namespace ITCompanySimulation.Core
         [PunRPC]
         private void OnControlledCompanyWorkerAddedRPC(SharedWorker addedWorker, int photonPlayerID)
         {
-            PlayerData data = PlayerDataMap[photonPlayerID];
+            PhotonPlayer sourcePlayer = Utils.PhotonPlayerFromID(photonPlayerID);
+            PlayerData data = PlayerDataMap[sourcePlayer.ID];
             data.Workers.Add(addedWorker.ID, addedWorker);
-            data.Stats.WorkersHired++;
-            PhotonPlayer sourcePlayer = PhotonNetwork.otherPlayers.FirstOrDefault(x => x.ID == photonPlayerID);
             OtherPlayerWorkerAdded?.Invoke(addedWorker, sourcePlayer);
 
 #if DEVELOPMENT_BUILD || UNITY_EDITOR
@@ -442,9 +445,6 @@ namespace ITCompanySimulation.Core
             {
                 PhotonPlayer sourcePlayer = Utils.PhotonPlayerFromID(photonPlayerID);
                 data.Player = sourcePlayer;
-                SharedSimulationStats stats = new SharedSimulationStats();
-                stats.CompanyBalance = SimulationSettings.InitialBalance;
-                data.Stats = stats;
                 PlayerDataMap.Add(photonPlayerID, data);
                 NumberOfPlayerDataReceived++;
             }
@@ -466,14 +466,14 @@ namespace ITCompanySimulation.Core
         }
 
         /// <summary>
-        /// Called when simulation statistic of other client have been updated.
+        /// Called by client whose company's balance was updated.
         /// </summary>
-        /// <param name="senderId">PhotonPlayer ID of client that invoked this event</param>
         [PunRPC]
-        private void OnSimulationStatsUpdateRPC(int senderId, SharedSimulationStats updatedStats)
+        private void OnOtherPlayerCompanyBalanceUpdatedRPC(int senderId, int newBalance)
         {
-            PlayerData data = PlayerDataMap[senderId];
-            data.Stats = updatedStats;
+            PhotonPlayer sender = Utils.PhotonPlayerFromID(senderId);
+            PlayerData data = PlayerDataMap[sender.ID];
+            data.CompanyBalance = newBalance;
         }
 
         #endregion
@@ -531,17 +531,6 @@ namespace ITCompanySimulation.Core
                                 companyWorker.ID,
                                 companyWorker.Salary,
                                 (int)WorkerAttribute.Salary);
-        }
-
-        private void OnSimulationStatsUpdate()
-        {
-            SharedSimulationStats sharedStats = new SharedSimulationStats(Stats);
-
-            this.photonView.RPC("OnSimulationStatsUpdateRPC",
-                                PhotonTargets.Others,
-                                PhotonNetwork.player.ID,
-                                sharedStats);
-
         }
 
         /*Public methods*/
