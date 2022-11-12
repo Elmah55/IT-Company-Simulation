@@ -6,25 +6,10 @@ using UnityEngine.Audio;
 
 namespace ITCompanySimulation.Settings
 {
-    public static class AudioSettings
+    [CreateAssetMenu(fileName = "AudioSettings", menuName = "ITCompanySimulation/Settings/AudioSettings")]
+    public class AudioSettings : ScriptableObject
     {
         /*Private consts fields*/
-
-        /// <summary>
-        /// Default value for string values in PlayerPrefs
-        /// </summary>
-        private const string DEFAULT_STRING_KEY_VALUE = "";
-        /// <summary>
-        /// Default value for float values in PlayerPrefs
-        /// </summary>
-        private const float DEFAULT_FLOAT_KEY_VALUE = -1f;
-
-        //Keys values for accessing settings from
-        //PlayerPrefs class
-
-        private const string MASTER_VOLUME_KEY = "MasterVolume";
-        private const string UI_VOLUME_KEY = "UIVolume";
-        private const string MUSIC_VOLUME_KEY = "MusicVolume";
 
         //Names of AudioMixer exposed parameters
         private const string MUSIC_GROUP_VOLUME_PARAMETER_NAME = "MusicVolume";
@@ -39,34 +24,30 @@ namespace ITCompanySimulation.Settings
 
         /*Private fields*/
 
-        private static AudioMixer AudioMixerComponent;
+        [SerializeField]
+        private AudioMixer AudioMixerComponent;
 
         /*Public consts fields*/
 
         /*Public fields*/
 
         /// <summary>
-        /// Level of music volume (in %)
+        /// Level of music volume (in range 0-1)
         /// </summary>
-        public static float MusicVolume { get; private set; }
+        [Range(0f, 1f)]
+        public float MusicVolume;
         /// <summary>
-        /// Level of UI volume (in %)
+        /// Level of UI volume (in range 0-1)
         /// </summary>
-        public static float UIVolume { get; private set; }
+        [Range(0f, 1f)]
+        public float UIVolume;
         /// <summary>
-        /// Level of master volume (in %)
+        /// Level of master volume (in range 0-1)
         /// </summary>
-        public static float MasterVolume { get; private set; }
+        [Range(0f, 1f)]
+        public float MasterVolume;
 
         /*Private methods*/
-
-        static AudioSettings()
-        {
-            //Get handle to music audio source to get audio mixer. All audio sources will use same audio mixer
-            AudioSource musicAudioSource =
-                GameObject.FindGameObjectWithTag("ApplicationManager").GetComponentInChildren<AudioSource>();
-            AudioMixerComponent = musicAudioSource.outputAudioMixerGroup.audioMixer;
-        }
 
         /// <summary>
         /// Checks if volume value is within range (0-1)
@@ -83,27 +64,9 @@ namespace ITCompanySimulation.Settings
         }
 
         /// <summary>
-        /// Checks if param has default value. If it has it loads param
-        /// from AudioMixer instead of from registry. Default value of params
-        /// means it wasn't saved to registry before.
-        /// </summary>
-        /// <returns>Param value from AudioMixer (converted to linear value (0-100%)) if param has default value
-        /// otherwise returns same value as provided in argument</returns>
-        private static float CheckDefaultParam(float param, string audioMixerParamName)
-        {
-            if (DEFAULT_FLOAT_KEY_VALUE == param)
-            {
-                param = GetAudioMixerParam(audioMixerParamName);
-                param = Utils.MapDbToLinear(param);
-            }
-
-            return param;
-        }
-
-        /// <summary>
         /// Sets parameter with given name in AudioMixer.
         /// </summary>
-        private static void SetAudioMixerParam(string paramName, float value)
+        private void SetAudioMixerParam(string paramName, float value)
         {
             bool setFloatResult = AudioMixerComponent.SetFloat(paramName, value);
 
@@ -121,7 +84,7 @@ namespace ITCompanySimulation.Settings
         /// <summary>
         /// Gets parameter with given name from AudioMixer.
         /// </summary>
-        private static float GetAudioMixerParam(string paramName)
+        private float GetAudioMixerParam(string paramName)
         {
             float param = float.NaN;
             bool getFloatResult = AudioMixerComponent.GetFloat(paramName, out param);
@@ -143,7 +106,7 @@ namespace ITCompanySimulation.Settings
         /// Returns volume converted to dB scale
         /// </summary>
         /// <returns></returns>
-        private static float GetdBVolume(float volumeLevel)
+        private float GetdBVolume(float volumeLevel)
         {
             float dBVolume = Utils.MapLinearTodB(volumeLevel);
 
@@ -163,8 +126,8 @@ namespace ITCompanySimulation.Settings
         /// <param name="masterVolumeLevel">Level of master volume (in %)</param>
         /// <param name="UIVolumeLevel">Level of master volume (in %)</param>
         /// <param name="musicVolumeLevel">Level of master volume (in %)</param>
-        /// <param name="preview">If true only level of volume will be changed without saving changes to registry</param>
-        public static void Apply(float masterVolumeLevel, float UIVolumeLevel, float musicVolumeLevel, bool preview)
+        /// <param name="preview">If true only level of volume will be changed without saving changes</param>
+        public void Apply(float masterVolumeLevel, float UIVolumeLevel, float musicVolumeLevel, bool preview)
         {
             CheckVolumeValue(masterVolumeLevel);
             CheckVolumeValue(UIVolumeLevel);
@@ -172,10 +135,6 @@ namespace ITCompanySimulation.Settings
 
             if (false == preview)
             {
-                PlayerPrefs.SetFloat(MASTER_VOLUME_KEY, masterVolumeLevel);
-                PlayerPrefs.SetFloat(UI_VOLUME_KEY, UIVolumeLevel);
-                PlayerPrefs.SetFloat(MUSIC_VOLUME_KEY, musicVolumeLevel);
-
                 MasterVolume = masterVolumeLevel;
                 UIVolume = UIVolumeLevel;
                 MusicVolume = musicVolumeLevel;
@@ -191,18 +150,10 @@ namespace ITCompanySimulation.Settings
         }
 
         /// <summary>
-        /// Loads settings from registry
+        /// Initializes this instance with saved settings.
         /// </summary>
-        public static void Load()
+        public void Load()
         {
-            MusicVolume = PlayerPrefs.GetFloat(MUSIC_VOLUME_KEY, DEFAULT_FLOAT_KEY_VALUE);
-            MasterVolume = PlayerPrefs.GetFloat(MASTER_VOLUME_KEY, DEFAULT_FLOAT_KEY_VALUE);
-            UIVolume = PlayerPrefs.GetFloat(UI_VOLUME_KEY, DEFAULT_FLOAT_KEY_VALUE);
-
-            MusicVolume = CheckDefaultParam(MusicVolume, MUSIC_GROUP_VOLUME_PARAMETER_NAME);
-            UIVolume = CheckDefaultParam(UIVolume, UI_GROUP_VOLUME_PARAMETER_NAME);
-            MasterVolume = CheckDefaultParam(MasterVolume, MASTER_GROUP_VOLUME_PARAMETER_NAME);
-
             //Values of volume levels in dB log scale
             float musicVolumedB = GetdBVolume(MusicVolume);
             float UIVolumedB = GetdBVolume(UIVolume);

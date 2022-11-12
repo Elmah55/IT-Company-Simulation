@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections;
 using UnityEngine;
-using ITCompanySimulation.Events;
+using ITCompanySimulation.Event;
 using Photon;
 
 namespace ITCompanySimulation.Core

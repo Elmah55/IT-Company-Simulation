@@ -135,7 +135,7 @@ namespace ITCompanySimulation.Character
     }
 }
 
-namespace ITCompanySimulation.Events
+namespace ITCompanySimulation.Event
 {
     public enum DataTransferSource
     {

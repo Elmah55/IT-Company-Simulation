@@ -8,7 +8,7 @@ using ITCompanySimulation.Multiplayer;
 using ITCompanySimulation.Company;
 using ITCompanySimulation.Project;
 using ITCompanySimulation.Settings;
-using ITCompanySimulation.Events;
+using ITCompanySimulation.Event;
 using ITCompanySimulation.Utilities;
 using Photon;
 
@@ -130,7 +130,7 @@ namespace ITCompanySimulation.Core
 #if DEVELOPMENT_BUILD || UNITY_EDITOR
         private void OnGUI()
         {
-            Event currentEvent = Event.current;
+            UnityEngine.Event currentEvent = UnityEngine.Event.current;
 
             if (true == currentEvent.isKey)
             {

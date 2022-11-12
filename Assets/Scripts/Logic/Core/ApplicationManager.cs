@@ -13,7 +13,7 @@ using System.Threading;
 using System.Globalization;
 using System.Collections.Generic;
 using Photon;
-using ITCompanySimulation.Events;
+using ITCompanySimulation.Event;
 using ITCompanySimulation.UI;
 
 #if DEVELOPMENT_BUILD || UNITY_EDITOR
@@ -75,6 +75,8 @@ namespace ITCompanySimulation.Core
         /// </summary>
         [SerializeField]
         private DataTransferEvent SimulationInitialDataReceived;
+        [SerializeField]
+        private AudioSettings AudioSettingsObject;
 
         /*Public consts fields*/
 
@@ -157,16 +159,14 @@ namespace ITCompanySimulation.Core
 
         private void Start()
         {
-            //Init other static classes
-            AudioSettings.Load();
-
+            AudioSettingsObject.Load();
             LoadScene(SceneIndex.Menu);
         }
 
 #if DEVELOPMENT_BUILD || UNITY_EDITOR
         private void OnGUI()
         {
-            Event currentEvent = Event.current;
+            UnityEngine.Event currentEvent = UnityEngine.Event.current;
 
             if (true == currentEvent.isKey)
             {

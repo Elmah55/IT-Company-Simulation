@@ -3,7 +3,7 @@ using ITCompanySimulation.Utilities;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using ITCompanySimulation.Events;
+using ITCompanySimulation.Event;
 using System.Linq;
 using Photon;
 

@@ -4,6 +4,7 @@ using ITCompanySimulation.Core;
 using ITCompanySimulation.Settings;
 using ITCompanySimulation.Utilities;
 using ITCompanySimulation.Multiplayer;
+using ITCompanySimulation.Event;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -84,13 +85,13 @@ namespace ITCompanySimulation.UI
         [SerializeField]
         private NotificationDisplay NotificationDisplayChatWindowButton;
         private MultiplayerChatManager ChatComponent;
-        [SerializeField]
-        private SoundEffects SoundEffectsComponent;
         /// <summary>
         /// Sound effect played when comapny's project is completed.
         /// </summary>
         [SerializeField]
         private AudioClip SoundEffectProjectCompleted;
+        [SerializeField]
+        private UISoundRequestEvent UISoundPlayRequest;
         /// <summary>
         /// Text used for animation when company's balance is increased.
         /// </summary>
@@ -274,7 +275,8 @@ namespace ITCompanySimulation.UI
 
         private void OnCompanyProjectCompleted(LocalProject proj)
         {
-            SoundEffectsComponent.PlaySoundEffect(SoundEffectProjectCompleted);
+            UISoundRequestEventArgs args = new UISoundRequestEventArgs(SoundEffectProjectCompleted);
+            UISoundPlayRequest.RaiseEvent(args);
         }
 
         private void OnGameTimeDayChanged()

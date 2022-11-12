@@ -1,9 +1,12 @@
 ﻿using UnityEngine;
 using UnityEngine.Events;
 
-namespace ITCompanySimulation.Events
+namespace ITCompanySimulation.Event
 {
-    [CreateAssetMenu(fileName = "DataTransferEvent", menuName = "ITCompanySimulation/Events/Data transfer event")]
+    /// <summary>
+    /// Event used for notyfing simulation manager about other components' data transfer completion.
+    /// </summary>
+    [CreateAssetMenu(fileName = "DataTransferEvent", menuName = "ITCompanySimulation/Events/DataTransferEvent")]
     public class DataTransferEvent : ScriptableObject
     {
         /*Private consts fields*/

@@ -1,0 +1,3 @@
+Classes in this directory are scriptable object events used for cross-scene communication between components.
+Reference to specific instance of scriptable object can be assigned using editor and then component can subscribe
+to event or raise event in which case all listeners will be notified.

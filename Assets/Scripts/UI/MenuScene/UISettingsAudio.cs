@@ -2,6 +2,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using AudioSettings = ITCompanySimulation.Settings.AudioSettings;
+using ITCompanySimulation.Event;
 
 namespace ITCompanySimulation.UI
 {
@@ -26,9 +27,11 @@ namespace ITCompanySimulation.UI
         [SerializeField]
         private Slider SliderMusicVolume;
         [SerializeField]
-        private SoundEffects SoundEffectsComponent;
+        private UISoundRequestEvent UISoundPlayRequest;
         [SerializeField]
         private AudioClip ClipMenuButtonClick;
+        [SerializeField]
+        private AudioSettings AudioSettingsObject;
 
         /*Public consts fields*/
 
@@ -38,17 +41,17 @@ namespace ITCompanySimulation.UI
 
         private void Awake()
         {
-            SliderMasterVolume.value = AudioSettings.MasterVolume;
-            SliderMusicVolume.value = AudioSettings.MusicVolume;
-            SliderUIVolume.value = AudioSettings.UIVolume;
+            SliderMasterVolume.value = AudioSettingsObject.MasterVolume;
+            SliderMusicVolume.value = AudioSettingsObject.MusicVolume;
+            SliderUIVolume.value = AudioSettingsObject.UIVolume;
         }
 
         private void OnDisable()
         {
-            AudioSettings.Apply(SliderMasterVolume.value,
-                                SliderUIVolume.value,
-                                SliderMusicVolume.value,
-                                false);
+            AudioSettingsObject.Apply(SliderMasterVolume.value,
+                                      SliderUIVolume.value,
+                                      SliderMusicVolume.value,
+                                      false);
         }
 
 
@@ -56,28 +59,29 @@ namespace ITCompanySimulation.UI
 
         public void OnSliderMasterVolumeValueChanged(float value)
         {
-            AudioSettings.Apply(SliderMasterVolume.value,
-                                SliderUIVolume.value,
-                                SliderMusicVolume.value,
-                                true);
+            AudioSettingsObject.Apply(SliderMasterVolume.value,
+                                      SliderUIVolume.value,
+                                      SliderMusicVolume.value,
+                                      true);
         }
 
         public void OnSliderUIVolumeValueChanged(float value)
         {
-            AudioSettings.Apply(SliderMasterVolume.value,
-                                SliderUIVolume.value,
-                                SliderMusicVolume.value,
-                                true);
-            SoundEffectsComponent.PlaySoundEffectExclusively(ClipMenuButtonClick);
+            AudioSettingsObject.Apply(SliderMasterVolume.value,
+                                      SliderUIVolume.value,
+                                      SliderMusicVolume.value,
+                                      true);
+            UISoundRequestEventArgs args = new UISoundRequestEventArgs(ClipMenuButtonClick, true);
+            UISoundPlayRequest.RaiseEvent(args);
 
         }
 
         public void OnSliderMusicVolumeValueChanged(float value)
         {
-            AudioSettings.Apply(SliderMasterVolume.value,
-                                SliderUIVolume.value,
-                                SliderMusicVolume.value,
-                                true);
+            AudioSettingsObject.Apply(SliderMasterVolume.value,
+                                      SliderUIVolume.value,
+                                      SliderMusicVolume.value,
+                                      true);
         }
     }
 }

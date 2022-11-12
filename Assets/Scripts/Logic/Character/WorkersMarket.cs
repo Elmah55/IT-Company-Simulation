@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using ITCompanySimulation.Utilities;
-using ITCompanySimulation.Events;
+using ITCompanySimulation.Event;
 using ITCompanySimulation.Core;
 using System.Linq;
 using ITCompanySimulation.Project;
