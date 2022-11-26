@@ -53,7 +53,7 @@ namespace ITCompanySimulation.Settings
         /// Checks if volume value is within range (0-1)
         /// </summary>
         /// <param name="value">Value thath will be checked</param>
-        private static void CheckVolumeValue(float value)
+        private void CheckVolumeValue(float value)
         {
             if (value > 1f || value < 0f)
             {

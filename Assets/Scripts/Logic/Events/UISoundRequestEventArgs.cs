@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using ITCompanySimulation.UI;
 
 namespace ITCompanySimulation.Event
 {

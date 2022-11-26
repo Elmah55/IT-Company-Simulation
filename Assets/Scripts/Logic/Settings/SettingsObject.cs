@@ -4,7 +4,7 @@ namespace ITCompanySimulation.Settings
 {
     /// <summary>
     /// Object storing settings that cannot be set in UI.
-    /// Used to create object allowing setting values in inspector.
+    /// Used to create object that allows setting values in inspector.
     /// </summary>
     [CreateAssetMenu(fileName = "Settings", menuName = "ITCompanySimulation/Settings")]
     public class SettingsObject : ScriptableObject

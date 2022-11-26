@@ -96,7 +96,6 @@ namespace ITCompanySimulation.UI
             {
                 UIAudioSource.PlayOneShot(args.Clip);
             }
-
         }
 
         /*Public methods*/

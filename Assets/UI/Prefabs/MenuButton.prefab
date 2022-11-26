@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 8226057690303175442}
   - component: {fileID: 1560831014}
   - component: {fileID: 1402988362}
+  - component: {fileID: 4563341042117186719}
   m_Layer: 5
   m_Name: MenuButton
   m_TagString: Untagged
@@ -92,7 +93,19 @@ MonoBehaviour:
     type: 3}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 4563341042117186719}
+        m_MethodName: RequestSound
+        m_Mode: 2
+        m_Arguments:
+          m_ObjectArgument: {fileID: 8300000, guid: 5c561e26c2b3e7f40a8b61ffbf517ce3,
+            type: 3}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.AudioClip, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
     m_TypeName: UnityEngine.UI.Button+ButtonClickedEvent, UnityEngine.UI, Version=1.0.0.0,
       Culture=neutral, PublicKeyToken=null
 --- !u!114 &8226057690303175442
@@ -173,6 +186,20 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   AnimationTime: 0.2
   ResizePercentage: 20
+--- !u!114 &4563341042117186719
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1283056410451971157}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 27e32f14ee9620a4b96dcabaec02471c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  SoundRequestEventObject: {fileID: 11400000, guid: 3ab112d3c740bac4fa9ef565ecb680c1,
+    type: 2}
 --- !u!1 &4919592432116051609
 GameObject:
   m_ObjectHideFlags: 0
