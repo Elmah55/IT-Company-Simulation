@@ -1359,5 +1359,11 @@ PrefabInstance:
       propertyPath: SoundtrackClips.Array.data[2]
       value: 
       objectReference: {fileID: 8300000, guid: bed2ced3a1cf7ac44a2df538dfe83cb0, type: 3}
+    - target: {fileID: 1675802875012329070, guid: 95f51ada0b7376e45bfc89d9f7e67cca,
+        type: 3}
+      propertyPath: VolumeSettingsUpdateEvent
+      value: 
+      objectReference: {fileID: 11400000, guid: fe23bca8a80549d49a3410a5bc3000f4,
+        type: 2}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 95f51ada0b7376e45bfc89d9f7e67cca, type: 3}

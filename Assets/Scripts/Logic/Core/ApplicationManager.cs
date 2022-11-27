@@ -8,7 +8,6 @@ using UnityEngine.Events;
 using UnityEngine.SceneManagement;
 using System;
 using ITCompanySimulation.Settings;
-using AudioSettings = ITCompanySimulation.Settings.AudioSettings;
 using System.Threading;
 using System.Globalization;
 using System.Collections.Generic;
@@ -76,7 +75,7 @@ namespace ITCompanySimulation.Core
         [SerializeField]
         private DataTransferEvent SimulationInitialDataReceived;
         [SerializeField]
-        private AudioSettings AudioSettingsObject;
+        private string ConfigFileDirectoryPath;
 
         /*Public consts fields*/
 
@@ -115,15 +114,26 @@ namespace ITCompanySimulation.Core
         [Tooltip("Specifies time in seconds after which timeout occurs if session did not start." +
             "Time is measured since loading of game scene.")]
         public float SessionStartTimeout;
+        public IObjectStorage ConfigStorage { get; private set; }
+        public static ApplicationManager Instance { get; private set; }
 
         /*Private methods*/
 
         private void Awake()
         {
+            if (null != Instance)
+            {
+                Debug.LogErrorFormat("[{0}] Only one instance of {0} should exist but is instantiated multiple times.",
+                     this.GetType().Name);
+            }
+
+            Instance = this;
+
             //Display info in US format regardless of culture set on windows
             Thread.CurrentThread.CurrentCulture = new CultureInfo("en-US");
 
             Settings = Resources.Load<SettingsObject>("Settings");
+            ConfigStorage = new ConfigFileManager(this.ConfigFileDirectoryPath);
 
             //Register custom classes that will be sent between clients.
             PhotonPeer.RegisterType(typeof(SharedProject), NetworkingData.PROJECT_BYTE_CODE, SharedProject.Serialize, SharedProject.Deserialize);
@@ -159,7 +169,6 @@ namespace ITCompanySimulation.Core
 
         private void Start()
         {
-            AudioSettingsObject.Load();
             LoadScene(SceneIndex.Menu);
         }
 

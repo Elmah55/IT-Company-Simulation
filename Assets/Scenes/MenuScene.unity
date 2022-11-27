@@ -5695,7 +5695,8 @@ MonoBehaviour:
   SliderMusicVolume: {fileID: 1504000141}
   UISoundPlayRequest: {fileID: 11400000, guid: 3ab112d3c740bac4fa9ef565ecb680c1, type: 2}
   ClipMenuButtonClick: {fileID: 8300000, guid: 5c561e26c2b3e7f40a8b61ffbf517ce3, type: 3}
-  AudioSettingsObject: {fileID: 11400000, guid: cac3b750609ffe14fa34fb7a5d3bb090,
+  VolumeSettings: {fileID: 11400000, guid: cac3b750609ffe14fa34fb7a5d3bb090, type: 2}
+  VolumeSettingsUpdateEvent: {fileID: 11400000, guid: fe23bca8a80549d49a3410a5bc3000f4,
     type: 2}
 --- !u!1 &572883002
 GameObject:

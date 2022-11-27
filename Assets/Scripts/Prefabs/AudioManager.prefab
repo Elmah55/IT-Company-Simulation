@@ -44,7 +44,7 @@ AudioSource:
     type: 2}
   m_audioClip: {fileID: 0}
   m_PlayOnAwake: 0
-  m_Volume: 1
+  m_Volume: 0.5
   m_Pitch: 1
   Loop: 0
   Mute: 0
@@ -138,6 +138,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6458719370833298789}
   - component: {fileID: 6458719370833298786}
+  - component: {fileID: 1675802875012329070}
   m_Layer: 0
   m_Name: AudioManager
   m_TagString: Untagged
@@ -173,14 +174,29 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 62ab42c320f95394ababceec8dbc0d41, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Clips:
-  - {fileID: 8300000, guid: fa4475527666b7647b7e3e0ef2d340b0, type: 3}
-  - {fileID: 8300000, guid: 2c28195812a776048ab09beef3cbda72, type: 3}
-  - {fileID: 8300000, guid: bed2ced3a1cf7ac44a2df538dfe83cb0, type: 3}
+  SoundtrackClips: []
   PlayRandom: 1
   MusicAudioSource: {fileID: 6458719371135751889}
   UIAudioSource: {fileID: 6458719370156881987}
   UISoundPlayRequested: {fileID: 11400000, guid: 3ab112d3c740bac4fa9ef565ecb680c1,
+    type: 2}
+--- !u!114 &1675802875012329070
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6458719370833298788}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9c62292f20b8ee141ab2240f0d5f15a9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  AudioMixerComponent: {fileID: 24100000, guid: 31f4af7c104fbdf409091e926638867b,
+    type: 2}
+  m_VolumeSettings: {fileID: 11400000, guid: cac3b750609ffe14fa34fb7a5d3bb090, type: 2}
+  AudioVolumeSettingsConfigFileName: volume_config.json
+  VolumeSettingsUpdateEvent: {fileID: 11400000, guid: b0a11c0116257f44994de6e5938df1b1,
     type: 2}
 --- !u!1 &6458719371135751891
 GameObject:
@@ -226,7 +242,7 @@ AudioSource:
     type: 2}
   m_audioClip: {fileID: 0}
   m_PlayOnAwake: 0
-  m_Volume: 1
+  m_Volume: 0.5
   m_Pitch: 1
   Loop: 0
   Mute: 0

@@ -1,7 +1,6 @@
 ﻿using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using AudioSettings = ITCompanySimulation.Settings.AudioSettings;
 using ITCompanySimulation.Event;
 
 namespace ITCompanySimulation.UI
@@ -12,6 +11,7 @@ namespace ITCompanySimulation.UI
     public class UISettingsAudio : MonoBehaviour
     {
         /*Private consts fields*/
+
         /*Private fields*/
 
         [SerializeField]
@@ -31,7 +31,13 @@ namespace ITCompanySimulation.UI
         [SerializeField]
         private AudioClip ClipMenuButtonClick;
         [SerializeField]
-        private AudioSettings AudioSettingsObject;
+        private AudioVolumeSettings VolumeSettings;
+        [SerializeField]
+        private VoidEvent VolumeSettingsUpdateEvent;
+        /// <summary>
+        /// Determines whether this component has finished initialization.
+        /// </summary>
+        private bool IsInitialized = false;
 
         /*Public consts fields*/
 
@@ -39,38 +45,42 @@ namespace ITCompanySimulation.UI
 
         /*Private methods*/
 
-        private void Awake()
+        private void ApplySettings()
         {
-            SliderMasterVolume.value = AudioSettingsObject.MasterVolume;
-            SliderMusicVolume.value = AudioSettingsObject.MusicVolume;
-            SliderUIVolume.value = AudioSettingsObject.UIVolume;
+            //Apply settings only when initialization is finished to not update
+            //settings when sliders' values are initialized
+            if (true == IsInitialized)
+            {
+                VolumeSettings.MasterVolume = SliderMasterVolume.value;
+                VolumeSettings.MusicVolume = SliderMusicVolume.value;
+                VolumeSettings.UIVolume = SliderUIVolume.value;
+                VolumeSettingsUpdateEvent.RaiseEvent();
+            }
+        }
+
+        private void Start()
+        {
+            SliderMasterVolume.value = VolumeSettings.MasterVolume;
+            SliderMusicVolume.value = VolumeSettings.MusicVolume;
+            SliderUIVolume.value = VolumeSettings.UIVolume;
+            IsInitialized = true;
         }
 
         private void OnDisable()
         {
-            AudioSettingsObject.Apply(SliderMasterVolume.value,
-                                      SliderUIVolume.value,
-                                      SliderMusicVolume.value,
-                                      false);
+            ApplySettings();
         }
-
 
         /*Public methods*/
 
         public void OnSliderMasterVolumeValueChanged(float value)
         {
-            AudioSettingsObject.Apply(SliderMasterVolume.value,
-                                      SliderUIVolume.value,
-                                      SliderMusicVolume.value,
-                                      true);
+            ApplySettings();
         }
 
         public void OnSliderUIVolumeValueChanged(float value)
         {
-            AudioSettingsObject.Apply(SliderMasterVolume.value,
-                                      SliderUIVolume.value,
-                                      SliderMusicVolume.value,
-                                      true);
+            ApplySettings();
             UISoundRequestEventArgs args = new UISoundRequestEventArgs(ClipMenuButtonClick, true);
             UISoundPlayRequest.RaiseEvent(args);
 
@@ -78,10 +88,7 @@ namespace ITCompanySimulation.UI
 
         public void OnSliderMusicVolumeValueChanged(float value)
         {
-            AudioSettingsObject.Apply(SliderMasterVolume.value,
-                                      SliderUIVolume.value,
-                                      SliderMusicVolume.value,
-                                      true);
+            ApplySettings();
         }
     }
 }

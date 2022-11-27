@@ -61,3 +61,6 @@ crashlytics-build.properties
 # Licensed assets
 Assets/**/Licensed
 Assets/**/Licensed.meta
+
+# ITCompanySimulation configuration data
+ConfigData/

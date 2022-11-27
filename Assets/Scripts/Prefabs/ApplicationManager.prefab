@@ -47,6 +47,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   SimulationInitialDataReceived: {fileID: 11400000, guid: b14f57b61bb8b6940affc6c5b96f2629,
     type: 2}
+  AudioSettingsObject: {fileID: 0}
+  ConfigFileDirectoryPath: ConfigData/
   SessionStartTimeout: 30
 --- !u!114 &3765739074144711040
 MonoBehaviour:
