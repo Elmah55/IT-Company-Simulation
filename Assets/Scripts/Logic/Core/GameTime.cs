@@ -32,7 +32,14 @@ namespace ITCompanySimulation.Core
 
         /*Public fields*/
 
-        public DateTime CurrentTime { get; private set; }
+        /// <summary>
+        /// Current in-game time.
+        /// </summary>
+        public DateTime CurrentDate { get; private set; }
+        /// <summary>
+        /// Time at the start of game.
+        /// </summary>
+        public DateTime InitialDate { get; private set; }
         /// <summary>
         /// How many days (game time) have passed since start of game
         /// </summary>
@@ -68,29 +75,29 @@ namespace ITCompanySimulation.Core
 
                 //Next days occurs when time specified by
                 //TIME_UPDATE_FREQUENCY passes
-                DateTime newTime = CurrentTime.AddDays(1);
+                DateTime oldDate = CurrentDate;
+                CurrentDate = CurrentDate.AddDays(1);
 
                 ++DaysSinceStart;
                 DayChanged?.Invoke();
 
-                if (newTime.Month != CurrentTime.Month)
+                if (CurrentDate.Month != oldDate.Month)
                 {
                     MonthChanged?.Invoke();
                 }
 
-                if (newTime.Year != CurrentTime.Year)
+                if (CurrentDate.Year != oldDate.Year)
                 {
                     YearChanged?.Invoke();
                 }
-
-                CurrentTime = newTime;
             }
         }
 
         [PunRPC]
         private void SetTimeRPC(int day, int month, int year)
         {
-            CurrentTime = new DateTime(year, month, day);
+            CurrentDate = new DateTime(year, month, day);
+            InitialDate = CurrentDate;
             //Inform all subscribers right after receiving new date from master client
             InitialDataReceivedEvent.RaiseEvent(DataTransferSource.GameTime);
             DayChanged?.Invoke();
@@ -109,10 +116,11 @@ namespace ITCompanySimulation.Core
             //clients is synchronized
             if (true == PhotonNetwork.isMasterClient)
             {
-                CurrentTime = DateTime.Now;
+                CurrentDate = DateTime.Now;
+                InitialDate = CurrentDate;
 
                 this.photonView.RPC("SetTimeRPC", PhotonTargets.Others,
-                    CurrentTime.Day, CurrentTime.Month, CurrentTime.Year);
+                    CurrentDate.Day, CurrentDate.Month, CurrentDate.Year);
             }
         }
 

@@ -114,7 +114,7 @@ namespace ITCompanySimulation.UI
             //Game time
             GameTimeComponent.DayChanged += OnGameTimeDayChanged;
             TextDaysSinceStart.text = GetDaysSinceStartText(GameTimeComponent.DaysSinceStart);
-            TextDate.text = GameTimeComponent.CurrentTime.ToLongDateString();
+            TextDate.text = GameTimeComponent.CurrentDate.ToLongDateString();
 
             //Company
             SimulationManagerComponent.ControlledCompany.BalanceChanged += OnControlledCompanyBalanceChanged;
@@ -282,7 +282,7 @@ namespace ITCompanySimulation.UI
         private void OnGameTimeDayChanged()
         {
             TextDaysSinceStart.text = GetDaysSinceStartText(GameTimeComponent.DaysSinceStart);
-            TextDate.text = GameTimeComponent.CurrentTime.ToLongDateString();
+            TextDate.text = GameTimeComponent.CurrentDate.ToLongDateString();
         }
 
         private void SetProgressBarBalance(float value)

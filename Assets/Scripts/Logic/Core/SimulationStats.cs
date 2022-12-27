@@ -1,5 +1,8 @@
 ﻿using System;
 using UnityEngine.Events;
+using System.Collections.Generic;
+using ITCompanySimulation.Company;
+using System.Collections.ObjectModel;
 
 namespace ITCompanySimulation.Core
 {
@@ -25,8 +28,10 @@ namespace ITCompanySimulation.Core
         private int m_OtherPlayersWorkersHired = 0;
         private int m_WorkersLeftCompany = 0;
         private int m_ProjectsCompleted = 0;
-        private int m_CompanyBalance = 0;
         private int m_DaysSinceStart = 0;
+        private List<int> m_BalanceHistory = new List<int>();
+        private GameTime GameTimeComponent;
+        private PlayerCompany ControlledCompany;
 
         /*Public consts fields*/
 
@@ -137,22 +142,6 @@ namespace ITCompanySimulation.Core
             }
         }
         /// <summary>
-        /// Amount of money that company has.
-        /// </summary>
-        public int CompanyBalance
-        {
-            get
-            {
-                return m_CompanyBalance;
-            }
-
-            set
-            {
-                m_CompanyBalance = value;
-                OnStatsUpdated();
-            }
-        }
-        /// <summary>
         /// Stores the running time of simulation (from simulation start to simulation finish).
         /// This is real world time. This value is not related to session running time. Value
         /// of this field is not valid until end of simulation.
@@ -179,14 +168,42 @@ namespace ITCompanySimulation.Core
         /// Invoked when any of the stats is altered.
         /// </summary>
         public event UnityAction StatsUpdated;
+        /// <summary>
+        /// Stores company's balance history since beggining
+        /// of simulation. Each entry holds company's balance 
+        /// at the beggining of coresponding month.
+        /// <para>Index 0 - 1st month, index 1 - 2nd month and so on</para>
+        /// </summary>
+        public ReadOnlyCollection<int> BalanceHistory
+        {
+            get
+            {
+                return new ReadOnlyCollection<int>(m_BalanceHistory);
+            }
+        }
 
         /*Private methods*/
 
-        protected void OnStatsUpdated()
+        private void OnStatsUpdated()
         {
             this.StatsUpdated?.Invoke();
         }
 
+        private void OnMonthChanged()
+        {
+            m_BalanceHistory.Add(ControlledCompany.Balance);
+        }
+
         /*Public methods*/
+
+        public SimulationStats(PlayerCompany controlledCompany, GameTime timeComponent)
+        {
+            this.ControlledCompany = controlledCompany;
+            this.GameTimeComponent = timeComponent;
+
+            GameTimeComponent.MonthChanged += OnMonthChanged;
+            //Add balance for 1st month
+            OnMonthChanged();
+        }
     }
 }

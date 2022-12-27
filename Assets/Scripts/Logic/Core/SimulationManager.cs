@@ -77,7 +77,7 @@ namespace ITCompanySimulation.Core
         /// <summary>
         /// Simulation statistics collected during simulation run.
         /// </summary>
-        public SimulationStats Stats { get; private set; } = new SimulationStats();
+        public SimulationStats Stats { get; private set; }
 
         public event SimulationFinishAction SimulationFinished;
         public event Action SimulationStarted;
@@ -119,7 +119,8 @@ namespace ITCompanySimulation.Core
             ApplicationManagerComponent = GameObject.FindGameObjectWithTag("ApplicationManager").GetComponent<ApplicationManager>();
             GameTimeComponent = GetComponent<GameTime>();
             NotificatorComponent = new SimulationEventNotificator(GameTimeComponent);
-            CreateCompany();
+            ControlledCompany = CreateCompany();
+            Stats = new SimulationStats(ControlledCompany, GameTimeComponent);
         }
 
         private void OnDestroy()
@@ -161,15 +162,17 @@ namespace ITCompanySimulation.Core
         }
 #endif
 
-        private void CreateCompany()
+        private PlayerCompany CreateCompany()
         {
-            ControlledCompany = new PlayerCompany(PlayerInfoSettings.CompanyName);
+            PlayerCompany newCompany = new PlayerCompany(PlayerInfoSettings.CompanyName);
 
-            ControlledCompany.WorkerAdded += OnControlledCompanyWorkerAdded;
-            ControlledCompany.WorkerRemoved += OnControlledCompanyWorkerRemoved;
-            ControlledCompany.BalanceChanged += OnControlledCompanyBalanceChanged;
-            ControlledCompany.ProjectAdded += OnControlledCompanyProjectAdded;
-            ControlledCompany.Balance = SimulationSettings.InitialBalance;
+            newCompany.WorkerAdded += OnControlledCompanyWorkerAdded;
+            newCompany.WorkerRemoved += OnControlledCompanyWorkerRemoved;
+            newCompany.BalanceChanged += OnControlledCompanyBalanceChanged;
+            newCompany.ProjectAdded += OnControlledCompanyProjectAdded;
+            newCompany.Balance = SimulationSettings.InitialBalance;
+
+            return newCompany;
         }
 
         private void StartSimulation()
@@ -191,13 +194,18 @@ namespace ITCompanySimulation.Core
 
         private void OnControlledCompanyBalanceChanged(int newBalance, int balanceDelta)
         {
-            if (balanceDelta >= 0)
+            //Avoid counting stats when company's balance is set for 1st time
+            //(Stats will not be created at the time of creating company)
+            if (null != Stats)
             {
-                Stats.MoneyEarned += balanceDelta;
-            }
-            else
-            {
-                Stats.MoneySpent += Mathf.Abs(balanceDelta);
+                if (balanceDelta >= 0)
+                {
+                    Stats.MoneyEarned += balanceDelta;
+                }
+                else
+                {
+                    Stats.MoneySpent += Mathf.Abs(balanceDelta);
+                }
             }
 
             if (true == IsSimulationActive)
@@ -225,8 +233,6 @@ namespace ITCompanySimulation.Core
                                     PhotonNetwork.player.ID,
                                     newBalance);
             }
-
-            Stats.CompanyBalance = newBalance;
         }
 
         private void OnSessionStarted()

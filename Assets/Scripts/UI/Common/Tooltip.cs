@@ -40,7 +40,11 @@ namespace ITCompanySimulation.UI
             set
             {
                 TextComponent.text = value;
-                SetTooltipSize();
+
+                if (true == gameObject.activeSelf)
+                {
+                    SetTooltipSize();
+                }
             }
         }
 
@@ -48,13 +52,13 @@ namespace ITCompanySimulation.UI
 
         private void SetTooltipSize()
         {
-            Vector2 newSize = new Vector2(TextComponent.preferredWidth, TextComponent.preferredHeight);
-            ObjectTransform.sizeDelta = newSize;
-
             //Size has to be set twice. For some reason when settings size only once its not perfectly fitted.
             //Possible text mesh pro issue
-            newSize = new Vector2(TextComponent.preferredWidth, TextComponent.preferredHeight);
-            ObjectTransform.sizeDelta = newSize;
+            for (int i = 0; i < 2; i++)
+            {
+                Vector2 newSize = new Vector2(TextComponent.preferredWidth, TextComponent.preferredHeight);
+                ObjectTransform.sizeDelta = newSize; 
+            }
         }
 
         private void SetTooltipPosition()
@@ -109,6 +113,7 @@ namespace ITCompanySimulation.UI
 
         private void OnEnable()
         {
+            SetTooltipSize();
             SetTooltipPosition();
         }
 

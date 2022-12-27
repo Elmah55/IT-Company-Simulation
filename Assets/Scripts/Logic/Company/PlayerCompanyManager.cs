@@ -96,8 +96,8 @@ namespace ITCompanySimulation.Company
                     //Check if worker was hired for whole month when month
                     //has less than 31 days
                     int daysInCurrentMonth = System.DateTime.DaysInMonth(
-                        GameTimeComponent.CurrentTime.Year,
-                        GameTimeComponent.CurrentTime.Month);
+                        GameTimeComponent.CurrentDate.Year,
+                        GameTimeComponent.CurrentDate.Month);
 
                     if (companyWorker.DaysInCompany >= daysInCurrentMonth)
                     {

@@ -31,7 +31,7 @@ namespace ITCompanySimulation.Core
 
         public void Notify(string txt, SimulationEventNotificationPriority prio = SimulationEventNotificationPriority.Normal)
         {
-            DateTime timestamp = GameTimeComponent.CurrentTime;
+            DateTime timestamp = GameTimeComponent.CurrentDate;
             SimulationEventNotification newNotification = new SimulationEventNotification(txt, prio, timestamp);
             NotificationReceived?.Invoke(newNotification);
         }

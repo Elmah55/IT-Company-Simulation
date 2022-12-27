@@ -12,6 +12,7 @@ namespace ITCompanySimulation.UI
 
         /*Private fields*/
 
+        [SerializeField]
         private SimulationManager SimulationManagerComponent;
         [SerializeField]
         private TextMeshProUGUI TextMoneyEarned;
@@ -54,7 +55,7 @@ namespace ITCompanySimulation.UI
             TextOtherPlayersWorkersHired.text = string.Format("Other players' workers hired: {0}", stats.OtherPlayersWorkersHired);
             TextWorkersLeftCompany.text = string.Format("Workers that left company: {0}", stats.WorkersLeftCompany);
             TextProjectsCompleted.text = string.Format("Number of completed projects: {0}", stats.ProjectsCompleted);
-            TextCompanyBalance.text = string.Format("Company balance: {0} $", stats.CompanyBalance);
+            TextCompanyBalance.text = string.Format("Company balance: {0} $", SimulationManagerComponent.ControlledCompany.Balance);
         }
 
         /// <summary>
@@ -69,12 +70,6 @@ namespace ITCompanySimulation.UI
                                                                 data.Player.NickName,
                                                                 data.CompanyBalance,
                                                                 SimulationSettings.TargetBalance);
-        }
-
-        private void Awake()
-        {
-            SimulationManagerComponent =
-                GameObject.FindGameObjectWithTag("ScriptsGameObject").GetComponent<SimulationManager>();
         }
 
         private void Start()

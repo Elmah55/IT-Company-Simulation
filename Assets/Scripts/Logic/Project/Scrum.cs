@@ -238,7 +238,7 @@ namespace ITCompanySimulation.Project
 
             this.BindedProject = bindedProject;
             this.BindedProject.Completed += OnProjectFinished;
-            this.BindedProject.TimeOfStart = GameTimeComponent.CurrentTime;
+            this.BindedProject.TimeOfStart = GameTimeComponent.CurrentDate;
             this.BindedProject.WorkerRemoved += OnBindedProjectWorkerRemoved;
             this.BindedProject.WorkerAdded += OnBindedProjectWorkerAdded;
             GameTimeComponent.DayChanged += OnGameTimeDayChanged;
