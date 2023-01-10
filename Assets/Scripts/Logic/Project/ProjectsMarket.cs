@@ -151,12 +151,10 @@ namespace ITCompanySimulation.Project
         /// </summary>
         private void GenerateAndSendProjects()
         {
-#if DEVELOPMENT_BUILD || UNITY_EDITOR
-            string className = this.GetType().Name;
-            string debugInfo = string.Format("[{0}] generating {1} projects...",
-                className, MaxProjectsOnMarket - Projects.Count);
-            Debug.Log(debugInfo);
-#endif
+            string debugInfo = string.Format("generating {0} projects...",
+                 MaxProjectsOnMarket - Projects.Count);
+            RestrictedDebug.Log(debugInfo);
+
             SharedProject[] generatedProjects = new SharedProject[MaxProjectsOnMarket];
 
             for (int i = 0; i < MaxProjectsOnMarket; i++)
@@ -166,11 +164,9 @@ namespace ITCompanySimulation.Project
 
             this.photonView.RPC("OnProjectsGeneratedRPC", PhotonTargets.All, generatedProjects);
 
-#if DEVELOPMENT_BUILD || UNITY_EDITOR
-            debugInfo = string.Format("[{0}] generated {1} projects",
-               className, Projects.Count);
-            Debug.Log(debugInfo);
-#endif
+            debugInfo = string.Format("generated {0} projects",
+                Projects.Count);
+            RestrictedDebug.Log(debugInfo);
         }
 
         private List<ProjectTechnology> GenerateProjectTechnologies()
@@ -242,17 +238,15 @@ namespace ITCompanySimulation.Project
                 this.photonView.RPC("OnProjectRequestCfmRPC", targetPlayer, requestedProjectID);
                 this.photonView.RPC("OnProjectRemovedRPC", PhotonTargets.All, requestedProjectID);
             }
-#if DEVELOPMENT_BUILD || UNITY_EDITOR
             else
             {
-                Debug.LogWarningFormat("[{0}] Project (ID {1}) requested from Player: {2} (ID {3}) but project" +
-                                        "does not exists in market anymore",
-                                        this.GetType().Name,
-                                        requestedProjectID,
-                                        targetPlayer.NickName,
-                                        targetPlayer.ID);
+                string debugInfo = string.Format("Project (ID {0}) requested from Player: {1} (ID {2}) but project" +
+                                                 "does not exists in market anymore",
+                                                 requestedProjectID,
+                                                 targetPlayer.NickName,
+                                                 targetPlayer.ID);
+                RestrictedDebug.Log(debugInfo, LogType.Warning);
             }
-#endif
         }
 
         /// <summary>

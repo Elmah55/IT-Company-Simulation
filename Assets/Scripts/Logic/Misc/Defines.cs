@@ -36,7 +36,7 @@ namespace ITCompanySimulation.Project
         Planning,
         Developing,
         Retrospective
-    } 
+    }
 }
 
 /// <summary>
@@ -169,47 +169,50 @@ namespace ITCompanySimulation.Multiplayer
 
 /*Classes*/
 
-/// <summary>
-/// This class maps enums to strings.
-/// </summary>
-public static class EnumToString
+namespace ITCompanySimulation.Utilities
 {
     /// <summary>
-    /// Converts ProjectTechnology enum to string.
+    /// This class maps enums to strings.
     /// </summary>
-    /// <param name="enumInput">Enum to be converted to string.</param>
-    public static string GetString(ProjectTechnology enumInput)
+    public static class EnumToString
     {
-        return ProjectTechnologiesStrings[enumInput];
+        /// <summary>
+        /// Converts ProjectTechnology enum to string.
+        /// </summary>
+        /// <param name="enumInput">Enum to be converted to string.</param>
+        public static string GetString(ProjectTechnology enumInput)
+        {
+            return ProjectTechnologiesStrings[enumInput];
+        }
+
+        /// <summary>
+        /// Converts FullScreenMode enum to string.
+        /// </summary>
+        /// <param name="enumInput">Enum to be converted to string.</param>
+        public static string GetString(FullScreenMode enumInput)
+        {
+            return FullScreenModeStrings[enumInput];
+        }
+
+        private static IReadOnlyDictionary<ProjectTechnology, string> ProjectTechnologiesStrings = new Dictionary<ProjectTechnology, string>()
+        {
+            { ProjectTechnology.C,"C" },
+            { ProjectTechnology.Cpp,"C++" },
+            { ProjectTechnology.CSharp,"C#" },
+            { ProjectTechnology.JavaScript,"JavaScript" },
+            { ProjectTechnology.PHP,"PHP" },
+            { ProjectTechnology.Python,"Python" },
+            { ProjectTechnology.Java,"Java" }
+        };
+
+        private static IReadOnlyDictionary<FullScreenMode, string> FullScreenModeStrings = new Dictionary<FullScreenMode, string>()
+        {
+            { FullScreenMode.ExclusiveFullScreen,"Exclusive fullscreen" },
+            { FullScreenMode.FullScreenWindow,"Fullscreen window" },
+            { FullScreenMode.MaximizedWindow,"Maximized window" },
+            { FullScreenMode.Windowed,"Windowed" }
+        };
     }
-
-    /// <summary>
-    /// Converts FullScreenMode enum to string.
-    /// </summary>
-    /// <param name="enumInput">Enum to be converted to string.</param>
-    public static string GetString(FullScreenMode enumInput)
-    {
-        return FullScreenModeStrings[enumInput];
-    }
-
-    private static IReadOnlyDictionary<ProjectTechnology, string> ProjectTechnologiesStrings = new Dictionary<ProjectTechnology, string>()
-    {
-        { ProjectTechnology.C,"C" },
-        { ProjectTechnology.Cpp,"C++" },
-        { ProjectTechnology.CSharp,"C#" },
-        { ProjectTechnology.JavaScript,"JavaScript" },
-        { ProjectTechnology.PHP,"PHP" },
-        { ProjectTechnology.Python,"Python" },
-        { ProjectTechnology.Java,"Java" }
-    };
-
-    private static IReadOnlyDictionary<FullScreenMode, string> FullScreenModeStrings = new Dictionary<FullScreenMode, string>()
-    {
-        { FullScreenMode.ExclusiveFullScreen,"Exclusive fullscreen" },
-        { FullScreenMode.FullScreenWindow,"Fullscreen window" },
-        { FullScreenMode.MaximizedWindow,"Maximized window" },
-        { FullScreenMode.Windowed,"Windowed" }
-    };
 }
 
 namespace ITCompanySimulation.Multiplayer

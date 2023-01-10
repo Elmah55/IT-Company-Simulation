@@ -239,10 +239,9 @@ namespace ITCompanySimulation.Core
         {
             StartSimulation();
 
-#if DEVELOPMENT_BUILD || UNITY_EDITOR
-            Debug.LogFormat("[{0}] Session started. Starting simulation with time scale {1}",
-                this.GetType().Name, GameTimeComponent.Scale);
-#endif
+            string msg = string.Format("Session started. Starting simulation with time scale {0}",
+                GameTimeComponent.Scale);
+            RestrictedDebug.Log(msg);
         }
 
         #region RPC events
@@ -289,11 +288,10 @@ namespace ITCompanySimulation.Core
             PhotonPlayer sourcePlayer = PhotonNetwork.otherPlayers.FirstOrDefault(x => x.ID == photonPlayerID);
             OtherPlayerWorkerRemoved?.Invoke(localRemovedWorker, sourcePlayer);
 
-#if DEVELOPMENT_BUILD || UNITY_EDITOR
-            Debug.LogFormat("[{3}] Received worker update from player {0} (ID: {1}).\n" +
-                            "Worker removed (ID: {2}). Local workers collection synchronized",
-                            sourcePlayer.NickName, sourcePlayer.ID, removedWorkerID, this.GetType().Name);
-#endif
+            string msg = string.Format("Received worker update from player {0} (ID: {1}).\n" +
+                                       "Worker removed (ID: {2}). Local workers collection synchronized",
+                                       sourcePlayer.NickName, sourcePlayer.ID, removedWorkerID);
+            RestrictedDebug.Log(msg);
         }
 
         /// <summary>
@@ -308,11 +306,10 @@ namespace ITCompanySimulation.Core
             data.Workers.Add(addedWorker.ID, addedWorker);
             OtherPlayerWorkerAdded?.Invoke(addedWorker, sourcePlayer);
 
-#if DEVELOPMENT_BUILD || UNITY_EDITOR
-            Debug.LogFormat("[{3}] Received worker update from player {0} (ID: {1}).\n" +
-                            "Worker added (ID: {2}). Local workers collection synchronized",
-                            sourcePlayer.NickName, sourcePlayer.ID, addedWorker.ID, this.GetType().Name);
-#endif
+            string msg = string.Format("Received worker update from player {0} (ID: {1}).\n" +
+                                       "Worker added (ID: {2}). Local workers collection synchronized",
+                                       sourcePlayer.NickName, sourcePlayer.ID, addedWorker.ID);
+            RestrictedDebug.Log(msg);
         }
 
         /// <summary>
@@ -338,22 +335,19 @@ namespace ITCompanySimulation.Core
                                              sender?.NickName); //Check if player didnt disconnect since sending RPC
                 NotificatorComponent.Notify(notification);
 
-#if DEVELOPMENT_BUILD || UNITY_EDITOR
-                string debugInfo = string.Format("[{3}] Player {0} (ID: {1}) removed worker ID: {2} from your company",
-                    sender.NickName, sender.ID, workerToRemove.ID, this.GetType().Name);
-                Debug.Log(debugInfo);
-#endif
+                string debugInfo = string.Format("Player {0} (ID: {1}) removed worker ID: {2} from your company",
+                    sender.NickName, sender.ID, workerToRemove.ID);
+                RestrictedDebug.Log(debugInfo);
             }
-#if DEVELOPMENT_BUILD || UNITY_EDITOR
             else
             {
-                Debug.LogWarningFormat("Worker (ID {0}) requested from player {1} (ID {2}) " +
-                                       "was not found in local workers collection",
-                                       workerID,
-                                       sender?.NickName,
-                                       sender?.ID);
+                string debugInfo = string.Format("Worker (ID {0}) requested from player {1} (ID {2}) " +
+                                                 "was not found in local workers collection",
+                                                 workerID,
+                                                 sender?.NickName,
+                                                 sender?.ID);
+                RestrictedDebug.Log(debugInfo, LogType.Warning);
             }
-#endif
         }
 
         /// <summary>
@@ -429,15 +423,14 @@ namespace ITCompanySimulation.Core
                 Stats.SimulationRunningTime = TimeSpan.FromSeconds(simulationRunningTime);
                 Stats.DaysSinceStart = GameTimeComponent.DaysSinceStart;
 
-#if DEVELOPMENT_BUILD || UNITY_EDITOR
-                Debug.LogFormat("[{0}] Simulation finished\n" +
-                                "Reason: {1}\n" +
-                                "Winner player: {2} (ID {3})",
-                                this.GetType().Name,
+                string debugInfo = string.Format(
+                                "Simulation finished\n" +
+                                "Reason: {0}\n" +
+                                "Winner player: {1} (ID {2})",
                                 this.FinishReason,
                                 WinnerPlayer?.NickName,
                                 WinnerPlayer?.ID);
-#endif
+                RestrictedDebug.Log(debugInfo);
             }
         }
 
@@ -454,16 +447,15 @@ namespace ITCompanySimulation.Core
                 PlayerDataMap.Add(photonPlayerID, data);
                 NumberOfPlayerDataReceived++;
             }
-#if DEVELOPMENT_BUILD || UNITY_EDITOR
             else
             {
                 PhotonPlayer sourcePlayer = Utils.PhotonPlayerFromID(photonPlayerID);
-                Debug.LogWarningFormat("[{0}] Received data from player {1} (ID {2}) more than one time",
-                    this.GetType().Name,
+                string debugInfo = string.Format(
+                    "Received data from player {0} (ID {1}) more than one time",
                     sourcePlayer.NickName,
                     photonPlayerID);
+                RestrictedDebug.Log(debugInfo, LogType.Warning);
             }
-#endif
 
             if (PhotonNetwork.otherPlayers.Length == NumberOfPlayerDataReceived)
             {

@@ -80,13 +80,10 @@ namespace ITCompanySimulation.Character
 
         private void GenerateWorkers()
         {
-#if DEVELOPMENT_BUILD || UNITY_EDITOR
             int workersToGenerate = MaxWorkersOnMarket - Workers.Count;
-            string className = this.GetType().Name;
-            string debugInfo = string.Format("[{0}] generating {1} workers...",
-               className, workersToGenerate);
-            Debug.Log(debugInfo);
-#endif
+            string debugInfo = string.Format("generating {0} workers...",
+                                             workersToGenerate);
+            RestrictedDebug.Log(debugInfo);
 
             while (Workers.Count != MaxWorkersOnMarket)
             {
@@ -94,11 +91,9 @@ namespace ITCompanySimulation.Character
                 Workers.Add(newWorker.ID, newWorker);
             }
 
-#if DEVELOPMENT_BUILD || UNITY_EDITOR
-            debugInfo = string.Format("[{0}] generated {1} workers",
-               className, Workers.Count);
-            Debug.Log(debugInfo);
-#endif
+            debugInfo = string.Format("generated {0} workers",
+                                      Workers.Count);
+            RestrictedDebug.Log(debugInfo);
         }
 
         private SharedWorker GenerateSingleWorker()
@@ -330,17 +325,15 @@ namespace ITCompanySimulation.Character
                 this.photonView.RPC("OnWorkerRequestCfmRPC", targetPlayer, requestedWorkerID);
                 this.photonView.RPC("OnWorkerRemovedRPC", PhotonTargets.All, requestedWorkerID);
             }
-#if DEVELOPMENT_BUILD || UNITY_EDITOR
             else
             {
-                Debug.LogWarningFormat("[{0}] Worker (ID {1}) requested from Player: {2} (ID {3}) but worker" +
-                                        "does not exists in market anymore",
-                                        this.GetType().Name,
-                                        requestedWorkerID,
-                                        targetPlayer.NickName,
-                                        targetPlayer.ID);
+                string msg = string.Format("Worker (ID {0}) requested from Player: {1} (ID {2}) but worker" +
+                                           "does not exists in market anymore",
+                                           requestedWorkerID,
+                                           targetPlayer.NickName,
+                                           targetPlayer.ID);
+                RestrictedDebug.Log(msg, LogType.Warning);
             }
-#endif
         }
 
         /// <summary>

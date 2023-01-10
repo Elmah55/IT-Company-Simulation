@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ITCompanySimulation.Utilities;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -62,19 +63,12 @@ public class ButtonSelector : IButtonSelector
                     selectedButtonColors.normalColor = selectedButtonColors.selectedColor;
                     buttonComponent.colors = selectedButtonColors;
                     break;
-#if DEVELOPMENT_BUILD || UNITY_EDITOR
-                case Selectable.Transition.None:
-                case Selectable.Transition.SpriteSwap:
-                case Selectable.Transition.Animation:
-                    Debug.LogWarningFormat("[{0}] Unsupported button transition: {1}",
-                        this.GetType().Name,
-                        buttonComponent.transition.ToString());
-                    break;
-#endif
                 default:
+                    string msg = string.Format("Unsupported button transition: {0}",
+                           buttonComponent.transition.ToString());
+                    RestrictedDebug.Log(msg, LogType.Warning);
                     break;
             }
-
 
             SelectedButtonChanged?.Invoke(buttonComponent);
         }

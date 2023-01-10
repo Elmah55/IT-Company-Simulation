@@ -61,11 +61,9 @@ namespace ITCompanySimulation.Settings
         {
             if (value > 1f || value < 0f)
             {
-#if DEVELOPMENT_BUILD || UNITY_EDITOR
-                Debug.LogWarningFormat("[{0}] Incorrect value of volume parameter ({1})",
-                                       this.GetType().Name,
-                                       value);
-#endif
+                string msg = string.Format("Incorrect value of volume parameter ({0})", value);
+                RestrictedDebug.Log(msg, LogType.Warning);
+
                 value = Mathf.Clamp(value, 0f, 1f);
             }
 
@@ -79,15 +77,13 @@ namespace ITCompanySimulation.Settings
         {
             bool setFloatResult = AudioMixerComponent.SetFloat(paramName, value);
 
-#if DEVELOPMENT_BUILD || UNITY_EDITOR
             if (false == setFloatResult)
             {
-                Debug.LogWarningFormat("[0] Could not set value of param \"{1}\" in AudioMixer: {2}",
-                                        MethodBase.GetCurrentMethod().DeclaringType,
-                                        paramName,
-                                        AudioMixerComponent.name);
+                string msg = string.Format("Could not set value of param \"{0}\" in AudioMixer: {1}",
+                                           paramName,
+                                           AudioMixerComponent.name);
+                RestrictedDebug.Log(msg, LogType.Warning);
             }
-#endif
         }
 
         /// <summary>
@@ -98,15 +94,13 @@ namespace ITCompanySimulation.Settings
             float param = float.NaN;
             bool getFloatResult = AudioMixerComponent.GetFloat(paramName, out param);
 
-#if DEVELOPMENT_BUILD || UNITY_EDITOR
             if (false == getFloatResult)
             {
-                Debug.LogWarningFormat("[0] Could not get value of param \"{1}\" in AudioMixer: {2}",
-                                        MethodBase.GetCurrentMethod().DeclaringType,
-                                        paramName,
-                                        AudioMixerComponent.name);
+                string msg = string.Format("Could not get value of param \"{0}\" in AudioMixer: {1}",
+                                           paramName,
+                                           AudioMixerComponent.name);
+                RestrictedDebug.Log(msg, LogType.Warning);
             }
-#endif
 
             return param;
         }

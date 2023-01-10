@@ -14,10 +14,8 @@ using System.Collections.Generic;
 using Photon;
 using ITCompanySimulation.Event;
 using ITCompanySimulation.UI;
-
-#if DEVELOPMENT_BUILD || UNITY_EDITOR
+using ITCompanySimulation.Utilities;
 using System.Reflection;
-#endif
 
 namespace ITCompanySimulation.Core
 {
@@ -123,8 +121,9 @@ namespace ITCompanySimulation.Core
         {
             if (null != Instance)
             {
-                Debug.LogErrorFormat("[{0}] Only one instance of {0} should exist but is instantiated multiple times.",
-                     this.GetType().Name);
+                string msg = string.Format("Only one instance of {0} should exist but is instantiated multiple times.",
+                                           this.GetType().Name);
+                RestrictedDebug.Log(msg, LogType.Error);
             }
 
             Instance = this;
@@ -265,10 +264,10 @@ namespace ITCompanySimulation.Core
                 if (NumberOfClientsWithDataReceived == PhotonNetwork.otherPlayers.Length &&
                     NUMBER_OF_REQUIRED_DATA_TRANSFERS == ComponentsWithReceivedData.Count)
                 {
-#if DEVELOPMENT_BUILD || UNITY_EDITOR
-                    Debug.LogFormat("[{0}] All clients ({1}) received data. Starting sesssion",
-                        this.GetType().Name, PhotonNetwork.playerList.Length);
-#endif
+                    string msg = string.Format("All clients ({0}) received data. Starting sesssion",
+                         PhotonNetwork.playerList.Length);
+                    RestrictedDebug.Log(msg);
+
                     photonView.RPC("StartSessionRPC", PhotonTargets.All);
                 }
             }
@@ -289,11 +288,10 @@ namespace ITCompanySimulation.Core
         [PunRPC]
         private void StartSessionRPC()
         {
-#if DEVELOPMENT_BUILD || UNITY_EDITOR
-            Debug.LogFormat("[{0}] {1} called. Starting session...",
-                this.GetType().Name,
+            string msg = string.Format("{0} called. Starting session...",
                 MethodBase.GetCurrentMethod().Name);
-#endif
+            RestrictedDebug.Log(msg);
+
             StartCoroutine(StartSessionCoroutine());
         }
 
@@ -314,21 +312,18 @@ namespace ITCompanySimulation.Core
         {
             if (false == ComponentsWithReceivedData.Add(source))
             {
-#if DEVELOPMENT_BUILD || UNITY_EDITOR
-                Debug.LogWarningFormat("[{0}] Data from same source ({1}) received more than one time",
-                    this.GetType().Name,
-                    source.ToString());
-#endif
+                string msg = string.Format("Data from same source ({0}) received more than one time",
+                                        source.ToString());
+                RestrictedDebug.Log(msg, LogType.Warning);
             }
 
             if (NUMBER_OF_REQUIRED_DATA_TRANSFERS == ComponentsWithReceivedData.Count)
             {
                 if (false == PhotonNetwork.isMasterClient)
                 {
-#if DEVELOPMENT_BUILD || UNITY_EDITOR
-                    Debug.LogFormat("[{0}] All components received data. Notifying master client",
-                        this.GetType().Name);
-#endif
+                    string msg = string.Format("All components received data. Notifying master client");
+                    RestrictedDebug.Log(msg);
+
                     //Notify master client that all required data is received
                     RaiseEventOptions options = new RaiseEventOptions
                     {
@@ -400,15 +395,13 @@ namespace ITCompanySimulation.Core
                 PhotonNetwork.JoinOrCreateRoom("Default", options, PhotonNetwork.lobby);
             }
 
-#if DEVELOPMENT_BUILD || UNITY_EDITOR
             if (SimulationSettings.InitialBalance <= SimulationSettings.MinimalBalance)
             {
-                Debug.LogWarningFormat("[{0}] Initial balance ({1} $) is smaller than or equal to minimal balance ({2} $)",
-                                       this.GetType().Name,
-                                       SimulationSettings.InitialBalance,
-                                       SimulationSettings.MinimalBalance);
+                string msg = string.Format("Initial balance ({0} $) is smaller than or equal to minimal balance ({1} $)",
+                                           SimulationSettings.InitialBalance,
+                                           SimulationSettings.MinimalBalance);
+                RestrictedDebug.Log(msg, LogType.Warning);
             }
-#endif
 
             if (true == PhotonNetwork.isMasterClient)
             {
@@ -460,10 +453,8 @@ namespace ITCompanySimulation.Core
         {
             base.OnConnectedToMaster();
 
-#if DEVELOPMENT_BUILD || UNITY_EDITOR
-            string msg = string.Format("[{0}] Connected to master", this.GetType().Name);
-            Debug.Log(msg);
-#endif
+            string msg = "Connected to master";
+            RestrictedDebug.Log(msg);
         }
 
         /// <summary>
@@ -474,12 +465,9 @@ namespace ITCompanySimulation.Core
         {
             base.OnJoinedLobby();
 
-#if DEVELOPMENT_BUILD || UNITY_EDITOR
-            string msg = string.Format("[{0}] Joined lobby: {1}",
-                                       this.GetType().Name,
+            string msg = string.Format("Joined lobby: {0}",
                                        PhotonNetwork.lobby.Name);
-            Debug.Log(msg);
-#endif
+            RestrictedDebug.Log(msg);
 
             //Since auto lobby join is enabled this method
             //will be called when client is connected to server
@@ -488,11 +476,8 @@ namespace ITCompanySimulation.Core
 
         public override void OnLeftLobby()
         {
-#if DEVELOPMENT_BUILD || UNITY_EDITOR
-            string msg = string.Format("[{0}] Left lobby",
-                                       this.GetType().Name);
-            Debug.Log(msg);
-#endif
+            string msg = "Left lobby";
+            RestrictedDebug.Log(msg);
         }
 
         public override void OnJoinedRoom()
@@ -507,29 +492,24 @@ namespace ITCompanySimulation.Core
                 StartGameInternalRPC();
             }
 
-#if DEVELOPMENT_BUILD || UNITY_EDITOR
-            string msg = string.Format("[{0}] Joined room\n" +
-                               "Name: {1}\n" +
-                               "Number of players: {2}\n" +
-                               "Max number of players : {3}\n" +
-                               "Open: {4}",
-                               this.GetType().Name,
+            string msg = string.Format("Joined room\n" +
+                               "Name: {0}\n" +
+                               "Number of players: {1}\n" +
+                               "Max number of players : {2}\n" +
+                               "Open: {3}",
                                PhotonNetwork.room.Name,
                                PhotonNetwork.room.PlayerCount,
                                PhotonNetwork.room.MaxPlayers,
                                PhotonNetwork.room.IsOpen);
-            Debug.Log(msg);
-#endif
+            RestrictedDebug.Log(msg);
         }
 
         public override void OnLeftRoom()
         {
             base.OnLeftRoom();
 
-#if DEVELOPMENT_BUILD || UNITY_EDITOR
-            string msg = string.Format("[{0}] Left room", this.GetType().Name);
-            Debug.Log(msg);
-#endif
+            string msg = "Left room";
+            RestrictedDebug.Log(msg);
         }
 
         public override void OnDisconnectedFromPhoton()
@@ -538,10 +518,8 @@ namespace ITCompanySimulation.Core
 
             InfoWindow.Instance.ShowOk("Disconnected from game server.");
 
-#if DEVELOPMENT_BUILD || UNITY_EDITOR
-            string msg = string.Format("[{0}] Disconnected from Photon", this.GetType().Name);
-            Debug.Log(msg);
-#endif
+            string msg = "Disconnected from Photon";
+            RestrictedDebug.Log(msg);
 
             DisconnectedFromServer?.Invoke();
         }
@@ -550,12 +528,9 @@ namespace ITCompanySimulation.Core
         {
             base.OnConnectionFail(cause);
 
-#if DEVELOPMENT_BUILD || UNITY_EDITOR
-            string msg = string.Format("[{0}] Connection failed. Reason: {1}",
-                                       this.GetType().Name,
+            string msg = string.Format("Connection failed. Reason: {0}",
                                        cause);
-            Debug.Log(msg);
-#endif
+            RestrictedDebug.Log(msg, LogType.Warning);
 
             DisconnectedFromServer?.Invoke();
         }
@@ -571,10 +546,8 @@ namespace ITCompanySimulation.Core
                                 codeAndMsg[0]);
             InfoWindow.Instance.ShowOk(errorMsg);
 
-#if DEVELOPMENT_BUILD || UNITY_EDITOR
-            string msg = string.Format("[{0}] Failed to join the room", this.GetType().Name);
-            Debug.Log(msg);
-#endif
+            string msg = "Failed to join the room";
+            RestrictedDebug.Log(msg);
         }
 
         /// <summary>

@@ -1,4 +1,5 @@
 ﻿using ITCompanySimulation.Character;
+using ITCompanySimulation.Utilities;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -125,12 +126,10 @@ namespace ITCompanySimulation.Project
                 this.IsActive = true;
                 this.Started?.Invoke(this);
 
-#if DEVELOPMENT_BUILD || UNITY_EDITOR
                 string debugInfo = string.Format(
                     "Project (ID: {0}) started",
                     this.ID);
-                Debug.Log(debugInfo);
-#endif
+                RestrictedDebug.Log(debugInfo);
             }
         }
 
@@ -141,12 +140,9 @@ namespace ITCompanySimulation.Project
                 this.IsActive = false;
                 this.Stopped?.Invoke(this);
 
-#if DEVELOPMENT_BUILD || UNITY_EDITOR
                 string debugInfo = string.Format(
-                    "[{1}] Project (ID: {0}) stopped",
-                    this.ID, this.GetType().Name);
-                Debug.Log(debugInfo);
-#endif
+                    "Project (ID: {0}) stopped", this.ID);
+                RestrictedDebug.Log(debugInfo);
             }
         }
 
@@ -156,18 +152,16 @@ namespace ITCompanySimulation.Project
             this.Workers.Add(projectWorker);
             WorkerAdded?.Invoke(projectWorker);
 
-#if DEVELOPMENT_BUILD || UNITY_EDITOR
             string debugInfo = string.Format(
-                "[{5}] Worker added to project\n" +
+                "Worker added to project\n" +
                 "PROJECT -------------------\n" +
                 "Name: {0}\n" +
                 "ID: {1}\n" +
                 "WORKER -------------------\n" +
                 "Name: {2} {3}\n" +
                 "ID: {4}",
-                this.Name, this.ID, projectWorker.Name, projectWorker.Surename, projectWorker.ID, this.GetType().Name);
-            Debug.Log(debugInfo);
-#endif
+                this.Name, this.ID, projectWorker.Name, projectWorker.Surename, projectWorker.ID);
+            RestrictedDebug.Log(debugInfo);
         }
 
         public void RemoveWorker(LocalWorker projectWorker)
@@ -176,18 +170,16 @@ namespace ITCompanySimulation.Project
             this.Workers.Remove(projectWorker);
             WorkerRemoved?.Invoke(projectWorker);
 
-#if DEVELOPMENT_BUILD || UNITY_EDITOR
             string debugInfo = string.Format(
-                "[{5}] Worker removed from project\n" +
+                "Worker removed from project\n" +
                 "PROJECT -------------------\n" +
                 "Name: {0}\n" +
                 "ID: {1}\n" +
                 "WORKER -------------------\n" +
                 "Name: {2} {3}\n" +
                 "ID: {4}",
-                this.Name, this.ID, projectWorker.Name, projectWorker.Surename, projectWorker.ID, this.GetType().Name);
-            Debug.Log(debugInfo);
-#endif
+                this.Name, this.ID, projectWorker.Name, projectWorker.Surename, projectWorker.ID);
+            RestrictedDebug.Log(debugInfo);
         }
     }
 }

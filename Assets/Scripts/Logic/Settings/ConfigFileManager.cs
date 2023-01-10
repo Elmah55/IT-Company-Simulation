@@ -2,6 +2,7 @@
 using System.IO;
 using UnityEngine;
 using ITCompanySimulation.Core;
+using ITCompanySimulation.Utilities;
 
 namespace ITCompanySimulation.Settings
 {
@@ -41,14 +42,12 @@ namespace ITCompanySimulation.Settings
             }
             catch (Exception ex)
             {
-#if DEVELOPMENT_BUILD || UNITY_EDITOR
-                Debug.LogWarningFormat("[{0}] Could not read config file\n" +
-                                       "File path: {1}\n" +
-                                       "Error: {2}",
-                                       this.GetType().Name,
+                string msg = string.Format("Could not read config file\n" +
+                                       "File path: {0}\n" +
+                                       "Error: {1}",
                                        configFilePath,
                                        ex.Message);
-#endif
+                RestrictedDebug.Log(msg, LogType.Warning);
             }
         }
 
@@ -69,14 +68,12 @@ namespace ITCompanySimulation.Settings
             }
             catch (Exception ex)
             {
-#if DEVELOPMENT_BUILD || UNITY_EDITOR
-                Debug.LogWarningFormat("[{0}] Could not write config file\n" +
-                                       "File path: {1}\n" +
-                                       "Error: {2}",
-                                       this.GetType().Name,
+                string msg = string.Format("Could not write config file\n" +
+                                       "File path: {0}\n" +
+                                       "Error: {1}",
                                        configFilePath,
                                        ex.Message);
-#endif
+                RestrictedDebug.Log(msg, LogType.Warning);
             }
 
         }

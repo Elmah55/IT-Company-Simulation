@@ -1,6 +1,7 @@
 ﻿using ITCompanySimulation.Character;
 using ITCompanySimulation.Company;
 using ITCompanySimulation.Core;
+using ITCompanySimulation.Utilities;
 using System;
 using UnityEngine;
 
@@ -146,11 +147,9 @@ namespace ITCompanySimulation.Project
                 finishedProject.Name, finishedProject.CompletionBonus);
             SimulationManagerComponent.NotificatorComponent.Notify(playerNotification);
 
-#if DEVELOPMENT_BUILD || UNITY_EDITOR
-            string debugInfo = string.Format("[{3}] Project {0} (ID {2}) finished. {1} $ added to company's balance",
-                finishedProject.Name, finishedProject.CompletionBonus, finishedProject.ID, this.GetType().Name);
-            Debug.Log(debugInfo);
-#endif
+            string debugInfo = string.Format("Project {0} (ID {2}) finished. {1} $ added to company's balance",
+                finishedProject.Name, finishedProject.CompletionBonus, finishedProject.ID);
+            RestrictedDebug.Log(debugInfo);
         }
 
         private void OnBindedProjectWorkerAdded(SharedWorker worker)

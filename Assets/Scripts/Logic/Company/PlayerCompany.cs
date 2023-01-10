@@ -94,11 +94,9 @@ namespace ITCompanySimulation.Company
             ScrumProcesses.Add(newScrum);
             ProjectAdded?.Invoke(newScrum);
 
-#if DEVELOPMENT_BUILD || UNITY_EDITOR
-            string debugInfo = string.Format("[{3}] Project added to company\nName: {0}\nID {1}\nComplete bonus: {2}",
-                projectToAdd.Name, projectToAdd.ID, projectToAdd.CompletionBonus, this.GetType().Name);
-            Debug.Log(debugInfo);
-#endif
+            string debugInfo = string.Format("Project added to company\nName: {0}\nID {1}\nComplete bonus: {2}",
+                projectToAdd.Name, projectToAdd.ID, projectToAdd.CompletionBonus);
+            RestrictedDebug.Log(debugInfo);
         }
 
         public void RemoveProject(LocalProject projectToRemove)
@@ -114,11 +112,9 @@ namespace ITCompanySimulation.Company
                 }
             }
 
-#if DEVELOPMENT_BUILD || UNITY_EDITOR
-            string debugInfo = string.Format("[{2}] Project removed from company\nName: {0}\nID {1}",
-                projectToRemove.Name, projectToRemove.ID, this.GetType().Name);
-            Debug.Log(debugInfo);
-#endif
+            string debugInfo = string.Format("Project removed from company\nName: {0}\nID {1}",
+                projectToRemove.Name, projectToRemove.ID);
+            RestrictedDebug.Log(debugInfo);
         }
 
         public void AddWorker(LocalWorker workerToAdd)
@@ -128,11 +124,9 @@ namespace ITCompanySimulation.Company
             workerToAdd.DaysInCompany = 0;
             WorkerAdded?.Invoke(workerToAdd);
 
-#if DEVELOPMENT_BUILD || UNITY_EDITOR
-            string debugInfo = string.Format("[{3}] Worker added to company\nName: {0} {1}\nID: {2}\n",
-                workerToAdd.Name, workerToAdd.Surename, workerToAdd.ID, this.GetType().Name);
-            Debug.Log(debugInfo);
-#endif
+            string debugInfo = string.Format("Worker added to company\nName: {0} {1}\nID: {2}\n",
+                workerToAdd.Name, workerToAdd.Surename, workerToAdd.ID);
+            RestrictedDebug.Log(debugInfo);
         }
 
         public void RemoveWorker(LocalWorker workerToRemove)
@@ -147,12 +141,9 @@ namespace ITCompanySimulation.Company
 
             WorkerRemoved?.Invoke(workerToRemove);
 
-
-#if DEVELOPMENT_BUILD || UNITY_EDITOR
-            string debugInfo = string.Format("[{3}] Worker removed from company\nName {0} {1}\nID {2}\n",
-                workerToRemove.Name, workerToRemove.Surename, workerToRemove.ID, this.GetType().Name);
-            Debug.Log(debugInfo);
-#endif
+            string debugInfo = string.Format("Worker removed from company\nName {0} {1}\nID {2}\n",
+                workerToRemove.Name, workerToRemove.Surename, workerToRemove.ID);
+            RestrictedDebug.Log(debugInfo);
         }
     }
 }

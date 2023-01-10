@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using ITCompanySimulation.Utilities;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
@@ -42,14 +43,11 @@ namespace ITCompanySimulation.UI
             {
                 bool result = AllowedDraggableIds.Add(id);
 
-#if DEVELOPMENT_BUILD || UNITY_EDITOR
                 if (false == result)
                 {
-                    Debug.LogWarningFormat("[{0}] Allowed ID ({1}) defined multiple times.",
-                        this.GetType().Name,
-                        id);
+                    string debugInfo = string.Format("Allowed ID ({0}) defined multiple times", id);
+                    RestrictedDebug.Log(debugInfo, LogType.Warning);
                 }
-#endif
             }
         }
 
@@ -151,7 +149,7 @@ namespace ITCompanySimulation.UI
                     && (true == AllowedDraggableIds.Contains(draggedElement.ID)))
                 {
                     //Initially set closest element as first control in list view. Then iterate through remaining
-                    //controls to found cloest one
+                    //controls to find closest one
                     RectTransform closestElementTransform = (RectTransform)Controls[0].transform;
                     RectTransform draggedElementTransform = (RectTransform)draggedElement.transform;
                     float smallestDeltaY = Mathf.Abs(draggedElementTransform.position.y - closestElementTransform.position.y);

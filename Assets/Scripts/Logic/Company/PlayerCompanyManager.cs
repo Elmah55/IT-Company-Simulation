@@ -1,6 +1,7 @@
 ﻿using ITCompanySimulation.Character;
 using ITCompanySimulation.Core;
 using ITCompanySimulation.Project;
+using ITCompanySimulation.Utilities;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -227,11 +228,9 @@ namespace ITCompanySimulation.Company
                     companyWorker.Name, companyWorker.Surename, companyWorker.DaysUntilAvailable);
                 SimulationManagerComponent.NotificatorComponent.Notify(playerNotification);
 
-#if DEVELOPMENT_BUILD || UNITY_EDITOR
                 string debugInfo = string.Format("Worker {0} {1} (ID {2}) is sick\n{3} days until available\n",
                     companyWorker.Name, companyWorker.Surename, companyWorker.ID, companyWorker.DaysUntilAvailable);
-                Debug.Log(debugInfo);
-#endif
+                RestrictedDebug.Log(debugInfo);
             }
         }
 
@@ -256,11 +255,9 @@ namespace ITCompanySimulation.Company
                     companyWorker.Name, companyWorker.Surename, companyWorker.DaysUntilAvailable);
                 SimulationManagerComponent.NotificatorComponent.Notify(playerNotification);
 
-#if DEVELOPMENT_BUILD || UNITY_EDITOR
                 string debugInfo = string.Format("Worker {0} {1} (ID {2}) is on holidays\n{3} days until available\n",
                     companyWorker.Name, companyWorker.Surename, companyWorker.ID, companyWorker.DaysUntilAvailable);
-                Debug.Log(debugInfo);
-#endif
+                RestrictedDebug.Log(debugInfo);
             }
         }
 
@@ -281,14 +278,11 @@ namespace ITCompanySimulation.Company
                                                        canceledProject.CompletionTimeExceededPenalty);
                 SimulationManagerComponent.NotificatorComponent.Notify(notificationTxt);
 
-#if DEVELOPMENT_BUILD || UNITY_EDITOR
-                string debugInfo = string.Format("[{3}] Project canceled\nName: {0}\nID: {1}\nPenalty: {2}",
+                string debugInfo = string.Format("Project canceled\nName: {0}\nID: {1}\nPenalty: {2}",
                                                  canceledProject.Name,
                                                  canceledProject.ID,
-                                                 canceledProject.CompletionTimeExceededPenalty,
-                                                 this.GetType().Name);
-                Debug.Log(debugInfo);
-#endif
+                                                 canceledProject.CompletionTimeExceededPenalty);
+                RestrictedDebug.Log(debugInfo);
             }
         }
 

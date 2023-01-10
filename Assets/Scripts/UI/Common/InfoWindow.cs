@@ -3,6 +3,7 @@ using TMPro;
 using UnityEngine.Events;
 using UnityEngine.UI;
 using System.Collections.Generic;
+using ITCompanySimulation.Utilities;
 
 namespace ITCompanySimulation.UI
 {
@@ -96,13 +97,12 @@ namespace ITCompanySimulation.UI
 
         private void Awake()
         {
-#if DEVELOPMENT_BUILD || UNITY_EDITOR
             if (null != Instance)
             {
-                Debug.LogErrorFormat("[{0}] Only one instance of {0} should exist but is instantiated multiple times.",
-                                     this.GetType().Name);
+                string debugInfo = string.Format("Only one instance of {0} should exist but is instantiated multiple times",
+                    this.GetType().Name);
+                RestrictedDebug.Log(debugInfo, LogType.Error);
             }
-#endif
 
             Instance = this;
 

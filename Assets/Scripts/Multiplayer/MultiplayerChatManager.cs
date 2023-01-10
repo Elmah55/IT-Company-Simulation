@@ -5,6 +5,7 @@ using System.Linq;
 using UnityEngine.Events;
 using Photon;
 using System.Collections.Generic;
+using ITCompanySimulation.Utilities;
 
 namespace ITCompanySimulation.Multiplayer
 {
@@ -46,8 +47,9 @@ namespace ITCompanySimulation.Multiplayer
         {
             if (null != Instance)
             {
-                Debug.LogErrorFormat("[{0}] Only one instance of {0} should exist but is instantiated multiple times.",
+                string debugInfo = string.Format("Only one instance of {0} should exist but is instantiated multiple times",
                      this.GetType().Name);
+                RestrictedDebug.Log(debugInfo, LogType.Error);
             }
 
             Instance = this;
@@ -78,14 +80,11 @@ namespace ITCompanySimulation.Multiplayer
             {
                 result = Client.PublishMessage(Channel, msg);
 
-#if DEVELOPMENT_BUILD || UNITY_EDITOR
                 if (false == result)
                 {
-                    Debug.LogErrorFormat("[{0}] Failed to send message on channel: {1}",
-                                 this.GetType().Name,
-                                 Channel);
+                    string debugInfo = string.Format("Failed to send message on channel: {0}", Channel);
+                    RestrictedDebug.Log(debugInfo, LogType.Warning);
                 }
-#endif
             }
 
             return result;
@@ -99,15 +98,13 @@ namespace ITCompanySimulation.Multiplayer
             {
                 result = Client.SendPrivateMessage(targetPlayerNickname, msg);
 
-#if DEVELOPMENT_BUILD || UNITY_EDITOR
                 if (false == result)
                 {
-                    Debug.LogErrorFormat("[{0}] Failed to send private message. Channel: {1} Target player: {2}",
-                                         this.GetType().Name,
-                                         Channel,
-                                         targetPlayerNickname);
+                    string debugInfo = string.Format("Failed to send private message. Channel: {0} Target player: {1}",
+                                                     Channel,
+                                                     targetPlayerNickname);
+                    RestrictedDebug.Log(debugInfo, LogType.Warning);
                 }
-#endif 
             }
 
             return result;
@@ -122,10 +119,7 @@ namespace ITCompanySimulation.Multiplayer
             IsConnected = true;
             Connected?.Invoke();
 
-#if DEVELOPMENT_BUILD || UNITY_EDITOR
-            Debug.LogFormat("[{0}] Connected",
-                            this.GetType().Name);
-#endif
+            RestrictedDebug.Log("Connected");
         }
 
         public void OnDisconnected()
@@ -133,10 +127,7 @@ namespace ITCompanySimulation.Multiplayer
             IsConnected = false;
             Disconnected?.Invoke();
 
-#if DEVELOPMENT_BUILD || UNITY_EDITOR
-            Debug.LogFormat("[{0}] Disconencted",
-                            this.GetType().Name);
-#endif
+            RestrictedDebug.Log("Disconencted");
         }
 
         public void OnGetMessages(string channelName, string[] senders, object[] messages)
@@ -151,17 +142,15 @@ namespace ITCompanySimulation.Multiplayer
                     MessageReceived?.Invoke(receivedMessage);
                 }
             }
-#if DEVELOPMENT_BUILD || UNITY_EDITOR
             else
             {
-                Debug.LogWarningFormat("[{0}] Received message from channel \"{1}\" but expected messages only from " +
-                                       "channel \"{2}\" Client is subscribed to {3} channels",
-                                        this.GetType().Name,
-                                        channelName,
-                                        Channel,
-                                        Client.PublicChannels.Count);
+                string debugInfo = string.Format("Received message from channel \"{0}\" but expected messages only from " +
+                                                 "channel \"{1}\" Client is subscribed to {2} channels",
+                                                 channelName,
+                                                 Channel,
+                                                 Client.PublicChannels.Count);
+                RestrictedDebug.Log(debugInfo, LogType.Warning);
             }
-#endif
         }
 
         public void OnPrivateMessage(string sender, object message, string channelName)
@@ -175,16 +164,22 @@ namespace ITCompanySimulation.Multiplayer
 
         public void OnSubscribed(string[] channels, bool[] results)
         {
-#if DEVELOPMENT_BUILD || UNITY_EDITOR
-            //User should be subcribed to only one channel at once
             for (int i = 0; i < channels.Length; i++)
             {
-                Debug.LogFormat("[{0}] Subscribed to channel: {1} ({2})",
-                    this.GetType().Name,
-                    channels[i],
-                    results[i]);
+                string debugInfo = string.Format("Subscribed to channel: {0} ({1})",
+                                                 channels[i],
+                                                 results[i]);
+                RestrictedDebug.Log(debugInfo);
             }
-#endif
+
+            //User should be subcribed to only one channel at once
+            if (channels.Length > 1)
+            {
+                string debugInfo = string.Format("User subscribed to more than one channel. " +
+                    "Number of subscribed channels: {0}", channels.Length);
+                RestrictedDebug.Log(debugInfo, LogType.Warning);
+            }
+
             Channel = (true == results[0]) ? channels[0] : null;
 
             if (null != Channel)
@@ -195,22 +190,11 @@ namespace ITCompanySimulation.Multiplayer
 
         public void OnUnsubscribed(string[] channels)
         {
-#if DEVELOPMENT_BUILD || UNITY_EDITOR
-            if (channels.Length > 1)
-            {
-                Debug.LogWarningFormat("[{0}] User is currently subscribed to {1} channels." +
-                                       "This is a bug, user should be subcribed to one channel only",
-                                       this.GetType().Name,
-                                       channels.Length);
-            }
-
             foreach (string channel in channels)
             {
-                Debug.LogFormat("[{0}] Unsubscribed from channel: {1}",
-                                this.GetType().Name,
-                                channel);
+                string debugInfo = string.Format("Unsubscribed from channel: {0}", channel);
+                RestrictedDebug.Log(debugInfo);
             }
-#endif
         }
 
         public void OnUserSubscribed(string channel, string user) { }

@@ -81,16 +81,14 @@ namespace ITCompanySimulation.Utilities
         {
             PhotonPlayer result = PhotonNetwork.playerList?.FirstOrDefault(player => player.ID == playerID);
 
-#if DEVELOPMENT_BUILD || UNITY_EDITOR
             if (default(PhotonPlayer) == result)
             {
-                string warningMsg = string.Format("[{0}] {1} - could not find photon player with ID ({2})",
-                                                  typeof(Utils).Name,
-                                                  MethodBase.GetCurrentMethod().Name,
-                                                  playerID);
-                Debug.LogWarning(warningMsg);
+                string debugInfo = string.Format("{0} - could not find photon player with ID ({1})",
+                                                 MethodBase.GetCurrentMethod().Name,
+                                                 playerID);
+                RestrictedDebug.Log(debugInfo, LogType.Warning);
             }
-#endif
+
             return result;
         }
     }

@@ -177,15 +177,13 @@ namespace ITCompanySimulation.Render
             string layerName = "DontDisableCameraControl";
             DontDisableCameraControlLayer = LayerMask.NameToLayer(layerName);
 
-#if DEVELOPMENT_BUILD || UNITY_EDITOR
             if (-1 == DontDisableCameraControlLayer)
             {
                 string debugMsg = string.Format(
-                    "[{0}] Could not get layer \"{1}\" by name. Holding mouse pointer over all UI elements will disable camera control.",
-                    this.GetType().Name, layerName);
-                Debug.LogWarning(debugMsg);
+                    "Could not get layer \"{0}\" by name. Holding mouse pointer over all UI elements will disable camera control.",
+                    layerName);
+                RestrictedDebug.Log(debugMsg);
             }
-#endif
         }
 
         /// <summary>
