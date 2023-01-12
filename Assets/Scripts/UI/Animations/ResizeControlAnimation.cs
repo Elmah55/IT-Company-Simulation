@@ -20,6 +20,11 @@ namespace ITCompanySimulation.UI
         /// Scale of transform before resizing.
         /// </summary>
         private Vector2 OrignalSize;
+        /// <summary>
+        /// Specifies whether this instance of component
+        /// has been started and initialized
+        /// </summary>
+        private bool Initialized;
 
         /*Public consts fields*/
 
@@ -38,11 +43,15 @@ namespace ITCompanySimulation.UI
         private void Start()
         {
             OrignalSize = LocalTransform.localScale;
+            Initialized = true;
         }
 
         private void OnDisable()
         {
-            RestoreOriginalSize();
+            if (true == Initialized)
+            {
+                RestoreOriginalSize();
+            }
         }
 
         /*Public methods*/
