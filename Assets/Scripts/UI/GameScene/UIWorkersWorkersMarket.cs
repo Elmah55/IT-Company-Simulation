@@ -170,10 +170,9 @@ namespace ITCompanySimulation.UI
         private void Awake()
         {
             InfoWindowComponent = InfoWindow.Instance;
-            GameObject scriptsObject = GameObject.FindGameObjectWithTag("ScriptsGameObject");
-            SimulationManagerComponent = scriptsObject.GetComponent<SimulationManager>();
-            GameTimeComponent = scriptsObject.GetComponent<GameTime>();
-            WorkersMarketComponent = scriptsObject.GetComponent<WorkersMarket>();
+            SimulationManagerComponent = SimulationManager.Instance;
+            GameTimeComponent = SimulationManagerComponent.gameObject.GetComponent<GameTime>();
+            WorkersMarketComponent = SimulationManagerComponent.gameObject.GetComponent<WorkersMarket>();
         }
 
         private void Start()

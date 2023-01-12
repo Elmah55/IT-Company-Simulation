@@ -45,7 +45,6 @@ namespace ITCompanySimulation.UI
         /// </summary>
         private TextMeshProUGUI TextWorkerAbility;
         private Camera MainCamera;
-        private static Transform ScriptsObjectTransform;
         [SerializeField]
         private GameObject AbilityTextPlaceholder;
         /// <summary>
@@ -79,6 +78,8 @@ namespace ITCompanySimulation.UI
         [Tooltip("How much ability text should move up when playing animation")]
         public float AbilityTxtMoveAnimationYAmount;
         public float AbilityTxtMoveAnimationSpeed;
+        public Canvas CanvasComponent;
+        public Transform ScriptsObjectTransform;
 
         /*Private methods*/
 
@@ -153,14 +154,9 @@ namespace ITCompanySimulation.UI
 
         private void Awake()
         {
-            Transform canvasTransform = GameObject.FindGameObjectWithTag("Canvas").transform;
+            Transform canvasTransform = CanvasComponent.transform;
             TextObject = GameObject.Instantiate(TextWorkerNamePrefab, canvasTransform);
             TextWorkerAbility = GameObject.Instantiate(TextWorkerAbilityPrefab, canvasTransform);
-
-            if (null == ScriptsObjectTransform)
-            {
-                ScriptsObjectTransform = GameObject.FindGameObjectWithTag("ScriptsGameObject").transform;
-            }
 
             TextObject.transform.SetParent(canvasTransform);
             TextObject.transform.SetAsFirstSibling();

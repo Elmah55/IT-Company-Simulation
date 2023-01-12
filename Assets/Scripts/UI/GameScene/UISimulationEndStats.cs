@@ -24,8 +24,7 @@ namespace ITCompanySimulation.UI
 
         private void Awake()
         {
-            ApplicationManagerComponent =
-                GameObject.FindGameObjectWithTag("ApplicationManager").GetComponent<ApplicationManager>();
+            ApplicationManagerComponent = ApplicationManager.Instance;
         }
 
         private void OnEnable()

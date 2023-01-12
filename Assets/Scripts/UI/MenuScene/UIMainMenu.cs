@@ -67,7 +67,7 @@ namespace ITCompanySimulation.UI
                 ButtonEnterCredentials
             };
 
-            ApplicationManagerComponent = GameObject.FindGameObjectWithTag("ApplicationManager").GetComponent<ApplicationManager>();
+            ApplicationManagerComponent = ApplicationManager.Instance;
             ApplicationManagerComponent.DisconnectedFromServer += OnDisconnectedFromServer;
             ApplicationManagerComponent.ConnectedToServer += OnConnectedToSever;
             ButtonStartGame.onClick.AddListener(() =>

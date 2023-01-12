@@ -11,13 +11,6 @@ namespace ITCompanySimulation.Character
     {
         /*Private consts fields*/
 
-        /// <summary>
-        /// How many retries there will be to spawn character before
-        /// spawning fails
-        /// </summary>
-        private const int MAX_SPAWN_RETRIES = 15;
-        private const float SPAWN_POS_MINIMUM_COLLIDER_DISTANCE = 0.3f;
-
         /*Private fields*/
 
         [Tooltip("Male characters prefabs that will be spawn onto game world")]
@@ -29,6 +22,8 @@ namespace ITCompanySimulation.Character
         private SimulationManager SimulationManagerComponent;
         [SerializeField]
         private Transform[] SpawnPoints;
+        [SerializeField]
+        private Canvas CanvasComponent;
 
         /*Public consts fields*/
 
@@ -100,8 +95,25 @@ namespace ITCompanySimulation.Character
             this.SimulationManagerComponent = GetComponent<SimulationManager>();
         }
 
+        private void InitWorkerPrefab(GameObject workerPrefab)
+        {
+            WorkerText textComponent = workerPrefab.GetComponentInChildren<WorkerText>();
+            textComponent.CanvasComponent = this.CanvasComponent;
+            textComponent.ScriptsObjectTransform = gameObject.transform;
+        }
+
         private void Start()
         {
+            foreach (GameObject worker in MaleCharactersPrefabs)
+            {
+                InitWorkerPrefab(worker);
+            }
+
+            foreach (GameObject worker in FemaleCharactersPrefabs)
+            {
+                InitWorkerPrefab(worker);
+            }
+
             SimulationManagerComponent.ControlledCompany.WorkerAdded += OnControlledCompanyWorkerAdded;
             SimulationManagerComponent.ControlledCompany.WorkerRemoved += OnControlledCompanyWorkerRemoved;
         }

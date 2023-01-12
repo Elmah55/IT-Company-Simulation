@@ -29,8 +29,7 @@ namespace ITCompanySimulation.UI
 
         public void Init()
         {
-            SimulationManagerComponent =
-                GameObject.FindGameObjectWithTag("ScriptsGameObject").GetComponent<SimulationManager>();
+            SimulationManagerComponent = SimulationManager.Instance;
             SimulationManagerComponent.NotificatorComponent.NotificationReceived += OnNotificationReceived;
         }
 

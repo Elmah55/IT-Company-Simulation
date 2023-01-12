@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using ITCompanySimulation.Utilities;
 using ITCompanySimulation.Project;
-
+using ITCompanySimulation.Core;
 
 namespace ITCompanySimulation.Character
 {
@@ -15,7 +15,7 @@ namespace ITCompanySimulation.Character
 
         private int m_Salary;
         private int m_ExpierienceTime;
-        private static WorkerGenerationData GenerationData;
+        protected static WorkerGenerationData GenerationData;
 
         /*Public consts fields*/
 
@@ -106,6 +106,11 @@ namespace ITCompanySimulation.Character
 
         public SharedWorker(string name, string surename, Gender gender) : base(name, surename, gender)
         {
+            if (null == GenerationData)
+            {
+                GenerationData = SimulationManager.Instance.gameObject.GetComponent<WorkersMarket>().GenerationData;
+            }
+
             this.Salary = BASE_SALARY;
         }
 
@@ -212,8 +217,7 @@ namespace ITCompanySimulation.Character
         {
             if (null == GenerationData)
             {
-                GameObject scriptsObject = GameObject.FindGameObjectWithTag("ScriptsGameObject");
-                GenerationData = scriptsObject.GetComponent<WorkersMarket>().GenerationData;
+                GenerationData = SimulationManager.Instance.gameObject.GetComponent<WorkersMarket>().GenerationData;
             }
 
             int offset = 0;

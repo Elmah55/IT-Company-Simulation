@@ -63,7 +63,7 @@ namespace ITCompanySimulation.UI
 
         private void Start()
         {
-            ApplicationManagerComponent = GameObject.FindGameObjectWithTag("ApplicationManager").GetComponent<ApplicationManager>();
+            ApplicationManagerComponent = ApplicationManager.Instance;
             ButtonReady.interactable = (false == PhotonNetwork.offlineMode);
         }
 

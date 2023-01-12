@@ -84,7 +84,7 @@ namespace ITCompanySimulation.Company
 
         public PlayerCompany(string name) : base(name)
         {
-            SimulationManagerComponent = GameObject.FindGameObjectWithTag("ScriptsGameObject").GetComponent<SimulationManager>();
+            SimulationManagerComponent = SimulationManager.Instance;
             ProjectAdded += OnProjectAdded;
         }
 

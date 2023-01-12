@@ -231,9 +231,8 @@ namespace ITCompanySimulation.Project
         public Scrum(LocalProject bindedProject)
         {
             //Game object containing scripts
-            GameObject scriptsObject = GameObject.FindGameObjectWithTag("ScriptsGameObject");
-            SimulationManagerComponent = scriptsObject.GetComponent<SimulationManager>();
-            GameTimeComponent = scriptsObject.GetComponent<GameTime>();
+            SimulationManagerComponent = SimulationManager.Instance;
+            GameTimeComponent = SimulationManagerComponent.gameObject.GetComponent<GameTime>();
 
             this.BindedProject = bindedProject;
             this.BindedProject.Completed += OnProjectFinished;

@@ -159,8 +159,7 @@ namespace ITCompanySimulation.Character
         {
             DestinationSetter = GetComponent<AIDestinationSetter>();
             PathWalker = GetComponent<AIPath>();
-            GameObject scriptsObject = GameObject.FindGameObjectWithTag("ScriptsGameObject");
-            TargetObject = GameObject.Instantiate(TargetObjectPrefab, scriptsObject.transform);
+            TargetObject = GameObject.Instantiate(TargetObjectPrefab);
             CharacterDirection = GetRandomStangindMovement();
         }
 

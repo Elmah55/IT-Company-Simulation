@@ -24,6 +24,7 @@ namespace ITCompanySimulation.UI
         /// </summary>
         private RectTransform ObjectTransform;
         private RectTransform CanvasTransform;
+        [SerializeField]
         private Canvas CanvasComponent;
 
         /*Public consts fields*/
@@ -57,7 +58,7 @@ namespace ITCompanySimulation.UI
             for (int i = 0; i < 2; i++)
             {
                 Vector2 newSize = new Vector2(TextComponent.preferredWidth, TextComponent.preferredHeight);
-                ObjectTransform.sizeDelta = newSize; 
+                ObjectTransform.sizeDelta = newSize;
             }
         }
 
@@ -107,8 +108,7 @@ namespace ITCompanySimulation.UI
         private void Awake()
         {
             ObjectTransform = GetComponent<RectTransform>();
-            CanvasTransform = GameObject.FindGameObjectWithTag("Canvas").GetComponent<RectTransform>();
-            CanvasComponent = CanvasTransform.GetComponent<Canvas>();
+            CanvasTransform = (RectTransform)CanvasComponent.transform;
         }
 
         private void OnEnable()

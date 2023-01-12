@@ -232,8 +232,7 @@ namespace ITCompanySimulation.Character
         {
             GameTimeComponent = GetComponent<GameTime>();
             GameTimeComponent.DayChanged += OnGameTimeDayChanged;
-            ApplicationManagerComponent =
-                GameObject.FindGameObjectWithTag("ApplicationManager").GetComponent<ApplicationManager>();
+            ApplicationManagerComponent = ApplicationManager.Instance;
             SimulationManagerComponent = GetComponent<SimulationManager>();
 
             //Master client will generate all the workers on market

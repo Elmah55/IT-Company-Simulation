@@ -293,8 +293,7 @@ namespace ITCompanySimulation.Project
         private void Start()
         {
             SimulationManagerComponent = GetComponent<SimulationManager>();
-            ApplicationManagerComponent =
-                GameObject.FindGameObjectWithTag("ApplicationManager").GetComponent<ApplicationManager>();
+            ApplicationManagerComponent = ApplicationManager.Instance;
 
             //Master client will generate all the workers on market
             //then send it to other clients

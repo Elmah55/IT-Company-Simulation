@@ -22,7 +22,7 @@ namespace ITCompanySimulation.UI
         private void Start()
         {
             InfoWindowComponent = InfoWindow.Instance;
-            ApplicationManagerComponent = GameObject.FindGameObjectWithTag("ApplicationManager").GetComponent<ApplicationManager>();
+            ApplicationManagerComponent = ApplicationManager.Instance;
         }
 
         /*Public methods*/

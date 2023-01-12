@@ -30,9 +30,8 @@ namespace ITCompanySimulation.UI
 
         private void Awake()
         {
-            GameObject scriptsGameObject = GameObject.FindGameObjectWithTag("ScriptsGameObject");
-            SimulationManagerComponent = scriptsGameObject.GetComponent<SimulationManager>();
-            ProjectsMarketComponent = scriptsGameObject.GetComponent<ProjectsMarket>();
+            SimulationManagerComponent = SimulationManager.Instance;
+            ProjectsMarketComponent = SimulationManagerComponent.gameObject.GetComponent<ProjectsMarket>();
         }
 
         private void Start()

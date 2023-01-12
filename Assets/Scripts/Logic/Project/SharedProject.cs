@@ -12,7 +12,7 @@ namespace ITCompanySimulation.Project
         /*Private fields*/
 
         private int m_CompletionTime;
-        private static ProjectGenerationData GenerationData;
+        protected static ProjectGenerationData GenerationData;
 
         /*Public consts fields*/
 
@@ -121,7 +121,7 @@ namespace ITCompanySimulation.Project
         {
             if (null == GenerationData)
             {
-                GenerationData = GameObject.FindGameObjectWithTag("ScriptsGameObject").GetComponent<ProjectsMarket>().GenerationData;
+                GenerationData = SimulationManager.Instance.gameObject.GetComponent<ProjectsMarket>().GenerationData;
             }
 
             int offset = 0;
@@ -166,6 +166,11 @@ namespace ITCompanySimulation.Project
 
         public SharedProject(string projectName)
         {
+            if (null == GenerationData)
+            {
+                GenerationData = SimulationManager.Instance.gameObject.GetComponent<ProjectsMarket>().GenerationData;
+            }
+
             this.Name = projectName;
             UsedTechnologies = new List<ProjectTechnology>();
         }

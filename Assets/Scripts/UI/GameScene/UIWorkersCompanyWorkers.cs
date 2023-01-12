@@ -164,8 +164,7 @@ namespace ITCompanySimulation.UI
         private void Awake()
         {
             InfoWindowComponent = InfoWindow.Instance;
-            GameObject scripts = GameObject.FindGameObjectWithTag("ScriptsGameObject");
-            SimulationManagerComponent = scripts.GetComponent<SimulationManager>();
+            SimulationManagerComponent = SimulationManager.Instance;
         }
 
         private void Start()

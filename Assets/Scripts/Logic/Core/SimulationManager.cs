@@ -96,6 +96,7 @@ namespace ITCompanySimulation.Core
         /// of simulation
         /// </summary>
         public event PhotonPlayerAction OtherPlayerCompanyMinimalBalanceReached;
+        public static SimulationManager Instance;
 
         /*Private methods*/
 
@@ -116,7 +117,16 @@ namespace ITCompanySimulation.Core
 
         private void Awake()
         {
-            ApplicationManagerComponent = GameObject.FindGameObjectWithTag("ApplicationManager").GetComponent<ApplicationManager>();
+            if (null != Instance)
+            {
+                string msg = string.Format("Only one instance of {0} should exist but is instantiated multiple times.",
+                                           this.GetType().Name);
+                RestrictedDebug.Log(msg, LogType.Error);
+            }
+
+            Instance = this;
+
+            ApplicationManagerComponent = ApplicationManager.Instance;
             GameTimeComponent = GetComponent<GameTime>();
             NotificatorComponent = new SimulationEventNotificator(GameTimeComponent);
             ControlledCompany = CreateCompany();
